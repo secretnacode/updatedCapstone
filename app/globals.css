@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+/* default variable  */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: hsl(0, 0%, 95%);
+  --text-primary: rgb(19, 19, 19);
+  --color-border: #000000;
+  --primary-color: hsl(131, 85%, 49%);
+  --primary-hover-color: hsl(131, 86%, 51%);
+  --primary-active-color: hsl(118, 92%, 46%);
+  --success: hsl(120, 98%, 36%);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-text-primary: var(--text-primary);
+  --color-color-border: var(--color-border);
+  --color-primary-color: var(--primary-color);
+  --color-primary-hover-color: var(--primary-hover-color);
+  --color-primary-active-color: var(--primary-active-color);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --animate-toLeft: toLeft 1s ease-in-out;
+  @keyframes toLeft {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  --animate-toRight: toRight 1s ease-in-out;
+  @keyframes toRight {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(110%);
+    }
   }
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
+  height: 100vh;
+  width: 100%;
+}
+
+@layer utilities {
+  .auth_form {
+    @apply bg-white p-8 rounded-lg shadow-lg w-full;
+  }
+  .auth_form h1 {
+    @apply text-2xl font-bold text-center text-gray-800 mb-8;
+  }
+  .auth_form form {
+    @apply space-y-6;
+  }
+  .auth_form form label {
+    @apply text-sm font-medium text-gray-700 block;
+  }
+  .auth_form form input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200;
+  }
+  .auth_form form div input + button {
+    @apply absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer;
+  }
+  .auth_form form button[type="submit"] {
+    @apply w-full bg-green-600 text-white py-2.5 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors cursor-pointer;
+  }
+  .auth_form p button[type="button"] {
+    @apply font-medium text-green-600 hover:text-green-700 focus:outline-none focus:underline transition-colors cursor-pointer;
+  }
+  .title {
+    @apply font-serif;
+  }
+  .notification-wrapper {
+    @apply fixed top-4 right-4 z-50 flex flex-col gap-4;
+    pointer-events: none;
+  }
+  .notification {
+    @apply flex items-center gap-3 p-4 rounded-lg shadow-lg border backdrop-blur-sm;
+    pointer-events: auto;
+    transform-origin: top right;
+  }
+  .success {
+    @apply bg-green-50/90 border-green-600 text-green-900;
+  }
+  .warning {
+    @apply bg-orange-50/90 border-orange-600 text-orange-900;
+  }
+  .error {
+    @apply bg-red-50/90 border-red-600 text-red-900;
+  }
+  .notification-logo {
+    @apply size-7;
+  }
+  .notification p {
+    @apply text-sm font-medium tracking-wide break-words min-w-[150px] max-w-[200px] md:max-w-[300px] lg:max-w-[400px];
+  }
+  .notification button {
+    @apply cursor-pointer hover:text-gray-600 hover:scale-110 active:scale-90 active:text-gray-900 transition-all ease-in-out  duration-200;
+  }
+  .logo {
+    @apply stroke-[2.5px];
+  }
+  .notification-close-logo {
+    @apply w-5 h-5 opacity-75 transition-opacity hover:opacity-100 focus:opacity-100 cursor-pointer;
+  }
 }
