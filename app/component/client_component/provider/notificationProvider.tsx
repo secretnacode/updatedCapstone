@@ -42,6 +42,7 @@ export function NotificationProvider({
   const [notificationVal, setNotificationVal] = useState<NotificationValType[]>(
     [{ message: "", type: null, notifId: null }]
   );
+  const timeRef = useRef<NodeJS.Timeout | null>(null);
 
   // handling the setting of message and type of the notification and automatically make it into a default value to remove it
   const handleSetNotification = (data: NotificationBaseType[]) => {
@@ -51,9 +52,15 @@ export function NotificationProvider({
 
     setNotificationVal((prev) => [...prev, ...newNotification]);
 
+    // clearing the time after making another notification, in this way the setTimeout doesnt que the function that will be called
+    if (timeRef.current !== null) {
+      clearTimeout(timeRef.current);
+    }
+
     // setting a timeout function to remove the notification after 8 seconds
-    setTimeout(() => {
+    timeRef.current = setTimeout(() => {
       setNotificationVal([{ message: "", type: null, notifId: null }]);
+      timeRef.current = null;
     }, 10000);
   };
 

@@ -1,7 +1,13 @@
 "use client";
 
-import { AuthComponentProps, AuthLoginType, AuthSignUpType } from "@/types";
-import { Eye, EyeClosed, TriangleAlert, X } from "lucide-react";
+import {
+  AllHasValueType,
+  AuthComponentProps,
+  AuthLoginType,
+  AuthSignUpType,
+  NotificationBaseType,
+  ValidateAuthValType,
+} from "@/types";
 import {
   ChangeEvent,
   FC,
@@ -10,8 +16,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { Eye, EyeClosed, TriangleAlert, X } from "lucide-react";
 import { useNotification } from "./provider/notificationProvider";
-// import { Validate } from "@/util/helper_function/frontEndValidation";
+import {
+  AllHasValue,
+  ValidateSingupVal,
+} from "@/util/helper_function/validation/frontendValidation/authvalidation";
 
 export const SignUp: FC<AuthComponentProps> = ({
   setIsSignUp,
@@ -19,7 +29,7 @@ export const SignUp: FC<AuthComponentProps> = ({
   const [isHiddenPass, setIsHiddenPass] = useState<boolean>(true);
   const [isHiddenConPass, setIsHiddenConPass] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
-  console.log("SignUp component rendered");
+  const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
 
   const [authVal, setAuthVal] = useState<AuthSignUpType>({
     username: "",
@@ -31,11 +41,18 @@ export const SignUp: FC<AuthComponentProps> = ({
     setAuthVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleFormSubmit = async (e: FormEvent) => {
+  const handleFormSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
 
-    // const errors = Validate(authVal);
-    // if (errors.errors.length > 0) return handleSetNotification(errors.errors);
+    setIsSubmiting(true);
+
+    const err: ValidateAuthValType<NotificationBaseType[]> =
+      ValidateSingupVal(authVal);
+
+    if (!err.valid) {
+      setIsSubmiting(false);
+      return handleSetNotification(err.errors as NotificationBaseType[]);
+    }
 
     try {
       const req = await fetch(`/api/userAuth/signup`, {
@@ -51,19 +68,30 @@ export const SignUp: FC<AuthComponentProps> = ({
       switch (req.status) {
         case 201:
           handleSetNotification([{ message: data.message, type: "success" }]);
-          break;
+          return setIsSignUp(false);
+
         case 409:
-          handleSetNotification([{ message: data.message, type: "warning" }]);
-          break;
+          return handleSetNotification([
+            { message: data.message, type: "warning" },
+          ]);
+
         case 500:
-          handleSetNotification([{ message: data.message, type: "error" }]);
-          break;
+          return handleSetNotification([
+            { message: data.message, type: "error" },
+          ]);
+
+        default:
+          return handleSetNotification([
+            { message: "Unknown error occured", type: "error" },
+          ]);
       }
     } catch (error) {
       const err = error as Error;
-      handleSetNotification([
+      return handleSetNotification([
         { message: err.message as string, type: "error" },
       ]);
+    } finally {
+      setIsSignUp(false);
     }
   };
 
@@ -124,7 +152,9 @@ export const SignUp: FC<AuthComponentProps> = ({
           </div>
         </div>
 
-        <button type="submit">Ipasa</button>
+        <button type="submit" disabled={isSubmiting ? true : false}>
+          Ipasa
+        </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-600">
@@ -141,21 +171,38 @@ export const LogIn: FC<AuthComponentProps> = ({
   setIsSignUp,
 }): ReactElement => {
   const [isHidden, setIsHidden] = useState<boolean>(true);
+  const { handleSetNotification } = useNotification();
   const [authVal, setAuthVal] = useState<AuthLoginType>({
     username: "",
     password: "",
   });
 
-  console.log("LogIn component rendered");
-
   const handleAuthVal = (e: ChangeEvent<HTMLInputElement>): void => {
     setAuthVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleFormSubmit = (e: FormEvent): void => {
+  const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // const checkVal = Validate(authVal);
+    const checkVal: AllHasValueType = AllHasValue(authVal);
+
+    if (!checkVal.valid)
+      return handleSetNotification([
+        { message: checkVal.message ?? "", type: "warning" },
+      ]);
+
+    try {
+      const req = await fetch(`/api/userAuth/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(authVal),
+      });
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([
+        { message: err.message as string, type: "error" },
+      ]);
+    }
   };
 
   return (
@@ -231,17 +278,33 @@ export const ModalNotif: FC = (): ReactElement => {
 
         {/* Content */}
         <div className="p-6">
-          <h4 className="font-medium mb-4">
-            Ang iyong username at password ay dapat may:
+          <h4 className="font-medium mb-2">
+            Ang iyong <span className="font-semibold">username</span> ay dapat
+            may:
           </h4>
-          <ul className="space-y-3 mb-6">
+          <ul className="space-y-3 mb-6 ml-3">
             <li className="flex items-center gap-2 text-gray-600">
               <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
               <span>Hindi bababa sa 8 letra o numero</span>
             </li>
             <li className="flex items-center gap-2 text-gray-600">
               <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-              <span>Kahit isang malaking letra (A-Z)</span>
+              <span>Letra at Numero lamang ang laman</span>
+            </li>
+          </ul>
+
+          <h4 className="font-medium mb-2">
+            Ang iyong <span className="font-semibold">password</span> ay dapat
+            may:
+          </h4>
+          <ul className="space-y-3 mb-6 ml-3">
+            <li className="flex items-center gap-2 text-gray-600">
+              <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+              <span>Hindi bababa sa 8 letra o numero</span>
+            </li>
+            <li className="flex items-center gap-2 text-gray-600">
+              <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+              <span>Kahit isang malaking na letra (A-Z)</span>
             </li>
             <li className="flex items-center gap-2 text-gray-600">
               <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
@@ -250,6 +313,17 @@ export const ModalNotif: FC = (): ReactElement => {
             <li className="flex items-center gap-2 text-gray-600">
               <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
               <span>Kahit isang numero (0-9)</span>
+            </li>
+          </ul>
+
+          <h4 className="font-medium mb-2">
+            Ang iyong <span className="font-semibold">confirm password</span> ay
+            dapat:
+          </h4>
+          <ul className="space-y-3 mb-6 ml-3">
+            <li className="flex items-center gap-2 text-gray-600">
+              <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+              <span>Kaparehas ng inilagay mo sa password</span>
             </li>
           </ul>
 

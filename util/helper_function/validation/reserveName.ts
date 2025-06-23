@@ -1,0 +1,28 @@
+export const reserveNames: Set<string> = new Set(
+  [
+    "admin",
+    "administrator",
+    "root",
+    "user",
+    "guest",
+    "support",
+    "help",
+    "info",
+    "webmaster",
+    "security",
+    "abuse",
+    "postmaster",
+    "contact",
+    "sysadmin",
+    "server",
+    "test",
+    "dev",
+    "api",
+    "report",
+    "reporting",
+    "farmer",
+    "farmers",
+    "agriculturist",
+    "agriculture",
+  ].map((name) => name.toLowerCase())
+);
