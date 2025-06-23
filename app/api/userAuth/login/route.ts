@@ -5,7 +5,7 @@ import {
   QueryUserLoginReturnType,
   ValidateAuthValType,
 } from "@/types";
-import { redis, sessionId } from "@/util/helper_function/token";
+import { CreateSession } from "@/util/helper_function/session";
 import { ValidateloginVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { UserLogin } from "@/util/queries/user";
 import { ComparePassword } from "@/util/server_functions/reusableFunctions";
@@ -23,8 +23,13 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           errors: validateData.errors,
-        } as LoginFailedReturnType,
-        { status: 400 }
+        },
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
     // will check if the user is existing
@@ -34,33 +39,48 @@ export async function POST(req: NextRequest) {
     if (!userCredentials.exist)
       return NextResponse.json(
         { message: userCredentials.message },
-        { status: 404 }
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
     // if its allready existing, will compare the user passwod input and the hash password that is in the database and will compare it
     if (!(await ComparePassword(data.password, userCredentials.data.password)))
       return NextResponse.json(
         { message: `Mali ang nailagay mong password` },
-        { status: 401 }
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-    await redis.set(
-      `session:${sessionId}`,
-      JSON.stringify({
-        isAuthenticated: true,
-        userId: userCredentials.data.authId,
-        role: userCredentials.data.role,
-      }),
-      { ex: 3600 }
-    );
+    await CreateSession(userCredentials.data.authId, userCredentials.data.role);
 
-    return NextResponse.json({ data: userCredentials.data }, { status: 200 });
+    return NextResponse.json(
+      { redirectUrl: `/${userCredentials.data.role}` },
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     const err = error as Error;
     console.log(`Error in POST req in sign up: ${err}`);
     return NextResponse.json(
       { message: `Error in POST req in sign up: ${err}` },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
