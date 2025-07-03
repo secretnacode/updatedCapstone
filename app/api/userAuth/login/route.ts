@@ -1,23 +1,25 @@
 import {
   AuthValType,
-  LoginFailedReturnType,
+  AuthResponseType,
   NotificationBaseType,
   QueryUserLoginReturnType,
   ValidateAuthValType,
 } from "@/types";
 import { CreateSession } from "@/util/helper_function/session";
-import { ValidateloginVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
+import { ValidateLoginVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { UserLogin } from "@/util/queries/user";
 import { ComparePassword } from "@/util/server_functions/reusableFunctions";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest
+): Promise<NextResponse<AuthResponseType>> {
   try {
     const data: AuthValType = await req.json();
 
     // will check the user first then will see if the passed value is both string
     const validateData: ValidateAuthValType<NotificationBaseType[]> =
-      ValidateloginVal(data);
+      ValidateLoginVal(data);
     if (!validateData.valid)
       return NextResponse.json(
         {
@@ -26,9 +28,6 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
         }
       );
 
@@ -38,48 +37,57 @@ export async function POST(req: NextRequest) {
     );
     if (!userCredentials.exist)
       return NextResponse.json(
-        { message: userCredentials.message },
+        {
+          success: false,
+          errors: [{ message: userCredentials.message, type: "warning" }],
+        },
         {
           status: 404,
-          headers: {
-            "Content-Type": "application/json",
-          },
         }
       );
 
     // if its allready existing, will compare the user passwod input and the hash password that is in the database and will compare it
     if (!(await ComparePassword(data.password, userCredentials.data.password)))
       return NextResponse.json(
-        { message: `Mali ang nailagay mong password` },
+        {
+          success: false,
+          errors: [
+            {
+              message: `Mali ang nailagay mong password o username`,
+              type: "warning",
+            },
+          ],
+        },
         {
           status: 401,
-          headers: {
-            "Content-Type": "application/json",
-          },
         }
       );
 
-    await CreateSession(userCredentials.data.authId, userCredentials.data.role);
+    const session = await CreateSession(
+      userCredentials.data.authId,
+      userCredentials.data.role
+    );
+
+    console.log(`session: ${session}`);
 
     return NextResponse.json(
-      { redirectUrl: `/${userCredentials.data.role}` },
+      { success: true, url: `/${userCredentials.data.role}` },
       {
         status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
       }
     );
   } catch (error) {
     const err = error as Error;
     console.log(`Error in POST req in sign up: ${err}`);
     return NextResponse.json(
-      { message: `Error in POST req in sign up: ${err}` },
+      {
+        success: false,
+        errors: [
+          { message: `Error in POST req in sign up: ${err}`, type: "error" },
+        ],
+      },
       {
         status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
       }
     );
   }

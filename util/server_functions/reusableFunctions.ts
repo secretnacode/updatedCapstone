@@ -8,7 +8,7 @@ export function Hash(word: string): string {
  * use to compare the password and hashpass that was store in the database
  * @param password of the user input
  * @param hashPass that is from the database
- * @returns {Promise<boolean>} true if the password and hashpass is same value, if not will return a false
+ * @returns {Promise<boolean>} true if the password input and hashpass from db is same value, if not will return a false
  */
 export async function ComparePassword(
   password: string,

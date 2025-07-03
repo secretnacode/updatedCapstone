@@ -2,12 +2,7 @@ import {
   authLogInSchema,
   authSignUpSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { Dispatch, SetStateAction } from "react";
 import z from "zod/v4";
-
-export type AuthComponentProps = {
-  setIsSignUp: Dispatch<SetStateAction<boolean>>;
-};
 
 // exporting the type of authSignUpSchema so it can be used as a type together with the schema
 export type AuthSignUpType = z.infer<typeof authSignUpSchema>;
@@ -39,19 +34,17 @@ export type NotificationContextType = {
 
 export type ValidateReturnType = NotificationBaseType;
 
-export type AuthValType = {
-  username: string;
-  password: string;
-};
-
-export type NewUserTye = AuthValType & {
+export type NewUserType = AuthLoginType & {
   userId: string;
+  role: string;
 };
 
-export type ValidateAuthValType<T> = {
-  valid: boolean;
-  errors?: T;
-};
+export type ValidateAuthValType<T> =
+  | {
+      valid: false;
+      errors: T;
+    }
+  | { valid: true };
 
 export type QueryUserLoginReturnType =
   | {
@@ -63,12 +56,26 @@ export type QueryUserLoginReturnType =
       data: { authId: string; password: string; role: string };
     };
 
-export type LoginFailedReturnType = {
-  success: false;
+export type AuthResponseType =
+  | {
+      success: false;
+      errors: NotificationBaseType[];
+    }
+  | {
+      success: true;
+      url: string;
+    };
+
+export type ErrorResponseType = {
   errors: NotificationBaseType[];
 };
 
-export type LoginSuccessReturnType = {
-  success: true;
-  url: string;
-};
+export type SessionValueType =
+  | {
+      sessionVal: {
+        isAuthenticated: boolean;
+        userId: string;
+        role: string;
+      };
+    }
+  | string;

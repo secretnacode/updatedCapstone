@@ -1,4 +1,4 @@
-import { NewUserTye, QueryUserLoginReturnType } from "@/types";
+import { NewUserType, QueryUserLoginReturnType } from "@/types";
 import pool from "../db";
 
 /**
@@ -29,11 +29,11 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
  * @param {string} data.userId - UUID of the new user, this ensures the uniqueness of the ID
  * @throws {Error} If the network request fails or an invalid username is provided.
  **/
-export const InsertNewUser = async (data: NewUserTye) => {
+export const InsertNewUser = async (data: NewUserType) => {
   try {
     return await pool.query(
       `insert into capstone.auth ("authId", "username", "password", "role") values ($1, $2, $3, $4)`,
-      [data.userId, data.username, data.password, `farmer`]
+      [data.userId, data.username, data.password, data.role]
     );
   } catch (error) {
     const err = error as Error;
@@ -63,7 +63,7 @@ export const UserLogin = async (
     if (!query.rows[0])
       return {
         exist: false,
-        message: "Walang user sa username na ito, mag-sign up ka muna",
+        message: "Mali ang nailagay mong password o username",
       };
 
     return {

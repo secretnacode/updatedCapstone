@@ -11,8 +11,8 @@ import { reserveNames } from "../reserveName";
 /**
  * A validation function for signup function
  * @param data object that contains all the value of tha user who's trying to login{username, password, confirmPassword}
- * @returns { ValidateAuthValType<NotificationBaseType[]> } a success with a boolean value, if false it returns a errors object that contains all the error messages together with its type of notification
- *
+ * @returns { ValidateAuthValType<NotificationBaseType[]> } a valid with a boolean value,
+ * if false it returns a errors object that contains all the error messages together with its type of notification
  */
 export const ValidateSingupVal = (
   data: AuthSignUpType
@@ -55,7 +55,7 @@ export const ValidateSingupVal = (
  * @returns { ValidateAuthValType<NotificationBaseType[]> } a success with a boolean value, if false it returns a errors object that contains all the error messages together with its type of notification
  *
  */
-export const ValidateloginVal = (
+export const ValidateLoginVal = (
   data: AuthLoginType
 ): ValidateAuthValType<NotificationBaseType[]> => {
   const hasVal: AllHasValueType = AllHasValue(data);

@@ -1,6 +1,9 @@
+"use server";
+
 import { Redis } from "@upstash/redis";
 import { CreateUUID } from "./reusableFunction";
 import { cookies } from "next/headers";
+import { SessionValueType } from "@/types";
 
 const sessionDuration = 36000;
 
@@ -48,4 +51,24 @@ export const CreateSession = async (
   });
 
   return sessionId;
+};
+
+/**
+ * Getting the session value that was store in the
+ * @returns sessionVal object that contains all the in the session storage
+ */
+export const GetSession = async (): Promise<SessionValueType> => {
+  const sessionId = (await cookies()).get(`sessionId`)?.value;
+
+  const sessionWord = `session: ${sessionId}`;
+
+  if (!sessionId) return `no session id`;
+
+  const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
+
+  if (!sessionVal) return `no session value`;
+
+  await redis.expire(sessionWord, sessionDuration);
+
+  return sessionVal;
 };

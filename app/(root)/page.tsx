@@ -1,20 +1,11 @@
-"use client";
-
-import { ReactElement, useState } from "react";
-import {
-  LogIn,
-  ModalNotif,
-  SignUp,
-} from "../component/client_component/authComponent";
+import { AuthForm } from "@/component/client_component/authComponent";
+import { ReactElement } from "react";
 
 export default function Page(): ReactElement {
-  const [isSignUp, setIsSignUp] = useState<boolean>(false);
-
+  console.log(`main component`);
   return (
-    <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white relative">
-      {isSignUp && <ModalNotif />}
-
-      <div className="relative z-10 flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
+    <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
+      <div className="flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
         {/* Left Section */}
         <div className="flex flex-col items-center md:items-end md:w-full md:max-w-[500px] lg:pr-4 xl:pr-8 space-y-6 mb-8 md:mb-0">
           <div className="text-center md:text-right">
@@ -47,11 +38,7 @@ export default function Page(): ReactElement {
 
         {/* Right Section - Auth Forms */}
         <div className="w-[90%] max-w-md">
-          {isSignUp ? (
-            <SignUp setIsSignUp={setIsSignUp} />
-          ) : (
-            <LogIn setIsSignUp={setIsSignUp} />
-          )}
+          <AuthForm />
         </div>
       </div>
     </main>

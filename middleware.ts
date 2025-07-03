@@ -39,7 +39,7 @@ export default async function Middleware(req: NextRequest) {
     });
   }
 
-  return res; // returning the next response
+  return res;
 }
 
 export const config = {
