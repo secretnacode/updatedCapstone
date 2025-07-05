@@ -70,12 +70,14 @@ export type ErrorResponseType = {
   errors: NotificationBaseType[];
 };
 
-export type SessionValueType =
-  | {
-      sessionVal: {
-        isAuthenticated: boolean;
-        userId: string;
-        role: string;
-      };
-    }
-  | string;
+export type SessionValueType = {
+  userId: string;
+  role: string;
+} | null;
+
+export type LoadingContextType = {
+  isLoading: boolean;
+  loadingMessage: string;
+  handleIsLoading: (message: string) => void;
+  handleDoneLoading: () => void;
+};

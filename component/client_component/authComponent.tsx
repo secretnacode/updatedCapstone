@@ -25,6 +25,7 @@ import {
 } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { useRouter } from "next/navigation";
 import { LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
+import { useLoading } from "./provider/loadingProvider";
 
 /**
  * Auth form component that renders the login form(default) or the sign up form
@@ -58,8 +59,8 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const [isHiddenPass, setIsHiddenPass] = useState<boolean>(true);
   const [isHiddenConPass, setIsHiddenConPass] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
-  const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const router = useRouter();
+  const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
   const handleFormSubmit = async (
     e: FormEvent<HTMLFormElement>
@@ -76,15 +77,14 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
     console.log(authVal);
 
-    setIsSubmiting(true);
-
     const err: ValidateAuthValType<NotificationBaseType[]> =
       ValidateSingupVal(authVal);
 
     if (!err.valid) {
-      setIsSubmiting(false);
       return handleSetNotification(err.errors as NotificationBaseType[]);
     }
+
+    handleIsLoading("Inihahanda na ang iyong account");
 
     try {
       const req = await SignUpAuth(authVal);
@@ -95,8 +95,7 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);
-    } finally {
-      setIsSubmiting(false);
+      handleDoneLoading();
     }
   };
 
@@ -147,14 +146,16 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
           </div>
         </div>
 
-        <button type="submit" disabled={isSubmiting ? true : false}>
-          Ipasa
-        </button>
+        <button type="submit">Ipasa</button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-600">
         May account na?{" "}
-        <button type="button" onClick={() => setIsSignUp(false)}>
+        <button
+          type="button"
+          onClick={() => setIsSignUp(false)}
+          disabled={isLoading ? true : false}
+        >
           Mag log in
         </button>
       </p>
@@ -173,6 +174,7 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const [isHidden, setIsHidden] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
   const route = useRouter();
+  const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -189,6 +191,8 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
     if (!checkVal.valid) return handleSetNotification(checkVal.errors);
 
+    handleIsLoading("Sinusuri lang ang iyong username at password");
+
     try {
       const req: AuthResponseType = await LoginAuth(authVal);
 
@@ -198,6 +202,8 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);
+    } finally {
+      handleDoneLoading();
     }
   };
 
@@ -230,7 +236,11 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
       <p className="mt-6 text-center text-sm text-gray-600">
         Wala pang account?{" "}
-        <button type="button" onClick={() => setIsSignUp(true)}>
+        <button
+          type="button"
+          onClick={() => setIsSignUp(true)}
+          disabled={isLoading ? true : false}
+        >
           Gumawa
         </button>
       </p>

@@ -8,7 +8,7 @@ import {
   ValidateAuthValType,
 } from "@/types";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
-import { CreateSession } from "@/util/helper_function/session";
+import { CreateSession } from "@/lib/session";
 import { ValidateSingupVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { CheckUsername, InsertNewUser } from "@/util/queries/user";
 import { Hash } from "@/util/server_functions/reusableFunctions";

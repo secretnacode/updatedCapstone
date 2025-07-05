@@ -1,49 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GetSession } from "./lib/session";
+import { SessionValueType } from "./types";
+
+const authorizedPath = new Map<string, string[]>();
+authorizedPath.set(`agriculturist`, [`/agriculturist`]);
+authorizedPath.set(`farmer`, [`/farmer`, `/user-details`]);
+const publicPath = [`/`, `/unauthorized`];
 
 export default async function Middleware(req: NextRequest) {
+  const res = NextResponse.next();
+
   // logging all the incoming requests for debugging purposes
   console.log(`Request URL: ${req.url}`);
   console.log(`Request Method: ${req.method}`);
-  console.log(`Request Body: ${req.body}`);
 
-  // handling CORS
-  const res = NextResponse.next();
+  const { pathname } = req.nextUrl;
 
-  // setting which url can access the API routes,
-  // as of now its only set to "*" which means all url is allowed to access the API routes
-  // so in production or when deployed, this should be set to the url of the frontend app lik "capstone_proj.com"
-  res.headers.set("Access-Control-Allow-Origin", "*");
+  const session: SessionValueType = await GetSession();
 
-  // setting which methods are allowed to access the API routes
-  // as of now its only set to "GET, POST, PUT, DELETE, OPTIONS" which means all methods are allowed to access the API routes
-  res.headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
+  // if the current path was defines in the publicPath Variable, the middleware will let it pass through
+  if (publicPath.includes(pathname)) return res;
 
-  // setting which headers are allowed to access the API routes
-  // as of now its only set to "Content-Type, Authorization" which means all headers are allowed to access the API routes
-  res.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
+  if (session) {
+    const accessiblePath = authorizedPath.get(session.role);
+    console.warn(`middleware: you have a session`);
 
-  // setting which credentials are allowed to access the API routes
-  // as of now its only set to "true" which means all credentials are allowed to access the API routes
-  res.headers.set("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return new NextResponse(null, {
-      status: 204,
-      headers: res.headers,
-    });
+    if (
+      accessiblePath &&
+      accessiblePath.some((path) => pathname.startsWith(path))
+    ) {
+      console.warn(`middleware: you're authorized to go ${pathname}`);
+      return res;
+    } else {
+      console.warn(`middleware: you're unauthorized to go ${pathname}`);
+      return NextResponse.redirect(new URL(`/unauthorized`, req.url));
+    }
+  } else {
+    console.warn(`middleware: you're not logged in`);
+    return NextResponse.redirect(new URL(`/`, req.url));
   }
-
-  return res;
 }
 
 export const config = {
-  matcher: [
-    "/api/:path*", // Matches all routes under /api/
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
 };

@@ -5,7 +5,6 @@ import {
   NotificationContextType,
   NotificationValType,
 } from "@/types";
-import { removeNotif } from "@/util/helper_function/providerFunction";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
 import {
   CircleCheck,
@@ -24,18 +23,27 @@ import {
   useState,
 } from "react";
 
-// creating a notification context with a default value of notification and showNotification function, this 1 value is the value that will be available globally if the context was used
-export const NotificationContext = createContext<NotificationContextType>({
+/**
+ * defining the default value of the notification context
+ */
+const NotificationContext = createContext<NotificationContextType>({
   notificationVal: [{ message: "", type: null, notifId: null }],
   handleSetNotification: () => {},
   handleRemoveNotification: () => {},
 });
 
-// making custom hook thats using the context hook of the notification context
+/**
+ * custom hook that uses the notification context
+ * @returns useContext of the notification context
+ */
 export const useNotification = (): NotificationContextType =>
   useContext(NotificationContext);
 
-// making a notification provider
+/**
+ * Notification provider component that carries the available value notificationVal, handleSetNotification, and handleRemoveNotification
+ * @param param children under the notification provider component
+ * @returns provider component with children object inside it and notification design
+ */
 export function NotificationProvider({
   children,
 }: Readonly<{ children: ReactNode }>): ReactElement {
@@ -44,7 +52,6 @@ export function NotificationProvider({
   );
   const timeRef = useRef<NodeJS.Timeout | null>(null);
 
-  // handling the setting of message and type of the notification and automatically make it into a default value to remove it
   const handleSetNotification = (data: NotificationBaseType[]) => {
     const newNotification: NotificationValType[] = data.map((notif) => {
       return { ...notif, notifId: CreateUUID() };
@@ -52,12 +59,10 @@ export function NotificationProvider({
 
     setNotificationVal((prev) => [...prev, ...newNotification]);
 
-    // clearing the time after making another notification, in this way the setTimeout doesnt que the function that will be called
     if (timeRef.current !== null) {
       clearTimeout(timeRef.current);
     }
 
-    // setting a timeout function to remove the notification after 8 seconds
     timeRef.current = setTimeout(() => {
       setNotificationVal([{ message: "", type: null, notifId: null }]);
       timeRef.current = null;
@@ -70,7 +75,6 @@ export function NotificationProvider({
     );
   };
 
-  // instantiating the value in the context hook
   const notificationContextValue: NotificationContextType = {
     notificationVal,
     handleSetNotification,
@@ -85,7 +89,10 @@ export function NotificationProvider({
   );
 }
 
-// notification component where this will handle what notification will be shown
+/**
+ * notification message components that renders all the notification inside it
+ * @returns notification component with its notification messages
+ */
 const NotificationMessages: FC = (): ReactElement | null => {
   const { notificationVal } = useNotification();
 
@@ -106,6 +113,13 @@ const NotificationMessages: FC = (): ReactElement | null => {
   );
 };
 
+/**
+ * used to render eacg notification
+ * @param param.message message of the notification that will be passed
+ * @param param.type type of the message like success, warning, or error
+ * @param param.notifId id of the notif
+ * @returns notification component
+ */
 const Notification: FC<NotificationValType> = ({
   message,
   type,
@@ -114,24 +128,30 @@ const Notification: FC<NotificationValType> = ({
   const notifRef = useRef<HTMLDivElement>(null);
   const { handleRemoveNotification } = useNotification();
 
+  const removeNotif = <T extends HTMLDivElement>(refElement: T): void => {
+    if (refElement.classList.contains("animate-toLeft"))
+      refElement.classList.remove("animate-toLeft");
+
+    refElement.classList.add("animate-toRight");
+    setTimeout(() => handleRemoveNotification(notifId as string), 1000);
+  };
+
   return (
     <div ref={notifRef} className={`notification animate-toLeft ${type}`}>
       <Logo type={type} />
       <p>{message}</p>
-      <button
-        onClick={() =>
-          removeNotif(notifRef.current as HTMLDivElement, () =>
-            handleRemoveNotification(notifId as string)
-          )
-        }
-      >
+      <button onClick={() => removeNotif(notifRef.current as HTMLDivElement)}>
         <X className="logo notification-close-logo" />
       </button>
     </div>
   );
 };
 
-// a function called Logo that returns a component logo and its color depends in the type of the notification
+/**
+ * used to render what logo will be shown in the notification
+ * @param param.type accepts a type of notification that will be render
+ * @returns logo component
+ */
 const Logo: FC<{ type: "success" | "error" | "warning" | null }> = ({
   type,
 }): ReactElement => {

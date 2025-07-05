@@ -10,7 +10,7 @@ import {
   NewUserType,
 } from "@/types";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
-import { CreateSession } from "@/util/helper_function/session";
+import { CreateSession } from "@/lib/session";
 import {
   ValidateLoginVal,
   ValidateSingupVal,

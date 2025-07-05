@@ -2,7 +2,6 @@ import { AuthForm } from "@/component/client_component/authComponent";
 import { ReactElement } from "react";
 
 export default function Page(): ReactElement {
-  console.log(`main component`);
   return (
     <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
       <div className="flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
