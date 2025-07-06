@@ -1,7 +1,15 @@
 "use client";
 
 import { LoadingContextType } from "@/types";
-import { createContext, FC, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  FC,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 /**
  * cretion of loading context where also defining the default value of the loading context
@@ -25,15 +33,17 @@ export const LoadingProvider: FC<Readonly<{ children: ReactNode }>> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
 
+  console.log(`loading context`);
+
   const handleIsLoading = (message: string) => {
     setLoadingMessage(message);
     setIsLoading(true);
   };
 
-  const handleDoneLoading = () => {
+  const handleDoneLoading = useCallback(() => {
     setLoadingMessage("");
     setIsLoading(false);
-  };
+  }, []);
 
   return (
     <LoadingContext.Provider
@@ -61,4 +71,18 @@ const LoadingComponent: FC = () => {
       )}
     </>
   );
+};
+
+/**
+ * used to hide/stop the loading animation in the screen
+ * `preferably` use in every page that will be called in the user redirection
+ * @returns
+ */
+export const LoadingManager: FC = () => {
+  const { isLoading, handleDoneLoading } = useLoading();
+  useEffect(() => {
+    if (isLoading) handleDoneLoading();
+  }, [handleDoneLoading, isLoading]);
+
+  return null;
 };

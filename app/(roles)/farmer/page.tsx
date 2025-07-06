@@ -1,3 +1,11 @@
+import { LoadingManager } from "@/component/client_component/provider/loadingProvider";
+
 export default function Page() {
-  return <div>hello </div>;
+  console.log(`farmer main component`);
+  return (
+    <div>
+      <LoadingManager />
+      hello
+    </div>
+  );
 }

@@ -34,6 +34,8 @@ import { useLoading } from "./provider/loadingProvider";
 export const AuthForm: FC = () => {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
 
+  console.log(`auth component`);
+
   return (
     <>
       {isSignUp ? (
@@ -61,6 +63,8 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const { handleSetNotification } = useNotification();
   const router = useRouter();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
+
+  console.log(`sign up component`);
 
   const handleFormSubmit = async (
     e: FormEvent<HTMLFormElement>
@@ -176,6 +180,8 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const route = useRouter();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
+  console.log(`login component`);
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -202,7 +208,6 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);
-    } finally {
       handleDoneLoading();
     }
   };
