@@ -1,3 +1,5 @@
+"use server";
+
 import { compare, hashSync } from "bcrypt";
 
 export function Hash(word: string): string {

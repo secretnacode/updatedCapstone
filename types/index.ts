@@ -81,3 +81,10 @@ export type LoadingContextType = {
   handleIsLoading: (message: string) => void;
   handleDoneLoading: () => void;
 };
+
+export type ExistingOrgType =
+  | {
+      orgId: string;
+      orgName: string;
+    }[]
+  | null;

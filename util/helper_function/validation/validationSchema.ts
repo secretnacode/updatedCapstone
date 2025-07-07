@@ -46,3 +46,5 @@ export const authLogInSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
+
+export const farmerDetailFormSchema = 

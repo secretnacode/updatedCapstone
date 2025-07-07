@@ -16,10 +16,7 @@ import {
   ValidateSingupVal,
 } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { CheckUsername, InsertNewUser, UserLogin } from "@/util/queries/user";
-import {
-  ComparePassword,
-  Hash,
-} from "@/util/server_functions/reusableFunctions";
+import { ComparePassword, Hash } from "@/lib/reusableFunctions";
 
 /**
  * used for login authentication of the user and validating the user input before redirecting the user into another page if the user
@@ -120,7 +117,7 @@ export async function SignUpAuth(
 
     await CreateSession(newUserId, newUserRole);
 
-    return { success: true, url: `/user-details` };
+    return { success: true, url: `/farmerDetails` };
   } catch (error) {
     const err = error as Error;
     console.log(`Error making a new user: ${err}`);

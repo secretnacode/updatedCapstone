@@ -4,7 +4,7 @@ import { SessionValueType } from "./types";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`agriculturist`, [`/agriculturist`]);
-authorizedPath.set(`farmer`, [`/farmer`, `/user-details`]);
+authorizedPath.set(`farmer`, [`/farmer`, `/farmerDetails`]);
 const publicPath = [`/`, `/unauthorized`];
 
 export default async function Middleware(req: NextRequest) {
