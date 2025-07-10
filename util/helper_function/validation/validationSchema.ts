@@ -1,4 +1,36 @@
 import { z } from "zod/v4";
+// /**
+//  * trasnforming the value data type that zod expects(string)
+//  */
+// const toString = z.string().pipe(
+//   z.preprocess((val) => {
+//     if (val === null || val === undefined) return "";
+//     if (val instanceof File) return undefined;
+//     return String(val).trim();
+//   }, z.string())
+// );
+
+// /**
+//  * trasnforming the value data type that zod expects(number)
+//  */
+// const toNumber = z.preprocess((val) => {
+//   if (typeof val === "string" && val.trim() === "") return undefined;
+//   else if (val === null || val === undefined) return undefined;
+//   else if (val instanceof File) return undefined;
+
+//   return isNaN(Number(val)) ? undefined : Number(val);
+// }, z.number());
+
+// /**
+//  * trasnforming the value data type that zod expects(date object)
+//  */
+// const toDateObj = z.preprocess((val) => {
+//   if (typeof val === "string" && val.trim() !== "") {
+//     const date = new Date(val);
+//     return isNaN(date.getTime()) ? undefined : date;
+//   }
+//   return undefined;
+// }, z.date());
 
 /**
  * Defining the object/shape of the auth sign up by adding its
@@ -47,4 +79,15 @@ export const authLogInSchema = z.object({
   password: z.string(),
 });
 
-export const farmerDetailFormSchema = 
+/**
+ * a schema for validating farmer details form after a new farmer has signed up
+ */
+export const farmerDetailFormSchema = z.object({
+  fullname: z.string(),
+  alias: z.string(),
+  farmArea: z.number(),
+  organization: z.string(),
+  mobileNumber: z.string(),
+  barangay: z.string(),
+  birthdate: z.date(),
+});

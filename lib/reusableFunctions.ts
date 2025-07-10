@@ -2,7 +2,7 @@
 
 import { compare, hashSync } from "bcrypt";
 
-export function Hash(word: string): string {
+export async function Hash(word: string): Promise<string> {
   return hashSync(word, 10);
 }
 

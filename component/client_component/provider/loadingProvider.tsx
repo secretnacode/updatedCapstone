@@ -35,10 +35,10 @@ export const LoadingProvider: FC<Readonly<{ children: ReactNode }>> = ({
 
   console.log(`loading context`);
 
-  const handleIsLoading = (message: string) => {
+  const handleIsLoading = useCallback((message: string) => {
     setLoadingMessage(message);
     setIsLoading(true);
-  };
+  }, []);
 
   const handleDoneLoading = useCallback(() => {
     setLoadingMessage("");

@@ -82,9 +82,26 @@ export type LoadingContextType = {
   handleDoneLoading: () => void;
 };
 
-export type ExistingOrgType =
+export type QueryAvailableOrgReturnType =
   | {
       orgId: string;
       orgName: string;
     }[]
-  | null;
+  | [];
+
+export type AvailableOrgReturnType =
+  | {
+      success: true;
+      data: QueryAvailableOrgReturnType;
+    }
+  | {
+      success: false;
+      errors: NotificationBaseType[];
+    };
+
+export type CropListType = {
+  cropId: string;
+  cropFarmArea: number;
+  farmAreaMeasurement: "sqft" | "sqm" | "ac" | "ha"; // sqaure feet, square meter, acre, hectare
+  cropBaranggay: string;
+};

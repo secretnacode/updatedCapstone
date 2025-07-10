@@ -111,7 +111,7 @@ export async function SignUpAuth(
     await InsertNewUser({
       userId: newUserId,
       username: data.username,
-      password: Hash(data.password),
+      password: await Hash(data.password),
       role: newUserRole,
     } as NewUserType);
 
