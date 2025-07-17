@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { Date10YearsAgo } from "../reusableFunction";
 // /**
 //  * trasnforming the value data type that zod expects(string)
 //  */
@@ -82,12 +83,46 @@ export const authLogInSchema = z.object({
 /**
  * a schema for validating farmer details form after a new farmer has signed up
  */
-export const farmerDetailFormSchema = z.object({
-  fullname: z.string(),
-  alias: z.string(),
-  farmArea: z.number(),
-  organization: z.string(),
-  mobileNumber: z.string(),
-  barangay: z.string(),
-  birthdate: z.date(),
+export const farmerFirstDetailFormSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .min(1, { message: `Ilagay ang iyong unang pangalan` })
+    .max(50, {
+      message: `Limangpu pababa lamang ang pede mong mailagay sa una mong Pangalan`,
+    }),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, { message: `Ilagay ang iyong apelyido` })
+    .max(50, {
+      message: `Limangpu pababa lamang ang pede mong mailagay sa iyong Apelyido`,
+    }),
+  alias: z
+    .string()
+    .transform((e) => (e === "" ? null : e))
+    .nullable(),
+  mobileNumber: z
+    .string()
+    .trim()
+    .max(13, {
+      message: `Ang numero mo ay hindi dapat tataas sa labing tatlong(13) na numero`,
+    })
+    .refine(
+      (val) =>
+        /^\+?\d+$/.test(val) &&
+        ((val.startsWith("+639") && val.length === 13) ||
+          (val.startsWith("09") && val.length === 11)),
+      {
+        message: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx o +639xxxxxxxxx)`,
+      }
+    ),
+  birthdate: z.coerce
+    .date({ message: `Ilagay ang araw ng iyong kapanganakan` })
+    .max(Date10YearsAgo(), {
+      message: `Dapat ang edad mo ay mas mahigit pa sa sampu(10)`,
+    }),
+  farmerBarangay: z
+    .string()
+    .min(1, { message: `Ilagay ang iyong barangay ng tinitirhan` }),
 });

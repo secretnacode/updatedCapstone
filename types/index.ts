@@ -1,6 +1,7 @@
 import {
   authLogInSchema,
   authSignUpSchema,
+  farmerFirstDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import z from "zod/v4";
 
@@ -104,4 +105,25 @@ export type CropListType = {
   cropFarmArea: number;
   farmAreaMeasurement: "sqft" | "sqm" | "ac" | "ha"; // sqaure feet, square meter, acre, hectare
   cropBaranggay: string;
+};
+
+export type FarmerFirstDetailFormType = z.infer<
+  typeof farmerFirstDetailFormSchema
+>;
+
+type FormStateBaseType<T> = {
+  success: boolean | null;
+  formError: { [v in keyof T]?: string[] } | null;
+  notifError: NotificationBaseType | null;
+};
+
+export type FirstFarmerDetailFormType =
+  FormStateBaseType<FarmerFirstDetailFormType> & {
+    fieldValues: FarmerFirstDetailFormType;
+  };
+
+export type FarmerFirstDetailType = FarmerFirstDetailFormType & {
+  farmerId: string;
+  verified: boolean;
+  dateCreated: Date;
 };

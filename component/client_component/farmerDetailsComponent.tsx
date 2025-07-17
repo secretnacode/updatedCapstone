@@ -9,20 +9,25 @@ import {
 import {
   ChangeEvent,
   FC,
-  FormEvent,
   ReactElement,
+  useActionState,
   useEffect,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { useLoading } from "./provider/loadingProvider";
-import { CreateUUID } from "@/util/helper_function/reusableFunction";
+import {
+  baranggayList,
+  CreateUUID,
+  DateToYYMMDD,
+} from "@/util/helper_function/reusableFunction";
+import { AddFirstFarmerDetails } from "@/lib/server_action/farmerDetails";
 
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
 
-  const [toggle, setToggle] = useState<boolean>(false);
+  const [toggle, setToggle] = useState<boolean>(true);
   return (
     <div>
       <button onClick={() => setToggle((prev) => !prev)}>toggle</button>
@@ -31,64 +36,102 @@ export const FarmerDetailForm: FC = () => {
   );
 };
 
-export const FarmereDetailFirstStep: FC = () => {
+export const FarmereDetailFirstStep: FC = (): ReactElement => {
   console.log(`farmer 1st detail form`);
   const { handleSetNotification } = useNotification();
+  const [state, formAction, isPending] = useActionState(AddFirstFarmerDetails, {
+    success: null,
+    formError: null,
+    notifError: null,
+    fieldValues: {
+      firstName: "",
+      lastName: "",
+      alias: "",
+      mobileNumber: "",
+      birthdate: new Date(),
+      farmerBarangay: "",
+    },
+  });
 
-  const baranggayList = [
-    "balayhangin",
-    "bangyas",
-    "dayap",
-    "imok",
-    "kanluran",
-    "lamot 1",
-    "lamot 2",
-    "limao",
-    "mabacan",
-    "masiit",
-    "paliparan",
-    "pulo",
-    "san roque",
-    "sto. tomas",
-    "prinza",
-    "pinagbayanan",
-    "ambulong",
-  ];
+  console.log(state.fieldValues.farmerBarangay);
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  };
   return (
     <div>
-      <form onSubmit={handleFormSubmit}>
+      <form action={formAction}>
         <div>
-          <label htmlFor="fullname">Unang Pangalan:</label>
-          <input type="text" name="firstname" />
+          <label htmlFor="firstName">Unang Pangalan:</label>
+          <input
+            type="text"
+            name="firstName"
+            defaultValue={state.fieldValues.firstName}
+          />
+          {!state.success &&
+            state.formError?.firstName?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         <div>
-          <label htmlFor="fullname">Apelyido:</label>
-          <input type="text" name="lastname" />
+          <label htmlFor="lastName">Apelyido:</label>
+          <input
+            type="text"
+            name="lastName"
+            defaultValue={state.fieldValues.lastName}
+          />
+          {!state.success &&
+            state.formError?.lastName?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         <div>
           <label htmlFor="alias">Alyas</label>
-          <input type="text" name="alias" />
+          <input
+            type="text"
+            name="alias"
+            defaultValue={state.fieldValues.alias ?? ""}
+          />
         </div>
 
         <div>
           <label htmlFor="mobileNumber">Mobile Number:</label>
-          <input type="text" name="mobileNumber" />
+          <input
+            type="text"
+            name="mobileNumber"
+            defaultValue={state.fieldValues.mobileNumber}
+          />
+          {!state.success &&
+            state.formError?.mobileNumber?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         <div>
           <label htmlFor="birthdate">Araw ng kapanganakan:</label>
-          <input type="date" name="birthdate" />
+          <input
+            type="date"
+            name="birthdate"
+            defaultValue={
+              state.success === false &&
+              state.fieldValues.birthdate instanceof Date &&
+              !isNaN(Number(state.fieldValues.birthdate))
+                ? DateToYYMMDD(state.fieldValues.birthdate)
+                : ""
+            }
+            max={new Date().toISOString().split("T")[0]}
+          />
+          {!state.success &&
+            state.formError?.birthdate?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         <div>
           <label htmlFor="farmerBarangay">Baranggay na iyong tinitirhan:</label>
-          <select name="farmerBarangay" id="">
+          <select
+            name="farmerBarangay"
+            defaultValue={state.fieldValues.farmerBarangay}
+          >
             <option value="">--Pumili--Ng--Baranggay--</option>
             {baranggayList.map((baranggay, index) => (
               <option key={index} value={baranggay}>
@@ -96,10 +139,14 @@ export const FarmereDetailFirstStep: FC = () => {
               </option>
             ))}
           </select>
+          {!state.success &&
+            state.formError?.farmerBarangay?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         <div>
-          <button type="submit">submit button</button>
+          <button type="submit">{isPending ? "Ipinapasa...." : "Ipasa"}</button>
         </div>
       </form>
     </div>
@@ -166,26 +213,6 @@ export const FarmerDetailSecondStep: FC = () => {
     if (e.target.value === "other") setOtherOrg(true);
     else setOtherOrg(false);
   };
-
-  const baranggayList = [
-    "balayhangin",
-    "bangyas",
-    "dayap",
-    "imok",
-    "kanluran",
-    "lamot 1",
-    "lamot 2",
-    "limao",
-    "mabacan",
-    "masiit",
-    "paliparan",
-    "pulo",
-    "san roque",
-    "sto. tomas",
-    "prinza",
-    "pinagbayanan",
-    "ambulong",
-  ];
 
   return (
     <>

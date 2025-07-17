@@ -2,6 +2,7 @@ import {
   AllHasValueType,
   AuthLoginType,
   AuthSignUpType,
+  FarmerFirstDetailFormType,
   NotificationBaseType,
   ValidateAuthValType,
 } from "@/types";

@@ -1,4 +1,8 @@
-import { NewUserType, QueryUserLoginReturnType } from "@/types";
+import {
+  FarmerFirstDetailType,
+  NewUserType,
+  QueryUserLoginReturnType,
+} from "@/types";
 import pool from "../db";
 
 /**
@@ -37,7 +41,9 @@ export const InsertNewUser = async (data: NewUserType) => {
     );
   } catch (error) {
     const err = error as Error;
-    console.error("Error in Inserting a new user query", error);
+    console.error(
+      `Error in Inserting a new user query ${err.message as string}`
+    );
     throw new Error(
       `Error in Inserting a new user query ${err.message as string}`
     );
@@ -72,7 +78,34 @@ export const UserLogin = async (
     };
   } catch (error) {
     const err = error as Error;
-    console.error("Error in CheckUsername query", error);
-    throw new Error(`Error in CheckUsername query ${err.message as string}`);
+    console.error(`Error in User Login query ${err.message as string}`);
+    throw new Error(`Error in User Login query ${err.message as string}`);
+  }
+};
+
+export const FarmerFirstDetailQuery = async (data: FarmerFirstDetailType) => {
+  try {
+    return await pool.query(
+      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerLastName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        data.farmerId,
+        data.firstName,
+        data.lastName,
+        data.alias,
+        data.mobileNumber,
+        data.farmerBarangay,
+        data.birthdate,
+        data.verified,
+        data.dateCreated,
+      ]
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      `Error in Farmer First Detail query ${err.message as string}`
+    );
+    throw new Error(
+      `Error in Farmer First Detail query ${err.message as string}`
+    );
   }
 };
