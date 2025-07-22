@@ -56,7 +56,7 @@ export const CreateSession = async (
  * Getting the session value that was store in the
  * @returns sessionVal object that contains all the in the session storage
  */
-export const GetSession = async (): Promise<SessionValueType> => {
+export const GetSession = async (): Promise<SessionValueType | null> => {
   // getting the cookie that was stored in the browser
   const sessionId = (await cookies()).get(`sessionId`)?.value;
 

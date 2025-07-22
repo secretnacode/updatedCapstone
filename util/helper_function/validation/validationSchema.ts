@@ -126,3 +126,38 @@ export const farmerFirstDetailFormSchema = z.object({
     .string()
     .min(1, { message: `Ilagay ang iyong barangay ng tinitirhan` }),
 });
+
+/**
+ * a zod schema for validating the 2nd detail of the farmer after the sign up
+ */
+export const farmerSecondDetailFormSchema = z
+  .object({
+    organization: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+    otherOrg: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+    cropFarmArea: z
+      .string()
+      .trim()
+      .min(1, { error: "Mag lagay ng lawak ng iyong pinag tataniman" })
+      .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
+        error:
+          "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
+      }),
+    farmAreaMeasurement: z
+      .string()
+      .min(1, { error: "Pumili ng unit ng lupain" }),
+    cropBaranggay: z.string().trim().min(1, {
+      error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
+    }),
+  })
+  .refine((data) => data.organization || data.otherOrg, {
+    error: "Mag lagay ng organisasyon kung san ka kasali",
+    path: ["organization"],
+  });

@@ -18,6 +18,7 @@ import {
   FC,
   ReactElement,
   ReactNode,
+  useCallback,
   useContext,
   useRef,
   useState,
@@ -54,7 +55,7 @@ export function NotificationProvider({
 
   console.log(`notification context`);
 
-  const handleSetNotification = (data: NotificationBaseType[]) => {
+  const handleSetNotification = useCallback((data: NotificationBaseType[]) => {
     const newNotification: NotificationValType[] = data.map((notif) => {
       return { ...notif, notifId: CreateUUID() };
     });
@@ -69,7 +70,7 @@ export function NotificationProvider({
       setNotificationVal([{ message: "", type: null, notifId: null }]);
       timeRef.current = null;
     }, 10000);
-  };
+  }, []);
 
   const handleRemoveNotification = (notifId: string) => {
     setNotificationVal((prev) =>

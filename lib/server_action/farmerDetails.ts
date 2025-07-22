@@ -1,19 +1,18 @@
 "use server";
 
-import { FarmerFirstDetailType, FirstFarmerDetailFormType } from "@/types";
+import {
+  FarmerFirstDetailActionType,
+  FarmerSecondDetailActionType,
+} from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
-import {
-  CheckMobileNumFormat,
-  CreateUUID,
-} from "@/util/helper_function/reusableFunction";
 import { FarmerFirstDetailQuery } from "@/util/queries/user";
-import { GetSession } from "../session";
+import { ProtectedAction } from "@/lib/protectedActions";
 
 export const AddFirstFarmerDetails = async (
-  prevData: FirstFarmerDetailFormType,
+  prevData: FarmerFirstDetailActionType,
   formData: FormData
-): Promise<FirstFarmerDetailFormType> => {
+): Promise<FarmerFirstDetailActionType> => {
   const farmVal = {
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
@@ -23,21 +22,18 @@ export const AddFirstFarmerDetails = async (
     farmerBarangay: formData.get("farmerBarangay") as string,
   };
 
-  const returnVal: FirstFarmerDetailFormType = {
+  const returnVal: FarmerFirstDetailActionType = {
     success: null,
     formError: null,
     notifError: null,
     fieldValues: {
-      firstName: farmVal.firstName,
-      lastName: farmVal.lastName,
-      alias: farmVal.alias,
-      mobileNumber: farmVal.mobileNumber,
-      birthdate: new Date(farmVal.birthdate),
-      farmerBarangay: farmVal.farmerBarangay,
+      ...farmVal,
     },
   };
 
   try {
+    const userId = await ProtectedAction("create:user");
+
     const validateVal = ZodValidateForm(farmVal, farmerFirstDetailFormSchema);
     if (!validateVal.valid) {
       console.log(validateVal.formError);
@@ -51,23 +47,14 @@ export const AddFirstFarmerDetails = async (
     await FarmerFirstDetailQuery({
       ...farmVal,
       mobileNumber: farmVal.mobileNumber,
-      farmerId: await GetSession(),
+      farmerId: userId,
       verified: false,
       dateCreated: new Date(),
     });
 
     return {
-      success: false,
-      formError: null,
-      notifError: null,
-      fieldValues: {
-        firstName: farmVal.firstName,
-        lastName: farmVal.lastName,
-        alias: farmVal.alias,
-        mobileNumber: farmVal.mobileNumber,
-        birthdate: new Date(farmVal.birthdate),
-        farmerBarangay: farmVal.farmerBarangay,
-      },
+      ...returnVal,
+      success: true,
     };
   } catch (error) {
     const err = error as Error;
@@ -79,6 +66,41 @@ export const AddFirstFarmerDetails = async (
         message: `Error in Adding First Farmer Detial: ${err.message}`,
         type: "error",
       },
+    };
+  }
+};
+
+export const AddSecondFarmerDetails = async (
+  prevData: FarmerSecondDetailActionType,
+  formData: FormData
+): Promise<FarmerSecondDetailActionType> => {
+  console.log(formData);
+  const farmVal = {
+    organization: null,
+    otherOrg: null,
+    cropFarmArea: "",
+    farmAreaMeasurement: "ha",
+    cropBaranggay: "",
+  };
+
+  const returnVal = {
+    success: null,
+    formError: null,
+    notifError: null,
+    fieldValues: {
+      ...farmVal,
+    },
+  };
+
+  try {
+    return {
+      ...returnVal,
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.error(`Error in Adding First Farmer Detial: ${err.message}`);
+    return {
+      ...returnVal,
     };
   }
 };

@@ -2,6 +2,7 @@
 
 import { AvailableOrgReturnType } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
+import { ProtectedAction } from "../protectedActions";
 
 /**
  * gets all the available organizations with their orgId and orgName
@@ -10,6 +11,8 @@ import { GetAvailableOrgQuery } from "@/util/queries/org";
  */
 export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
   try {
+    await ProtectedAction("read:org:list");
+
     return {
       success: true,
       data: await GetAvailableOrgQuery(),

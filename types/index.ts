@@ -2,6 +2,7 @@ import {
   authLogInSchema,
   authSignUpSchema,
   farmerFirstDetailFormSchema,
+  farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import z from "zod/v4";
 
@@ -74,7 +75,7 @@ export type ErrorResponseType = {
 export type SessionValueType = {
   userId: string;
   role: string;
-} | null;
+};
 
 export type LoadingContextType = {
   isLoading: boolean;
@@ -111,19 +112,24 @@ export type FarmerFirstDetailFormType = z.infer<
   typeof farmerFirstDetailFormSchema
 >;
 
-type FormStateBaseType<T> = {
+type FormActionBaseType<T> = {
   success: boolean | null;
   formError: { [v in keyof T]?: string[] } | null;
   notifError: NotificationBaseType | null;
+  fieldValues: T;
 };
-
-export type FirstFarmerDetailFormType =
-  FormStateBaseType<FarmerFirstDetailFormType> & {
-    fieldValues: FarmerFirstDetailFormType;
-  };
+export type FarmerFirstDetailActionType =
+  FormActionBaseType<FarmerFirstDetailFormType>;
 
 export type FarmerFirstDetailType = FarmerFirstDetailFormType & {
   farmerId: string;
   verified: boolean;
   dateCreated: Date;
 };
+
+export type FarmerSecondDetailFormType = z.infer<
+  typeof farmerSecondDetailFormSchema
+>;
+
+export type FarmerSecondDetailActionType =
+  FormActionBaseType<FarmerSecondDetailFormType>;

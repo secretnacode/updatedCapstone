@@ -8,8 +8,10 @@ import {
 } from "@/types";
 import {
   ChangeEvent,
+  Dispatch,
   FC,
   ReactElement,
+  SetStateAction,
   useActionState,
   useEffect,
   useState,
@@ -22,21 +24,39 @@ import {
   CreateUUID,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
-import { AddFirstFarmerDetails } from "@/lib/server_action/farmerDetails";
+import {
+  AddFirstFarmerDetails,
+  AddSecondFarmerDetails,
+} from "@/lib/server_action/farmerDetails";
 
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
 
-  const [toggle, setToggle] = useState<boolean>(true);
+  const [nextStep, setNextStep] = useState<boolean>(true);
+  const { handleIsLoading, handleDoneLoading } = useLoading();
   return (
     <div>
-      <button onClick={() => setToggle((prev) => !prev)}>toggle</button>
-      {toggle ? <FarmereDetailFirstStep /> : <FarmerDetailSecondStep />}
+      {nextStep ? (
+        <FarmerDetailSecondStep
+          handleIsLoading={handleIsLoading}
+          handleDoneLoading={handleDoneLoading}
+        />
+      ) : (
+        <FarmereDetailFirstStep
+          setNextStep={setNextStep}
+          handleIsLoading={handleIsLoading}
+          handleDoneLoading={handleDoneLoading}
+        />
+      )}
     </div>
   );
 };
 
-export const FarmereDetailFirstStep: FC = (): ReactElement => {
+export const FarmereDetailFirstStep: FC<{
+  setNextStep: Dispatch<SetStateAction<boolean>>;
+  handleIsLoading: (message: string) => void;
+  handleDoneLoading: () => void;
+}> = ({ setNextStep, handleIsLoading, handleDoneLoading }): ReactElement => {
   console.log(`farmer 1st detail form`);
   const { handleSetNotification } = useNotification();
   const [state, formAction, isPending] = useActionState(AddFirstFarmerDetails, {
@@ -53,7 +73,30 @@ export const FarmereDetailFirstStep: FC = (): ReactElement => {
     },
   });
 
-  console.log(state.fieldValues.farmerBarangay);
+  useEffect(() => {
+    if (state.success === false && state.notifError) {
+      handleSetNotification([
+        state.notifError ?? { message: "unkown error", type: "error" },
+      ]);
+    }
+
+    if (state.success) {
+      setNextStep(true);
+    }
+
+    if (isPending) {
+      handleIsLoading("passing your information");
+    } else {
+      handleDoneLoading();
+    }
+  }, [
+    state,
+    handleSetNotification,
+    setNextStep,
+    isPending,
+    handleIsLoading,
+    handleDoneLoading,
+  ]);
 
   return (
     <div>
@@ -153,10 +196,12 @@ export const FarmereDetailFirstStep: FC = (): ReactElement => {
   );
 };
 
-export const FarmerDetailSecondStep: FC = () => {
+export const FarmerDetailSecondStep: FC<{
+  handleIsLoading: (message: string) => void;
+  handleDoneLoading: () => void;
+}> = ({ handleIsLoading, handleDoneLoading }) => {
   console.log(`farmer 2nd detail form`);
   const { handleSetNotification } = useNotification();
-  const { handleIsLoading, handleDoneLoading } = useLoading();
   const [organization, setOrganization] = useState<QueryAvailableOrgReturnType>(
     []
   );
@@ -168,6 +213,18 @@ export const FarmerDetailSecondStep: FC = () => {
     cropBaranggay: "",
   });
   const [cropList, setCropList] = useState<CropListType[] | []>([]);
+  const [state, formAction] = useActionState(AddSecondFarmerDetails, {
+    success: null,
+    formError: null,
+    notifError: null,
+    fieldValues: {
+      organization: null,
+      otherOrg: null,
+      cropFarmArea: "",
+      farmAreaMeasurement: "ha",
+      cropBaranggay: "",
+    },
+  });
 
   // getting all the available orgs in the database when the component mount
   useEffect(() => {
@@ -179,9 +236,10 @@ export const FarmerDetailSecondStep: FC = () => {
         handleDoneLoading();
 
         if (AvailOrg.success) return setOrganization(AvailOrg.data);
-        else throw AvailOrg.errors;
+        else throw AvailOrg;
       } catch (error) {
         const err = error as ErrorResponseType;
+        console.log(error);
         handleSetNotification(err.errors);
       }
     };
@@ -217,7 +275,7 @@ export const FarmerDetailSecondStep: FC = () => {
   return (
     <>
       <button onClick={handleAddCropList}>Add crop</button>
-      <form action="">
+      <form action={formAction}>
         <div>
           <label htmlFor="organization">Organisasyon na kabilang:</label>
           <select name="organization" id="" onChange={handleOtherOrg}>
@@ -231,6 +289,10 @@ export const FarmerDetailSecondStep: FC = () => {
             <option value="other">Mag Lagay ng iba</option>
             <option value="none">Wala</option>
           </select>
+          {!state.success &&
+            state.formError?.organization?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
 
         {otherOrg && (
@@ -239,11 +301,15 @@ export const FarmerDetailSecondStep: FC = () => {
               Ilagay ang Organisasyon na kinabibilangan:
             </label>
             <input type="text" name="otherOrg" />
+            {!state.success &&
+              state.formError?.otherOrg?.map((err, index) => (
+                <p key={err + index}>{err}</p>
+              ))}
           </div>
         )}
 
         <div>
-          <label htmlFor="farmArea">
+          <label htmlFor="cropFarmArea">
             Sukat ng lote na iyong Pinagtataniman:
           </label>
           <input
@@ -253,6 +319,10 @@ export const FarmerDetailSecondStep: FC = () => {
             value={currentCropList.cropFarmArea}
             onChange={handleChangeCropVal}
           />
+          {!state.success &&
+            state.formError?.cropFarmArea?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
 
           <div>
             <div>
@@ -294,6 +364,10 @@ export const FarmerDetailSecondStep: FC = () => {
                 onChange={handleChangeCropVal}
               />
             </div>
+            {!state.success &&
+              state.formError?.farmAreaMeasurement?.map((err, index) => (
+                <p key={err + index}>{err}</p>
+              ))}
           </div>
         </div>
 
@@ -312,7 +386,13 @@ export const FarmerDetailSecondStep: FC = () => {
               </option>
             ))}
           </select>
+
+          {!state.success &&
+            state.formError?.cropBaranggay?.map((err, index) => (
+              <p key={err + index}>{err}</p>
+            ))}
         </div>
+        <button type="submit">Ipasa</button>
 
         <FarmerCropDetail cropList={cropList} />
       </form>

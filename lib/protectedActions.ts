@@ -1,0 +1,103 @@
+import { GetSession } from "@/lib/session";
+
+const Actions = {
+  // admin creation action
+  CREATE_USER_AGRI: "create:user:agri", // action to create a user role agriculture
+
+  // action that wants to create, read, and update their own info
+  CREATE_USER: "create:user", // action for creating a user(farmer sign up)
+  READ_USER: "read:user", // action for the user to read their OWN information
+  UPDATE_USER: "update:user", // action for the user to update their OWN information
+
+  // action that wants to access the farmers info
+  READ_FARMER_USER: "read:farmer:user", // action to view the FARMER USER
+  UPDATE_FARMER_USER: "update:farmer:user", // action to update the FARMER USER (e.g. block)
+  DELETE_FARMER_USER: "delete:farmer:user", // action to delete the FARMER USER
+
+  // actions that want to makes a their OWN report and read it
+  CREATE_REPORT: "create:report", // action for farmer to create their own report
+  READ_REPORT: "read:report", // action for farmer to view their OWN report
+
+  // action that wants to access the farmers report info
+  READ_FARMER_REPORT: "read:farmer:report", // action to view the farmer's report
+  UPDATE_FARMER_REPORT: "update:farmer:report", // action to update the farmer's report
+  DELETE_FARMER_REPORT: "delete:farmer:report", // action to delete the farmer's report
+
+  //action regarding the farmer report lists
+  READ_FARMER_REPORT_LIST: "read:farmer:report:list", // action for reading the farmer report list
+  DELETE_FARMER_REPORT_LIST: "delete:farmer:report:list", // action for deleting the farmer report list
+
+  // actions that wants to mutate the orgaanization the user is in
+  CREATE_ORG: "create:org", // action for creating an organization
+  READ_ORG: "read:org", // action of the farmer to know who is the leader of the organization that he's/she's in
+  UPDATE_ORG: "update:org", // action of the farmer if he/she wants to change his/her organization
+
+  // actions to in regarding of organization lists
+  READ_ORG_LIST: "read:org:list", // action to read the org(e.g. its leader and members)
+  UPDATE_ORG_LIST: "update:org:list", // action for updating the organization list(e.g. changing the members)
+  DELETE_ORG_LIST: "delete:org:list", // action for deleting and entire organization
+} as const;
+
+const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
+  admin: [
+    Actions.CREATE_USER_AGRI,
+    Actions.DELETE_FARMER_USER,
+    Actions.DELETE_FARMER_REPORT,
+    Actions.DELETE_FARMER_REPORT_LIST,
+    Actions.DELETE_ORG_LIST,
+    Actions.READ_FARMER_USER,
+    Actions.READ_FARMER_REPORT,
+    Actions.READ_FARMER_REPORT_LIST,
+    Actions.READ_ORG_LIST,
+    Actions.READ_USER,
+    Actions.UPDATE_FARMER_USER,
+    Actions.UPDATE_FARMER_REPORT,
+    Actions.UPDATE_ORG_LIST,
+    Actions.UPDATE_USER,
+  ],
+  agriculturist: [
+    Actions.DELETE_FARMER_USER,
+    Actions.DELETE_FARMER_REPORT,
+    Actions.DELETE_FARMER_REPORT_LIST,
+    Actions.DELETE_ORG_LIST,
+    Actions.READ_FARMER_USER,
+    Actions.READ_FARMER_REPORT,
+    Actions.READ_FARMER_REPORT_LIST,
+    Actions.READ_ORG_LIST,
+    Actions.READ_USER,
+    Actions.UPDATE_FARMER_USER,
+    Actions.UPDATE_FARMER_REPORT,
+    Actions.UPDATE_ORG_LIST,
+    Actions.UPDATE_USER,
+  ],
+  farmer: [
+    Actions.CREATE_ORG,
+    Actions.CREATE_USER,
+    Actions.CREATE_REPORT,
+    Actions.READ_REPORT,
+    Actions.READ_ORG_LIST,
+    Actions.READ_ORG,
+    Actions.READ_USER,
+    Actions.UPDATE_ORG,
+    Actions.UPDATE_USER,
+  ],
+};
+
+/**
+ * a function that protects the server action that validates if the user is logged in
+ * and the if the user is allowed to execute that server action
+ * @param action that you want to execute (e.g. create:user)
+ * @throws if the current user is not logged in yet
+ * and if the user role cant access the action that was passed in this function
+ * @returns the userId of the current logged in user
+ */
+export const ProtectedAction = async (action: string): Promise<string> => {
+  const session = await GetSession();
+
+  if (!session) throw new Error("You need to log in first");
+
+  if (!ROLE_ACTION_PERMISION[session?.role].includes(action))
+    throw new Error("You are not allowed to execute this action");
+
+  return session.userId;
+};
