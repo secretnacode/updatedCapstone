@@ -104,7 +104,7 @@ export type AvailableOrgReturnType =
 export type CropListType = {
   cropId: string;
   cropFarmArea: number;
-  farmAreaMeasurement: "sqft" | "sqm" | "ac" | "ha"; // sqaure feet, square meter, acre, hectare
+  farmAreaMeasurement: "sqft" | "sqm" | "ac" | "ha" | null; // sqaure feet, square meter, acre, hectare
   cropBaranggay: string;
 };
 
@@ -112,14 +112,15 @@ export type FarmerFirstDetailFormType = z.infer<
   typeof farmerFirstDetailFormSchema
 >;
 
-type FormActionBaseType<T> = {
+export type FormActionBaseType<T> = {
   success: boolean | null;
   formError: { [v in keyof T]?: string[] } | null;
-  notifError: NotificationBaseType | null;
-  fieldValues: T;
+  notifError: NotificationBaseType[] | null;
 };
-export type FarmerFirstDetailActionType =
-  FormActionBaseType<FarmerFirstDetailFormType>;
+export type FarmerFirstDetailActionReturnType =
+  FormActionBaseType<FarmerFirstDetailFormType> & {
+    fieldValues: FarmerFirstDetailFormType;
+  };
 
 export type FarmerFirstDetailType = FarmerFirstDetailFormType & {
   farmerId: string;
@@ -131,5 +132,21 @@ export type FarmerSecondDetailFormType = z.infer<
   typeof farmerSecondDetailFormSchema
 >;
 
-export type FarmerSecondDetailActionType =
-  FormActionBaseType<FarmerSecondDetailFormType>;
+export type FarmerDetailCropType = FarmerSecondDetailFormType & {
+  cropId: string;
+};
+
+export type FarmerSecondDetailActionReturnType =
+  FormActionBaseType<FarmerSecondDetailFormType> & {
+    fieldValues: FarmerSecondDetailFormType;
+  };
+
+export type EditCropListType =
+  | {
+      edit: false;
+      cropId: null;
+    }
+  | {
+      edit: true;
+      cropId: string;
+    };

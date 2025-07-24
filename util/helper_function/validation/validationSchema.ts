@@ -132,11 +132,7 @@ export const farmerFirstDetailFormSchema = z.object({
  */
 export const farmerSecondDetailFormSchema = z
   .object({
-    organization: z
-      .string()
-      .trim()
-      .transform((e) => (e === "" ? null : e))
-      .nullable(),
+    organization: z.string().trim(),
     otherOrg: z
       .string()
       .trim()
@@ -157,7 +153,7 @@ export const farmerSecondDetailFormSchema = z
       error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
     }),
   })
-  .refine((data) => data.organization || data.otherOrg, {
+  .refine((data) => data.organization === "other" && data.otherOrg, {
     error: "Mag lagay ng organisasyon kung san ka kasali",
     path: ["organization"],
   });

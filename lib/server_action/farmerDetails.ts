@@ -1,8 +1,9 @@
 "use server";
 
 import {
-  FarmerFirstDetailActionType,
-  FarmerSecondDetailActionType,
+  FarmerFirstDetailActionReturnType,
+  FarmerSecondDetailActionReturnType,
+  FarmerSecondDetailFormType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
@@ -10,9 +11,9 @@ import { FarmerFirstDetailQuery } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
 
 export const AddFirstFarmerDetails = async (
-  prevData: FarmerFirstDetailActionType,
+  prevData: FarmerFirstDetailActionReturnType,
   formData: FormData
-): Promise<FarmerFirstDetailActionType> => {
+): Promise<FarmerFirstDetailActionReturnType> => {
   const farmVal = {
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
@@ -22,7 +23,7 @@ export const AddFirstFarmerDetails = async (
     farmerBarangay: formData.get("farmerBarangay") as string,
   };
 
-  const returnVal: FarmerFirstDetailActionType = {
+  const returnVal: FarmerFirstDetailActionReturnType = {
     success: null,
     formError: null,
     notifError: null,
@@ -62,45 +63,43 @@ export const AddFirstFarmerDetails = async (
     return {
       ...returnVal,
       success: false,
-      notifError: {
-        message: `Error in Adding First Farmer Detial: ${err.message}`,
-        type: "error",
-      },
+      notifError: [
+        {
+          message: `Error in Adding First Farmer Detial: ${err.message}`,
+          type: "error",
+        },
+      ],
     };
   }
 };
 
 export const AddSecondFarmerDetails = async (
-  prevData: FarmerSecondDetailActionType,
-  formData: FormData
-): Promise<FarmerSecondDetailActionType> => {
-  console.log(formData);
-  const farmVal = {
-    organization: null,
-    otherOrg: null,
-    cropFarmArea: "",
-    farmAreaMeasurement: "ha",
-    cropBaranggay: "",
-  };
-
-  const returnVal = {
+  cropList: FarmerSecondDetailFormType[]
+): Promise<FarmerSecondDetailActionReturnType> => {
+  const returnVal: FarmerSecondDetailActionReturnType = {
     success: null,
     formError: null,
     notifError: null,
-    fieldValues: {
-      ...farmVal,
-    },
+    fieldValues: cropList,
   };
 
   try {
-    return {
-      ...returnVal,
-    };
+    console.log(cropList);
+    const userId = await ProtectedAction("create:ussser");
+
+    return returnVal;
   } catch (error) {
     const err = error as Error;
-    console.error(`Error in Adding First Farmer Detial: ${err.message}`);
     return {
       ...returnVal,
+      success: false,
+      formError: null,
+      notifError: [
+        {
+          message: `Error in Adding First Farmer Detial: ${err.message}`,
+          type: "error",
+        },
+      ],
     };
   }
 };

@@ -2,14 +2,18 @@
 
 import {
   AvailableOrgReturnType,
-  CropListType,
+  EditCropListType,
   ErrorResponseType,
+  FarmerDetailCropType,
+  FarmerSecondDetailFormType,
+  FormActionBaseType,
   QueryAvailableOrgReturnType,
 } from "@/types";
 import {
   ChangeEvent,
   Dispatch,
   FC,
+  FormEvent,
   ReactElement,
   SetStateAction,
   useActionState,
@@ -24,29 +28,18 @@ import {
   CreateUUID,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
-import {
-  AddFirstFarmerDetails,
-  AddSecondFarmerDetails,
-} from "@/lib/server_action/farmerDetails";
+import { AddFirstFarmerDetails } from "@/lib/server_action/farmerDetails";
 
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
 
   const [nextStep, setNextStep] = useState<boolean>(true);
-  const { handleIsLoading, handleDoneLoading } = useLoading();
   return (
     <div>
       {nextStep ? (
-        <FarmerDetailSecondStep
-          handleIsLoading={handleIsLoading}
-          handleDoneLoading={handleDoneLoading}
-        />
+        <FarmerDetailSecondStep />
       ) : (
-        <FarmereDetailFirstStep
-          setNextStep={setNextStep}
-          handleIsLoading={handleIsLoading}
-          handleDoneLoading={handleDoneLoading}
-        />
+        <FarmereDetailFirstStep setNextStep={setNextStep} />
       )}
     </div>
   );
@@ -54,11 +47,10 @@ export const FarmerDetailForm: FC = () => {
 
 export const FarmereDetailFirstStep: FC<{
   setNextStep: Dispatch<SetStateAction<boolean>>;
-  handleIsLoading: (message: string) => void;
-  handleDoneLoading: () => void;
-}> = ({ setNextStep, handleIsLoading, handleDoneLoading }): ReactElement => {
+}> = ({ setNextStep }): ReactElement => {
   console.log(`farmer 1st detail form`);
   const { handleSetNotification } = useNotification();
+  const { handleDoneLoading, handleIsLoading } = useLoading();
   const [state, formAction, isPending] = useActionState(AddFirstFarmerDetails, {
     success: null,
     formError: null,
@@ -75,9 +67,7 @@ export const FarmereDetailFirstStep: FC<{
 
   useEffect(() => {
     if (state.success === false && state.notifError) {
-      handleSetNotification([
-        state.notifError ?? { message: "unkown error", type: "error" },
-      ]);
+      handleSetNotification(state.notifError);
     }
 
     if (state.success) {
@@ -196,35 +186,27 @@ export const FarmereDetailFirstStep: FC<{
   );
 };
 
-export const FarmerDetailSecondStep: FC<{
-  handleIsLoading: (message: string) => void;
-  handleDoneLoading: () => void;
-}> = ({ handleIsLoading, handleDoneLoading }) => {
+export const FarmerDetailSecondStep: FC = () => {
   console.log(`farmer 2nd detail form`);
   const { handleSetNotification } = useNotification();
-  const [organization, setOrganization] = useState<QueryAvailableOrgReturnType>(
-    []
-  );
-  const [otherOrg, setOtherOrg] = useState<boolean>(false);
-  const [currentCropList, setCurrentCropList] = useState<CropListType>({
-    cropId: CreateUUID(),
-    cropFarmArea: 0,
-    farmAreaMeasurement: "ha",
+  const { handleDoneLoading, handleIsLoading } = useLoading();
+  const [otherOrg, setOtherOrg] = useState(false);
+  const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType>([]);
+  const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
+  const [editCropId, setEditCropId] = useState<EditCropListType>({
+    edit: false,
+    cropId: null,
+  });
+  const [currentCrops, setCurrentCrops] = useState({
+    organization: "",
+    otherOrg: "",
+    cropFarmArea: "",
+    farmAreaMeasurement: "",
     cropBaranggay: "",
   });
-  const [cropList, setCropList] = useState<CropListType[] | []>([]);
-  const [state, formAction] = useActionState(AddSecondFarmerDetails, {
-    success: null,
-    formError: null,
-    notifError: null,
-    fieldValues: {
-      organization: null,
-      otherOrg: null,
-      cropFarmArea: "",
-      farmAreaMeasurement: "ha",
-      cropBaranggay: "",
-    },
-  });
+  const [error, setError] = useState<
+    FormActionBaseType<FarmerSecondDetailFormType>
+  >({ success: null, formError: null, notifError: null });
 
   // getting all the available orgs in the database when the component mount
   useEffect(() => {
@@ -235,7 +217,7 @@ export const FarmerDetailSecondStep: FC<{
 
         handleDoneLoading();
 
-        if (AvailOrg.success) return setOrganization(AvailOrg.data);
+        if (AvailOrg.success) return setAvailOrg(AvailOrg.data);
         else throw AvailOrg;
       } catch (error) {
         const err = error as ErrorResponseType;
@@ -247,40 +229,130 @@ export const FarmerDetailSecondStep: FC<{
     GetAvailableOrg();
   }, [handleSetNotification, handleIsLoading, handleDoneLoading]);
 
-  const handleChangeCropVal = (
+  const handleChangeVal = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    console.log(`${e.target.name}: ${e.target.value}`);
-    setCurrentCropList((prev) => ({
+    if (e.target.name === "organization") {
+      if (e.target.value === "other") setOtherOrg(true);
+      else {
+        if (currentCrops.otherOrg)
+          setCurrentCrops((prev) => ({ ...prev, otherOrg: "" }));
+
+        setOtherOrg(false);
+      }
+    }
+
+    setCurrentCrops((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleAddCropList = () => {
-    setCropList((prev) => [...prev, currentCropList]);
-    setCurrentCropList({
-      cropId: CreateUUID(),
-      cropFarmArea: 0,
-      farmAreaMeasurement: "ha",
+  const handleValidateCurrentCrops = ():
+    | { [v in keyof FarmerSecondDetailFormType]?: string[] }
+    | null => {
+    let err: { [v in keyof FarmerSecondDetailFormType]?: string[] } | null = {};
+    for (const [key, value] of Object.entries(currentCrops)) {
+      if (key === "otherOrg" && currentCrops.organization !== "other") continue;
+
+      if (value === "") {
+        switch (key) {
+          case "organization":
+            err = {
+              ...err,
+              organization: ["Pumili ng organisasyon na ikaw ay kasali"],
+            };
+            break;
+          case "otherOrg":
+            err = {
+              ...err,
+              otherOrg: [
+                "Ilagay ang organisasyon na ikaw ay kasali pero wala sa listahan",
+              ],
+            };
+            break;
+          case "cropFarmArea":
+            err = {
+              ...err,
+              cropFarmArea: [
+                "Ilagay kung gaano ka laki ang lote ng iyong pinagtataniman",
+              ],
+            };
+            break;
+          case "farmAreaMeasurement":
+            err = {
+              ...err,
+              farmAreaMeasurement: [
+                "Pumili kung anong uri ng sukat ang nailagay mo sa laki ng iyong lote",
+              ],
+            };
+            break;
+          case "cropBaranggay":
+            err = {
+              ...err,
+              cropBaranggay: [
+                "Pumili ng barangay kung saan ang lokasyon ng iyong pinag tataniman",
+              ],
+            };
+            break;
+        }
+      }
+    }
+
+    return err;
+  };
+
+  const handleAddNewCrop = () => {
+    const validate = handleValidateCurrentCrops();
+    if (validate && Object.entries(validate).length > 0) {
+      console.log("err");
+      return setError({
+        success: false,
+        notifError: null,
+        formError: validate,
+      });
+    }
+
+    setCropList((prev) => [...prev, { ...currentCrops, cropId: CreateUUID() }]);
+    setOtherOrg(false);
+    setError({ success: null, notifError: null, formError: null });
+    setCurrentCrops({
+      organization: "",
+      otherOrg: "",
+      cropFarmArea: "",
+      farmAreaMeasurement: currentCrops.farmAreaMeasurement,
       cropBaranggay: "",
     });
   };
+  console.log(cropList);
 
-  const handleOtherOrg = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (e.target.value === "other") setOtherOrg(true);
-    else setOtherOrg(false);
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const newCropList = [...cropList, { ...currentCrops }];
+
+      console.log(newCropList);
+      // const res = await AddSecondFarmerDetails(newCropList);
+    } catch {}
+  };
+
+  const handleEditCrop = (cropToEdit: FarmerDetailCropType) => {
+    console.log(cropToEdit);
   };
 
   return (
     <>
-      <button onClick={handleAddCropList}>Add crop</button>
-      <form action={formAction}>
+      <form onSubmit={handleFormSubmit}>
         <div>
           <label htmlFor="organization">Organisasyon na kabilang:</label>
-          <select name="organization" id="" onChange={handleOtherOrg}>
+          <select
+            name="organization"
+            id=""
+            onChange={handleChangeVal}
+            value={currentCrops.organization}
+          >
             <option value="">--Pumili--Ng--Organisasyon</option>
-            {organization.map((org, index) => (
+            {availOrg.map((org, index) => (
               <option key={index} value={org.orgId}>
                 {org.orgName}
               </option>
@@ -289,9 +361,9 @@ export const FarmerDetailSecondStep: FC<{
             <option value="other">Mag Lagay ng iba</option>
             <option value="none">Wala</option>
           </select>
-          {!state.success &&
-            state.formError?.organization?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+          {error.success === false &&
+            error.formError?.organization?.map((error, key) => (
+              <p key={key + error}>{error}</p>
             ))}
         </div>
 
@@ -300,10 +372,15 @@ export const FarmerDetailSecondStep: FC<{
             <label htmlFor="otherOrg">
               Ilagay ang Organisasyon na kinabibilangan:
             </label>
-            <input type="text" name="otherOrg" />
-            {!state.success &&
-              state.formError?.otherOrg?.map((err, index) => (
-                <p key={err + index}>{err}</p>
+            <input
+              type="text"
+              name="otherOrg"
+              onChange={handleChangeVal}
+              value={currentCrops.otherOrg}
+            />
+            {error.success === false &&
+              error.formError?.otherOrg?.map((error, key) => (
+                <p key={key + error}>{error}</p>
               ))}
           </div>
         )}
@@ -313,15 +390,14 @@ export const FarmerDetailSecondStep: FC<{
             Sukat ng lote na iyong Pinagtataniman:
           </label>
           <input
-            type="number"
+            type="text"
             name="cropFarmArea"
-            min={0}
-            value={currentCropList.cropFarmArea}
-            onChange={handleChangeCropVal}
+            onChange={handleChangeVal}
+            value={currentCrops.cropFarmArea}
           />
-          {!state.success &&
-            state.formError?.cropFarmArea?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+          {error.success === false &&
+            error.formError?.cropFarmArea?.map((error, key) => (
+              <p key={key + error}>{error}</p>
             ))}
 
           <div>
@@ -331,7 +407,7 @@ export const FarmerDetailSecondStep: FC<{
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"ha"}
-                onChange={handleChangeCropVal}
+                onChange={handleChangeVal}
               />
             </div>
 
@@ -341,7 +417,7 @@ export const FarmerDetailSecondStep: FC<{
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"ac"}
-                onChange={handleChangeCropVal}
+                onChange={handleChangeVal}
               />
             </div>
 
@@ -351,7 +427,7 @@ export const FarmerDetailSecondStep: FC<{
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"sqft"}
-                onChange={handleChangeCropVal}
+                onChange={handleChangeVal}
               />
             </div>
 
@@ -361,12 +437,12 @@ export const FarmerDetailSecondStep: FC<{
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"sqm"}
-                onChange={handleChangeCropVal}
+                onChange={handleChangeVal}
               />
             </div>
-            {!state.success &&
-              state.formError?.farmAreaMeasurement?.map((err, index) => (
-                <p key={err + index}>{err}</p>
+            {error.success === false &&
+              error.formError?.farmAreaMeasurement?.map((error, key) => (
+                <p key={key + error}>{error}</p>
               ))}
           </div>
         </div>
@@ -376,8 +452,8 @@ export const FarmerDetailSecondStep: FC<{
           <select
             name="cropBaranggay"
             id=""
-            value={currentCropList.cropBaranggay}
-            onChange={handleChangeCropVal}
+            onChange={handleChangeVal}
+            value={currentCrops.cropBaranggay}
           >
             <option value="">--Pumili--Ng--Lugar</option>
             {baranggayList.map((brgy, index) => (
@@ -387,32 +463,75 @@ export const FarmerDetailSecondStep: FC<{
             ))}
           </select>
 
-          {!state.success &&
-            state.formError?.cropBaranggay?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+          {error.success === false &&
+            error.formError?.cropBaranggay?.map((error, key) => (
+              <p key={key + error}>{error}</p>
             ))}
         </div>
-        <button type="submit">Ipasa</button>
 
-        <FarmerCropDetail cropList={cropList} />
+        <button type="button" onClick={handleAddNewCrop}>
+          Mag dagdag ng pananim
+        </button>
+        <br />
+        <button type="submit">Ipasa</button>
       </form>
+
+      <CropsValComponent
+        cropList={cropList}
+        availOrg={availOrg}
+        handleEditCrop={handleEditCrop}
+      />
     </>
   );
 };
 
-const FarmerCropDetail: FC<{ cropList: CropListType[] | [] }> = ({
-  cropList,
-}) => {
+const CropsValComponent: FC<{
+  cropList: FarmerDetailCropType[];
+  availOrg: QueryAvailableOrgReturnType;
+  handleEditCrop: (cropToEdit: FarmerDetailCropType) => void;
+}> = ({ cropList, availOrg, handleEditCrop }) => {
+  const handleOrg = (currentOrg: string, otherOrg: string | null): string => {
+    const name = availOrg.filter((org) => currentOrg === org.orgId);
+    if (name.length > 0) return name[0].orgName;
+
+    if (currentOrg === "other" && otherOrg) return otherOrg;
+
+    if (currentOrg === "none") return "Wala";
+
+    return "Wala sa pamimilian ang iyong napili";
+  };
+
+  const convertMeasurement = (measure: string) => {
+    switch (measure) {
+      case "ha":
+        return "Ektarya(Hectares)";
+      case "ac":
+        return "Akre(Acres)";
+      case "sqft":
+        return "Talampakang Kuwadrado(Square Feet)";
+      case "sqm":
+        return "Metrong Kuwadrado(Square Meter)";
+      default:
+        return "";
+    }
+  };
+
   return (
     <>
-      {cropList.map((list) => (
-        <div key={list.cropId}>
-          <p>Id: {list.cropId}</p>
-          <p>Farm Area: {list.cropFarmArea}</p>
-          <p>Area Measurement: {list.farmAreaMeasurement}</p>
-          <p>Farm location: {list.cropBaranggay}</p>
-        </div>
-      ))}
+      {cropList &&
+        cropList.map((crop, index) => (
+          <div key={index} onClick={() => handleEditCrop(crop)}>
+            <p>
+              Organisasyon na iyong pinapasukan:{" "}
+              {handleOrg(crop.organization, crop.otherOrg)}
+            </p>
+            <p>
+              Lote ng iyong pinag tataniman: {crop.cropFarmArea}{" "}
+              {convertMeasurement(crop.farmAreaMeasurement)}
+            </p>
+            <p>Lugar ng Iyong pinagtataniman: {crop.cropBaranggay}</p>
+          </div>
+        ))}
     </>
   );
 };
