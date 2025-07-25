@@ -143,10 +143,12 @@ export type FarmerSecondDetailActionReturnType =
 
 export type EditCropListType =
   | {
-      edit: false;
+      editing: false;
       cropId: null;
+      listNum: null;
     }
   | {
-      edit: true;
+      editing: true;
       cropId: string;
+      listNum: number;
     };

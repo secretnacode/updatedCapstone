@@ -14,10 +14,12 @@ import {
   Dispatch,
   FC,
   FormEvent,
+  memo,
   ReactElement,
   SetStateAction,
   useActionState,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
@@ -194,10 +196,12 @@ export const FarmerDetailSecondStep: FC = () => {
   const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType>([]);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
   const [editCropId, setEditCropId] = useState<EditCropListType>({
-    edit: false,
+    editing: false,
     cropId: null,
+    listNum: null,
   });
   const [currentCrops, setCurrentCrops] = useState({
+    cropId: "",
     organization: "",
     otherOrg: "",
     cropFarmArea: "",
@@ -248,6 +252,12 @@ export const FarmerDetailSecondStep: FC = () => {
     }));
   };
 
+  /**
+   * simple validation for the currentCrops,
+   * it detects if a single value of currentCrops has a empty value
+   * @returns err that is an array of objects that containst the error of each value in the form,
+   * if value in the form is valid then it returns an empty array
+   */
   const handleValidateCurrentCrops = ():
     | { [v in keyof FarmerSecondDetailFormType]?: string[] }
     | null => {
@@ -302,10 +312,13 @@ export const FarmerDetailSecondStep: FC = () => {
     return err;
   };
 
+  /**
+   * performing a simple validation for the currentCrops before executing handleSaveListAndBackDefault
+   * @returns a error for the form to use if the simple validation fails
+   */
   const handleAddNewCrop = () => {
     const validate = handleValidateCurrentCrops();
     if (validate && Object.entries(validate).length > 0) {
-      console.log("err");
       return setError({
         success: false,
         notifError: null,
@@ -313,10 +326,76 @@ export const FarmerDetailSecondStep: FC = () => {
       });
     }
 
+    handleSaveListAndBackDefault();
+  };
+
+  /**
+   * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
+   */
+  const handleEditCrop = useMemo(() => {
+    return (cropToEdit: FarmerDetailCropType, index: number) => {
+      setEditCropId({
+        editing: true,
+        cropId: cropToEdit.cropId,
+        listNum: index,
+      });
+      setCurrentCrops({ ...cropToEdit, otherOrg: cropToEdit.otherOrg ?? "" });
+    };
+  }, []);
+
+  /**
+   * seting the value of the state editCropId into a default value
+   */
+  const handleDefaultEditState = () => {
+    setEditCropId({ editing: false, cropId: null, listNum: null });
+  };
+
+  /**
+   * executing handleSaveListAndBackDefault and handleDefaultEdiState
+   */
+  const handleDoneEditingCrop = () => {
+    setCropList((prev) =>
+      prev.map((crop) =>
+        crop.cropId === currentCrops.cropId ? { ...currentCrops } : crop
+      )
+    );
+    handleBackDefault();
+    handleDefaultEditState();
+  };
+  console.log(cropList);
+
+  /**
+   * executing handleDefaultEdiState and handleBackDefault to make a default value for
+   * editCropId, otherOrg, error, and currentCrops into their default value
+   */
+  const handleCancelEditCrop = () => {
+    handleDefaultEditState();
+    handleBackDefault();
+  };
+
+  /**
+   * executing the function handleSaveList and handleBackDefault
+   */
+  const handleSaveListAndBackDefault = () => {
+    handleSaveList();
+    handleBackDefault();
+  };
+
+  /**
+   * appending the value of the currentCrops while adding a unique id for that crop list
+   */
+  const handleSaveList = () => {
     setCropList((prev) => [...prev, { ...currentCrops, cropId: CreateUUID() }]);
+  };
+
+  /**
+   * setting the state of otherOrg, error, and currentCrops into their default value
+   */
+  const handleBackDefault = () => {
     setOtherOrg(false);
     setError({ success: null, notifError: null, formError: null });
     setCurrentCrops({
+      cropId: "",
       organization: "",
       otherOrg: "",
       cropFarmArea: "",
@@ -324,7 +403,6 @@ export const FarmerDetailSecondStep: FC = () => {
       cropBaranggay: "",
     });
   };
-  console.log(cropList);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -336,12 +414,12 @@ export const FarmerDetailSecondStep: FC = () => {
     } catch {}
   };
 
-  const handleEditCrop = (cropToEdit: FarmerDetailCropType) => {
-    console.log(cropToEdit);
-  };
-
   return (
     <>
+      {editCropId.editing && (
+        <div>Binabago ang taniman {editCropId.listNum}</div>
+      )}
+
       <form onSubmit={handleFormSubmit}>
         <div>
           <label htmlFor="organization">Organisasyon na kabilang:</label>
@@ -469,14 +547,31 @@ export const FarmerDetailSecondStep: FC = () => {
             ))}
         </div>
 
-        <button type="button" onClick={handleAddNewCrop}>
-          Mag dagdag ng pananim
+        <button
+          type="button"
+          onClick={
+            editCropId.editing ? handleDoneEditingCrop : handleAddNewCrop
+          }
+        >
+          {editCropId.editing
+            ? "Kumpiramhin ang pag babago"
+            : "Mag dagdag ng pananim"}
         </button>
+
+        {editCropId.editing && (
+          <>
+            <br />
+            <button type="button" onClick={handleCancelEditCrop}>
+              Kanselahin ang pag babago
+            </button>
+          </>
+        )}
+
         <br />
         <button type="submit">Ipasa</button>
       </form>
 
-      <CropsValComponent
+      <MemoizedCropsValComponent
         cropList={cropList}
         availOrg={availOrg}
         handleEditCrop={handleEditCrop}
@@ -488,8 +583,9 @@ export const FarmerDetailSecondStep: FC = () => {
 const CropsValComponent: FC<{
   cropList: FarmerDetailCropType[];
   availOrg: QueryAvailableOrgReturnType;
-  handleEditCrop: (cropToEdit: FarmerDetailCropType) => void;
+  handleEditCrop: (cropToEdit: FarmerDetailCropType, index: number) => void;
 }> = ({ cropList, availOrg, handleEditCrop }) => {
+  console.log("Crop Value Component");
   const handleOrg = (currentOrg: string, otherOrg: string | null): string => {
     const name = availOrg.filter((org) => currentOrg === org.orgId);
     if (name.length > 0) return name[0].orgName;
@@ -520,7 +616,8 @@ const CropsValComponent: FC<{
     <>
       {cropList &&
         cropList.map((crop, index) => (
-          <div key={index} onClick={() => handleEditCrop(crop)}>
+          <div key={index} onClick={() => handleEditCrop(crop, index)}>
+            <p>Taniman {index}</p>
             <p>
               Organisasyon na iyong pinapasukan:{" "}
               {handleOrg(crop.organization, crop.otherOrg)}
@@ -530,8 +627,13 @@ const CropsValComponent: FC<{
               {convertMeasurement(crop.farmAreaMeasurement)}
             </p>
             <p>Lugar ng Iyong pinagtataniman: {crop.cropBaranggay}</p>
+
+            <button></button>
+            <br />
           </div>
         ))}
     </>
   );
 };
+
+const MemoizedCropsValComponent = memo(CropsValComponent);
