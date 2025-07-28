@@ -38,19 +38,50 @@ import {
   AddSecondFarmerDetails,
 } from "@/lib/server_action/farmerDetails";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { AlertTriangle } from "lucide-react";
 
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
 
   const [nextStep, setNextStep] = useState<boolean>(true);
   return (
-    <div>
-      {nextStep ? (
-        <FarmerDetailSecondStep />
-      ) : (
-        <FarmereDetailFirstStep setNextStep={setNextStep} />
-      )}
-    </div>
+    <main className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Impormasyon ng Magsasaka
+          </h1>
+          <div className="flex items-center gap-4">
+            <div
+              className={`flex-1 h-2 rounded-full ${
+                nextStep ? "bg-green-500" : "bg-green-200"
+              }`}
+            />
+            <div
+              className={`flex-1 h-2 rounded-full ${
+                nextStep ? "bg-green-200" : "bg-gray-200"
+              }`}
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-12">
+          {/* First Step */}
+          <div className={`${nextStep ? "opacity-50" : ""} transition-opacity`}>
+            <FarmereDetailFirstStep setNextStep={setNextStep} />
+          </div>
+
+          {/* Second Step */}
+          <div
+            className={`${
+              !nextStep ? "opacity-50 pointer-events-none" : ""
+            } transition-opacity`}
+          >
+            <FarmerDetailSecondStep />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 };
 
@@ -98,58 +129,96 @@ export const FarmereDetailFirstStep: FC<{
   ]);
 
   return (
-    <div>
-      <form action={formAction}>
-        <div>
-          <label htmlFor="firstName">Unang Pangalan:</label>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+        Personal na Impormasyon
+      </h2>
+      <form action={formAction} className="space-y-6">
+        <div className="space-y-2">
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Unang Pangalan:
+          </label>
           <input
             type="text"
             name="firstName"
             defaultValue={state.fieldValues.firstName}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           {!state.success &&
             state.formError?.firstName?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+              <p key={err + index} className="text-red-500 text-sm">
+                {err}
+              </p>
             ))}
         </div>
 
         <div>
-          <label htmlFor="lastName">Apelyido:</label>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Apelyido:
+          </label>
           <input
             type="text"
             name="lastName"
             defaultValue={state.fieldValues.lastName}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           {!state.success &&
             state.formError?.lastName?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+              <p key={err + index} className="text-red-500 text-sm">
+                {err}
+              </p>
             ))}
         </div>
 
         <div>
-          <label htmlFor="alias">Alyas</label>
+          <label
+            htmlFor="alias"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Alyas
+          </label>
           <input
             type="text"
             name="alias"
             defaultValue={state.fieldValues.alias ?? ""}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
         </div>
 
         <div>
-          <label htmlFor="mobileNumber">Mobile Number:</label>
+          <label
+            htmlFor="mobileNumber"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Mobile Number:
+          </label>
           <input
             type="text"
             name="mobileNumber"
             defaultValue={state.fieldValues.mobileNumber}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           {!state.success &&
             state.formError?.mobileNumber?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+              <p key={err + index} className="text-red-500 text-sm">
+                {err}
+              </p>
             ))}
         </div>
 
         <div>
-          <label htmlFor="birthdate">Araw ng kapanganakan:</label>
+          <label
+            htmlFor="birthdate"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Araw ng kapanganakan:
+          </label>
           <input
             type="date"
             name="birthdate"
@@ -161,18 +230,27 @@ export const FarmereDetailFirstStep: FC<{
                 : ""
             }
             max={new Date().toISOString().split("T")[0]}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           {!state.success &&
             state.formError?.birthdate?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+              <p key={err + index} className="text-red-500 text-sm">
+                {err}
+              </p>
             ))}
         </div>
 
         <div>
-          <label htmlFor="farmerBarangay">Baranggay na iyong tinitirhan:</label>
+          <label
+            htmlFor="farmerBarangay"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Baranggay na iyong tinitirhan:
+          </label>
           <select
             name="farmerBarangay"
             defaultValue={state.fieldValues.farmerBarangay}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">--Pumili--Ng--Baranggay--</option>
             {baranggayList.map((baranggay, index) => (
@@ -183,12 +261,19 @@ export const FarmereDetailFirstStep: FC<{
           </select>
           {!state.success &&
             state.formError?.farmerBarangay?.map((err, index) => (
-              <p key={err + index}>{err}</p>
+              <p key={err + index} className="text-red-500 text-sm">
+                {err}
+              </p>
             ))}
         </div>
 
         <div>
-          <button type="submit">{isPending ? "Ipinapasa...." : "Ipasa"}</button>
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            {isPending ? "Ipinapasa...." : "Ipasa"}
+          </button>
         </div>
       </form>
     </div>
@@ -588,19 +673,27 @@ export const FarmerDetailSecondStep: FC = () => {
   };
 
   return (
-    <>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       {editCropId.editing && (
-        <div>Binabago ang taniman {editCropId.listNum}</div>
+        <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium">
+          Binabago ang taniman {editCropId.listNum + 1}
+        </div>
       )}
 
-      <form onSubmit={handleFormSubmit} ref={formRef}>
-        <div>
-          <label htmlFor="organization">Organisasyon na kabilang:</label>
+      <form onSubmit={handleFormSubmit} ref={formRef} className="space-y-6">
+        <div className="space-y-2">
+          <label
+            htmlFor="organization"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Organisasyon na kabilang:
+          </label>
           <select
             name="organization"
             id=""
             onChange={handleChangeVal}
             value={currentCrops.organization}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">--Pumili--Ng--Organisasyon</option>
             {availOrg.map((org, index) => (
@@ -612,15 +705,21 @@ export const FarmerDetailSecondStep: FC = () => {
             <option value="other">Mag Lagay ng iba</option>
             <option value="none">Wala</option>
           </select>
+
           {error.success === false &&
             error.formError?.organization?.map((error, key) => (
-              <p key={key + error}>{error}</p>
+              <p key={key + error} className="text-red-500 text-sm">
+                {error}
+              </p>
             ))}
         </div>
 
         {otherOrg && (
-          <div>
-            <label htmlFor="otherOrg">
+          <div className="space-y-2">
+            <label
+              htmlFor="otherOrg"
+              className="block text-sm font-medium text-gray-700"
+            >
               Ilagay ang Organisasyon na kinabibilangan:
             </label>
             <input
@@ -628,87 +727,97 @@ export const FarmerDetailSecondStep: FC = () => {
               name="otherOrg"
               onChange={handleChangeVal}
               value={currentCrops.otherOrg}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
+
             {error.success === false &&
               error.formError?.otherOrg?.map((error, key) => (
-                <p key={key + error}>{error}</p>
+                <p key={key + error} className="text-red-500 text-sm">
+                  {error}
+                </p>
               ))}
           </div>
         )}
 
-        <div>
-          <label htmlFor="cropFarmArea">
-            Sukat ng lote na iyong Pinagtataniman:
-          </label>
-          <input
-            type="text"
-            name="cropFarmArea"
-            onChange={handleChangeVal}
-            value={currentCrops.cropFarmArea}
-          />
-          {error.success === false &&
-            error.formError?.cropFarmArea?.map((error, key) => (
-              <p key={key + error}>{error}</p>
-            ))}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="cropFarmArea"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Sukat ng lote na iyong Pinagtataniman:
+            </label>
+            <input
+              type="text"
+              name="cropFarmArea"
+              onChange={handleChangeVal}
+              value={currentCrops.cropFarmArea}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
 
-          <div>
-            <div>
-              <label htmlFor="">Ektarya(Hectares)</label>
-              <input
-                type="radio"
-                name="farmAreaMeasurement"
-                value={"ha"}
-                checked={currentCrops.farmAreaMeasurement === "ha"}
-                onChange={handleChangeVal}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="">Akre(Acres)</label>
-              <input
-                type="radio"
-                name="farmAreaMeasurement"
-                value={"ac"}
-                checked={currentCrops.farmAreaMeasurement === "ac"}
-                onChange={handleChangeVal}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="">Talampakang Kuwadrado(Square Feet)</label>
-              <input
-                type="radio"
-                name="farmAreaMeasurement"
-                value={"sqft"}
-                checked={currentCrops.farmAreaMeasurement === "sqft"}
-                onChange={handleChangeVal}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="">Metrong Kuwadrado(Square Meter)</label>
-              <input
-                type="radio"
-                name="farmAreaMeasurement"
-                value={"sqm"}
-                checked={currentCrops.farmAreaMeasurement === "sqm"}
-                onChange={handleChangeVal}
-              />
-            </div>
             {error.success === false &&
-              error.formError?.farmAreaMeasurement?.map((error, key) => (
-                <p key={key + error}>{error}</p>
+              error.formError?.cropFarmArea?.map((error, key) => (
+                <p key={key + error} className="text-red-500 text-sm">
+                  {error}
+                </p>
               ))}
+
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: "Ektarya (Hectares)", value: "ha" },
+                { label: "Akre (Acres)", value: "ac" },
+                { label: "Talampakang Kuwadrado (Square Feet)", value: "sqft" },
+                { label: "Metrong Kuwadrado (Square Meter)", value: "sqm" },
+              ].map((measurement) => (
+                <div key={measurement.label}>
+                  <input
+                    type="radio"
+                    name="farmAreaMeasurement"
+                    value={measurement.value}
+                    checked={
+                      currentCrops.farmAreaMeasurement === measurement.value
+                    }
+                    onChange={handleChangeVal}
+                    className="text-green-600 focus:ring-green-500 cursor-pointer"
+                  />
+                  <label
+                    htmlFor="farmAreaMeasurement"
+                    className="text-sm text-gray-700 cursor-pointer"
+                    onClick={() =>
+                      setCurrentCrops((prev) => ({
+                        ...prev,
+                        farmAreaMeasurement: measurement.value,
+                      }))
+                    }
+                  >
+                    {measurement.label}
+                  </label>
+                </div>
+              ))}
+
+              {error.success === false &&
+                error.formError?.farmAreaMeasurement?.map((error, key) => (
+                  <p key={key + error} className="text-red-500 text-sm">
+                    {error}
+                  </p>
+                ))}
+            </div>
           </div>
         </div>
 
-        <div>
-          <label htmlFor="cropBaranggay">Lugar ng Iyong pinagtataniman:</label>
+        <div className="space-y-2">
+          <label
+            htmlFor="cropBaranggay"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Lugar ng Iyong pinagtataniman:
+          </label>
           <select
             name="cropBaranggay"
             id=""
             onChange={handleChangeVal}
             value={currentCrops.cropBaranggay}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">--Pumili--Ng--Lugar</option>
             {baranggayList.map((brgy, index) => (
@@ -720,49 +829,73 @@ export const FarmerDetailSecondStep: FC = () => {
 
           {error.success === false &&
             error.formError?.cropBaranggay?.map((error, key) => (
-              <p key={key + error}>{error}</p>
+              <p key={key + error} className="text-red-500 text-sm">
+                {error}
+              </p>
             ))}
         </div>
 
-        <button
-          type="button"
-          onClick={
-            editCropId.editing ? handleDoneEditingCrop : handleAddNewCrop
-          }
-        >
-          {editCropId.editing
-            ? "Kumpiramhin ang pag babago"
-            : "Mag dagdag ng pananim"}
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={
+              editCropId.editing ? handleDoneEditingCrop : handleAddNewCrop
+            }
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            {editCropId.editing
+              ? "Kumpiramhin ang pag babago"
+              : "Mag dagdag ng pananim"}
+          </button>
 
-        {editCropId.editing && (
-          <>
-            <br />
-            <button type="button" onClick={handleCancelEditCrop}>
-              Kanselahin ang pag babago
-            </button>
-          </>
-        )}
+          {editCropId.editing && (
+            <>
+              <br />
+              <button
+                type="button"
+                onClick={handleCancelEditCrop}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Kanselahin ang pag babago
+              </button>
+            </>
+          )}
+        </div>
 
         <br />
         <button
           type="button"
           onClick={handleFinalizeCropList}
           disabled={editCropId.editing}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Ipasa
         </button>
       </form>
 
       {cancelProceed && (
-        <div>
-          <p>Mag patuloy padin sa pag papasa?</p>
-          <p>
-            May kulang na impormasyon kang hindi panailalagay, mag patuloy padin
-            at baliwalain itong kasalukuyang inilalagay mo?
-          </p>
-          <button onClick={handleForceProceed}>Mag patuloy</button>
-          <button onClick={handleCancelProceed}>Bumalik</button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Mag patuloy padin sa pag papasa?
+            </h3>
+            <p className="text-gray-600">
+              May kulang na impormasyon kang hindi panailalagay, mag patuloy
+              padin at baliwalain itong kasalukuyang inilalagay mo?
+            </p>
+            <button
+              onClick={handleForceProceed}
+              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Mag patuloy
+            </button>
+            <button
+              onClick={handleCancelProceed}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Bumalik
+            </button>
+          </div>
         </div>
       )}
 
@@ -772,7 +905,7 @@ export const FarmerDetailSecondStep: FC = () => {
         cropError={formErrorList.map((crop) => crop.cropId)}
         handleEditCrop={handleEditCrop}
       />
-    </>
+    </div>
   );
 };
 
@@ -809,36 +942,54 @@ const CropsValComponent: FC<{
     }
   };
 
-  const handleCropIsError = (cropId: string) => {
-    if (cropError.includes(cropId)) return true;
-
-    return false;
-  };
-
   return (
-    <>
-      {cropList &&
-        cropList.map((crop, index) => (
-          <div key={index} onClick={() => handleEditCrop(crop, index)}>
-            <p>
-              Taniman {index} {`\t`}{" "}
-              {handleCropIsError(crop.cropId) && <span>Baguhin ito</span>}
-            </p>
-            <p>
-              Organisasyon na iyong pinapasukan:{" "}
-              {handleOrg(crop.organization, crop.otherOrg)}
-            </p>
-            <p>
-              Lote ng iyong pinag tataniman: {crop.cropFarmArea}{" "}
-              {convertMeasurement(crop.farmAreaMeasurement)}
-            </p>
-            <p>Lugar ng Iyong pinagtataniman: {crop.cropBaranggay}</p>
+    <div className=" grid gap-4 mt-6">
+      {cropList?.map((crop, index) => {
+        const isError = cropError.includes(crop.cropId);
 
-            <button></button>
-            <br />
+        return (
+          <div
+            key={index}
+            onClick={() => handleEditCrop(crop, index)}
+            className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md
+              ${
+                isError
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200 bg-white hover:border-green-300"
+              }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-gray-900">Taniman {index + 1}</h3>
+              {isError && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>Baguhin ito</span>
+                </div>
+              )}
+            </div>
+            <dl className="grid gap-1 text-sm">
+              <div>
+                <dt className="text-gray-500">Organisasyon:</dt>
+                <dd className="font-medium">
+                  {handleOrg(crop.organization, crop.otherOrg)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Lote:</dt>
+                <dd className="font-medium">
+                  {crop.cropFarmArea}{" "}
+                  {convertMeasurement(crop.farmAreaMeasurement)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Lokasyon:</dt>
+                <dd className="font-medium">{crop.cropBaranggay}</dd>
+              </div>
+            </dl>
           </div>
-        ))}
-    </>
+        );
+      })}
+    </div>
   );
 };
 
