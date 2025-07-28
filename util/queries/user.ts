@@ -33,9 +33,9 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
  * @param {string} data.userId - UUID of the new user, this ensures the uniqueness of the ID
  * @throws {Error} If the network request fails or an invalid username is provided.
  **/
-export const InsertNewUser = async (data: NewUserType) => {
+export const InsertNewUser = async (data: NewUserType): Promise<void> => {
   try {
-    return await pool.query(
+    await pool.query(
       `insert into capstone.auth ("authId", "username", "password", "role") values ($1, $2, $3, $4)`,
       [data.userId, data.username, data.password, data.role]
     );
@@ -83,9 +83,15 @@ export const UserLogin = async (
   }
 };
 
-export const FarmerFirstDetailQuery = async (data: FarmerFirstDetailType) => {
+/**
+ * inserting the value of the new user
+ * @param data of the new user that is signing up
+ */
+export const FarmerFirstDetailQuery = async (
+  data: FarmerFirstDetailType
+): Promise<void> => {
   try {
-    return await pool.query(
+    await pool.query(
       `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerLastName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         data.farmerId,
@@ -106,6 +112,31 @@ export const FarmerFirstDetailQuery = async (data: FarmerFirstDetailType) => {
     );
     throw new Error(
       `Error in Farmer First Detail query ${err.message as string}`
+    );
+  }
+};
+
+/**
+ * query to update the farmer info, changing its orgRole and its orgId
+ * @param orgId is the id of the new orgnization that was created
+ * @param userRole is the role of the user in their organization, the letter should start in small letter (e.g. "member")
+ * @param userId is the id of the current user
+ */
+export const UpdateUserOrgAndRoleAfterSignUp = async (
+  orgId: string | null,
+  userRole: string | null,
+  userId: string
+): Promise<void> => {
+  try {
+    await pool.query(
+      `update capstone.farmer set "orgId"=$1, "orgRole"=$2 where "farmerId"=$3`,
+      [orgId, userRole, userId]
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error in updating user orgId and orgRole:", error);
+    throw new Error(
+      `Error in updating user orgId and orgRole: ${err.message as string}`
     );
   }
 };

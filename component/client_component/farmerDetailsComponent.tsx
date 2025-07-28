@@ -2,6 +2,8 @@
 
 import {
   AvailableOrgReturnType,
+  CheckCropListReturnType,
+  CropErrorFormType,
   EditCropListType,
   ErrorResponseType,
   FarmerDetailCropType,
@@ -20,6 +22,7 @@ import {
   useActionState,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
@@ -30,7 +33,11 @@ import {
   CreateUUID,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
-import { AddFirstFarmerDetails } from "@/lib/server_action/farmerDetails";
+import {
+  AddFirstFarmerDetails,
+  AddSecondFarmerDetails,
+} from "@/lib/server_action/farmerDetails";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
@@ -194,7 +201,11 @@ export const FarmerDetailSecondStep: FC = () => {
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [otherOrg, setOtherOrg] = useState(false);
   const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType>([]);
+  const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
+  const [cancelProceed, setCancelProceed] = useState<boolean>(false);
+  const [formErrorList, setFormErrorList] = useState<CropErrorFormType>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [editCropId, setEditCropId] = useState<EditCropListType>({
     editing: false,
     cropId: null,
@@ -233,6 +244,18 @@ export const FarmerDetailSecondStep: FC = () => {
     GetAvailableOrg();
   }, [handleSetNotification, handleIsLoading, handleDoneLoading]);
 
+  /**
+   * use effect for only resubmiting()
+   */
+  useEffect(() => {
+    if (resubmit) {
+      if (formRef.current) {
+        formRef.current.requestSubmit();
+        setResubmit(false);
+      }
+    }
+  }, [resubmit]);
+
   const handleChangeVal = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -261,7 +284,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleValidateCurrentCrops = ():
     | { [v in keyof FarmerSecondDetailFormType]?: string[] }
     | null => {
-    let err: { [v in keyof FarmerSecondDetailFormType]?: string[] } | null = {};
+    let err: { [v in keyof FarmerSecondDetailFormType]?: string[] } = {};
     for (const [key, value] of Object.entries(currentCrops)) {
       if (key === "otherOrg" && currentCrops.organization !== "other") continue;
 
@@ -362,7 +385,6 @@ export const FarmerDetailSecondStep: FC = () => {
     handleBackDefault();
     handleDefaultEditState();
   };
-  console.log(cropList);
 
   /**
    * executing handleDefaultEdiState and handleBackDefault to make a default value for
@@ -392,6 +414,7 @@ export const FarmerDetailSecondStep: FC = () => {
    * setting the state of otherOrg, error, and currentCrops into their default value
    */
   const handleBackDefault = () => {
+    console.log("back to default");
     setOtherOrg(false);
     setError({ success: null, notifError: null, formError: null });
     setCurrentCrops({
@@ -399,19 +422,169 @@ export const FarmerDetailSecondStep: FC = () => {
       organization: "",
       otherOrg: "",
       cropFarmArea: "",
-      farmAreaMeasurement: currentCrops.farmAreaMeasurement,
+      farmAreaMeasurement: "",
       cropBaranggay: "",
     });
   };
 
+  /**
+   * checks every value of the currentCrops variable if it has a value or not
+   * @returns returns true if the value is not equals to ""(default value, an empty string), and false otherwise
+   */
+  const handleCurrentCropHasVal = (): boolean => {
+    for (const val of Object.values(currentCrops)) {
+      if (val !== "") return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * setting all back to default value and setting the reSubmit into true, after the renders it will trigger the useEffect for the re submitting of the form
+   */
+  const handleForceProceed = () => {
+    handleBackDefault();
+    setCancelProceed(false);
+    setResubmit(true);
+    handleIsLoading("Loading");
+  };
+
+  const handleCancelProceed = () => {
+    setCancelProceed(false);
+
+    const formError = handleValidateCurrentCrops();
+
+    if (formError && Object.entries(formError).length > 0)
+      setError({ success: false, formError: formError, notifError: null });
+  };
+
+  /**
+   * checks the value of cropList and currentCrops value before passing the final value in the backenf
+   * @returns an object, if the valid object value is false then it means both cropList and currentCrops doesnt have a value
+   * but if the valid object is true then it comes with cropList object where all the value is
+   */
+  const handleCheckCropList = (): CheckCropListReturnType => {
+    const hasCropList = cropList.length > 0;
+
+    const hasCurrentCrop = handleValidateCurrentCrops();
+
+    if (
+      hasCurrentCrop &&
+      Object.entries(hasCurrentCrop).length > 0 &&
+      !hasCropList
+    )
+      return {
+        showModal: false,
+        valid: false,
+        error: {
+          success: false,
+          formError: hasCurrentCrop,
+          notifError: [
+            {
+              message:
+                "Mag lagay ng impormasyon tungkol sa iyong itinatanim bago mag pasa",
+              type: "warning",
+            },
+          ],
+        },
+      };
+
+    if (
+      cropList.length > 0 &&
+      hasCurrentCrop &&
+      Object.entries(hasCurrentCrop).length > 0 &&
+      handleCurrentCropHasVal()
+    )
+      return {
+        valid: false,
+        showModal: true,
+        error: { success: false, formError: null, notifError: null },
+      };
+
+    if (hasCurrentCrop && Object.entries(hasCurrentCrop).length === 0) {
+      handleBackDefault();
+      setCropList((prev) => [
+        ...prev,
+        { ...currentCrops, cropId: CreateUUID() },
+      ]);
+      return { valid: true };
+    }
+
+    return { valid: true };
+  };
+
+  const handleFinalizeCropList = () => {
+    handleIsLoading("Loading");
+    const validateCrop = handleCheckCropList();
+    if (!validateCrop.valid) {
+      if (validateCrop.showModal) {
+        console.log("error: show modal");
+        setCancelProceed(true);
+        handleDoneLoading();
+        return;
+      }
+      console.log("error: no val");
+      handleSetNotification(
+        validateCrop.error.notifError ?? [
+          { message: "Unkown error", type: "warning" },
+        ]
+      );
+      setError(validateCrop.error);
+      handleDoneLoading();
+      return;
+    }
+
+    setResubmit(true);
+  };
+
+  const handleBackendValidateFormError = (err: CropErrorFormType) => {
+    if (!err)
+      return handleSetNotification([
+        { message: "No err value", type: "warning" },
+      ]);
+
+    setFormErrorList(err);
+    setError({ success: false, formError: err[0].formError, notifError: null });
+
+    const firstErr = cropList.filter((crop) => {
+      if (crop.cropId === err[0].cropId)
+        return {
+          cropId: crop.cropId ?? "",
+          organization: crop.organization ?? "",
+          otherOrg: crop.otherOrg ?? "",
+          cropFarmArea: crop.cropFarmArea ?? "",
+          farmAreaMeasurement: crop.farmAreaMeasurement ?? "",
+          cropBaranggay: crop.cropBaranggay ?? "",
+        };
+    })[0];
+
+    handleEditCrop(
+      { ...firstErr, otherOrg: firstErr.otherOrg ?? "" },
+      cropList.findIndex((crop) => crop.cropId === firstErr.cropId)
+    );
+  };
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const newCropList = [...cropList, { ...currentCrops }];
 
-      console.log(newCropList);
-      // const res = await AddSecondFarmerDetails(newCropList);
-    } catch {}
+    try {
+      const res = await AddSecondFarmerDetails(cropList);
+      console.log(res);
+      if (!res.success) {
+        console.log("error in here");
+        handleSetNotification(res.notifError);
+        if (res.cropErrors) handleBackendValidateFormError(res.cropErrors);
+        handleDoneLoading();
+        return;
+      }
+    } catch (error) {
+      if (!isRedirectError(error)) {
+        const err = error as Error;
+        handleSetNotification([{ message: err.message, type: "error" }]);
+      }
+    }
+
+    handleDoneLoading();
   };
 
   return (
@@ -420,7 +593,7 @@ export const FarmerDetailSecondStep: FC = () => {
         <div>Binabago ang taniman {editCropId.listNum}</div>
       )}
 
-      <form onSubmit={handleFormSubmit}>
+      <form onSubmit={handleFormSubmit} ref={formRef}>
         <div>
           <label htmlFor="organization">Organisasyon na kabilang:</label>
           <select
@@ -485,6 +658,7 @@ export const FarmerDetailSecondStep: FC = () => {
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"ha"}
+                checked={currentCrops.farmAreaMeasurement === "ha"}
                 onChange={handleChangeVal}
               />
             </div>
@@ -495,6 +669,7 @@ export const FarmerDetailSecondStep: FC = () => {
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"ac"}
+                checked={currentCrops.farmAreaMeasurement === "ac"}
                 onChange={handleChangeVal}
               />
             </div>
@@ -505,6 +680,7 @@ export const FarmerDetailSecondStep: FC = () => {
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"sqft"}
+                checked={currentCrops.farmAreaMeasurement === "sqft"}
                 onChange={handleChangeVal}
               />
             </div>
@@ -515,6 +691,7 @@ export const FarmerDetailSecondStep: FC = () => {
                 type="radio"
                 name="farmAreaMeasurement"
                 value={"sqm"}
+                checked={currentCrops.farmAreaMeasurement === "sqm"}
                 onChange={handleChangeVal}
               />
             </div>
@@ -568,12 +745,31 @@ export const FarmerDetailSecondStep: FC = () => {
         )}
 
         <br />
-        <button type="submit">Ipasa</button>
+        <button
+          type="button"
+          onClick={handleFinalizeCropList}
+          disabled={editCropId.editing}
+        >
+          Ipasa
+        </button>
       </form>
+
+      {cancelProceed && (
+        <div>
+          <p>Mag patuloy padin sa pag papasa?</p>
+          <p>
+            May kulang na impormasyon kang hindi panailalagay, mag patuloy padin
+            at baliwalain itong kasalukuyang inilalagay mo?
+          </p>
+          <button onClick={handleForceProceed}>Mag patuloy</button>
+          <button onClick={handleCancelProceed}>Bumalik</button>
+        </div>
+      )}
 
       <MemoizedCropsValComponent
         cropList={cropList}
         availOrg={availOrg}
+        cropError={formErrorList.map((crop) => crop.cropId)}
         handleEditCrop={handleEditCrop}
       />
     </>
@@ -583,8 +779,9 @@ export const FarmerDetailSecondStep: FC = () => {
 const CropsValComponent: FC<{
   cropList: FarmerDetailCropType[];
   availOrg: QueryAvailableOrgReturnType;
+  cropError: string[];
   handleEditCrop: (cropToEdit: FarmerDetailCropType, index: number) => void;
-}> = ({ cropList, availOrg, handleEditCrop }) => {
+}> = ({ cropList, availOrg, cropError, handleEditCrop }) => {
   console.log("Crop Value Component");
   const handleOrg = (currentOrg: string, otherOrg: string | null): string => {
     const name = availOrg.filter((org) => currentOrg === org.orgId);
@@ -612,12 +809,21 @@ const CropsValComponent: FC<{
     }
   };
 
+  const handleCropIsError = (cropId: string) => {
+    if (cropError.includes(cropId)) return true;
+
+    return false;
+  };
+
   return (
     <>
       {cropList &&
         cropList.map((crop, index) => (
           <div key={index} onClick={() => handleEditCrop(crop, index)}>
-            <p>Taniman {index}</p>
+            <p>
+              Taniman {index} {`\t`}{" "}
+              {handleCropIsError(crop.cropId) && <span>Baguhin ito</span>}
+            </p>
             <p>
               Organisasyon na iyong pinapasukan:{" "}
               {handleOrg(crop.organization, crop.otherOrg)}

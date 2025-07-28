@@ -114,9 +114,10 @@ export type FarmerFirstDetailFormType = z.infer<
 
 export type FormActionBaseType<T> = {
   success: boolean | null;
-  formError: { [v in keyof T]?: string[] } | null;
   notifError: NotificationBaseType[] | null;
+  formError: { [v in keyof T]?: string[] } | null;
 };
+
 export type FarmerFirstDetailActionReturnType =
   FormActionBaseType<FarmerFirstDetailFormType> & {
     fieldValues: FarmerFirstDetailFormType;
@@ -136,11 +137,6 @@ export type FarmerDetailCropType = FarmerSecondDetailFormType & {
   cropId: string;
 };
 
-export type FarmerSecondDetailActionReturnType =
-  FormActionBaseType<FarmerSecondDetailFormType> & {
-    fieldValues: FarmerSecondDetailFormType;
-  };
-
 export type EditCropListType =
   | {
       editing: false;
@@ -152,3 +148,45 @@ export type EditCropListType =
       cropId: string;
       listNum: number;
     };
+
+export type CheckCropListReturnType =
+  | {
+      showModal: boolean;
+      valid: false;
+      error: FormActionBaseType<FarmerSecondDetailFormType>;
+    }
+  | { valid: true };
+
+export type FarmerSecondDetailActionReturnType = {
+  success: false;
+  cropErrors?: CropErrorFormType;
+  notifError: NotificationBaseType[];
+};
+
+export type CropErrorFormType =
+  | {
+      formError: { [v in keyof FarmerSecondDetailFormType]?: string[] } | null;
+      cropId: string;
+    }[]
+  | [];
+
+export type FirstErrorType = {
+  organization: string;
+  otherOrg: string;
+  cropFarmArea: string;
+  farmAreaMeasurement: string;
+  cropBaranggay: string;
+  cropId: string;
+};
+
+export type CropAfterSignUpType = {
+  cropId: string;
+  cropLocation: string;
+  farmAreaMeasurement: string;
+};
+
+export type HandleInsertCropType = FarmerDetailCropType & { userId: string };
+
+export type InsertCropAfterSignUpType = CropAfterSignUpType & {
+  userId: string;
+};

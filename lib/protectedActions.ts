@@ -36,6 +36,12 @@ const Actions = {
   READ_ORG_LIST: "read:org:list", // action to read the org(e.g. its leader and members)
   UPDATE_ORG_LIST: "update:org:list", // action for updating the organization list(e.g. changing the members)
   DELETE_ORG_LIST: "delete:org:list", // action for deleting and entire organization
+
+  // actions for user farmer role crops
+  CREATE_CROP: "create:crop", // action for creating your own crop info
+  READ_CROP: "read:crop", // action for reading the crop of farmer user
+  UPDATE_CROP: "update:crop", // action for updating the crop of farmer user
+  DELET_CROP: "delete:crop", // action for deleting the crop of the farmer user
 } as const;
 
 const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
@@ -71,15 +77,18 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   farmer: [
+    Actions.CREATE_CROP,
     Actions.CREATE_ORG,
     Actions.CREATE_USER,
     Actions.CREATE_REPORT,
+    Actions.DELET_CROP,
+    Actions.READ_CROP,
     Actions.READ_REPORT,
     Actions.READ_ORG_LIST,
     Actions.READ_ORG,
     Actions.READ_USER,
+    Actions.UPDATE_CROP,
     Actions.UPDATE_ORG,
-    Actions.UPDATE_USER,
   ],
 };
 
