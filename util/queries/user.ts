@@ -36,7 +36,7 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
 export const InsertNewUser = async (data: NewUserType): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.auth ("authId", "username", "password", "role") values ($1, $2, $3, $4)`,
+      `insert into capstone.auth ("authId", "username", "password", "work") values ($1, $2, $3, $4)`,
       [data.userId, data.username, data.password, data.role]
     );
   } catch (error) {
@@ -62,7 +62,7 @@ export const UserLogin = async (
   try {
     // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     const query = await pool.query(
-      `select "authId", "password", "role" from capstone.auth where username = $1`,
+      `select "authId", "password", "work" from capstone.auth where username = $1`,
       [username]
     );
 
@@ -138,5 +138,49 @@ export const UpdateUserOrgAndRoleAfterSignUp = async (
     throw new Error(
       `Error in updating user orgId and orgRole: ${err.message as string}`
     );
+  }
+};
+
+/**
+ * query to get the role of the farmer (e.g. member or leader)
+ * @param userId id params of the current farmer user
+ * @returns the role of the farmer user
+ */
+export const GetFarmerRole = async (
+  userId: string
+): Promise<{ orgRole: string }> => {
+  try {
+    return (
+      await pool.query(
+        `select "orgRole" from capstone.farmer where "farmerId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error in getting user role:", error);
+    throw new Error(`Error in getting user role: ${err.message as string}`);
+  }
+};
+
+/**
+ * query to get the role of the farmer (e.g. member or leader)
+ * @param userId id params of the current farmer user
+ * @returns the role of the farmer user
+ */
+export const GetAgriRole = async (
+  userId: string
+): Promise<{ orgRole: string }> => {
+  try {
+    return (
+      await pool.query(
+        ` "agriRole" from capstone.agriculturist where "agriId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error in getting user role:", error);
+    throw new Error(`Error in getting user role: ${err.message as string}`);
   }
 };

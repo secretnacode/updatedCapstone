@@ -1,10 +1,29 @@
 import { AuthForm } from "@/component/client_component/authComponent";
+import { NotifFallBack } from "@/component/client_component/fallbackComponent";
+import { NotificationBaseType } from "@/types";
 import { ReactElement } from "react";
 
-export default function Page(): ReactElement {
-  console.log(`Auth main component`);
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}): Promise<ReactElement> {
+  console.log("Auth main component");
+  console.log((await searchParams).error);
+
+  const err = (await searchParams).error;
+  let errorMessage: NotificationBaseType[] | null = null;
+
+  if (err) errorMessage = JSON.parse(decodeURIComponent(err));
+
+  const Notif: React.JSX.Element | null = errorMessage ? (
+    <NotifFallBack data={errorMessage} />
+  ) : null;
+
   return (
     <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
+      {Notif}
+      {/* <LoadingManager /> */}
       <div className="flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
         {/* Left Section */}
         <div className="flex flex-col items-center md:items-end md:w-full md:max-w-[500px] lg:pr-4 xl:pr-8 space-y-6 mb-8 md:mb-0">

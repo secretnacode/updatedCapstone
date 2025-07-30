@@ -18,12 +18,12 @@ const redis = new Redis({
 /**
  * Creates a new session in Redis and sets the session cookie.
  * @param userId The ID of the authenticated user.
- * @param role The role of the user (optional).
+ * @param work The role of the user (optional).
  * @returns The generated session ID.
  */
 export const CreateSession = async (
   userId: string,
-  role: string
+  work: string
 ): Promise<string> => {
   const sessionId = CreateUUID();
 
@@ -34,7 +34,7 @@ export const CreateSession = async (
     `session: ${sessionId}`,
     JSON.stringify({
       userId: userId,
-      role: role,
+      work: work,
     }),
     { ex: sessionDuration }
   );

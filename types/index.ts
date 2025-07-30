@@ -4,6 +4,8 @@ import {
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
+import { LucideProps } from "lucide-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
 import z from "zod/v4";
 
 // exporting the type of authSignUpSchema so it can be used as a type together with the schema
@@ -55,7 +57,7 @@ export type QueryUserLoginReturnType =
     }
   | {
       exist: true;
-      data: { authId: string; password: string; role: string };
+      data: { authId: string; password: string; work: string };
     };
 
 export type AuthResponseType =
@@ -74,7 +76,7 @@ export type ErrorResponseType = {
 
 export type SessionValueType = {
   userId: string;
-  role: string;
+  work: string;
 };
 
 export type LoadingContextType = {
@@ -190,3 +192,13 @@ export type HandleInsertCropType = FarmerDetailCropType & { userId: string };
 export type InsertCropAfterSignUpType = CropAfterSignUpType & {
   userId: string;
 };
+
+export type NavbarType =
+  | {
+      page: string;
+      pageLabel: string;
+      logo: ForwardRefExoticComponent<
+        Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+      >;
+    }[]
+  | [];

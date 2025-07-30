@@ -59,9 +59,9 @@ export async function LoginAuth(
         ],
       };
 
-    await CreateSession(userCredentials.data.authId, userCredentials.data.role);
+    await CreateSession(userCredentials.data.authId, userCredentials.data.work);
 
-    return { success: true, url: `/${userCredentials.data.role}` };
+    return { success: true, url: `/${userCredentials.data.work}` };
   } catch (error) {
     const err = error as Error;
     console.log(`Error in logging in: ${err}`);

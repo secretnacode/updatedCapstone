@@ -1,3 +1,5 @@
+import { NotificationBaseType } from "@/types";
+import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -63,3 +65,12 @@ export const baranggayList = [
   "santo tomas",
   "prinza",
 ] as const;
+
+/**
+ * used to redirect the user into login page with an error message
+ * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
+ * @returns redirect function with its message
+ */
+export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
+  return redirect(`/?error=${encodeURIComponent(JSON.stringify(error))}`);
+};

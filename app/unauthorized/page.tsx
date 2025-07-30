@@ -1,12 +1,15 @@
-"use server";
+"use client";
 
+import { LoadingManager } from "@/component/client_component/provider/loadingProvider";
 import { GoBackButton } from "@/component/client_component/unauthorizedComponent";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export default async function Page(): Promise<ReactElement> {
+export default function Page(): ReactElement {
+  console.log("unauthorized main component");
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
+      <LoadingManager />
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Warning Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">

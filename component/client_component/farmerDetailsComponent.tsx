@@ -43,7 +43,7 @@ import { AlertTriangle } from "lucide-react";
 export const FarmerDetailForm: FC = () => {
   console.log(`farmer details form`);
 
-  const [nextStep, setNextStep] = useState<boolean>(true);
+  const [nextStep, setNextStep] = useState<boolean>(false);
   return (
     <main className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">

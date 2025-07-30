@@ -22,7 +22,7 @@ export default async function Middleware(req: NextRequest) {
     if (publicPath.includes(pathname)) return res;
 
     if (session) {
-      const accessiblePath = authorizedPath.get(session.role);
+      const accessiblePath = authorizedPath.get(session.work);
       console.warn(`middleware: you have a session`);
 
       if (

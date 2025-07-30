@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <div>
       <LoadingManager />
-      hello
+      main page / home page
     </div>
   );
 }

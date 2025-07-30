@@ -14,6 +14,8 @@ import {
 } from "@/util/helper_function/validation/validationSchema";
 import {
   FarmerFirstDetailQuery,
+  GetAgriRole,
+  GetFarmerRole,
   UpdateUserOrgAndRoleAfterSignUp,
 } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
@@ -222,5 +224,24 @@ const ConvertMeassurement = (measurement: string, unit: string): string => {
       return (Number(measurement) / 10000).toFixed(4);
     default:
       return measurement;
+  }
+};
+
+/**
+ * gets the user role base on the passed params of work
+ * @param userId params id of the current user
+ * @param work params of the work of th current user(e.g. farmer or agriculturist)
+ * @returns the role of the user
+ */
+export const GetUserRole = async (
+  userId: string,
+  work: string
+): Promise<string> => {
+  try {
+    if (work === "farmer") return (await GetFarmerRole(userId)).orgRole;
+    else return (await GetAgriRole(userId)).orgRole;
+  } catch (error) {
+    const err = error as Error;
+    throw new Error(err.message);
   }
 };
