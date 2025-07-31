@@ -105,7 +105,7 @@ export const ProtectedAction = async (action: string): Promise<string> => {
 
   if (!session) throw new Error("You need to log in first");
 
-  if (!ROLE_ACTION_PERMISION[session?.role].includes(action))
+  if (!ROLE_ACTION_PERMISION[session?.work].includes(action))
     throw new Error("You are not allowed to execute this action");
 
   return session.userId;

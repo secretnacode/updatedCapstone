@@ -2,7 +2,6 @@
 
 import {
   AuthLoginType,
-  AuthResponseType,
   AuthSignUpType,
   ErrorResponseType,
   NotificationBaseType,
@@ -177,7 +176,6 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 }): ReactElement => {
   const [isHidden, setIsHidden] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
-  const route = useRouter();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
   console.log(`login component`);
@@ -200,11 +198,7 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     handleIsLoading("Sinusuri lang ang iyong username at password");
 
     try {
-      const req: AuthResponseType = await LoginAuth(authVal);
-
-      if (!req.success) throw req;
-
-      route.push(`${req.url}`);
+      await LoginAuth(authVal);
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);

@@ -17,6 +17,8 @@ import {
 } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { CheckUsername, InsertNewUser, UserLogin } from "@/util/queries/user";
 import { ComparePassword, Hash } from "@/lib/reusableFunctions";
+import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 /**
  * used for login authentication of the user and validating the user input before redirecting the user into another page if the user
@@ -61,8 +63,16 @@ export async function LoginAuth(
 
     await CreateSession(userCredentials.data.authId, userCredentials.data.work);
 
-    return { success: true, url: `/${userCredentials.data.work}` };
+    redirect(
+      `/${userCredentials.data.work}/?success=${encodeURIComponent(
+        JSON.stringify([
+          { message: "Matagumpay ang iyong pag lologin", type: "success" },
+        ])
+      )}`
+    );
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     const err = error as Error;
     console.log(`Error in logging in: ${err}`);
     return {

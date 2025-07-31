@@ -1,11 +1,22 @@
-import { LoadingManager } from "@/component/client_component/provider/loadingProvider";
+import { RedirectManager } from "@/component/client_component/fallbackComponent";
+import { NotificationBaseType } from "@/types";
 
-export default function Page() {
-  console.log(`farmer main component`);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ success?: string }>;
+}) {
+  console.log(`Farmer main page`);
+
+  const { success } = await params;
+  let message: NotificationBaseType[] | null = null;
+
+  if (success) message = JSON.parse(decodeURIComponent(success));
+  console.log(message);
+
   return (
     <div>
-      <LoadingManager />
-      main page / home page
+      {message && <RedirectManager data={message} paramName="success" />}
     </div>
   );
 }

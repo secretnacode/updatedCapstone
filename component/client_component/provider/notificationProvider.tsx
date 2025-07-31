@@ -56,20 +56,22 @@ export function NotificationProvider({
   console.log(`notification context`);
 
   const handleSetNotification = useCallback((data: NotificationBaseType[]) => {
-    const newNotification: NotificationValType[] = data.map((notif) => {
-      return { ...notif, notifId: CreateUUID() };
-    });
+    if (data) {
+      const newNotification: NotificationValType[] = data.map((notif) => {
+        return { ...notif, notifId: CreateUUID() };
+      });
 
-    setNotificationVal((prev) => [...prev, ...newNotification]);
+      setNotificationVal((prev) => [...prev, ...newNotification]);
 
-    if (timeRef.current !== null) {
-      clearTimeout(timeRef.current);
+      if (timeRef.current !== null) {
+        clearTimeout(timeRef.current);
+      }
+
+      timeRef.current = setTimeout(() => {
+        setNotificationVal([{ message: "", type: null, notifId: null }]);
+        timeRef.current = null;
+      }, 10000);
     }
-
-    timeRef.current = setTimeout(() => {
-      setNotificationVal([{ message: "", type: null, notifId: null }]);
-      timeRef.current = null;
-    }, 10000);
   }, []);
 
   const handleRemoveNotification = (notifId: string) => {
