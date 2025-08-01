@@ -1,5 +1,9 @@
 import { z } from "zod/v4";
-import { Date10YearsAgo } from "../reusableFunction";
+import {
+  CurrentDate,
+  Date10YearsAgo,
+  FourDaysBefore,
+} from "../reusableFunction";
 // /**
 //  * trasnforming the value data type that zod expects(string)
 //  */
@@ -168,3 +172,40 @@ export const farmerSecondDetailFormSchema = z
       path: ["otherOrg"],
     }
   );
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];
+export const addFarmerReportSchema = z.object({
+  reportTitle: z
+    .string()
+    .min(1, { error: "Mag lagay ng pamagat ng iyong iuulat" })
+    .max(100, { error: "Iklian ang iyong pamagat, ito ay masyadong mahaba" }),
+  reportDescription: z
+    .string()
+    .min(1, { error: "Mag lagay ng maikling paglalarawan ng iyong iuulat" }),
+  dateHappen: z
+    .date()
+    .max(new Date(CurrentDate()), {
+      error:
+        "Hanggang ngayon lang ang pinakang mataas na date na pede mong mailagay",
+    })
+    .min(new Date(FourDaysBefore()), {
+      error: "Ang maaari mo lang iulat ay yung mga nakaraang apat na araw",
+    }),
+  reportPicture: z
+    .array(
+      z
+        .instanceof(File)
+        .refine((file) => file.size <= MAX_FILE_SIZE, {
+          error: "Masyadong malaki ang ipinasa mong ",
+        })
+        .refine((file) => acceptedFileTypes.includes(file.type), {
+          error:
+            "Ang pede mo lng ilagay ay mga imaheng may format na .jpg, .jpeg, at .png",
+        })
+    )
+    .min(1, { error: "Mag lagay kahit isang imahe" })
+    .max(5, { error: "Hanggang limang(5) imahe lang ang pede mong maipasa" }),
+});
+
+export const addFileSchema = z.object;

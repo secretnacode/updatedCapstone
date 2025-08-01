@@ -2,17 +2,18 @@ import { RedirectManager } from "@/component/client_component/fallbackComponent"
 import { NotificationBaseType } from "@/types";
 
 export default async function Page({
-  params,
+  searchParams,
 }: {
-  params: Promise<{ success?: string }>;
+  searchParams: Promise<{ success?: string }>;
 }) {
   console.log(`Farmer main page`);
 
-  const { success } = await params;
+  const { success } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 
+  console.log(success);
+
   if (success) message = JSON.parse(decodeURIComponent(success));
-  console.log(message);
 
   return (
     <div>

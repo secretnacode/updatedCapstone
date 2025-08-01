@@ -19,11 +19,27 @@ export function HandleErrorReturn(error: Error, message: string) {
  * used if you want to get the current date
  * @returns current date with the format of YYMMDD eg. 2025-05-23
  */
-export function CurrentDate() {
-  return `${new Date().getFullYear()}-${new Date()
-    .getMonth()
+export function CurrentDate(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+/**
+ * a function that returns a date
+ * @returns date 4 days before
+ */
+export function FourDaysBefore(): string {
+  let month = new Date().getMonth() + 1;
+  let date = new Date().getDate();
+
+  if (date - 3 <= 0) {
+    if (month % 2 === 0) date = date - 3 + 30;
+    else date = date - 3 + 31;
+    month -= 1;
+  }
+
+  return `${new Date().getFullYear()}-${month
     .toString()
-    .padStart(2, "0")}-${new Date().getDate().toString().padStart(2, "0")}`;
+    .padStart(2, "0")}-${date.toString().padStart(2, "0")}`;
 }
 
 /**

@@ -228,7 +228,7 @@ const ConvertMeassurement = (measurement: string, unit: string): string => {
 };
 
 /**
- * gets the user role base on the passed params of work
+ * gets the user role base on the passed params of work and will only throw an error and will be consumed by redirect function
  * @param userId params id of the current user
  * @param work params of the work of th current user(e.g. farmer or agriculturist)
  * @returns the role of the user
@@ -238,6 +238,8 @@ export const GetUserRole = async (
   work: string
 ): Promise<string> => {
   try {
+    const userId = await ProtectedAction("read:user");
+
     if (work === "farmer") return (await GetFarmerRole(userId)).orgRole;
     else return (await GetAgriRole(userId)).orgRole;
   } catch (error) {

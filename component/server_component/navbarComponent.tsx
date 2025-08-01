@@ -20,33 +20,26 @@ export const NavbarComponent: FC = async () => {
   const session = await GetSession();
   let role = "";
 
-  // try {
-  //   if (session) role = await GetUserRole(session.userId, session.work);
-  //   else
-  //     RedirectLoginWithError([
-  //       {
-  //         message: "Nag expired na ang iyong pag lologin. Mag login uli",
-  //         type: "warning",
-  //       },
-  //     ]);
-  // } catch (error) {
-  //   if (isRedirectError(error)) throw error;
+  try {
+    if (session) role = await GetUserRole(session.userId, session.work);
+    else
+      RedirectLoginWithError([
+        {
+          message: "Nag expired na ang iyong pag lologin. Mag login uli",
+          type: "warning",
+        },
+      ]);
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
 
-  //   const err = error as Error;
-  //   RedirectLoginWithError([
-  //     {
-  //       message: err.message,
-  //       type: "warning",
-  //     },
-  //   ]);
-  // }
-
-  RedirectLoginWithError([
-    {
-      message: "Nag expired na ang iyong pag lologin. Mag login uli",
-      type: "warning",
-    },
-  ]);
+    const err = error as Error;
+    RedirectLoginWithError([
+      {
+        message: err.message,
+        type: "warning",
+      },
+    ]);
+  }
 
   const navbar =
     session?.work === "farmer" ? (

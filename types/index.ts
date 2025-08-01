@@ -1,4 +1,5 @@
 import {
+  addFarmerReportSchema,
   authLogInSchema,
   authSignUpSchema,
   farmerFirstDetailFormSchema,
@@ -202,3 +203,27 @@ export type NavbarType =
       >;
     }[]
   | [];
+
+export type GetUserReportReturnType =
+  | {
+      reportId: string;
+      cropIdReported: string;
+      verificationStatus: string;
+      dayReported: string;
+      dayHappen: string;
+      title: string;
+    }[]
+  | [];
+
+export type GetFarmerReportReturnType =
+  | {
+      success: true;
+      userReport: GetUserReportReturnType;
+    }
+  | { success: false; notifError: NotificationBaseType[] };
+
+export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
+
+export type AddReportActionFormType = FormActionBaseType<AddReportValType> & {
+  fieldValues: AddReportValType;
+};
