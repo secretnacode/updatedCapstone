@@ -11,9 +11,7 @@ export default async function Page({
   const { success } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 
-  console.log(success);
-
-  if (success) message = JSON.parse(decodeURIComponent(success));
+  if (success) message = JSON.parse(success);
 
   return (
     <div>

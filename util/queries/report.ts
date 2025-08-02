@@ -1,5 +1,5 @@
-import { GetUserReportReturnType } from "@/types";
-import pool from "../db";
+import { AddNewFarmerReportQueryType, GetUserReportReturnType } from "@/types";
+import { pool } from "../configuration";
 
 export const GetUserReport = async (
   userId: string
@@ -11,6 +11,35 @@ export const GetUserReport = async (
         [userId]
       )
     ).rows;
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error on getting the user report", error);
+    throw new Error(
+      `Error on getting the user report ${err.message as string}`
+    );
+  }
+};
+
+/**
+ * query for inserting the new value of the report in the db
+ * @param data are the needed value in the insertion
+ */
+export const AddNewFarmerReport = async (
+  data: AddNewFarmerReportQueryType
+): Promise<void> => {
+  try {
+    await pool.query(
+      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description") values ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        data.reportId,
+        data.farmerId,
+        data.verificationStatus,
+        data.dayReported,
+        data.dayHappen,
+        data.reportTitle,
+        data.reportDescription,
+      ]
+    );
   } catch (error) {
     const err = error as Error;
     console.error("Error on getting the user report", error);

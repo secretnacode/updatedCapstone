@@ -1,5 +1,5 @@
 import { QueryAvailableOrgReturnType } from "@/types";
-import pool from "../db";
+import { pool } from "../configuration";
 import { CreateUUID } from "../helper_function/reusableFunction";
 
 /**

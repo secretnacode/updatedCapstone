@@ -12,7 +12,7 @@ export default async function Page({
   const { error } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 
-  if (error) message = JSON.parse(decodeURIComponent(error));
+  if (error) message = JSON.parse(error);
 
   return (
     <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">

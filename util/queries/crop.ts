@@ -1,5 +1,5 @@
 import { InsertCropAfterSignUpType } from "@/types";
-import pool from "../db";
+import { pool } from "../configuration";
 
 /**
  * query function that is used to insert the new information of the farmer about their crops

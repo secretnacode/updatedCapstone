@@ -48,33 +48,53 @@ export const NavbarComponent: FC = async () => {
       <AgriculturistNav role={role} />
     );
 
-  return <div>{navbar}</div>;
+  return (
+    <div className="">
+      <Link
+        href={`/${session?.work}`}
+        className="inline-block font-bold italic text-2xl title text-green-800 m-4 tracking-wide"
+      >
+        AgroFarm
+      </Link>
+      {navbar}
+    </div>
+  );
 };
 
 const FarmerNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/farmer";
-  let navbar: NavbarType = [
+  const navbar: NavbarType = [
     { page: basePage, pageLabel: "Home", logo: Home },
     { page: `${basePage}/report`, pageLabel: "Ulat", logo: ClipboardPlus },
     { page: `${basePage}/crop`, pageLabel: "Pananim", logo: Sprout },
     { page: `${basePage}/profile`, pageLabel: "Profile", logo: UserPen },
+    {
+      page: `${basePage}/validateReport`,
+      pageLabel: "Ulat ng miyembro",
+      logo: ClipboardCheck,
+    },
+    {
+      page: `${basePage}/orgMember`,
+      pageLabel: "Mga miyembro",
+      logo: ContactRound,
+    },
   ];
 
-  if (role === "leader")
-    navbar = [
-      ...navbar.slice(0, 3),
-      {
-        page: `${basePage}/validateReport`,
-        pageLabel: "Ulat ng miyembro",
-        logo: ClipboardCheck,
-      },
-      {
-        page: `${basePage}/orgMember`,
-        pageLabel: "Mga miyembro",
-        logo: ContactRound,
-      },
-      ...navbar.slice(3),
-    ];
+  // if (role === "leader")
+  //   navbar = [
+  //     ...navbar.slice(0, 3),
+  //     {
+  //       page: `${basePage}/validateReport`,
+  //       pageLabel: "Ulat ng miyembro",
+  //       logo: ClipboardCheck,
+  //     },
+  //     {
+  //       page: `${basePage}/orgMember`,
+  //       pageLabel: "Mga miyembro",
+  //       logo: ContactRound,
+  //     },
+  //     ...navbar.slice(3),
+  //   ];
 
   return <Navbar pages={navbar} />;
 };

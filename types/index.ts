@@ -224,6 +224,19 @@ export type GetFarmerReportReturnType =
 
 export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
 
-export type AddReportActionFormType = FormActionBaseType<AddReportValType> & {
-  fieldValues: AddReportValType;
+export type AddReportActionFormType = FormActionBaseType<AddReportValType>;
+
+export type AddReportPictureType = {
+  picId: string;
+  file: File;
+}[];
+
+export type AddNewFarmerReportQueryType = {
+  reportId: string;
+  farmerId: string;
+  reportTitle: string;
+  reportDescription: string;
+  dayHappen: Date;
+  dayReported: Date;
+  verificationStatus: boolean;
 };

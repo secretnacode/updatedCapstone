@@ -3,7 +3,7 @@ import {
   NewUserType,
   QueryUserLoginReturnType,
 } from "@/types";
-import pool from "../db";
+import { pool } from "../configuration";
 
 /**
  * Check the user value by making a query that returns a boolean value.

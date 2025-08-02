@@ -24,6 +24,16 @@ export function CurrentDate(): string {
 }
 
 /**
+ * a function that gets the date to day and is used for the inupt type date if you want the maximum date is today
+ * @returns
+ */
+export function MaxDateToday(): string {
+  return `${new Date().getFullYear()}-${(new Date().getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${new Date().getDate().toString().padStart(2, "0")}`;
+}
+
+/**
  * a function that returns a date
  * @returns date 4 days before
  */
@@ -88,5 +98,9 @@ export const baranggayList = [
  * @returns redirect function with its message
  */
 export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
-  return redirect(`/?error=${encodeURIComponent(JSON.stringify(error))}`);
+  return redirect(`/?error=${NotifToUriComponent(error)}`);
+};
+
+export const NotifToUriComponent = (notif: NotificationBaseType[]) => {
+  return encodeURIComponent(JSON.stringify(notif));
 };

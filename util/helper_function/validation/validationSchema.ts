@@ -3,6 +3,7 @@ import {
   CurrentDate,
   Date10YearsAgo,
   FourDaysBefore,
+  MaxDateToday,
 } from "../reusableFunction";
 // /**
 //  * trasnforming the value data type that zod expects(string)
@@ -183,9 +184,9 @@ export const addFarmerReportSchema = z.object({
   reportDescription: z
     .string()
     .min(1, { error: "Mag lagay ng maikling paglalarawan ng iyong iuulat" }),
-  dateHappen: z
-    .date()
-    .max(new Date(CurrentDate()), {
+  dateHappen: z.coerce
+    .date({ error: "Mag lagay kung kelan nangyari itong kaganapan" })
+    .max(new Date(MaxDateToday()), {
       error:
         "Hanggang ngayon lang ang pinakang mataas na date na pede mong mailagay",
     })

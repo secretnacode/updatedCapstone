@@ -2,29 +2,36 @@
 
 import { PostFarmerReport } from "@/lib/server_action/report";
 import {
+  CreateUUID,
   CurrentDate,
   FourDaysBefore,
+  MaxDateToday,
 } from "@/util/helper_function/reusableFunction";
 import {
   ChangeEvent,
   Dispatch,
   FC,
   FormEvent,
+  memo,
   SetStateAction,
   useActionState,
+  useCallback,
   useEffect,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import Image from "next/image";
+import { X } from "lucide-react";
+import { AddReportPictureType } from "@/types";
 
 export const AddReportComponent: FC = () => {
   const [addReport, setAddReport] = useState<boolean>(true);
 
   return (
     <>
-      {addReport && <AddingReport setAddReport={setAddReport} />}
+      {addReport && <MemoizedAddingReport setAddReport={setAddReport} />}
       <button onClick={() => setAddReport(true)}>Mag sagawa ng ulat</button>
     </>
   );
@@ -38,32 +45,23 @@ const AddingReport: FC<{
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [capturedImageBlob, setCapturedImageBlob] = useState<Blob | null>(null);
   const [openCam, setOpenCam] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<File[]>([]);
-  const [state, formAction, isPending] = useActionState(PostFarmerReport, {
+  const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
+  const [isPassing, startPassing] = useTransition();
+  const [state, formAction] = useActionState(PostFarmerReport, {
     success: null,
     notifError: null,
     formError: null,
-    fieldValues: {
-      reportTitle: "",
-      reportDescription: "",
-      dateHappen: new Date(),
-      reportPicture: [],
-    },
   });
 
   useEffect(() => {
-    if (videoRef.current) {
-      console.log("start play");
+    if (videoRef.current && openCam) {
       videoRef.current.srcObject = stream;
       videoRef.current.play();
     }
-  }, [videoRef, stream]);
+  }, [stream, openCam]);
 
   const handleStartCamera = async () => {
-    setCapturedImageBlob(null);
-
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
       return handleSetNotification([
         {
@@ -77,8 +75,8 @@ const AddingReport: FC<{
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
       });
-      setStream(mediaStream);
       setOpenCam(true);
+      setStream(mediaStream);
     } catch (error: any) {
       const err = error as Error;
       if (
@@ -109,16 +107,15 @@ const AddingReport: FC<{
     }
   };
 
-  const handleStopCamera = () => {
+  const handleStopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((tracks) => tracks.stop());
       setStream(null);
     }
 
     setOpenCam(false);
-  };
+  }, [stream]);
 
-  console.log(stream);
   const handleCaptureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -134,7 +131,16 @@ const AddingReport: FC<{
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              setCapturedImageBlob(blob);
+              setSelectedFile((prev) => [
+                ...prev,
+                {
+                  picId: CreateUUID(),
+                  file: new File([blob], `captureImage.jpeg`, {
+                    type: "images/jpeg",
+                    lastModified: Date.now(),
+                  }),
+                },
+              ]);
               handleSetNotification([
                 {
                   message: "Matagumpay na nakakuha ng larawan",
@@ -170,21 +176,38 @@ const AddingReport: FC<{
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setSelectedFile((prev) => [...prev, ...(e.target.files as FileList)]);
+      setSelectedFile((prev) => [
+        ...prev,
+        ...Array.from(e.target.files as FileList).map((file) => ({
+          picId: CreateUUID(),
+          file: file,
+        })),
+      ]);
     }
   };
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleRemovePicture = (picId: string) => {
+    setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
+  };
+
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    selectedFile.forEach((file) => {
-      formData.append("reportPicture", file);
+    selectedFile.forEach((image) => {
+      formData.append("file", image.file);
     });
 
-    formAction(formData);
+    startPassing(() => formAction(formData));
   };
+
+  useEffect(() => {
+    return () => {
+      console.log(`stopping the camera`);
+      if (openCam) handleStopCamera();
+    };
+  });
 
   return (
     <form onSubmit={handleFormSubmit}>
@@ -212,7 +235,7 @@ const AddingReport: FC<{
           type="date"
           name="dateHappen"
           min={FourDaysBefore()}
-          max={CurrentDate()}
+          max={MaxDateToday()}
         />
         {!state.success &&
           state.formError?.dateHappen?.map((err, index) => (
@@ -240,7 +263,7 @@ const AddingReport: FC<{
         </div>
 
         <div>
-          <button type="button" onClick={handleStartCamera}>
+          <button type="button" disabled={openCam} onClick={handleStartCamera}>
             Gamitin ang camera
           </button>
         </div>
@@ -276,33 +299,38 @@ const AddingReport: FC<{
         </>
       )}
 
-      {/* previewing the image using the blob that was created using the capture image */}
-      {capturedImageBlob && (
-        <div>
-          <h1>Image preview:</h1>
-          <div>
-            <Image
-              src={URL.createObjectURL(capturedImageBlob)}
-              alt="image preview"
-              fill // Use fill to make it responsive to the container
-              style={{
-                objectFit: "contain",
-                borderRadius: "8px",
-                border: "1px solid #ddd",
-              }}
-              // Critical for local Blob URLs, prevents Next.js from trying to optimize local URLs
-            />
-          </div>
+      {selectedFile && (
+        <div className="grid grid-cols-3">
+          {selectedFile.map((image, index) => (
+            <div key={image.picId + index}>
+              <div className="relative h-[200px] w-[200px]">
+                <X
+                  onClick={() => handleRemovePicture(image.picId)}
+                  className="z-20 relative"
+                />
+                <Image
+                  src={URL.createObjectURL(image.file)}
+                  alt={`image report ${index + 1}`}
+                  fill
+                  unoptimized
+                  className="absolute z-0"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      <canvas ref={canvasRef} className="hidden"></canvas>
+      {/* turning the captured picture into a canvas, then turning canvas into a blob(file) */}
+      <canvas ref={canvasRef} className="hidden" />
       <div>
-        <button type="submit">Ipasa ang ulat</button>
+        <button type="submit">Mag pasa ng ulat</button>
         <button type="button" onClick={() => setAddReport(false)}>
-          Ikansela ang pag papasa ng ulat
+          Kanselahin ang pagpapasa
         </button>
       </div>
     </form>
   );
 };
+
+const MemoizedAddingReport = memo(AddingReport);
