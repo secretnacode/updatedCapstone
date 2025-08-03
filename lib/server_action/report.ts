@@ -15,6 +15,9 @@ import {
   NotifToUriComponent,
 } from "@/util/helper_function/reusableFunction";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { cloudinary } from "@/util/configuration";
+import { UploadApiResponse } from "cloudinary";
+import { AddNewFarmerReportImage } from "@/util/queries/image";
 
 /**
  * server action to get the farmer report
@@ -64,6 +67,7 @@ export const PostFarmerReport = async (
     const userId = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
+    console.log(validateVal);
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -71,8 +75,10 @@ export const PostFarmerReport = async (
         formError: validateVal.formError,
       };
 
+    const reportId = CreateUUID();
+
     await AddNewFarmerReport({
-      reportId: CreateUUID(),
+      reportId: reportId,
       farmerId: userId,
       reportTitle: reportVal.reportTitle,
       reportDescription: reportVal.reportDescription,
@@ -81,11 +87,35 @@ export const PostFarmerReport = async (
       verificationStatus: false,
     });
 
-    // return redirect(
-    //   `/farmer/report?success=${NotifToUriComponent([
-    //     { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
-    //   ])}`
-    // );
+    reportVal.reportPicture.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      console.log(file.name);
+
+      const uploadResult: UploadApiResponse | undefined = await new Promise(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({}, (error, result) => {
+              if (error) reject(error);
+
+              resolve(result);
+            })
+            .end(buffer);
+        }
+      );
+
+      if (uploadResult)
+        await AddNewFarmerReportImage({
+          picId: CreateUUID(),
+          reportId: reportId,
+          pictureUrl: uploadResult.secure_url,
+        });
+    });
+
+    return redirect(
+      `/farmer/report?success=${NotifToUriComponent([
+        { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
+      ])}`
+    );
 
     return returnVal;
   } catch (error) {

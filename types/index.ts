@@ -240,3 +240,9 @@ export type AddNewFarmerReportQueryType = {
   dayReported: Date;
   verificationStatus: boolean;
 };
+
+export type AddNewFarmerReportImageType = {
+  picId: string;
+  reportId: string;
+  pictureUrl: string;
+};

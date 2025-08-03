@@ -49,12 +49,11 @@ export const NavbarComponent: FC = async () => {
     );
 
   return (
-    <div className="">
-      <Link
-        href={`/${session?.work}`}
-        className="inline-block font-bold italic text-2xl title text-green-800 m-4 tracking-wide"
-      >
-        AgroFarm
+    <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
+      <Link href={`/${session?.work}`} className="p-6 border-b border-gray-200">
+        <h1 className="font-bold italic text-2xl title text-green-800 tracking-wide">
+          AgroFarm
+        </h1>
       </Link>
       {navbar}
     </div>
@@ -63,38 +62,28 @@ export const NavbarComponent: FC = async () => {
 
 const FarmerNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/farmer";
-  const navbar: NavbarType = [
+  let navbar: NavbarType = [
     { page: basePage, pageLabel: "Home", logo: Home },
     { page: `${basePage}/report`, pageLabel: "Ulat", logo: ClipboardPlus },
     { page: `${basePage}/crop`, pageLabel: "Pananim", logo: Sprout },
     { page: `${basePage}/profile`, pageLabel: "Profile", logo: UserPen },
-    {
-      page: `${basePage}/validateReport`,
-      pageLabel: "Ulat ng miyembro",
-      logo: ClipboardCheck,
-    },
-    {
-      page: `${basePage}/orgMember`,
-      pageLabel: "Mga miyembro",
-      logo: ContactRound,
-    },
   ];
 
-  // if (role === "leader")
-  //   navbar = [
-  //     ...navbar.slice(0, 3),
-  //     {
-  //       page: `${basePage}/validateReport`,
-  //       pageLabel: "Ulat ng miyembro",
-  //       logo: ClipboardCheck,
-  //     },
-  //     {
-  //       page: `${basePage}/orgMember`,
-  //       pageLabel: "Mga miyembro",
-  //       logo: ContactRound,
-  //     },
-  //     ...navbar.slice(3),
-  //   ];
+  if (role === "leader")
+    navbar = [
+      ...navbar.slice(0, 3),
+      {
+        page: `${basePage}/validateReport`,
+        pageLabel: "Ulat ng miyembro",
+        logo: ClipboardCheck,
+      },
+      {
+        page: `${basePage}/orgMember`,
+        pageLabel: "Mga miyembro",
+        logo: ContactRound,
+      },
+      ...navbar.slice(3),
+    ];
 
   return <Navbar pages={navbar} />;
 };
@@ -134,13 +123,19 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
 
 const Navbar: FC<{ pages: NavbarType }> = ({ pages }) => {
   return (
-    <nav>
-      {pages.map((page) => (
-        <Link href={page.page} key={page.page}>
-          {page.pageLabel}
-          <page.logo />
-        </Link>
-      ))}
+    <nav className="flex-1 py-4">
+      <div className="px-3 space-y-1">
+        {pages.map((page) => (
+          <Link
+            href={page.page}
+            key={page.page}
+            className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors group"
+          >
+            <page.logo className="h-5 w-5 group-hover:text-green-600" />
+            <span className="text-sm font-medium">{page.pageLabel}</span>
+          </Link>
+        ))}
+      </div>
     </nav>
   );
 };

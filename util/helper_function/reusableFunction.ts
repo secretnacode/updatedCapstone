@@ -39,14 +39,13 @@ export function MaxDateToday(): string {
  */
 export function FourDaysBefore(): string {
   let month = new Date().getMonth() + 1;
-  let date = new Date().getDate();
+  let date = new Date().getDate() - 3;
 
-  if (date - 3 <= 0) {
-    if (month % 2 === 0) date = date - 3 + 30;
-    else date = date - 3 + 31;
+  if (date <= 0) {
+    if (month % 2 === 0) date += 30;
+    else date += 31;
     month -= 1;
   }
-
   return `${new Date().getFullYear()}-${month
     .toString()
     .padStart(2, "0")}-${date.toString().padStart(2, "0")}`;

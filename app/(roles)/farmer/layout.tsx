@@ -3,9 +3,9 @@ import { ReactNode } from "react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-row">
+    <div className="min-h-screen flex">
       <NavbarComponent />
-      {children}
+      <main className="flex-1 p-8">{children}</main>
     </div>
   );
 }

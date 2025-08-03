@@ -3,7 +3,6 @@
 import { PostFarmerReport } from "@/lib/server_action/report";
 import {
   CreateUUID,
-  CurrentDate,
   FourDaysBefore,
   MaxDateToday,
 } from "@/util/helper_function/reusableFunction";
@@ -25,6 +24,7 @@ import { useNotification } from "./provider/notificationProvider";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { AddReportPictureType } from "@/types";
+import { useLoading } from "./provider/loadingProvider";
 
 export const AddReportComponent: FC = () => {
   const [addReport, setAddReport] = useState<boolean>(true);
@@ -48,6 +48,7 @@ const AddingReport: FC<{
   const [openCam, setOpenCam] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
   const [state, formAction] = useActionState(PostFarmerReport, {
     success: null,
     notifError: null,
@@ -60,6 +61,12 @@ const AddingReport: FC<{
       videoRef.current.play();
     }
   }, [stream, openCam]);
+
+  useEffect(() => {
+    if (!state.success && !isPassing) handleDoneLoading();
+  }, [state.success, isPassing, handleDoneLoading]);
+
+  console.log(selectedFile);
 
   const handleStartCamera = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
@@ -77,11 +84,11 @@ const AddingReport: FC<{
       });
       setOpenCam(true);
       setStream(mediaStream);
-    } catch (error: any) {
+    } catch (error) {
       const err = error as Error;
       if (
-        error.name === "NotAllowedError" ||
-        error.name === "PermissionDeniedError"
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
       )
         handleSetNotification([
           {
@@ -90,7 +97,7 @@ const AddingReport: FC<{
             type: "warning",
           },
         ]);
-      else if (error.name === "NotFoundError")
+      else if (err.name === "NotFoundError")
         handleSetNotification([
           {
             message: "Hindi ma detect and iyong camera",
@@ -135,8 +142,8 @@ const AddingReport: FC<{
                 ...prev,
                 {
                   picId: CreateUUID(),
-                  file: new File([blob], `captureImage.jpeg`, {
-                    type: "images/jpeg",
+                  file: new File([blob], `captureImage.jpg`, {
+                    type: "image/jpeg",
                     lastModified: Date.now(),
                   }),
                 },
@@ -192,6 +199,7 @@ const AddingReport: FC<{
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    handleIsLoading("Ipinapasa na ang iyong ulat");
 
     const formData = new FormData(e.currentTarget);
 
@@ -249,7 +257,11 @@ const AddingReport: FC<{
         </label>
 
         <div>
-          <button type="button" onClick={() => pickFileRef.current?.click()}>
+          <button
+            type="button"
+            disabled={isPassing}
+            onClick={() => pickFileRef.current?.click()}
+          >
             Pumili ng larawan
           </button>
 
@@ -263,7 +275,11 @@ const AddingReport: FC<{
         </div>
 
         <div>
-          <button type="button" disabled={openCam} onClick={handleStartCamera}>
+          <button
+            type="button"
+            disabled={openCam || isPassing}
+            onClick={handleStartCamera}
+          >
             Gamitin ang camera
           </button>
         </div>
@@ -324,8 +340,14 @@ const AddingReport: FC<{
       {/* turning the captured picture into a canvas, then turning canvas into a blob(file) */}
       <canvas ref={canvasRef} className="hidden" />
       <div>
-        <button type="submit">Mag pasa ng ulat</button>
-        <button type="button" onClick={() => setAddReport(false)}>
+        <button type="submit" disabled={isPassing}>
+          Mag pasa ng ulat
+        </button>
+        <button
+          type="button"
+          onClick={() => setAddReport(false)}
+          disabled={isPassing}
+        >
           Kanselahin ang pagpapasa
         </button>
       </div>
