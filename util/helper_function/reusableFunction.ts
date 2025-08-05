@@ -100,6 +100,11 @@ export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
   return redirect(`/?error=${NotifToUriComponent(error)}`);
 };
 
+/**
+ * encoding the notification param into an URI component
+ * @param notif the message you want to encode
+ * @returns encoded uri message
+ */
 export const NotifToUriComponent = (notif: NotificationBaseType[]) => {
   return encodeURIComponent(JSON.stringify(notif));
 };

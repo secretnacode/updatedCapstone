@@ -1,10 +1,15 @@
 "use server";
 
-import { AddNewFarmerReport, GetUserReport } from "@/util/queries/report";
+import {
+  AddNewFarmerReport,
+  GetFarmerReportDetailQuery,
+  GetUserReport,
+} from "@/util/queries/report";
 import { ProtectedAction } from "../protectedActions";
 import {
   AddReportActionFormType,
   AddReportValType,
+  GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -116,14 +121,37 @@ export const PostFarmerReport = async (
         { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
       ])}`
     );
-
-    return returnVal;
   } catch (error) {
     if (isRedirectError(error)) throw error;
     const err = error as Error;
     console.log(`Error in getting the farmer reports: ${err}`);
     return {
       ...returnVal,
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+export const GetFarmerReportDetail = async (
+  reportId: string
+): Promise<GetFarmerReportDetailReturnType> => {
+  try {
+    await ProtectedAction("read:report");
+
+    const reportDetail = await GetFarmerReportDetailQuery(reportId);
+    console.log(reportDetail);
+    return {
+      success: true,
+      reportDetail: {
+        ...reportDetail,
+        pictures: reportDetail.pictures.split(","),
+      },
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Error in getting the farmer reports: ${err}`);
+    return {
       success: false,
       notifError: [{ message: err.message, type: "error" }],
     };

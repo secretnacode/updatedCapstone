@@ -32,3 +32,13 @@ export const RedirectManager: FC<{
 
   return null;
 };
+
+export const RenderNotification: FC<{ notif: NotificationBaseType[] }> = ({
+  notif,
+}) => {
+  const { handleSetNotification } = useNotification();
+  useEffect(() => {
+    handleSetNotification(notif);
+  }, [notif, handleSetNotification]);
+  return null;
+};

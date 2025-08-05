@@ -246,3 +246,28 @@ export type AddNewFarmerReportImageType = {
   reportId: string;
   pictureUrl: string;
 };
+
+type GetFarmerReportDetailBaseType = {
+  cropIdReported: string;
+  verificationStatus: string;
+  dayReported: Date;
+  dayHappen: Date;
+  title: string;
+  description: string;
+};
+
+export type GetFarmerReportDetailQueryReturnType =
+  GetFarmerReportDetailBaseType & {
+    pictures: string;
+  };
+
+export type ReportDetailType = GetFarmerReportDetailBaseType & {
+  pictures: string[];
+};
+
+export type GetFarmerReportDetailReturnType =
+  | {
+      success: true;
+      reportDetail: ReportDetailType;
+    }
+  | { success: false; notifError: NotificationBaseType[] };
