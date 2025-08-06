@@ -26,6 +26,7 @@ export const CreateSession = async (
   work: string
 ): Promise<string> => {
   const sessionId = CreateUUID();
+  console.log("creating sessiong");
 
   // setting the value in the redis, it will set the session id and
   // stringify the objects that will be used for authentication,

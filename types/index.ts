@@ -215,12 +215,17 @@ export type GetUserReportReturnType =
     }[]
   | [];
 
+export type ServerActionFailBaseType = {
+  success: false;
+  notifError: NotificationBaseType[];
+};
+
 export type GetFarmerReportReturnType =
   | {
       success: true;
       userReport: GetUserReportReturnType;
     }
-  | { success: false; notifError: NotificationBaseType[] };
+  | ServerActionFailBaseType;
 
 export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
 
@@ -270,4 +275,28 @@ export type GetFarmerReportDetailReturnType =
       success: true;
       reportDetail: ReportDetailType;
     }
-  | { success: false; notifError: NotificationBaseType[] };
+  | ServerActionFailBaseType;
+
+export type GetOrgMemberReportQueryType = {
+  reportId: string;
+  verificationStatus: string;
+  dayReported: Date;
+  title: string;
+  farmerFirstName: string;
+  farmerLastName: string;
+  farmerAlias: string;
+}[];
+
+export type GetOrgMemberReportReturnType =
+  | {
+      success: true;
+      memberReport: GetOrgMemberReportQueryType;
+    }
+  | ServerActionFailBaseType;
+
+export type ApprovedOrgMemberReturnType =
+  | {
+      success: true;
+      notifMessage: NotificationBaseType[];
+    }
+  | ServerActionFailBaseType;

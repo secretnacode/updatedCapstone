@@ -170,11 +170,11 @@ export const GetFarmerRole = async (
  */
 export const GetAgriRole = async (
   userId: string
-): Promise<{ orgRole: string }> => {
+): Promise<{ agriRole: string }> => {
   try {
     return (
       await pool.query(
-        ` "agriRole" from capstone.agriculturist where "agriId" = $1`,
+        `select "agriRole" from capstone.agriculturist where "agriId" = $1`,
         [userId]
       )
     ).rows[0];

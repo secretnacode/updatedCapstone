@@ -198,7 +198,8 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     handleIsLoading("Sinusuri lang ang iyong username at password");
 
     try {
-      await LoginAuth(authVal);
+      const res = await LoginAuth(authVal);
+      if (!res.success) throw { errors: res.errors };
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);

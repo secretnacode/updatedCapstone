@@ -4,6 +4,8 @@ import { GetSession } from "./lib/session";
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`agriculturist`, [`/agriculturist`]);
 authorizedPath.set(`farmer`, [`/farmer`, `/farmerDetails`]);
+authorizedPath.set(`admin`, [`/agriculturist`]);
+authorizedPath.set(`leader`, [`/farmer`, `/farmerDetails`, `/farmerLeader`]);
 const publicPath = [`/`, `/unauthorized`];
 
 export default async function Middleware(req: NextRequest) {
@@ -27,7 +29,7 @@ export default async function Middleware(req: NextRequest) {
 
       if (
         accessiblePath &&
-        accessiblePath.some((path) => pathname.startsWith(path))
+        accessiblePath.some((path) => `/${pathname.split("/")[1]}` === path)
       ) {
         console.warn(`middleware: you're authorized to go ${pathname}`);
         return res;

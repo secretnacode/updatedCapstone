@@ -241,7 +241,7 @@ export const GetUserRole = async (
     const userId = await ProtectedAction("read:user");
 
     if (work === "farmer") return (await GetFarmerRole(userId)).orgRole;
-    else return (await GetAgriRole(userId)).orgRole;
+    else return (await GetAgriRole(userId)).agriRole;
   } catch (error) {
     const err = error as Error;
     throw new Error(err.message);

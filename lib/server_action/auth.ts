@@ -15,7 +15,13 @@ import {
   ValidateLoginVal,
   ValidateSingupVal,
 } from "@/util/helper_function/validation/frontendValidation/authvalidation";
-import { CheckUsername, InsertNewUser, UserLogin } from "@/util/queries/user";
+import {
+  CheckUsername,
+  GetAgriRole,
+  GetFarmerRole,
+  InsertNewUser,
+  UserLogin,
+} from "@/util/queries/user";
 import { ComparePassword, Hash } from "@/lib/reusableFunctions";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -43,6 +49,7 @@ export async function LoginAuth(
     const userCredentials: QueryUserLoginReturnType = await UserLogin(
       data.username
     );
+
     if (!userCredentials.exist)
       return {
         success: false,
@@ -61,8 +68,15 @@ export async function LoginAuth(
         ],
       };
 
-    await CreateSession(userCredentials.data.authId, userCredentials.data.work);
+    await CreateSession(
+      userCredentials.data.authId,
+      await GenerateUserRole(
+        userCredentials.data.authId,
+        userCredentials.data.work
+      )
+    );
 
+    console.log("redirecting");
     redirect(
       `/${userCredentials.data.work}/?success=${encodeURIComponent(
         JSON.stringify([
@@ -81,6 +95,33 @@ export async function LoginAuth(
     };
   }
 }
+
+/**
+ * will generate a userRole base on the work of the current user
+ * @param userId id of the current user
+ * @param work of the current user
+ * @returns a role of the current user(e.g. farmer, agriculturist, leader, admin)
+ */
+const GenerateUserRole = async (
+  userId: string,
+  work: string
+): Promise<string> => {
+  // for generating farmer role
+  if (work === "farmer") {
+    const role = (await GetFarmerRole(userId)).orgRole;
+
+    if (role === "member") return work;
+
+    return role;
+  }
+
+  // for generating agri role
+  const role = (await GetAgriRole(userId)).agriRole;
+
+  if (role === work) return work;
+
+  return role;
+};
 
 /**
  * used for signing up new user and validating the user input before redirecting the user into another page

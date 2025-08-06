@@ -45,3 +45,27 @@ export const CreateNewOrgAfterSignUp = async (
     );
   }
 };
+
+/**
+ * geting the user orgId
+ * @param userId id of the user that you want to get the orgId
+ * @returns orgId of the user
+ */
+export const GetUserOrgId = async (
+  userId: string
+): Promise<{ orgId: string }> => {
+  try {
+    return (
+      await pool.query(
+        `select "orgId" from capstone.farmer where "farmerId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error on getting the user orgId: ", error);
+    throw new Error(
+      `Error on getting the user orgId: ${err.message as string}`
+    );
+  }
+};

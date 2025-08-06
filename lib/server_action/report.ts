@@ -2,15 +2,19 @@
 
 import {
   AddNewFarmerReport,
+  ApprovedOrgMemberQuery,
   GetFarmerReportDetailQuery,
+  GetOrgMemberReportQuery,
   GetUserReport,
 } from "@/util/queries/report";
 import { ProtectedAction } from "../protectedActions";
 import {
   AddReportActionFormType,
   AddReportValType,
+  ApprovedOrgMemberReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
+  GetOrgMemberReportReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import { addFarmerReportSchema } from "@/util/helper_function/validation/validationSchema";
@@ -23,6 +27,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
 import { AddNewFarmerReportImage } from "@/util/queries/image";
+import { GetUserOrgId } from "@/util/queries/org";
 
 /**
  * server action to get the farmer report
@@ -151,6 +156,57 @@ export const GetFarmerReportDetail = async (
   } catch (error) {
     const err = error as Error;
     console.log(`Error in getting the farmer reports: ${err}`);
+    return {
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+export const GetOrgMemberReport =
+  async (): Promise<GetOrgMemberReportReturnType> => {
+    try {
+      const farmerId = await ProtectedAction("read:farmer:member:report");
+
+      return {
+        success: true,
+        memberReport: await GetOrgMemberReportQuery(
+          (
+            await GetUserOrgId(farmerId)
+          ).orgId
+        ),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(`Error in getting the farmer member reports: ${err}`);
+      return {
+        success: false,
+        notifError: [{ message: err.message, type: "error" }],
+      };
+    }
+  };
+
+export const ApprovedOrgMember = async (
+  reportId: string
+): Promise<ApprovedOrgMemberReturnType> => {
+  try {
+    await ProtectedAction("read:farmer:member:report");
+
+    await ApprovedOrgMemberQuery(reportId);
+
+    redirect(
+      `/farmerLeader/validateReport/?success=${NotifToUriComponent([
+        {
+          message: "Matagumpay ang iyong pag aapruba ng ulat",
+          type: "success",
+        },
+      ])}`
+    );
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+    console.log(`Error in getting the farmer member reports: ${err}`);
     return {
       success: false,
       notifError: [{ message: err.message, type: "error" }],

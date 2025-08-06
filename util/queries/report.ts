@@ -1,6 +1,7 @@
 import {
   AddNewFarmerReportQueryType,
   GetFarmerReportDetailQueryReturnType,
+  GetOrgMemberReportQueryType,
   GetUserReportReturnType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -68,6 +69,45 @@ export const GetFarmerReportDetailQuery = async (
     console.error("Error on getting the user report", error);
     throw new Error(
       `Error on getting the user report ${err.message as string}`
+    );
+  }
+};
+
+/**
+ * gets the report of the member in the same organization
+ * @param orgId id of the organization that you want to see the reports
+ * @returns reports of the members within the organization
+ */
+export const GetOrgMemberReportQuery = async (
+  orgId: string
+): Promise<GetOrgMemberReportQueryType> => {
+  try {
+    return (
+      await pool.query(
+        `select r."reportId", r."verificationStatus", r."dayReported", r."title", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 order by case when r."verificationStatus" = $2 then $3 else $4 end asc`,
+        [orgId, "false", 1, 2]
+      )
+    ).rows;
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error on getting the farm member report:", error);
+    throw new Error(
+      `Error on getting the farm member report: ${err.message as string}`
+    );
+  }
+};
+
+export const ApprovedOrgMemberQuery = async (reportId: string) => {
+  try {
+    await pool.query(
+      `update capstone.report set "verificationStatus" = $1 where "reportId" = $2`,
+      ["pending", reportId]
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error on getting the farm member report:", error);
+    throw new Error(
+      `Error on getting the farm member report: ${err.message as string}`
     );
   }
 };

@@ -66,7 +66,7 @@ export default async function Page({
                 </tr>
               </thead>
               <tbody>
-                {report.success && report.userReport.length > 0 ? (
+                {report.success &&
                   report.userReport.map((report, index) => (
                     <tr key={report.reportId}>
                       <td className="text-gray-500">{index + 1}</td>
@@ -103,10 +103,7 @@ export default async function Page({
                         <ViewUserReportTableData reportId={report.reportId} />
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr> wala ka pang nagagawang ulat, mag gawa muna!!!</tr>
-                )}
+                  ))}
               </tbody>
             </table>
           </div>

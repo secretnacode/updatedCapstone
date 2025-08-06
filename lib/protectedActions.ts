@@ -18,6 +18,10 @@ const Actions = {
   CREATE_REPORT: "create:report", // action for farmer to create their own report
   READ_REPORT: "read:report", // action for farmer to view their OWN report
 
+  //action for the farmer leader to view and update their member report
+  READ_FARMER_MEMBER_REPORT: "read:farmer:member:report", // action to view the farmer member report
+  UPDATE_FARMER_MEMBER_REPORT: "update:farmer:member:report", // action to update the farmer member report
+
   // action that wants to access the farmers report info
   READ_FARMER_REPORT: "read:farmer:report", // action to view the farmer's report
   UPDATE_FARMER_REPORT: "update:farmer:report", // action to update the farmer's report
@@ -76,6 +80,22 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_ORG_LIST,
     Actions.UPDATE_USER,
   ],
+  leader: [
+    Actions.CREATE_CROP,
+    Actions.CREATE_ORG,
+    Actions.CREATE_USER,
+    Actions.CREATE_REPORT,
+    Actions.DELET_CROP,
+    Actions.READ_CROP,
+    Actions.READ_FARMER_MEMBER_REPORT,
+    Actions.READ_REPORT,
+    Actions.READ_ORG_LIST,
+    Actions.READ_ORG,
+    Actions.READ_USER,
+    Actions.UPDATE_CROP,
+    Actions.UPDATE_FARMER_MEMBER_REPORT,
+    Actions.UPDATE_ORG,
+  ],
   farmer: [
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
@@ -105,7 +125,7 @@ export const ProtectedAction = async (action: string): Promise<string> => {
 
   if (!session) throw new Error("You need to log in first");
 
-  if (!ROLE_ACTION_PERMISION[session?.work].includes(action))
+  if (!ROLE_ACTION_PERMISION[session.work].includes(action))
     throw new Error("You are not allowed to execute this action");
 
   return session.userId;

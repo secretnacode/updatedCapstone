@@ -12,7 +12,6 @@ import {
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC } from "react";
-import { GetUserRole } from "@/lib/server_action/farmerDetails";
 import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
 
 export const NavbarComponent: FC = async () => {
@@ -21,7 +20,7 @@ export const NavbarComponent: FC = async () => {
   let role = "";
 
   try {
-    if (session) role = await GetUserRole(session.userId, session.work);
+    if (session) role = session.work;
     else
       RedirectLoginWithError([
         {
@@ -42,7 +41,7 @@ export const NavbarComponent: FC = async () => {
   }
 
   const navbar =
-    session?.work === "farmer" ? (
+    session?.work === "farmer" || session?.work === "leader" ? (
       <FarmerNav role={role} />
     ) : (
       <AgriculturistNav role={role} />
@@ -73,12 +72,12 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
     navbar = [
       ...navbar.slice(0, 3),
       {
-        page: `${basePage}/validateReport`,
+        page: `${basePage}Leader/validateReport`,
         pageLabel: "Ulat ng miyembro",
         logo: ClipboardCheck,
       },
       {
-        page: `${basePage}/orgMember`,
+        page: `${basePage}Leader/orgMember`,
         pageLabel: "Mga miyembro",
         logo: ContactRound,
       },

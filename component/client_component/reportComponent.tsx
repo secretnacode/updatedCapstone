@@ -451,7 +451,9 @@ export const ViewUserReportTableData: FC<{ reportId: string }> = ({
   const [viewReport, setViewReport] = useState<boolean>(false);
   return (
     <>
-      <button onClick={() => setViewReport(true)}>Tingnan ang ulat</button>
+      <button onClick={() => setViewReport(true)} className="cursor-pointer">
+        Tingnan ang ulat
+      </button>
 
       {viewReport &&
         createPortal(
@@ -482,7 +484,6 @@ export const UserReportDetails: FC<{
 
     report();
   }, [reportId, handleSetNotification]);
-  console.log(userReport);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

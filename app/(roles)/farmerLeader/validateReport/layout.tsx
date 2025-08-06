@@ -3,7 +3,9 @@ import { ReactNode } from "react";
 
 export default function Layout({
   children,
-}: Readonly<{ children: ReactNode }>) {
+}: Readonly<{
+  children: Readonly<ReactNode>;
+}>) {
   return (
     <div className="min-h-screen flex">
       <NavbarComponent />

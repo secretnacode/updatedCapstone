@@ -656,7 +656,6 @@ export const FarmerDetailSecondStep: FC = () => {
       const res = await AddSecondFarmerDetails(cropList);
       console.log(res);
       if (!res.success) {
-        console.log("error in here");
         handleSetNotification(res.notifError);
         if (res.cropErrors) handleBackendValidateFormError(res.cropErrors);
         handleDoneLoading();
