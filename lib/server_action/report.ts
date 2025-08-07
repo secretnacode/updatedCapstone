@@ -13,6 +13,7 @@ import {
   AddReportActionFormType,
   AddReportValType,
   ApprovedOrgMemberReturnType,
+  GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
   GetOrgMemberReportReturnType,
@@ -228,20 +229,21 @@ export const ApprovedOrgMember = async (
   }
 };
 
-export const GetAllFarmerReport = async () => {
-  try {
-    await ProtectedAction("read:farmer:report:list");
+export const GetAllFarmerReport =
+  async (): Promise<GetAllFarmerReportReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:report:list");
 
-    return {
-      success: true,
-      validatedReport: await GetAllFarmerReportQuery(),
-    };
-  } catch (error) {
-    const err = error as Error;
-    console.log(`Error in getting the farmer member reports: ${err}`);
-    return {
-      success: false,
-      notifError: [{ message: err.message, type: "error" }],
-    };
-  }
-};
+      return {
+        success: true,
+        validatedReport: await GetAllFarmerReportQuery(),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(`Error in getting the farmer member reports: ${err}`);
+      return {
+        success: false,
+        notifError: [{ message: err.message, type: "error" }],
+      };
+    }
+  };

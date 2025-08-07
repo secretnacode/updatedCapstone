@@ -1,5 +1,6 @@
 import {
   AddNewFarmerReportQueryType,
+  GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   GetOrgMemberReportQueryType,
   GetUserReportReturnType,
@@ -97,6 +98,10 @@ export const GetOrgMemberReportQuery = async (
   }
 };
 
+/**
+ * query for approving the farmer org member
+ * @param reportId id that you want to approved
+ */
 export const ApprovedOrgMemberQuery = async (reportId: string) => {
   try {
     await pool.query(
@@ -112,16 +117,20 @@ export const ApprovedOrgMemberQuery = async (reportId: string) => {
   }
 };
 
-export const GetAllFarmerReportQuery = async () => {
-  try {
-    await pool.query(
-      `select r."reportId", r."cropIdReported", r."verificationStatus", (select concat(f."farmerFirstName", ' ', f."farmerLastName") from capstone.farmer f join capstone.org o on f."farmerId" = o."orgLeadFarmerId" join capstone.report r on o."orgId" = r."verifiedByOrgId" where r."verifiedByOrgId" =  $1) as "FarmerName"`
-    );
-  } catch (error) {
-    const err = error as Error;
-    console.error("Error on approving the farmer report:", error);
-    throw new Error(
-      `Error on approving the farmer report: ${err.message as string}`
-    );
-  }
-};
+export const GetAllFarmerReportQuery =
+  async (): Promise<GetAllFarmerReportQueryReturnType> => {
+    try {
+      return (
+        await pool.query(
+          `select r."reportId", r."cropIdReported", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."verifiedByOrgId" = o."orgId" where r."verificationStatus" = $1 or f."orgId" is null`,
+          ["pending"]
+        )
+      ).rows;
+    } catch (error) {
+      const err = error as Error;
+      console.error("Error on approving the farmer report:", error);
+      throw new Error(
+        `Error on approving the farmer report: ${err.message as string}`
+      );
+    }
+  };

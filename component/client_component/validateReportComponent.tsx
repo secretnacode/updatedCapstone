@@ -26,11 +26,11 @@ export const ViewMemberReport: FC<{ reportId: string }> = ({ reportId }) => {
   };
 
   return (
-    <div>
+    <>
       <button className="cursor-pointer" onClick={handleApprovedMember}>
         Apprubahan
       </button>
       <ViewUserReportTableData reportId={reportId} />
-    </div>
+    </>
   );
 };

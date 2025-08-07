@@ -300,3 +300,20 @@ export type ApprovedOrgMemberReturnType =
       notifMessage: NotificationBaseType[];
     }
   | ServerActionFailBaseType;
+
+export type GetAllFarmerReportQueryReturnType = {
+  reportId: string;
+  cropIdReported: string;
+  verificationStatus: string;
+  farmerName: string;
+  dayReported: Date;
+  dayHappen: Date;
+  orgName: string;
+}[];
+
+export type GetAllFarmerReportReturnType =
+  | {
+      success: true;
+      validatedReport: GetAllFarmerReportQueryReturnType;
+    }
+  | ServerActionFailBaseType;
