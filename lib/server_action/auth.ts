@@ -76,7 +76,6 @@ export async function LoginAuth(
       )
     );
 
-    console.log("redirecting");
     redirect(
       `/${userCredentials.data.work}/?success=${encodeURIComponent(
         JSON.stringify([
@@ -110,9 +109,9 @@ const GenerateUserRole = async (
   if (work === "farmer") {
     const role = (await GetFarmerRole(userId)).orgRole;
 
-    if (role === "member") return work;
+    if (role === "leader") return role;
 
-    return role;
+    return work;
   }
 
   // for generating agri role

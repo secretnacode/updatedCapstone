@@ -3,6 +3,7 @@
 import {
   AddNewFarmerReport,
   ApprovedOrgMemberQuery,
+  GetAllFarmerReportQuery,
   GetFarmerReportDetailQuery,
   GetOrgMemberReportQuery,
   GetUserReport,
@@ -77,7 +78,6 @@ export const PostFarmerReport = async (
     const userId = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
-    console.log(validateVal);
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -99,7 +99,6 @@ export const PostFarmerReport = async (
 
     reportVal.reportPicture.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());
-      console.log(file.name);
 
       const uploadResult: UploadApiResponse | undefined = await new Promise(
         (resolve, reject) => {
@@ -121,23 +120,29 @@ export const PostFarmerReport = async (
         });
     });
 
-    return redirect(
-      `/farmer/report?success=${NotifToUriComponent([
-        { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
-      ])}`
-    );
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    const err = error as Error;
-    console.log(`Error in getting the farmer reports: ${err}`);
     return {
       ...returnVal,
+      success: true,
+      notifError: [
+        { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Error in adding farmer report: ${err}`);
+    return {
+      formError: null,
       success: false,
       notifError: [{ message: err.message, type: "error" }],
     };
   }
 };
 
+/**
+ * server action for geting the detail if the farmer report
+ * @param reportId id of the report you want to see
+ * @returns the details of the report
+ */
 export const GetFarmerReportDetail = async (
   reportId: string
 ): Promise<GetFarmerReportDetailReturnType> => {
@@ -163,6 +168,10 @@ export const GetFarmerReportDetail = async (
   }
 };
 
+/**
+ * Fetch all the report of the member within the organization
+ * @returns all the report within the organization
+ */
 export const GetOrgMemberReport =
   async (): Promise<GetOrgMemberReportReturnType> => {
     try {
@@ -186,6 +195,11 @@ export const GetOrgMemberReport =
     }
   };
 
+/**
+ * for approving/validating the farmer report
+ * @param reportId id of the report you want to approved
+ * @returns
+ */
 export const ApprovedOrgMember = async (
   reportId: string
 ): Promise<ApprovedOrgMemberReturnType> => {
@@ -205,6 +219,24 @@ export const ApprovedOrgMember = async (
   } catch (error) {
     if (isRedirectError(error)) throw error;
 
+    const err = error as Error;
+    console.log(`Error in server action approving farmer report: ${err}`);
+    return {
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+export const GetAllFarmerReport = async () => {
+  try {
+    await ProtectedAction("read:farmer:report:list");
+
+    return {
+      success: true,
+      validatedReport: await GetAllFarmerReportQuery(),
+    };
+  } catch (error) {
     const err = error as Error;
     console.log(`Error in getting the farmer member reports: ${err}`);
     return {

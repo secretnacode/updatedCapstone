@@ -100,14 +100,28 @@ export const GetOrgMemberReportQuery = async (
 export const ApprovedOrgMemberQuery = async (reportId: string) => {
   try {
     await pool.query(
-      `update capstone.report set "verificationStatus" = $1 where "reportId" = $2`,
-      ["pending", reportId]
+      `update capstone.report set "verificationStatus" = $1, "verifiedByOrgId" = (select f."orgId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" where r."reportId" = $2), "dayVerified" = $3 where "reportId" = $4`,
+      ["pending", reportId, new Date(), reportId]
     );
   } catch (error) {
     const err = error as Error;
-    console.error("Error on getting the farm member report:", error);
+    console.error("Error on approving the farmer report:", error);
     throw new Error(
-      `Error on getting the farm member report: ${err.message as string}`
+      `Error on approving the farmer report: ${err.message as string}`
+    );
+  }
+};
+
+export const GetAllFarmerReportQuery = async () => {
+  try {
+    await pool.query(
+      `select r."reportId", r."cropIdReported", r."verificationStatus", (select concat(f."farmerFirstName", ' ', f."farmerLastName") from capstone.farmer f join capstone.org o on f."farmerId" = o."orgLeadFarmerId" join capstone.report r on o."orgId" = r."verifiedByOrgId" where r."verifiedByOrgId" =  $1) as "FarmerName"`
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error on approving the farmer report:", error);
+    throw new Error(
+      `Error on approving the farmer report: ${err.message as string}`
     );
   }
 };

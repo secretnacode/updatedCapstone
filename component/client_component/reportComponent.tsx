@@ -30,6 +30,7 @@ import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
 
 export const AddReportComponent: FC = () => {
+  console.log(`component add button`);
   const [addReport, setAddReport] = useState<boolean>(false);
 
   return (
@@ -65,6 +66,7 @@ export const AddReportComponent: FC = () => {
 const AddingReport: FC<{
   setAddReport: Dispatch<SetStateAction<boolean>>;
 }> = ({ setAddReport }) => {
+  console.log(`modal adding report component`);
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -88,10 +90,16 @@ const AddingReport: FC<{
   }, [stream, openCam]);
 
   useEffect(() => {
-    if (!state.success && !isPassing) handleDoneLoading();
-  }, [state.success, isPassing, handleDoneLoading]);
+    if (state.success) setAddReport(false);
+  }, [state.success, setAddReport]);
 
-  console.log(selectedFile);
+  useEffect(() => {
+    if (state.notifError) handleSetNotification(state.notifError);
+  }, [handleSetNotification, state.notifError]);
+
+  useEffect(() => {
+    if (!isPassing) handleDoneLoading();
+  }, [isPassing, handleDoneLoading]);
 
   const handleStartCamera = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
@@ -222,7 +230,7 @@ const AddingReport: FC<{
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleIsLoading("Ipinapasa na ang iyong ulat");
 
@@ -479,11 +487,14 @@ export const UserReportDetails: FC<{
       const report = await GetFarmerReportDetail(reportId);
 
       if (report.success) setUserReport(report.reportDetail);
-      else handleSetNotification(report.notifError);
+      else {
+        handleSetNotification(report.notifError);
+        setViewReport(false);
+      }
     };
 
     report();
-  }, [reportId, handleSetNotification]);
+  }, [reportId, handleSetNotification, setViewReport]);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
