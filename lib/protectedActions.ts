@@ -9,6 +9,12 @@ const Actions = {
   READ_USER: "read:user", // action for the user to read their OWN information
   UPDATE_USER: "update:user", // action for the user to update their OWN information
 
+  // action for the farmer leader to access their farmer org member
+  READ_ALL_FARMER_ORG_MEMBER_USER: "read:all:farmer:org:member:user", // action to view the FARMER USER
+  READ_FARMER_ORG_MEMBER_USER: "read:farmer:org:member:user", // action to view the FARMER org member user
+  UPDATE_FARMER_ORG_MEMBER_USER: "update:farmer:org:member:user", // action to update the FARMER USER (e.g. Validated)
+  DELETE_FARMER_ORG_MEMBER_USER: "delete:farmer:org:member:user", // action for the farmer leader if the user is not active
+
   // action that wants to access the farmers info
   READ_FARMER_USER: "read:farmer:user", // action to view the FARMER USER
   UPDATE_FARMER_USER: "update:farmer:user", // action to update the FARMER USER (e.g. block)
@@ -88,14 +94,18 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.CREATE_USER,
     Actions.CREATE_REPORT,
     Actions.DELET_CROP,
+    Actions.DELETE_FARMER_ORG_MEMBER_USER,
     Actions.READ_CROP,
+    Actions.READ_ALL_FARMER_ORG_MEMBER_USER,
     Actions.READ_FARMER_MEMBER_REPORT,
+    Actions.READ_FARMER_ORG_MEMBER_USER,
     Actions.READ_REPORT,
     Actions.READ_ORG_LIST,
     Actions.READ_ORG,
     Actions.READ_USER,
     Actions.UPDATE_CROP,
     Actions.UPDATE_FARMER_MEMBER_REPORT,
+    Actions.UPDATE_FARMER_ORG_MEMBER_USER,
     Actions.UPDATE_ORG,
   ],
   farmer: [

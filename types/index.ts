@@ -317,3 +317,20 @@ export type GetAllFarmerReportReturnType =
       validatedReport: GetAllFarmerReportQueryReturnType;
     }
   | ServerActionFailBaseType;
+
+export type GetFarmerOrgMemberQueryReturnType = {
+  farmerId: string;
+  farmerName: string;
+  farmerAlias: string;
+  mobileNumber: string;
+  barangay: string;
+  verified: boolean;
+  cropNum: number;
+}[];
+
+export type GetFarmerOrgMemberReturnType =
+  | {
+      success: true;
+      farmerMember: GetFarmerOrgMemberQueryReturnType;
+    }
+  | ServerActionFailBaseType;

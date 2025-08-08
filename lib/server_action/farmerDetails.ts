@@ -233,17 +233,17 @@ const ConvertMeassurement = (measurement: string, unit: string): string => {
  * @param work params of the work of th current user(e.g. farmer or agriculturist)
  * @returns the role of the user
  */
-export const GetUserRole = async (
-  userId: string,
-  work: string
-): Promise<string> => {
-  try {
-    const userId = await ProtectedAction("read:user");
+// export const GetUserRole = async (
+//   userId: string,
+//   work: string
+// ): Promise<string> => {
+//   try {
+//     const userId = await ProtectedAction("read:user");
 
-    if (work === "farmer") return (await GetFarmerRole(userId)).orgRole;
-    else return (await GetAgriRole(userId)).agriRole;
-  } catch (error) {
-    const err = error as Error;
-    throw new Error(err.message);
-  }
-};
+//     if (work === "farmer") return (await GetFarmerRole(userId)).orgRole;
+//     else return (await GetAgriRole(userId)).agriRole;
+//   } catch (error) {
+//     const err = error as Error;
+//     throw new Error(err.message);
+//   }
+// };

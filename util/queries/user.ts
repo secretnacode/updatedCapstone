@@ -1,5 +1,6 @@
 import {
   FarmerFirstDetailType,
+  GetFarmerOrgMemberQueryReturnType,
   NewUserType,
   QueryUserLoginReturnType,
 } from "@/types";
@@ -182,5 +183,48 @@ export const GetAgriRole = async (
     const err = error as Error;
     console.error("Error in getting user role:", error);
     throw new Error(`Error in getting user role: ${err.message as string}`);
+  }
+};
+
+/**
+ * query for getting the necesarry info of the membe in the organizatio
+ * @param leaderId id of the farm leader
+ * @returns all the user info that is within the organization
+ */
+export const GetFarmerOrgMemberQuery = async (
+  leaderId: string
+): Promise<GetFarmerOrgMemberQueryReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId"  where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId" order by case when f."verified" = $3 then $4 else $5 end asc `,
+        [leaderId, "member", false, 1, 2]
+      )
+    ).rows;
+  } catch (error) {
+    const err = error as Error;
+    console.error("Problema sa pag kuha ng detalye sa database", error);
+    throw new Error(
+      `Problema sa pag kuha ng detalye sa database ${err.message}`
+    );
+  }
+};
+
+/**
+ * query for updating the verified status of the farmer account
+ * @param farmerId id of the farmer you want to approved
+ */
+export const ApprovedOrgFarmerAccQuery = async (farmerId: string) => {
+  try {
+    await pool.query(
+      `update capstone.farmer set "verified" = $1 where "farmerId" = $2`,
+      [true, farmerId]
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error("Problema sa pag aapruba ng mag sasaka sa database", error);
+    throw new Error(
+      `Problema sa pag aapruba ng mag sasaka sa database ${err.message}`
+    );
   }
 };
