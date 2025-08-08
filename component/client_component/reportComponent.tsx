@@ -28,6 +28,7 @@ import { Camera, Plus, Upload, X } from "lucide-react";
 import { AddReportPictureType, ReportDetailType } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 
 export const AddReportComponent: FC = () => {
   console.log(`component add button`);
@@ -67,6 +68,7 @@ const AddingReport: FC<{
   setAddReport: Dispatch<SetStateAction<boolean>>;
 }> = ({ setAddReport }) => {
   console.log(`modal adding report component`);
+  const router = useRouter();
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -90,8 +92,11 @@ const AddingReport: FC<{
   }, [stream, openCam]);
 
   useEffect(() => {
-    if (state.success) setAddReport(false);
-  }, [state.success, setAddReport]);
+    if (state.success) {
+      setAddReport(false);
+      router.refresh();
+    }
+  }, [state.success, router, setAddReport]);
 
   useEffect(() => {
     if (state.notifError) handleSetNotification(state.notifError);

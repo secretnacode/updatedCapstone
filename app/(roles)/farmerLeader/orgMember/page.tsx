@@ -92,7 +92,10 @@ export default async function Page({
                         <td className="text-gray-500">{farmer.cropNum}</td>
 
                         <td className="text-center">
-                          <FarmerOrgMemberAction farmerId={farmer.farmerId} />
+                          <FarmerOrgMemberAction
+                            farmerId={farmer.farmerId}
+                            verificationStatus={farmer.verified}
+                          />
                         </td>
                       </tr>
                     ))}

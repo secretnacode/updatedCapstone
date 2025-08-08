@@ -6,8 +6,6 @@ import {
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetFarmerOrgMemberReturnType, NotificationBaseType } from "@/types";
-import { redirect } from "next/navigation";
-import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const GetFarmerOrgMember =
@@ -38,17 +36,18 @@ export const GetFarmerOrgMember =
 
 export const ApprovedOrgFarmerAcc = async (
   farmerId: string
-): Promise<{ notifMessage: NotificationBaseType[] }> => {
+): Promise<{ notifMessage: NotificationBaseType[]; refresh?: boolean }> => {
   try {
     await ProtectedAction("update:farmer:org:member:user");
 
     await ApprovedOrgFarmerAccQuery(farmerId);
 
-    redirect(
-      `/farmerLeader/orgMember?success=${NotifToUriComponent([
+    return {
+      refresh: true,
+      notifMessage: [
         { message: `Matagumpay ang iyong pag aapruba!!!`, type: "success" },
-      ])}`
-    );
+      ],
+    };
   } catch (error) {
     if (isRedirectError(error)) throw error;
 

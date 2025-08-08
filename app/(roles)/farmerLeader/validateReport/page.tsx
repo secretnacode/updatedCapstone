@@ -1,22 +1,10 @@
-import {
-  RedirectManager,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { ViewMemberReport } from "@/component/client_component/farmerLeaderComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
-import { NotificationBaseType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 import { ClipboardX } from "lucide-react";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ success?: string }>;
-}) {
-  const { success } = await searchParams;
-  let message: NotificationBaseType[] | null = null;
-  if (success) message = JSON.parse(success);
-
+export default async function Page() {
   console.log("validate reoport main component");
   const orgReport = await GetOrgMemberReport();
 
@@ -46,9 +34,6 @@ export default async function Page({
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full divide-y divide-gray-200 farmerReportTable">
-                {message && (
-                  <RedirectManager data={message} paramName="success" />
-                )}
                 {!orgReport.success && (
                   <RenderNotification notif={orgReport.notifError} />
                 )}
