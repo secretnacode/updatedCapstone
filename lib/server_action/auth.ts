@@ -35,6 +35,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 export async function LoginAuth(
   data: AuthLoginType
 ): Promise<AuthResponseType> {
+  // let work = ""
   try {
     // will check the user first then will see if the user input is both string
     const validateData: ValidateAuthValType<NotificationBaseType[]> =
@@ -76,6 +77,7 @@ export async function LoginAuth(
       )
     );
 
+    // work = userCredentials.data.work
     redirect(
       `/${userCredentials.data.work}/?success=${encodeURIComponent(
         JSON.stringify([

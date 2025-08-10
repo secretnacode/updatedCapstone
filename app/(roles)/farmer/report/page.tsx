@@ -4,13 +4,24 @@ import {
   ViewUserReportTableData,
 } from "@/component/client_component/reportComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
+import { GetFarmerReportReturnType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 import { ClipboardX } from "lucide-react";
 
 export default async function Page() {
   console.log("Report main component");
 
-  const report = await GetFarmerReport();
+  let report: GetFarmerReportReturnType;
+
+  try {
+    report = await GetFarmerReport();
+  } catch (error) {
+    const err = error as Error;
+    report = {
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
 
   return (
     <div className="p-8">

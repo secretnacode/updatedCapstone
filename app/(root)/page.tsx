@@ -15,7 +15,7 @@ export default async function Page({
   if (error) message = JSON.parse(error);
 
   return (
-    <main className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
       {message && <RedirectManager data={message} paramName="error" />}
       <div className="flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
         {/* Left Section */}
@@ -53,6 +53,6 @@ export default async function Page({
           <AuthForm />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

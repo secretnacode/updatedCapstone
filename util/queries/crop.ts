@@ -1,4 +1,7 @@
-import { InsertCropAfterSignUpType } from "@/types";
+import {
+  GetFarmerCropInfoQueryReturnType,
+  InsertCropAfterSignUpType,
+} from "@/types";
 import { pool } from "../configuration";
 
 /**
@@ -15,9 +18,35 @@ export const CreateNewCropAfterSignUp = async (
     );
   } catch (error) {
     const err = error as Error;
-    console.error("Error in Getting the available org:", error);
+    console.error("May pag kakamali sa pag gawa ng panibagong pananim:", error);
     throw new Error(
-      `Error in Getting the available org: ${err.message as string}`
+      `May pag kakamali sa pag gawa ng panibagong pananim: ${
+        err.message as string
+      }`
+    );
+  }
+};
+
+export const GetFarmerCropInfoQuery = async (
+  cropId: string
+): Promise<GetFarmerCropInfoQueryReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select "dayPlanted", "cropLocation", "farmAreaMeasurement" from capstone.crop where "cropId" = $1`,
+        [cropId]
+      )
+    ).rows[0];
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      "May pag kakamali sa pag kuha ng pananim sa database:",
+      error
+    );
+    throw new Error(
+      `May pag kakamali sa pag kuha ng pananim sa database: ${
+        err.message as string
+      }`
     );
   }
 };

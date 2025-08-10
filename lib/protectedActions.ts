@@ -52,6 +52,9 @@ const Actions = {
   READ_CROP: "read:crop", // action for reading the crop of farmer user
   UPDATE_CROP: "update:crop", // action for updating the crop of farmer user
   DELET_CROP: "delete:crop", // action for deleting the crop of the farmer user
+
+  // action for viewing the other farmer crop
+  READ_FARMER_CROP: "read:farmer:crop", // action for reading the crop of farmer user
 } as const;
 
 const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
@@ -61,6 +64,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
     Actions.DELETE_ORG_LIST,
+    Actions.READ_FARMER_CROP,
     Actions.READ_FARMER_USER,
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
@@ -77,6 +81,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
     Actions.DELETE_ORG_LIST,
+    Actions.READ_FARMER_CROP,
     Actions.READ_FARMER_USER,
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
@@ -96,6 +101,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELET_CROP,
     Actions.DELETE_FARMER_ORG_MEMBER_USER,
     Actions.READ_CROP,
+    Actions.READ_FARMER_CROP,
     Actions.READ_ALL_FARMER_ORG_MEMBER_USER,
     Actions.READ_FARMER_MEMBER_REPORT,
     Actions.READ_FARMER_ORG_MEMBER_USER,

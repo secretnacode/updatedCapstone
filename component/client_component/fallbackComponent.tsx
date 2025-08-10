@@ -18,8 +18,11 @@ export const RedirectManager: FC<{
   useEffect(() => {
     if (data) handleSetNotification(data);
     if (isLoading) handleDoneLoading();
+
     const currentUrl = new URL(window.location.href);
+
     currentUrl.searchParams.delete(paramName);
+
     route.replace(currentUrl.pathname + currentUrl.search, { scroll: false });
   }, [
     data,
@@ -39,8 +42,10 @@ export const RenderNotification: FC<{ notif: NotificationBaseType[] }> = ({
   notif,
 }) => {
   const { handleSetNotification } = useNotification();
+
   useEffect(() => {
     handleSetNotification(notif);
   }, [notif, handleSetNotification]);
+
   return null;
 };

@@ -334,3 +334,41 @@ export type GetFarmerOrgMemberReturnType =
       farmerMember: GetFarmerOrgMemberQueryReturnType;
     }
   | ServerActionFailBaseType;
+
+export type GetFarmerUserProfileInfoQueryReturnType = {
+  farmerFirstName: string;
+  farmerLastName: string;
+  farmerAlias: string;
+  mobileNumber: string;
+  barangay: string;
+  birthdate: Date;
+  verified: string;
+  orgName: string;
+  leaderName: string;
+  orgRole: string;
+  cropid: string;
+};
+
+export type GetFarmerUserProfileInfoReturnType =
+  | {
+      success: true;
+      farmerUserInfo: GetFarmerUserProfileInfoQueryReturnType;
+    }
+  | {
+      success: false;
+      notMember?: boolean;
+      notifError?: NotificationBaseType[];
+    };
+
+export type GetFarmerCropInfoQueryReturnType = {
+  dayPlanted: Date;
+  cropLocation: string;
+  farmAreaMeasurement: string;
+};
+
+export type GetFarmerCropInfoReturnType =
+  | {
+      success: true;
+      cropData: GetFarmerCropInfoQueryReturnType;
+    }
+  | ServerActionFailBaseType;

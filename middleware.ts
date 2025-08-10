@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
 
 const authorizedPath = new Map<string, string[]>();
-authorizedPath.set(`agriculturist`, [`/agriculturist`]);
 authorizedPath.set(`farmer`, [`/farmer`, `/farmerDetails`]);
-authorizedPath.set(`admin`, [`/agriculturist`]);
-authorizedPath.set(`leader`, [`/farmer`, `/farmerDetails`, `/farmerLeader`]);
+authorizedPath.set(`agriculturist`, [`/agriculturist`, `/farmerUser`]);
+authorizedPath.set(`admin`, [`/agriculturist`, `/farmerUser`]);
+authorizedPath.set(`leader`, [
+  `/farmer`,
+  `/farmerDetails`,
+  `/farmerLeader`,
+  `/farmerUser`,
+]);
 const publicPath = [`/`, `/unauthorized`];
 
 export default async function Middleware(req: NextRequest) {

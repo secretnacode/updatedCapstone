@@ -94,7 +94,7 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
     { page: `${basePage}/reports`, pageLabel: "Reports", logo: ClipboardPlus },
     { page: `${basePage}/crops`, pageLabel: "Crops", logo: Sprout },
     {
-      page: `${basePage}/farnerUsers`,
+      page: `${basePage}/farmerUsers`,
       pageLabel: "Farmers",
       logo: ContactRound,
     },

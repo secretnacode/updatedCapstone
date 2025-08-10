@@ -23,8 +23,15 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     const err = error as Error;
-    console.error("Error in CheckUsername query", error);
-    throw new Error(`Error in CheckUsername query ${err.message as string}`);
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag susuri ng username ng user: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag susuri ng username ng user: ${
+        err.message as string
+      }`
+    );
   }
 };
 
@@ -43,10 +50,14 @@ export const InsertNewUser = async (data: NewUserType): Promise<void> => {
   } catch (error) {
     const err = error as Error;
     console.error(
-      `Error in Inserting a new user query ${err.message as string}`
+      `May hindi inaasahang pagkakamali sa pag lalagay ng impormasyon sa database: ${
+        err.message as string
+      }`
     );
     throw new Error(
-      `Error in Inserting a new user query ${err.message as string}`
+      `May hindi inaasahang pagkakamali sa pag lalagay ng impormasyon sa database: ${
+        err.message as string
+      }`
     );
   }
 };
@@ -79,8 +90,16 @@ export const UserLogin = async (
     };
   } catch (error) {
     const err = error as Error;
-    console.error(`Error in User Login query ${err.message as string}`);
-    throw new Error(`Error in User Login query ${err.message as string}`);
+    console.error(
+      `May hindi inaasahang pagkakamali sa pag lologin ng user: ${
+        err.message as string
+      }`
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag lologin ng user: ${
+        err.message as string
+      }`
+    );
   }
 };
 
@@ -109,10 +128,14 @@ export const FarmerFirstDetailQuery = async (
   } catch (error) {
     const err = error as Error;
     console.error(
-      `Error in Farmer First Detail query ${err.message as string}`
+      `May hindi inaasahang pagkakamali sa pag sisign up ng user: ${
+        err.message as string
+      }`
     );
     throw new Error(
-      `Error in Farmer First Detail query ${err.message as string}`
+      `May hindi inaasahang pagkakamali sa pag sisign up ng user: ${
+        err.message as string
+      }`
     );
   }
 };
@@ -135,9 +158,14 @@ export const UpdateUserOrgAndRoleAfterSignUp = async (
     );
   } catch (error) {
     const err = error as Error;
-    console.error("Error in updating user orgId and orgRole:", error);
+    console.error(
+      "May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon:",
+      error
+    );
     throw new Error(
-      `Error in updating user orgId and orgRole: ${err.message as string}`
+      `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon: ${
+        err.message as string
+      }`
     );
   }
 };
@@ -159,8 +187,15 @@ export const GetFarmerRole = async (
     ).rows[0];
   } catch (error) {
     const err = error as Error;
-    console.error("Error in getting user role:", error);
-    throw new Error(`Error in getting user role: ${err.message as string}`);
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag kuha ng role ng magsasaka:",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag kuha ng role ng magsasaka: ${
+        err.message as string
+      }`
+    );
   }
 };
 
@@ -181,8 +216,15 @@ export const GetAgriRole = async (
     ).rows[0];
   } catch (error) {
     const err = error as Error;
-    console.error("Error in getting user role:", error);
-    throw new Error(`Error in getting user role: ${err.message as string}`);
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag kuha ng role ng agriculturist: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag kuha ng role ng agriculturist: ${
+        err.message as string
+      }`
+    );
   }
 };
 
@@ -203,9 +245,12 @@ export const GetFarmerOrgMemberQuery = async (
     ).rows;
   } catch (error) {
     const err = error as Error;
-    console.error("Problema sa pag kuha ng detalye sa database", error);
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag kuha ng detalye sa database: ",
+      error
+    );
     throw new Error(
-      `Problema sa pag kuha ng detalye sa database ${err.message}`
+      `May hindi inaasahang pagkakamali sa pag kuha ng detalye sa database: ${err.message}`
     );
   }
 };
@@ -222,9 +267,85 @@ export const ApprovedOrgFarmerAccQuery = async (farmerId: string) => {
     );
   } catch (error) {
     const err = error as Error;
-    console.error("Problema sa pag aapruba ng mag sasaka sa database", error);
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag aapruba ng mag sasaka sa database: ",
+      error
+    );
     throw new Error(
-      `Problema sa pag aapruba ng mag sasaka sa database ${err.message}`
+      `May hindi inaasahang pagkakamali sa pag aapruba ng mag sasaka sa database: ${err.message}`
+    );
+  }
+};
+
+/**
+ * checks the current user(usually leader) if the other farmer was its member or not
+ * @param farmerId farmer id that you want to check if its the member of the leader id or not
+ * @param leaderId current id of the user(leader id)
+ * @returns boolean value base on the result that the farmer is a member of the leader or not
+ */
+export const CheckMyMemberquery = async (
+  farmerId: string,
+  leaderId: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where f."farmerId" = $1 and o."orgLeadFarmerId" = $2)`,
+        [farmerId, leaderId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      "May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${err.message}`
+    );
+  }
+};
+
+/**
+ * getting the necesarry information about the farmer
+ * @param farmerId id of the farmer you want to get the info
+ * @returns info of the farmer
+ */
+export const GetFarmerUserProfileInfoQuery = async (farmerId: string) => {
+  try {
+    return (
+      await pool.query(
+        `select f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgName", (select concat(fl."farmerFirstName", ' ', fl."farmerLastName") from capstone.farmer fl join capstone.org o on fl."farmerId" = o."orgLeadFarmerId" join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1) as "leaderName", f."orgRole", string_agg(c."cropId"::text, ', ') as cropId from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.crop c on f."farmerId" = c."farmerId" where f."farmerId" = $2 group by f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgName", f."orgRole"`,
+        [farmerId, farmerId]
+      )
+    ).rows[0];
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      "May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${err.message}`
+    );
+  }
+};
+
+export const DelteUserAccountQuery = async (
+  farmerId: string
+): Promise<void> => {
+  try {
+    await pool.query(`delete from capstone.auth where "authId" = $1`, [
+      farmerId,
+    ]);
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag tatanggal ng account ng user: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag tatanggal ng account ng user: ${err.message}`
     );
   }
 };

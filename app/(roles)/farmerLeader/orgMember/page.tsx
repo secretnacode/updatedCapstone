@@ -4,24 +4,39 @@ import {
 } from "@/component/client_component/fallbackComponent";
 import { FarmerOrgMemberAction } from "@/component/client_component/farmerLeaderComponent";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
-import { NotificationBaseType } from "@/types";
+import { GetFarmerOrgMemberReturnType, NotificationBaseType } from "@/types";
 import { ClipboardX } from "lucide-react";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   console.log(`farmer org member main component`);
-  const farmerMember = await GetFarmerOrgMember();
-  const { success } = await searchParams;
-  const message: NotificationBaseType[] | undefined = success
-    ? JSON.parse(success)
+  let farmerMember: GetFarmerOrgMemberReturnType;
+  const { error } = await searchParams;
+  const message: NotificationBaseType[] | undefined = error
+    ? JSON.parse(error)
     : undefined;
+
+  try {
+    farmerMember = await GetFarmerOrgMember();
+  } catch (error) {
+    const err = error as Error;
+    farmerMember = {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
 
   return (
     <div className="p-8">
-      {message && <RedirectManager data={message} paramName="success" />}
+      {message && <RedirectManager data={message} paramName="error" />}
       {!farmerMember.success && (
         <RenderNotification notif={farmerMember.notifError} />
       )}
@@ -95,6 +110,7 @@ export default async function Page({
                           <FarmerOrgMemberAction
                             farmerId={farmer.farmerId}
                             verificationStatus={farmer.verified}
+                            farmerName={farmer.farmerName}
                           />
                         </td>
                       </tr>

@@ -73,6 +73,19 @@ export function Date10YearsAgo() {
   );
 }
 
+/**
+ * transforming the date object into human readable date (e.g. Jul. 20, 2025)
+ * @param date date type the you want to tranform
+ * @returns human readable date
+ */
+export function ReadableDateFomat(date: Date) {
+  return date.toLocaleDateString("en-PH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export const baranggayList = [
   "balayhangin",
   "bangyas",

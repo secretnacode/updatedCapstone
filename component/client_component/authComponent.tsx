@@ -25,6 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import { LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
 import { useLoading } from "./provider/loadingProvider";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 /**
  * Auth form component that renders the login form(default) or the sign up form
@@ -199,10 +200,20 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
     try {
       const res = await LoginAuth(authVal);
-      if (!res.success) throw { errors: res.errors };
+      if (res && !res.success) {
+        handleSetNotification(res.errors);
+        handleDoneLoading();
+      }
     } catch (error) {
-      const err = error as ErrorResponseType;
-      handleSetNotification(err.errors);
+      let err: ErrorResponseType | undefined;
+
+      if (!isRedirectError(error))
+        err = {
+          errors: [{ message: (error as Error).message, type: "error" }],
+        };
+
+      if (err) handleSetNotification(err.errors);
+
       handleDoneLoading();
     }
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import { ViewUserReportTableData } from "./reportComponent";
 import { useLoading } from "./provider/loadingProvider";
 import { useNotification } from "./provider/notificationProvider";
@@ -8,6 +8,9 @@ import { ErrorResponseType } from "@/types";
 import { ApprovedOrgMember } from "@/lib/server_action/report";
 import { ApprovedOrgFarmerAcc } from "@/lib/server_action/farmerUser";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { DeleteModalNotif } from "./componentForAllUser";
+import { createPortal } from "react-dom";
 
 export const ViewMemberReport: FC<{
   reportId: string;
@@ -42,10 +45,12 @@ export const ViewMemberReport: FC<{
 export const FarmerOrgMemberAction: FC<{
   farmerId: string;
   verificationStatus: boolean;
-}> = ({ farmerId, verificationStatus }) => {
+  farmerName: string;
+}> = ({ farmerId, verificationStatus, farmerName }) => {
   const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [userDelete, setUserDelete] = useState<boolean>(false);
 
   const handleApproveFarmerAcc = async () => {
     try {
@@ -63,9 +68,12 @@ export const FarmerOrgMemberAction: FC<{
       handleDoneLoading();
     }
   };
+
   return (
     <div>
-      <button className="cursor-pointer">Tingnan</button>
+      <Link className="cursor-pointer" href={`/farmerUser/${farmerId}`}>
+        Tingnan
+      </Link>
       <button
         className="cursor-pointer"
         disabled={verificationStatus}
@@ -73,7 +81,19 @@ export const FarmerOrgMemberAction: FC<{
       >
         Aprubahan
       </button>
-      <button className="cursor-pointer">Tanggalin</button>
+      <button className="cursor-pointer" onClick={() => setUserDelete(true)}>
+        Tanggalin
+      </button>
+
+      {userDelete &&
+        createPortal(
+          <DeleteModalNotif
+            farmerId={farmerId}
+            farmerName={farmerName}
+            setShowDeleteModal={setUserDelete}
+          />,
+          document.body
+        )}
     </div>
   );
 };

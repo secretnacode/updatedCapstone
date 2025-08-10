@@ -1,12 +1,28 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { ViewMemberReport } from "@/component/client_component/farmerLeaderComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
+import { GetOrgMemberReportReturnType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 import { ClipboardX } from "lucide-react";
 
 export default async function Page() {
   console.log("validate reoport main component");
-  const orgReport = await GetOrgMemberReport();
+  let orgReport: GetOrgMemberReportReturnType;
+
+  try {
+    orgReport = await GetOrgMemberReport();
+  } catch (error) {
+    const err = error as Error;
+    orgReport = {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
 
   return (
     <div className="p-8">

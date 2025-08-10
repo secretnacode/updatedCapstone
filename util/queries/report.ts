@@ -61,7 +61,7 @@ export const GetFarmerReportDetailQuery = async (
   try {
     return (
       await pool.query(
-        `SELECT r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') AS pictures FROM capstone.report r LEFT JOIN capstone.image i ON r."reportId" = i."reportId" WHERE r."reportId" = $1 GROUP BY r."reportId", r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title"`,
+        `SELECT r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r left join capstone.image i ON r."reportId" = i."reportId" WHERE r."reportId" = $1 GROUP BY r."reportId", r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title"`,
         [reportId]
       )
     ).rows[0];
