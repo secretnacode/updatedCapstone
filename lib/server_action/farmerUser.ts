@@ -10,6 +10,7 @@ import { ProtectedAction } from "../protectedActions";
 import {
   GetFarmerOrgMemberReturnType,
   GetFarmerUserProfileInfoReturnType,
+  GetMyProfileInfoType,
   NotificationBaseType,
 } from "@/types";
 import { GetSession } from "../session";
@@ -77,7 +78,12 @@ export const ApprovedOrgFarmerAcc = async (
   }
 };
 
-export const GetFarmerUserProfileInfo = async (
+/**
+ * server action for VIEWING(with security applied) farmer profile picture
+ * @param farmerId id of the farmer you want to view
+ * @returns farmer user profile info
+ */
+export const GetViewingFarmerUserProfileInfo = async (
   farmerId: string
 ): Promise<GetFarmerUserProfileInfoReturnType> => {
   try {
@@ -110,3 +116,67 @@ export const GetFarmerUserProfileInfo = async (
     };
   }
 };
+
+/**
+ * server action for GETTING the user information of the current user
+ * @returns user profile info
+ */
+export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
+  try {
+    await ProtectedAction("read:user");
+
+    const session = await GetSession();
+
+    if (session)
+      return {
+        success: true,
+        farmerInfo: await GetFarmerUserProfileInfoQuery(session.userId),
+      };
+    else
+      throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `Nagka problema sa pag kuha ng impormasyon ng mag sasaka ${err}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * updates the user
+ * @returns
+ */
+// export const UpdateMyProfileInfo = async () => {
+//   try {
+//     await ProtectedAction("update:user");
+
+//     const session = await GetSession();
+
+//     if (session) {
+//       await UpdateMyProfileInfoQuery(session.userId);
+//       return { success: true };
+//     } else
+//       throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+//   } catch (error) {
+//     const err = error as Error;
+//     console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
+//     return {
+//       success: false,
+//       notifError: [
+//         {
+//           message: err.message,
+//           type: "error",
+//         },
+//       ],
+//     };
+//   }
+// };

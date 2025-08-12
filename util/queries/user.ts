@@ -1,6 +1,7 @@
 import {
   FarmerFirstDetailType,
   GetFarmerOrgMemberQueryReturnType,
+  GetFarmerUserProfileInfoQueryReturnType,
   NewUserType,
   QueryUserLoginReturnType,
 } from "@/types";
@@ -311,11 +312,13 @@ export const CheckMyMemberquery = async (
  * @param farmerId id of the farmer you want to get the info
  * @returns info of the farmer
  */
-export const GetFarmerUserProfileInfoQuery = async (farmerId: string) => {
+export const GetFarmerUserProfileInfoQuery = async (
+  farmerId: string
+): Promise<GetFarmerUserProfileInfoQueryReturnType> => {
   try {
     return (
       await pool.query(
-        `select f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgName", (select concat(fl."farmerFirstName", ' ', fl."farmerLastName") from capstone.farmer fl join capstone.org o on fl."farmerId" = o."orgLeadFarmerId" join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1) as "leaderName", f."orgRole", string_agg(c."cropId"::text, ', ') as cropId from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.crop c on f."farmerId" = c."farmerId" where f."farmerId" = $2 group by f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgName", f."orgRole"`,
+        `select f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgId", (select concat(fl."farmerFirstName", ' ', fl."farmerLastName") from capstone.farmer fl join capstone.org o on fl."farmerId" = o."orgLeadFarmerId" join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1) as "leaderName", f."orgRole", string_agg(c."cropId"::text, ', ') as cropId from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" join capstone.crop c on f."farmerId" = c."farmerId" where f."farmerId" = $2 group by f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgId", f."orgRole"`,
         [farmerId, farmerId]
       )
     ).rows[0];
@@ -331,6 +334,10 @@ export const GetFarmerUserProfileInfoQuery = async (farmerId: string) => {
   }
 };
 
+/**
+ * delete the user infromation
+ * @param farmerId id of the farmer you want to delete
+ */
 export const DelteUserAccountQuery = async (
   farmerId: string
 ): Promise<void> => {
@@ -349,3 +356,18 @@ export const DelteUserAccountQuery = async (
     );
   }
 };
+
+// export const UpdateMyProfileInfoQuery = () => {
+//   try {
+//     await pool.query(`update capstone.`);
+//   } catch (error) {
+//     const err = error as Error;
+//     console.error(
+//       "May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ",
+//       error
+//     );
+//     throw new Error(
+//       `May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ${err.message}`
+//     );
+//   }
+// };

@@ -1,6 +1,6 @@
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
-import { GetFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
+import { GetViewingFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
 import { redirect } from "next/navigation";
 import { GetFarmerUserProfileInfoReturnType } from "@/types";
@@ -14,7 +14,7 @@ export default async function Page({
   let farmerData: GetFarmerUserProfileInfoReturnType;
 
   try {
-    farmerData = await GetFarmerUserProfileInfo((await params).farmerId);
+    farmerData = await GetViewingFarmerUserProfileInfo((await params).farmerId);
   } catch (error) {
     const err = error as Error;
     farmerData = {

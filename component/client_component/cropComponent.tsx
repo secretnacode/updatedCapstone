@@ -1,7 +1,15 @@
 "use client";
 
 import { GetFarmerCropInfo } from "@/lib/server_action/crop";
-import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FC,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useNotification } from "./provider/notificationProvider";
 import { GetFarmerCropInfoQueryReturnType } from "@/types";
@@ -9,11 +17,31 @@ import { useLoading } from "./provider/loadingProvider";
 import { X } from "lucide-react";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
-export const ViewCropModalButton: FC<{
+const MappingCropButtons: FC<{ cropId: string; isViewing: boolean }> = ({
+  cropId,
+  isViewing,
+}) => {
+  return (
+    <div className="grid gap-2">
+      {cropId.split(", ").map((crop) => (
+        <MemoViewCropModalButton
+          key={crop}
+          cropId={crop}
+          isViewing={isViewing}
+        />
+      ))}
+    </div>
+  );
+};
+
+export const MemoMappingCropButtons = memo(MappingCropButtons);
+
+const ViewCropModalButton: FC<{
   cropId: string;
   isViewing: boolean;
 }> = ({ cropId, isViewing }) => {
   const [viewCrop, setViewCrop] = useState<boolean>(false);
+
   return (
     <>
       <button
@@ -25,7 +53,7 @@ export const ViewCropModalButton: FC<{
 
       {viewCrop &&
         createPortal(
-          <ViewCropModal
+          <MemoViewCropModal
             cropId={cropId}
             setViewCrop={setViewCrop}
             isViewing={isViewing}
@@ -36,17 +64,24 @@ export const ViewCropModalButton: FC<{
   );
 };
 
+export const MemoViewCropModalButton = memo(ViewCropModalButton);
+
 export const ViewCropModal: FC<{
   cropId: string;
   setViewCrop: Dispatch<SetStateAction<boolean>>;
   isViewing: boolean;
 }> = ({ cropId, setViewCrop, isViewing }) => {
-  const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [isDoneFetching, setIsDoneFetching] = useState<boolean>(false);
+  const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>({
+    dayPlanted: new Date(),
+    cropLocation: "",
+    farmAreaMeasurement: "",
+  });
 
-  useEffect(() => {
-    const GetCrop = async () => {
+  const GetCrop = useCallback(
+    async (cropId: string, isViewing: boolean) => {
       try {
         handleIsLoading("Kinukuha ang impormasyon ng pananim....");
         const res = await GetFarmerCropInfo(cropId, isViewing);
@@ -57,6 +92,8 @@ export const ViewCropModal: FC<{
         }
 
         if (res.success && res.cropData) setCropInfo(res.cropData);
+
+        setIsDoneFetching(true);
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
@@ -64,21 +101,17 @@ export const ViewCropModal: FC<{
       } finally {
         handleDoneLoading();
       }
-    };
+    },
+    [handleSetNotification, handleIsLoading, handleDoneLoading, setViewCrop]
+  );
 
-    GetCrop();
-  }, [
-    cropId,
-    isViewing,
-    handleSetNotification,
-    handleIsLoading,
-    handleDoneLoading,
-    setViewCrop,
-  ]);
+  useEffect(() => {
+    GetCrop(cropId, isViewing);
+  }, [GetCrop, cropId, isViewing]);
 
   return (
     <>
-      {cropInfo && (
+      {isDoneFetching && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
             <div className="flex items-center justify-between p-4 border-b">
@@ -134,3 +167,5 @@ export const ViewCropModal: FC<{
     </>
   );
 };
+
+export const MemoViewCropModal = memo(ViewCropModal);

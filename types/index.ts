@@ -6,7 +6,13 @@ import {
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import { LucideProps } from "lucide-react";
-import { ForwardRefExoticComponent, RefAttributes } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  ForwardRefExoticComponent,
+  ReactNode,
+  RefAttributes,
+} from "react";
 import z from "zod/v4";
 
 // exporting the type of authSignUpSchema so it can be used as a type together with the schema
@@ -91,8 +97,7 @@ export type QueryAvailableOrgReturnType =
   | {
       orgId: string;
       orgName: string;
-    }[]
-  | [];
+    }[];
 
 export type AvailableOrgReturnType =
   | {
@@ -170,8 +175,7 @@ export type CropErrorFormType =
   | {
       formError: { [v in keyof FarmerSecondDetailFormType]?: string[] } | null;
       cropId: string;
-    }[]
-  | [];
+    }[];
 
 export type FirstErrorType = {
   organization: string;
@@ -201,8 +205,7 @@ export type NavbarType =
       logo: ForwardRefExoticComponent<
         Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
       >;
-    }[]
-  | [];
+    }[];
 
 export type GetUserReportReturnType =
   | {
@@ -212,8 +215,7 @@ export type GetUserReportReturnType =
       dayReported: string;
       dayHappen: string;
       title: string;
-    }[]
-  | [];
+    }[];
 
 export type ServerActionFailBaseType = {
   success: false;
@@ -343,9 +345,9 @@ export type GetFarmerUserProfileInfoQueryReturnType = {
   barangay: string;
   birthdate: Date;
   verified: string;
-  orgName: string;
-  leaderName: string;
+  orgId: string;
   orgRole: string;
+  leaderName: string;
   cropid: string;
 };
 
@@ -372,3 +374,87 @@ export type GetFarmerCropInfoReturnType =
       cropData: GetFarmerCropInfoQueryReturnType;
     }
   | ServerActionFailBaseType;
+
+export type GetMyProfileInfoType =
+  | {
+      success: true;
+      farmerInfo: GetFarmerUserProfileInfoQueryReturnType;
+    }
+  | ServerActionFailBaseType;
+
+export type FarmerPersonalInfoType = {
+  farmerFirstName: string;
+  farmerLastName: string;
+  farmerAlias: string;
+  mobileNumber: string;
+  barangay: string;
+  birthdate: Date;
+};
+
+export type ChildrenType = Readonly<{ children: Readonly<ReactNode> }>;
+
+export type FormInputType = {
+  type: string;
+  name: string;
+  placeholder: string;
+  className?: string;
+  required?: boolean;
+  disabled?: boolean;
+};
+
+export type ControlledFormInputType = FormInputType & {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+};
+
+export type FormLabelType = ChildrenType & {
+  htmlFor: string;
+  className?: string;
+};
+
+export type FormTitleType = ChildrenType & {
+  className?: string;
+};
+
+export type ControlledSelectElementForBarangayType = {
+  selectValue: string;
+  selectName: string;
+  selectClassName?: string;
+  selectIsDisable: boolean;
+  selectOnChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+};
+
+export type FormErrorElementType = { message: string; className: string };
+
+export type ControlledSelectElementForOrgListType = {
+  selectOrgList: QueryAvailableOrgReturnType;
+  selectValue: string;
+  selectName: string;
+  selectClassName?: string;
+  selectIdDisable: boolean;
+  selectOnChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+};
+
+export type FormElementType = ChildrenType & {
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  classname?: string;
+};
+
+export type FormDivType = ChildrenType & {
+  className?: string;
+};
+
+export type UserPersonalInfoFormInputComponentType = {
+  labelMessage: string;
+  inputType?: string;
+  inputDisable: boolean;
+  inputName: string;
+  inputValue: string;
+  inputPlaceholder: string;
+  inputOnchange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+};
+
+export type UserPersonalInfoFormSelectComponentType =
+  ControlledSelectElementForBarangayType & {
+    labelMessage: string;
+  };

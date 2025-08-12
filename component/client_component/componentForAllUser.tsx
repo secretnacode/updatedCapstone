@@ -1,9 +1,36 @@
+"use client";
+
 import { AlertTriangle, X } from "lucide-react";
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  FC,
+  FormEvent,
+  memo,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { useLoading } from "./provider/loadingProvider";
 import { useNotification } from "./provider/notificationProvider";
 import { DelteUserAccount } from "@/lib/server_action/user";
 import { useRouter } from "next/navigation";
+import {
+  FarmerPersonalInfoType,
+  GetFarmerUserProfileInfoQueryReturnType,
+  QueryAvailableOrgReturnType,
+  UserPersonalInfoFormInputComponentType,
+  UserPersonalInfoFormSelectComponentType,
+} from "@/types";
+import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
+import {
+  ControlledFormInput,
+  ControlledSelectElementForBarangay,
+  FormDiv,
+  FormElement,
+  FormLabel,
+  FormTitle,
+} from "../server_component/elementComponents/formComponent";
 
 /**
  * component for the delete modal that will let sure the user will delete the account
@@ -87,3 +114,249 @@ export const DeleteModalNotif: FC<{
     </div>
   );
 };
+
+//FIX: add middle name and extension name
+export const UserProFileForm: FC<{
+  userFarmerInfo: GetFarmerUserProfileInfoQueryReturnType;
+  isViewing: boolean;
+  orgList: QueryAvailableOrgReturnType;
+}> = ({ userFarmerInfo, isViewing, orgList }) => {
+  return (
+    <div className="grid gap-6">
+      <UserPersonalInfo
+        personalInfo={{
+          farmerFirstName: userFarmerInfo.farmerFirstName,
+          farmerLastName: userFarmerInfo.farmerLastName,
+          farmerAlias: userFarmerInfo.farmerAlias,
+          mobileNumber: userFarmerInfo.mobileNumber,
+          barangay: userFarmerInfo.barangay,
+          birthdate: userFarmerInfo.birthdate,
+        }}
+        isViewing={isViewing}
+      />
+      <div className="border-t pt-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Organisasyon na kasali
+        </h3>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Pangalan ng Organisasyon
+            </label>
+            {/* <MemoizedControlledSelectElementForOrgList
+              orgList={orgList}
+              val={orgId ? orgId : ""}
+              name={"orgId"}
+              style="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500"
+              isView={isViewing}
+              OnchangeFunc={handleUserInput}
+            /> */}
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Leader ng Organisasyon
+            </label>
+            <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500">
+              {userFarmerInfo.leaderName ? userFarmerInfo.leaderName : "Wala"}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Posisyon
+            </label>
+            <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500">
+              {userFarmerInfo.orgRole ? userFarmerInfo.orgRole : "Wala"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UserPersonalInfo: FC<{
+  personalInfo: FarmerPersonalInfoType;
+  isViewing: boolean;
+}> = ({ personalInfo, isViewing }) => {
+  const [userInfoState, setUserInfoState] =
+    useState<FarmerPersonalInfoType>(personalInfo);
+  console.log(userInfoState);
+
+  const handleUserInput = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setUserInfoState((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+      }));
+    },
+    []
+  );
+
+  const handleFormSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  }, []);
+
+  return (
+    <FormElement onSubmit={handleFormSubmit}>
+      <FormTitle className="text-lg font-semibold text-gray-900 mb-4">
+        Pangalan
+      </FormTitle>
+      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Unang Pangalan"
+          inputDisable={isViewing}
+          inputName={"farmerFirstName"}
+          inputValue={userInfoState.farmerFirstName}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="Mang kanor"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Gitnang Pangalan"
+          inputDisable={isViewing}
+          inputName={"farmerMiddleName"}
+          inputValue={"wala pa sa db"}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="wala pa sa db"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Apelyido"
+          inputDisable={isViewing}
+          inputName={"farmerLastName"}
+          inputValue={userInfoState.farmerLastName}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="e.g. Juan Delacruz"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Palayaw na pagdugtong"
+          inputDisable={isViewing}
+          inputName={"farmerExtensionName"}
+          inputValue={`wala pang nakalagay sa DB`}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="e.g. Jr."
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Alyas"
+          inputDisable={isViewing}
+          inputName={"farmerAlias"}
+          inputValue={userInfoState.farmerAlias}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="e.g. Mang Kanor"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Kasarian"
+          inputDisable={isViewing}
+          inputName={"farmerSex"}
+          inputValue={`wala pang nakalagay sa database`}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="e.g. lalaki"
+        />
+
+        <UserPersonalInfoFormSelectComponent
+          labelMessage="Baranggay na tinitirhan"
+          selectValue={userInfoState.barangay}
+          selectName={"barangay"}
+          selectIsDisable={isViewing}
+          selectOnChange={handleUserInput}
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Numero ng Telepono"
+          inputDisable={isViewing}
+          inputName={"mobileNumber"}
+          inputValue={userInfoState.mobileNumber}
+          inputOnchange={handleUserInput}
+          inputPlaceholder="09** *** **12"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Kapanganakan"
+          inputType="date"
+          inputDisable={isViewing}
+          inputName={"birthdate"}
+          inputValue={
+            userInfoState.birthdate instanceof Date
+              ? DateToYYMMDD(userInfoState.birthdate)
+              : userInfoState.birthdate
+          }
+          inputOnchange={handleUserInput}
+          inputPlaceholder="july 20, 2024"
+        />
+
+        <UserPersonalInfoFormInputComponent
+          labelMessage="Kapanganakan"
+          inputType="date"
+          inputDisable={isViewing}
+          inputName={"birthdate"}
+          inputValue={
+            userInfoState.birthdate instanceof Date
+              ? DateToYYMMDD(userInfoState.birthdate)
+              : userInfoState.birthdate
+          }
+          inputOnchange={handleUserInput}
+          inputPlaceholder="july 20, 2024"
+        />
+      </div>
+    </FormElement>
+  );
+};
+
+const UserPersonalInfoFormInputComponent: FC<UserPersonalInfoFormInputComponentType> =
+  memo(
+    ({
+      labelMessage,
+      inputType = "text",
+      inputDisable,
+      inputName,
+      inputValue,
+      inputOnchange,
+      inputPlaceholder,
+    }) => {
+      return (
+        <FormDiv>
+          <FormLabel htmlFor={inputName}>{labelMessage}</FormLabel>
+          <ControlledFormInput
+            type={inputType}
+            disabled={inputDisable}
+            name={inputName}
+            value={inputValue}
+            onChange={inputOnchange}
+            placeholder={inputPlaceholder}
+          />
+        </FormDiv>
+      );
+    }
+  );
+UserPersonalInfoFormInputComponent.displayName =
+  "UserPersonalInfoFormInputComponent";
+
+const UserPersonalInfoFormSelectComponent: FC<UserPersonalInfoFormSelectComponentType> =
+  memo(
+    ({
+      labelMessage,
+      selectValue,
+      selectName,
+      selectIsDisable,
+      selectOnChange,
+    }) => {
+      return (
+        <FormDiv>
+          <FormLabel htmlFor={selectName}>{labelMessage}</FormLabel>
+          <ControlledSelectElementForBarangay
+            selectIsDisable={selectIsDisable}
+            selectName={selectName}
+            selectValue={selectValue}
+            selectOnChange={selectOnChange}
+          />
+        </FormDiv>
+      );
+    }
+  );
+UserPersonalInfoFormSelectComponent.displayName =
+  "UserPersonalInfoFormSelectComponent";
