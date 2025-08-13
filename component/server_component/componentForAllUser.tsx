@@ -4,7 +4,7 @@ import {
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
-import { MemoMappingCropButtons } from "../client_component/cropComponent";
+import { ViewCropModalButton } from "../client_component/cropComponent";
 import { UserProFileForm } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
@@ -14,6 +14,8 @@ export const FarmerUserProfile: FC<{
   isViewing: boolean;
 }> = async ({ userFarmerInfo, isViewing }) => {
   let AvailOrg: AvailableOrgReturnType;
+
+  console.log(`Profile info component`);
 
   try {
     AvailOrg = await AvailableOrg();
@@ -74,10 +76,12 @@ export const FarmerUserProfile: FC<{
           {/* Crops Section */}
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
-            <MemoMappingCropButtons
-              cropId={userFarmerInfo.cropid}
-              isViewing={isViewing}
-            />
+            <div className="grid gap-2">
+                <ViewCropModalButton
+                  cropId={userFarmerInfo.cropid}
+                  isViewing={isViewing}
+                />
+            </div>
           </div>
         </div>
       </div>

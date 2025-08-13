@@ -5,6 +5,7 @@ import { GetMyProfileInfoType } from "@/types";
 
 export default async function Page() {
   let userInfo: GetMyProfileInfoType;
+  console.log(`Profile main component`);
 
   try {
     userInfo = await GetMyProfileInfo();

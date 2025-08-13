@@ -113,6 +113,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_FARMER_MEMBER_REPORT,
     Actions.UPDATE_FARMER_ORG_MEMBER_USER,
     Actions.UPDATE_ORG,
+    Actions.UPDATE_USER,
   ],
   farmer: [
     Actions.CREATE_CROP,
@@ -127,6 +128,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_USER,
     Actions.UPDATE_CROP,
     Actions.UPDATE_ORG,
+    Actions.UPDATE_USER,
   ],
 };
 

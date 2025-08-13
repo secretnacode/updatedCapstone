@@ -118,7 +118,7 @@ export const farmerFirstDetailFormSchema = z.object({
         ((val.startsWith("+639") && val.length === 13) ||
           (val.startsWith("09") && val.length === 11)),
       {
-        message: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx o +639xxxxxxxxx)`,
+        message: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx/+639xxxxxxxxx)`,
       }
     ),
   birthdate: z.coerce

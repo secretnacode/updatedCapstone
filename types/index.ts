@@ -5,7 +5,7 @@ import {
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { LucideProps } from "lucide-react";
+import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ChangeEvent,
   FormEvent,
@@ -382,16 +382,23 @@ export type GetMyProfileInfoType =
     }
   | ServerActionFailBaseType;
 
-export type FarmerPersonalInfoType = {
-  farmerFirstName: string;
-  farmerLastName: string;
-  farmerAlias: string;
-  mobileNumber: string;
-  barangay: string;
-  birthdate: Date;
-};
+export type FarmerPersonalInfoType = FarmerFirstDetailFormType;
 
-export type ChildrenType = Readonly<{ children: Readonly<ReactNode> }>;
+export type FormErrorType<T> = { [key in keyof T]?: string[] } | null;
+
+export type UpdateUserProfileInfoType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      formError?: FormErrorType<FarmerPersonalInfoType>;
+    }
+);
+
+export type ChildrenType = Readonly<{ children?: Readonly<ReactNode> }>;
 
 export type FormInputType = {
   type: string;
@@ -424,7 +431,10 @@ export type ControlledSelectElementForBarangayType = {
   selectOnChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type FormErrorElementType = { message: string; className: string };
+export type FormErrorElementType = {
+  messages: string[];
+  className?: string;
+};
 
 export type ControlledSelectElementForOrgListType = {
   selectOrgList: QueryAvailableOrgReturnType;
@@ -436,7 +446,7 @@ export type ControlledSelectElementForOrgListType = {
 };
 
 export type FormElementType = ChildrenType & {
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   classname?: string;
 };
 
@@ -444,9 +454,10 @@ export type FormDivType = ChildrenType & {
   className?: string;
 };
 
-export type UserPersonalInfoFormInputComponentType = {
+export type FormDivLabelInputType = {
   labelMessage: string;
   inputType?: string;
+  formErrorMessage?: string[];
   inputDisable: boolean;
   inputName: string;
   inputValue: string;
@@ -454,7 +465,26 @@ export type UserPersonalInfoFormInputComponentType = {
   inputOnchange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 };
 
-export type UserPersonalInfoFormSelectComponentType =
-  ControlledSelectElementForBarangayType & {
-    labelMessage: string;
-  };
+export type FormDivLabelSelectType = ControlledSelectElementForBarangayType & {
+  labelMessage: string;
+  formErrorMessage?: string[];
+};
+
+export type FormButtonType = ChildrenType & {
+  type?: "button" | "submit" | "reset";
+  onClick?: () => void;
+  className?: string;
+  logo?: LucideIcon;
+  buttonLabel: string;
+};
+
+export type FormCancelSubmitButtonType = {
+  submitOnClick?: () => void;
+  submitClassName?: string;
+  submitButtonLabel: string;
+  submitLogo?: LucideIcon;
+  cancelOnClick?: () => void;
+  cancelClassName?: string;
+  cancelButtonLabel: string;
+  cancelLogo?: LucideIcon;
+};

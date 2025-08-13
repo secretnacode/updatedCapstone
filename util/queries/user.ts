@@ -1,5 +1,6 @@
 import {
   FarmerFirstDetailType,
+  FarmerPersonalInfoType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerUserProfileInfoQueryReturnType,
   NewUserType,
@@ -154,7 +155,7 @@ export const UpdateUserOrgAndRoleAfterSignUp = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `update capstone.farmer set "orgId"=$1, "orgRole"=$2 where "farmerId"=$3`,
+      `update capstone.farmer set "orgId"= $1, "orgRole"= $2 where "farmerId"= $3`,
       [orgId, userRole, userId]
     );
   } catch (error) {
@@ -357,17 +358,31 @@ export const DelteUserAccountQuery = async (
   }
 };
 
-// export const UpdateMyProfileInfoQuery = () => {
-//   try {
-//     await pool.query(`update capstone.`);
-//   } catch (error) {
-//     const err = error as Error;
-//     console.error(
-//       "May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ",
-//       error
-//     );
-//     throw new Error(
-//       `May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ${err.message}`
-//     );
-//   }
-// };
+export const UpdateUserProfileInfoQuery = async (
+  userId: string,
+  newProfileInfo: FarmerPersonalInfoType
+) => {
+  try {
+    await pool.query(
+      `update capstone.farmer set "farmerFirstName" = $1, "farmerAlias" = $2, "mobileNumber" = $3, "barangay" = $4, "birthdate" = $5, "farmerLastName" = $6 where "farmerId" = $7`,
+      [
+        newProfileInfo.firstName,
+        newProfileInfo.alias,
+        newProfileInfo.mobileNumber,
+        newProfileInfo.farmerBarangay,
+        newProfileInfo.birthdate,
+        newProfileInfo.lastName,
+        userId,
+      ]
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error(
+      "May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ",
+      error
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ${err.message}`
+    );
+  }
+};

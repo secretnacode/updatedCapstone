@@ -17,39 +17,27 @@ import { useLoading } from "./provider/loadingProvider";
 import { X } from "lucide-react";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
-const MappingCropButtons: FC<{ cropId: string; isViewing: boolean }> = ({
-  cropId,
-  isViewing,
-}) => {
-  return (
-    <div className="grid gap-2">
-      {cropId.split(", ").map((crop) => (
-        <MemoViewCropModalButton
-          key={crop}
-          cropId={crop}
-          isViewing={isViewing}
-        />
-      ))}
-    </div>
-  );
-};
-
-export const MemoMappingCropButtons = memo(MappingCropButtons);
-
-const ViewCropModalButton: FC<{
+export const ViewCropModalButton: FC<{
   cropId: string;
   isViewing: boolean;
 }> = ({ cropId, isViewing }) => {
   const [viewCrop, setViewCrop] = useState<boolean>(false);
+  console.log(cropId);
+
+  const handleSplitCropId = cropId.split(", ");
 
   return (
     <>
-      <button
-        onClick={() => setViewCrop(true)}
-        className="w-full px-3 py-2 text-sm bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
-      >
-        {cropId}
-      </button>
+      {handleSplitCropId.length > 0 ? (
+        <button
+          onClick={() => setViewCrop(true)}
+          className="w-full px-3 py-2 text-sm bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
+        >
+          {cropId}
+        </button>
+      ) : (
+        <p>Wala ka pang pananim</p>
+      )}
 
       {viewCrop &&
         createPortal(
@@ -63,8 +51,6 @@ const ViewCropModalButton: FC<{
     </>
   );
 };
-
-export const MemoViewCropModalButton = memo(ViewCropModalButton);
 
 export const ViewCropModal: FC<{
   cropId: string;

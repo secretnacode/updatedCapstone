@@ -2,6 +2,10 @@ import {
   ControlledFormInputType,
   ControlledSelectElementForBarangayType,
   ControlledSelectElementForOrgListType,
+  FormButtonType,
+  FormCancelSubmitButtonType,
+  FormDivLabelInputType,
+  FormDivLabelSelectType,
   FormDivType,
   FormElementType,
   FormErrorElementType,
@@ -95,7 +99,7 @@ export const ControlledSelectElementForBarangay: FC<ControlledSelectElementForBa
           name={selectName}
           value={selectValue}
           onChange={selectOnChange}
-          className={`${selectClassName}`}
+          className={`w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent ${selectClassName}`}
           disabled={selectIsDisable}
         >
           <option value="">--Pumili--Ng--Baranggay--</option>
@@ -112,8 +116,16 @@ ControlledSelectElementForBarangay.displayName =
   "ControlledSelectElementForBarangay";
 
 export const FormErrorElement: FC<FormErrorElementType> = memo(
-  ({ className = "", message }) => {
-    return <p className={className}>{message}</p>;
+  ({ className = "", messages }) => {
+    return (
+      <>
+        {messages.map((message, index) => (
+          <p key={index} className={`text-red-500 text-sm ${className}`}>
+            {message}
+          </p>
+        ))}
+      </>
+    );
   }
 );
 FormErrorElement.displayName = "FormErrorElement";
@@ -133,7 +145,7 @@ export const ControlledSelectElementForOrgList: FC<ControlledSelectElementForOrg
           name={selectName}
           onChange={selectOnChange}
           value={selectValue}
-          className={selectClassName}
+          className={`w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent ${selectClassName}`}
           disabled={selectIdDisable}
         >
           <option value="">--Pumili--Ng--Organisasyon</option>
@@ -162,3 +174,136 @@ export const FormElement: FC<FormElementType> = memo(
   }
 );
 FormElement.displayName = "FormElement";
+
+export const FormSubmitButton: FC<FormButtonType> = memo(
+  ({
+    type = "button",
+    onClick = () => {},
+    className = "",
+    buttonLabel,
+    children,
+  }) => {
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        className={`flex items-center justify-center gap-3 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 ${className}`}
+      >
+        {children}
+        {buttonLabel}
+      </button>
+    );
+  }
+);
+FormSubmitButton.displayName = "FormSubmitButton";
+
+export const FormCancelButton: FC<FormButtonType> = memo(
+  ({
+    type = "button",
+    onClick = () => {},
+    className = "",
+    buttonLabel,
+    children,
+  }) => {
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        className={`flex items-center justify-center gap-3 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 ${className}`}
+      >
+        {children}
+        {buttonLabel}
+      </button>
+    );
+  }
+);
+FormCancelButton.displayName = "FormButton";
+
+export const FormCancelSubmitButton: FC<FormCancelSubmitButtonType> = memo(
+  ({
+    submitOnClick,
+    submitClassName = "",
+    submitButtonLabel,
+    submitLogo: SubmitLogo,
+    cancelOnClick,
+    cancelClassName = "",
+    cancelButtonLabel,
+    cancelLogo: CancelLogo,
+  }) => {
+    return (
+      <div className="flex justify-end gap-4 pt-6">
+        <FormSubmitButton
+          buttonLabel={submitButtonLabel}
+          onClick={submitOnClick}
+          className={submitClassName}
+          type="submit"
+        >
+          {SubmitLogo && <SubmitLogo />}
+        </FormSubmitButton>
+
+        <FormCancelButton
+          buttonLabel={cancelButtonLabel}
+          onClick={cancelOnClick}
+          className={cancelClassName}
+        >
+          {CancelLogo && <CancelLogo />}
+        </FormCancelButton>
+      </div>
+    );
+  }
+);
+FormCancelSubmitButton.displayName = "FormCancelSubmitButton";
+
+export const FormDivLabelInput: FC<FormDivLabelInputType> = memo(
+  ({
+    labelMessage,
+    inputType = "text",
+    inputDisable,
+    inputName,
+    inputValue,
+    inputOnchange,
+    inputPlaceholder,
+    formErrorMessage,
+  }) => {
+    return (
+      <FormDiv>
+        <FormLabel htmlFor={inputName}>{labelMessage}</FormLabel>
+        <ControlledFormInput
+          type={inputType}
+          disabled={inputDisable}
+          name={inputName}
+          value={inputValue}
+          onChange={inputOnchange}
+          placeholder={inputPlaceholder}
+        />
+        {formErrorMessage && <FormErrorElement messages={formErrorMessage} />}
+      </FormDiv>
+    );
+  }
+);
+FormDivLabelInput.displayName = "FormDivLabelInput";
+
+export const FormDivLabelSelect: FC<FormDivLabelSelectType> = memo(
+  ({
+    labelMessage,
+    selectValue,
+    selectName,
+    selectIsDisable,
+    selectOnChange,
+    formErrorMessage,
+  }) => {
+    return (
+      <FormDiv>
+        <FormLabel htmlFor={selectName}>{labelMessage}</FormLabel>
+        <ControlledSelectElementForBarangay
+          selectIsDisable={selectIsDisable}
+          selectName={selectName}
+          selectValue={selectValue}
+          selectOnChange={selectOnChange}
+        />
+        {formErrorMessage && <FormErrorElement messages={formErrorMessage} />}
+      </FormDiv>
+    );
+  }
+);
+FormDivLabelSelect.displayName = "FormDivLabelSelect";

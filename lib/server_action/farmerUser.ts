@@ -5,15 +5,20 @@ import {
   CheckMyMemberquery,
   GetFarmerOrgMemberQuery,
   GetFarmerUserProfileInfoQuery,
+  UpdateUserProfileInfoQuery,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import {
+  FarmerPersonalInfoType,
   GetFarmerOrgMemberReturnType,
   GetFarmerUserProfileInfoReturnType,
   GetMyProfileInfoType,
   NotificationBaseType,
+  UpdateUserProfileInfoType,
 } from "@/types";
 import { GetSession } from "../session";
+import { ZodValidateForm } from "../validation/authValidation";
+import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -155,28 +160,55 @@ export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
  * updates the user
  * @returns
  */
-// export const UpdateMyProfileInfo = async () => {
-//   try {
-//     await ProtectedAction("update:user");
+export const UpdateUserProfileInfo = async (
+  newUserProfileInfo: FarmerPersonalInfoType
+): Promise<UpdateUserProfileInfoType> => {
+  try {
+    await ProtectedAction("update:user");
+    console.log(newUserProfileInfo);
 
-//     const session = await GetSession();
+    const validateVal = ZodValidateForm(
+      newUserProfileInfo,
+      farmerFirstDetailFormSchema
+    );
+    if (!validateVal.valid)
+      return {
+        success: false,
+        formError: validateVal.formError,
+        notifMessage: [
+          {
+            message: "May mga mali sa iyong binago, itama muna ito",
+            type: "warning",
+          },
+        ],
+      };
 
-//     if (session) {
-//       await UpdateMyProfileInfoQuery(session.userId);
-//       return { success: true };
-//     } else
-//       throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
-//   } catch (error) {
-//     const err = error as Error;
-//     console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
-//     return {
-//       success: false,
-//       notifError: [
-//         {
-//           message: err.message,
-//           type: "error",
-//         },
-//       ],
-//     };
-//   }
-// };
+    const session = await GetSession();
+
+    if (session) {
+      await UpdateUserProfileInfoQuery(session.userId, newUserProfileInfo);
+      return {
+        success: true,
+        notifMessage: [
+          {
+            message: "Matagumpay ang pag babago mo ng iyong impormasyon",
+            type: "success",
+          },
+        ],
+      };
+    } else
+      throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
+    return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
