@@ -5,7 +5,7 @@ import {
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
-import { UserProFileForm } from "../client_component/componentForAllUser";
+import { UserProFileComponent } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
 
@@ -77,10 +77,10 @@ export const FarmerUserProfile: FC<{
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
             <div className="grid gap-2">
-                <ViewCropModalButton
-                  cropId={userFarmerInfo.cropid}
-                  isViewing={isViewing}
-                />
+              <ViewCropModalButton
+                cropId={userFarmerInfo.cropid}
+                isViewing={isViewing}
+              />
             </div>
           </div>
         </div>
@@ -89,8 +89,18 @@ export const FarmerUserProfile: FC<{
       {/* Right Column - Detailed Info */}
       <div className="md:col-span-3 bg-white rounded-lg shadow-sm p-6">
         {AvailOrg.success && (
-          <UserProFileForm
-            userFarmerInfo={userFarmerInfo}
+          <UserProFileComponent
+            userFarmerInfo={{
+              farmerFirstName: userFarmerInfo.farmerFirstName,
+              farmerLastName: userFarmerInfo.farmerLastName,
+              farmerAlias: userFarmerInfo.farmerAlias,
+              mobileNumber: userFarmerInfo.mobileNumber,
+              barangay: userFarmerInfo.barangay,
+              birthdate: userFarmerInfo.birthdate,
+              orgId: userFarmerInfo.orgId,
+              orgRole: userFarmerInfo.orgRole,
+              leaderName: userFarmerInfo.leaderName,
+            }}
             isViewing={isViewing}
             orgList={AvailOrg.data}
           />

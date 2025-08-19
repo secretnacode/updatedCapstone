@@ -1,10 +1,10 @@
 import {
   FarmerFirstDetailType,
-  FarmerPersonalInfoType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerUserProfileInfoQueryReturnType,
   NewUserType,
   QueryUserLoginReturnType,
+  userFarmerInfoPropType,
 } from "@/types";
 import { pool } from "../configuration";
 
@@ -360,8 +360,8 @@ export const DelteUserAccountQuery = async (
 
 export const UpdateUserProfileInfoQuery = async (
   userId: string,
-  newProfileInfo: FarmerPersonalInfoType
-) => {
+  newProfileInfo: userFarmerInfoPropType
+): Promise<void> => {
   try {
     await pool.query(
       `update capstone.farmer set "farmerFirstName" = $1, "farmerAlias" = $2, "mobileNumber" = $3, "barangay" = $4, "birthdate" = $5, "farmerLastName" = $6 where "farmerId" = $7`,

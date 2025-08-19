@@ -22,7 +22,6 @@ export const ViewCropModalButton: FC<{
   isViewing: boolean;
 }> = ({ cropId, isViewing }) => {
   const [viewCrop, setViewCrop] = useState<boolean>(false);
-  console.log(cropId);
 
   const handleSplitCropId = cropId.split(", ");
 

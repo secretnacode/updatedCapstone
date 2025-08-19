@@ -9,16 +9,16 @@ import {
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import {
-  FarmerPersonalInfoType,
   GetFarmerOrgMemberReturnType,
   GetFarmerUserProfileInfoReturnType,
   GetMyProfileInfoType,
   NotificationBaseType,
   UpdateUserProfileInfoType,
+  userFarmerInfoPropType,
 } from "@/types";
 import { GetSession } from "../session";
-import { ZodValidateForm } from "../validation/authValidation";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
+import { ZodValidateForm } from "../validation/authValidation";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -157,18 +157,18 @@ export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
 };
 
 /**
- * updates the user
- * @returns
+ * updates the user profile
+ * @returns if the updates is a success or not together with a notifMessage that can be consumed by the notification context
+ * if the value that was pass is invalid(by zod) it will throw additional formError object that contains all the error
  */
 export const UpdateUserProfileInfo = async (
-  newUserProfileInfo: FarmerPersonalInfoType
+  userProfileInfo: userFarmerInfoPropType
 ): Promise<UpdateUserProfileInfoType> => {
   try {
     await ProtectedAction("update:user");
-    console.log(newUserProfileInfo);
 
     const validateVal = ZodValidateForm(
-      newUserProfileInfo,
+      userProfileInfo,
       farmerFirstDetailFormSchema
     );
     if (!validateVal.valid)
@@ -186,7 +186,8 @@ export const UpdateUserProfileInfo = async (
     const session = await GetSession();
 
     if (session) {
-      await UpdateUserProfileInfoQuery(session.userId, newUserProfileInfo);
+      await UpdateUserProfileInfoQuery(session.userId, userProfileInfo);
+
       return {
         success: true,
         notifMessage: [

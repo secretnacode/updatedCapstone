@@ -17,7 +17,7 @@ import {
   UpdateUserOrgAndRoleAfterSignUp,
 } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
-import { CreateNewOrgAfterSignUp } from "@/util/queries/org";
+import { CreateNewOrg } from "@/util/queries/org";
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -177,7 +177,7 @@ const CreateNewOrgForNewUser = async (
     const isOtherOrg = data.organization === "other";
 
     if (isOtherOrg && data.otherOrg) {
-      orgId = (await CreateNewOrgAfterSignUp(data.otherOrg, data.userId)).orgId;
+      orgId = (await CreateNewOrg(data.otherOrg, data.userId)).orgId;
     }
 
     await UpdateUserOrgAndRoleAfterSignUp(

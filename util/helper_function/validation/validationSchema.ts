@@ -161,11 +161,8 @@ export const farmerSecondDetailFormSchema = z
     }),
   })
   .refine(
-    (data) => {
-      if (data.organization === "other" && !data.otherOrg) return false;
-
-      return true;
-    },
+    (e) =>
+      e.organization !== "other" || (e.organization === "other" && e.otherOrg),
     {
       error:
         "Mag lagay ng organisasyon kung san ka kasali kung wala sa pamimilian ang organisasyon na kasali ka",
@@ -208,4 +205,19 @@ export const addFarmerReportSchema = z.object({
     .max(5, { error: "Hanggang limang(5) imahe lang ang pede mong maipasa" }),
 });
 
-export const addFileSchema = z.object;
+export const userProfileOrgUpdateSchema = z
+  .object({
+    orgId: z.string().min(1, { error: "Pumili ng organisasyon" }),
+    otherOrgName: z
+      .string()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+  })
+  .refine(
+    (e) => e.orgId !== "other" || (e.orgId === "other" && e.otherOrgName),
+    {
+      error:
+        "Kung wala ang organisasyon sa pamimilian, Ilagay ang pangalan ng organisasyon na ikaw ay kasali",
+      path: ["otherOrgName"],
+    }
+  );

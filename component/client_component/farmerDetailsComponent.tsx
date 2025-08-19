@@ -285,7 +285,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [otherOrg, setOtherOrg] = useState(false);
-  const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType>([]);
+  const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType[]>([]);
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
   const [cancelProceed, setCancelProceed] = useState<boolean>(false);
@@ -910,7 +910,7 @@ export const FarmerDetailSecondStep: FC = () => {
 
 const CropsValComponent: FC<{
   cropList: FarmerDetailCropType[];
-  availOrg: QueryAvailableOrgReturnType;
+  availOrg: QueryAvailableOrgReturnType[];
   cropError: string[];
   handleEditCrop: (cropToEdit: FarmerDetailCropType, index: number) => void;
 }> = ({ cropList, availOrg, cropError, handleEditCrop }) => {

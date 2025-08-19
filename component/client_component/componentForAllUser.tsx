@@ -8,28 +8,41 @@ import {
   FormEvent,
   SetStateAction,
   useCallback,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import { DelteUserAccount } from "@/lib/server_action/user";
 import { useRouter } from "next/navigation";
 import {
-  FarmerPersonalInfoType,
   FormErrorType,
-  GetFarmerUserProfileInfoQueryReturnType,
+  OrganizationInfoFormPropType,
+  OrgInfoType,
   QueryAvailableOrgReturnType,
+  userFarmerInfoPropType,
+  UserFarmerInfoPropType,
+  UserProfileFormPropType,
 } from "@/types";
-import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 import {
-  ControlledSelectElementForOrgList,
+  baranggayList,
+  DateToYYMMDD,
+} from "@/util/helper_function/reusableFunction";
+import {
+  Div,
+  Form,
   FormCancelSubmitButton,
+  FormDiv,
   FormDivLabelInput,
   FormDivLabelSelect,
-  FormElement,
   FormTitle,
+  ModalNotice,
+  P,
+  Title,
 } from "../server_component/elementComponents/formComponent";
 import { UpdateUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { useLoading } from "./provider/loadingProvider";
+import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 
 /**
  * component for the delete modal that will let sure the user will delete the account
@@ -115,77 +128,71 @@ export const DeleteModalNotif: FC<{
 };
 
 //FIX: add middle name and extension name
-export const UserProFileForm: FC<{
-  userFarmerInfo: GetFarmerUserProfileInfoQueryReturnType;
+export const UserProFileComponent: FC<{
+  userFarmerInfo: UserFarmerInfoPropType;
   isViewing: boolean;
-  orgList: QueryAvailableOrgReturnType;
+  orgList: QueryAvailableOrgReturnType[];
 }> = ({ userFarmerInfo, isViewing, orgList }) => {
   return (
-    <div className="grid gap-6">
-      <UserPersonalInfo
-        personalInfo={{
-          firstName: userFarmerInfo.farmerFirstName,
-          lastName: userFarmerInfo.farmerLastName,
-          alias: userFarmerInfo.farmerAlias,
-          mobileNumber: userFarmerInfo.mobileNumber,
-          birthdate: userFarmerInfo.birthdate,
-          farmerBarangay: userFarmerInfo.barangay,
-        }}
-        isViewing={isViewing}
-      />
-      <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Organisasyon na kasali
-        </h3>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Pangalan ng Organisasyon
-            </label>
-            <ControlledSelectElementForOrgList
-              selectOrgList={orgList}
-              selectValue={userFarmerInfo.orgId ? userFarmerInfo.orgId : ""}
-              selectName={"orgId"}
-              selectIdDisable={isViewing}
-              selectOnChange={() => {}}
-            />
-          </div>
+    <Div>
+      <div className="grid gap-6">
+        <UserProfileForm
+          isViewing={isViewing}
+          userFarmerInfo={{
+            firstName: userFarmerInfo.farmerFirstName,
+            lastName: userFarmerInfo.farmerLastName,
+            alias: userFarmerInfo.farmerAlias,
+            mobileNumber: userFarmerInfo.mobileNumber,
+            birthdate: userFarmerInfo.birthdate,
+            farmerBarangay: userFarmerInfo.barangay,
+          }}
+        />
 
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Leader ng Organisasyon
-            </label>
-            <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500">
-              {userFarmerInfo.leaderName ? userFarmerInfo.leaderName : "Wala"}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Posisyon
-            </label>
-            <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500">
-              {userFarmerInfo.orgRole ? userFarmerInfo.orgRole : "Wala"}
-            </div>
-          </div>
-        </div>
+        <UserOrganizationInfoForm
+          isViewing={isViewing}
+          availOrgList={orgList}
+          userOrgInfo={{
+            orgId: userFarmerInfo.orgId,
+            leaderName: userFarmerInfo.leaderName,
+            orgRole: userFarmerInfo.orgRole,
+          }}
+        />
       </div>
-    </div>
+    </Div>
   );
 };
 
-const UserPersonalInfo: FC<{
-  personalInfo: FarmerPersonalInfoType;
-  isViewing: boolean;
-}> = ({ personalInfo, isViewing }) => {
+export const UserProfileForm: FC<UserProfileFormPropType> = ({
+  isViewing,
+  userFarmerInfo,
+}) => {
   const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
   const [formError, setFormError] =
-    useState<FormErrorType<FarmerPersonalInfoType>>();
+    useState<FormErrorType<userFarmerInfoPropType>>();
+  const personalInfo = useMemo(
+    () =>
+      ({
+        firstName: userFarmerInfo.firstName,
+        lastName: userFarmerInfo.lastName,
+        alias: userFarmerInfo.alias,
+        mobileNumber: userFarmerInfo.mobileNumber,
+        birthdate: userFarmerInfo.birthdate,
+        farmerBarangay: userFarmerInfo.farmerBarangay,
+      } as const),
+    [
+      userFarmerInfo.firstName,
+      userFarmerInfo.lastName,
+      userFarmerInfo.alias,
+      userFarmerInfo.mobileNumber,
+      userFarmerInfo.birthdate,
+      userFarmerInfo.farmerBarangay,
+    ]
+  );
   const [userInfoState, setUserInfoState] =
-    useState<FarmerPersonalInfoType>(personalInfo);
+    useState<userFarmerInfoPropType>(personalInfo);
 
   const handleUserInput = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -194,19 +201,15 @@ const UserPersonalInfo: FC<{
         [e.target.name]: e.target.value,
       }));
 
-      if (!isChangingVal) setIsChangingVal((prev) => !prev);
+      if (!isChangingVal) setIsChangingVal(true);
     },
     [isChangingVal]
   );
 
-  /**
-   * resets the state value into its default value
-   * was made because the "handleResetFormVal" set the current value(value before the route.refresh) and not the freshly fetched value
-   */
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setIsChangingVal(false);
     setFormError(null);
-  };
+  }, []);
 
   /**
    * resets the value and its form val if not passed yet
@@ -214,7 +217,7 @@ const UserPersonalInfo: FC<{
   const handleResetFormVal = useCallback(() => {
     setUserInfoState(personalInfo);
     handleReset();
-  }, [personalInfo]);
+  }, [personalInfo, handleReset]);
 
   const handleFormSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -222,13 +225,11 @@ const UserPersonalInfo: FC<{
         handleIsLoading("Ina-update na ang iyong impormasyon...");
         e.preventDefault();
 
-        console.log(userInfoState);
-
         const updateAction = await UpdateUserProfileInfo(userInfoState);
 
         if (updateAction.success) {
           router.refresh();
-          handleResetFormVal();
+          handleReset();
         } else {
           if (updateAction.formError) setFormError(updateAction.formError);
         }
@@ -246,26 +247,25 @@ const UserPersonalInfo: FC<{
       handleIsLoading,
       handleSetNotification,
       handleDoneLoading,
-      handleResetFormVal,
+      handleReset,
       userInfoState,
       router,
     ]
   );
 
   return (
-    <FormElement onSubmit={handleFormSubmit}>
-      <FormTitle className="text-lg font-semibold text-gray-900 mb-4">
-        Pangalan
-      </FormTitle>
-      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <Form onSubmit={handleFormSubmit}>
+      <FormTitle>Pangalan</FormTitle>
+
+      <FormDiv className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
         <FormDivLabelInput
           labelMessage="Unang Pangalan"
           inputDisable={isViewing}
           inputName={"firstName"}
           inputValue={userInfoState.firstName}
-          inputOnchange={handleUserInput}
+          onChange={handleUserInput}
           inputPlaceholder="Mang kanor"
-          formErrorMessage={formError?.firstName}
+          formError={formError?.firstName}
         />
 
         {/* WALA PA NITO SA DATABASE */}
@@ -273,8 +273,7 @@ const UserPersonalInfo: FC<{
           labelMessage="Gitnang Pangalan"
           inputDisable={isViewing}
           inputName={"farmerMiddleName"}
-          inputValue={"wala pa sa db"}
-          inputOnchange={handleUserInput}
+          inputDefaultValue={"wala pa sa db"}
           inputPlaceholder="wala pa sa db"
         />
 
@@ -283,9 +282,9 @@ const UserPersonalInfo: FC<{
           inputDisable={isViewing}
           inputName={"lastName"}
           inputValue={userInfoState.lastName}
-          inputOnchange={handleUserInput}
+          onChange={handleUserInput}
           inputPlaceholder="e.g. Juan Delacruz"
-          formErrorMessage={formError?.lastName}
+          formError={formError?.lastName}
         />
 
         {/* WALA PA NITO SA DATABASE */}
@@ -293,8 +292,7 @@ const UserPersonalInfo: FC<{
           labelMessage="Palayaw na pagdugtong"
           inputDisable={isViewing}
           inputName={"farmerExtensionName"}
-          inputValue={`wala pang nakalagay sa DB`}
-          inputOnchange={handleUserInput}
+          inputDefaultValue={`wala pang nakalagay sa DB`}
           inputPlaceholder="e.g. Jr."
         />
 
@@ -303,9 +301,9 @@ const UserPersonalInfo: FC<{
           inputDisable={isViewing}
           inputName={"alias"}
           inputValue={userInfoState.alias ?? ""}
-          inputOnchange={handleUserInput}
+          onChange={handleUserInput}
           inputPlaceholder="e.g. Mang Kanor"
-          formErrorMessage={formError?.alias}
+          formError={formError?.alias}
         />
 
         {/* WALA PA NITO SA DATABASE */}
@@ -313,18 +311,20 @@ const UserPersonalInfo: FC<{
           labelMessage="Kasarian"
           inputDisable={isViewing}
           inputName={"farmerSex"}
-          inputValue={`wala pang nakalagay sa database`}
-          inputOnchange={handleUserInput}
+          inputDefaultValue={`wala pang nakalagay sa database`}
           inputPlaceholder="e.g. lalaki"
         />
 
-        <FormDivLabelSelect
+        <FormDivLabelSelect<string>
           labelMessage="Baranggay na tinitirhan"
           selectValue={userInfoState.farmerBarangay}
           selectName={"farmerBarangay"}
-          selectIsDisable={isViewing}
-          selectOnChange={handleUserInput}
-          formErrorMessage={formError?.farmerBarangay}
+          selectDisable={isViewing}
+          onChange={handleUserInput}
+          optionList={baranggayList}
+          optionValue={(brgy: string) => brgy}
+          optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
+          formError={formError?.farmerBarangay}
         />
 
         <FormDivLabelInput
@@ -332,9 +332,9 @@ const UserPersonalInfo: FC<{
           inputDisable={isViewing}
           inputName={"mobileNumber"}
           inputValue={userInfoState.mobileNumber}
-          inputOnchange={handleUserInput}
+          onChange={handleUserInput}
           inputPlaceholder="09** *** ****"
-          formErrorMessage={formError?.mobileNumber}
+          formError={formError?.mobileNumber}
         />
 
         <FormDivLabelInput
@@ -347,19 +347,192 @@ const UserPersonalInfo: FC<{
               ? DateToYYMMDD(userInfoState.birthdate)
               : userInfoState.birthdate
           }
-          inputOnchange={handleUserInput}
+          onChange={handleUserInput}
           inputPlaceholder="july 20, 2024"
-          formErrorMessage={formError?.birthdate}
+          formError={formError?.birthdate}
         />
-      </div>
+      </FormDiv>
 
       {isChangingVal && (
         <FormCancelSubmitButton
           submitButtonLabel="Ipasa"
+          submitClassName="!py-2 !px-6 !rounded-2xl"
           cancelOnClick={handleResetFormVal}
           cancelButtonLabel="Kanselahin"
         />
       )}
-    </FormElement>
+    </Form>
+  );
+};
+
+export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
+  isViewing,
+  availOrgList,
+  userOrgInfo,
+}) => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [formError, setFormError] = useState<FormErrorType<OrgInfoType>>();
+  const [otherOrg, setOtherOrg] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
+  const [orgInfo, setOrgInfo] = useState<OrgInfoType>({
+    orgId: userOrgInfo.orgId,
+    otherOrgName: "",
+  });
+
+  const handleUserOrgChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+      setOrgInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+      if (!isChangingVal) setIsChangingVal(true);
+
+      if (
+        (e.target.name === "orgId" && e.target.value === "other") ||
+        e.target.name === "otherOrgName"
+      )
+        setOtherOrg(true);
+      else setOtherOrg(false);
+    },
+    [isChangingVal]
+  );
+
+  const handleReset = useCallback(() => {
+    setOtherOrg(false);
+    setShowModal(false);
+    setIsChangingVal(false);
+    setFormError(null);
+  }, []);
+
+  const handleResetForm = useCallback(() => {
+    setOrgInfo({ orgId: userOrgInfo.orgId, otherOrgName: "" });
+    handleReset();
+  }, [userOrgInfo.orgId, handleReset]);
+
+  const handleFormSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      try {
+        e.preventDefault();
+
+        handleIsLoading("Binabago na ang iyong organisasyon....");
+
+        const res = await UpdateUserProfileOrg(orgInfo);
+
+        if (res.success) {
+          handleReset();
+          setOrgInfo({ orgId: res.newOrgIdVal, otherOrgName: "" });
+        }
+
+        if (!res.success && res.formError) setFormError(res.formError);
+
+        handleSetNotification(res.notifMessage);
+      } catch (error) {
+        console.log((error as Error).message);
+        handleSetNotification([
+          { message: "May hindi inaasahang error ang nangyari", type: "error" },
+        ]);
+      } finally {
+        handleDoneLoading();
+      }
+    },
+    [
+      handleIsLoading,
+      handleSetNotification,
+      handleReset,
+      handleDoneLoading,
+      orgInfo,
+    ]
+  );
+
+  return (
+    <Form onSubmit={handleFormSubmit} ref={formRef} className="border-t pt-6">
+      <Title className="text-lg font-semibold text-gray-900 mb-4">
+        Organisasyon na kasali
+      </Title>
+      <FormDiv className="grid sm:grid-cols-2 gap-4">
+        <FormDivLabelSelect<QueryAvailableOrgReturnType>
+          labelMessage={"Pangalan ng Organisasyon"}
+          selectValue={orgInfo.orgId ?? ""}
+          onChange={handleUserOrgChange}
+          selectName={"orgId"}
+          selectDisable={isViewing}
+          optionOtherValAndLabel={[
+            { value: "none", label: "wala" },
+            { value: "other", label: "mag lagay ng iba" },
+          ]}
+          optionList={availOrgList}
+          optionValue={(org) => org.orgId}
+          optionLabel={(org) =>
+            `${org.orgName.charAt(0) + org.orgName.slice(1)}`
+          }
+          formError={formError?.orgId}
+        />
+
+        {otherOrg && (
+          <FormDivLabelInput
+            labelMessage="Mag lagay ng panibagong organisasyon"
+            inputName={"otherOrgName"}
+            inputValue={orgInfo.otherOrgName ?? ""}
+            inputPlaceholder="e.g. Kataniman"
+            onChange={handleUserOrgChange}
+            formError={formError?.otherOrgName}
+          />
+        )}
+
+        <FormDivLabelInput
+          labelMessage="Leader ng Organisasyon"
+          inputDisable={true}
+          inputName={"leaderName"}
+          inputDefaultValue={userOrgInfo.leaderName}
+          inputPlaceholder="Miyembro"
+        />
+
+        <FormDivLabelInput
+          labelMessage="Posisyon"
+          inputDisable={true}
+          inputName={"orgRole"}
+          inputDefaultValue={userOrgInfo.orgRole}
+          inputPlaceholder="Miyembro"
+        />
+      </FormDiv>
+
+      {isChangingVal && (
+        <FormCancelSubmitButton
+          submitButtonLabel="Ipasa"
+          submitType="button"
+          submitOnClick={() => setShowModal(true)}
+          cancelButtonLabel="Kanselahin"
+          cancelOnClick={handleResetForm}
+        />
+      )}
+
+      {showModal && (
+        <ModalNotice
+          logo={"warning"}
+          modalTitle={"Mag babago ng organisasyon?"}
+          closeModal={() => setShowModal(false)}
+          modalMessage={
+            <>
+              <P className="font-bold !text-lg mb-4">
+                Kapag nagpalit ka ng organisasyon, kailangan maaprubahan muna
+                ang iyong account bago ulit ka makapagsumite ng ulat.
+              </P>
+              <P className="!text-[17px] tracking-wide">
+                Magpatuloy sa pagpapalit ng organisasyon?
+              </P>
+            </>
+          }
+          procceedButton={{
+            label: "Mag Patuloy",
+            onClick: () => {
+              formRef.current?.requestSubmit();
+              setShowModal(false);
+            },
+          }}
+          cancelButton={{ label: "Bumalik" }}
+        />
+      )}
+    </Form>
   );
 };

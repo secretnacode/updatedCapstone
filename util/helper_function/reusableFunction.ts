@@ -102,7 +102,7 @@ export const baranggayList = [
   "san isidro",
   "santo tomas",
   "prinza",
-] as const;
+];
 
 /**
  * used to redirect the user into login page with an error message
@@ -120,4 +120,8 @@ export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
  */
 export const NotifToUriComponent = (notif: NotificationBaseType[]) => {
   return encodeURIComponent(JSON.stringify(notif));
+};
+
+export const LogInAgainMessage = (): string => {
+  return "Nag expire na ang iyong pag lo-log in, mag log in ulit ng panibago";
 };

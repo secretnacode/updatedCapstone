@@ -4,6 +4,7 @@ import {
   authSignUpSchema,
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
+  userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
@@ -93,16 +94,15 @@ export type LoadingContextType = {
   handleDoneLoading: () => void;
 };
 
-export type QueryAvailableOrgReturnType =
-  | {
-      orgId: string;
-      orgName: string;
-    }[];
+export type QueryAvailableOrgReturnType = {
+  orgId: string;
+  orgName: string;
+};
 
 export type AvailableOrgReturnType =
   | {
       success: true;
-      data: QueryAvailableOrgReturnType;
+      data: QueryAvailableOrgReturnType[];
     }
   | {
       success: false;
@@ -351,6 +351,51 @@ export type GetFarmerUserProfileInfoQueryReturnType = {
   cropid: string;
 };
 
+export type UserFarmerInfoPropType = {
+  farmerFirstName: string;
+  farmerLastName: string;
+  farmerAlias: string;
+  mobileNumber: string;
+  barangay: string;
+  birthdate: Date;
+  orgId: string;
+  orgRole: string;
+  leaderName: string;
+};
+
+export type userFarmerInfoPropType = {
+  firstName: string;
+  lastName: string;
+  alias: string;
+  mobileNumber: string;
+  birthdate: Date;
+  farmerBarangay: string;
+};
+
+export type UserProfileFormPropType = {
+  isViewing: boolean;
+  userFarmerInfo: userFarmerInfoPropType;
+};
+
+export type OrganizationInfoFormPropType = {
+  isViewing: boolean;
+  availOrgList: QueryAvailableOrgReturnType[];
+  userOrgInfo: { orgId: string; leaderName: string; orgRole: string };
+};
+
+export type OrgInfoType = z.infer<typeof userProfileOrgUpdateSchema>;
+
+export type CreateNewOrgAfterSignUpType = {
+  firstName: string;
+  lastName: string;
+  alias: string;
+  mobileNumber: string;
+  birthdate: Date;
+  farmerBarangay: string;
+  memberRole: string;
+  orgId: string;
+};
+
 export type GetFarmerUserProfileInfoReturnType =
   | {
       success: true;
@@ -382,8 +427,6 @@ export type GetMyProfileInfoType =
     }
   | ServerActionFailBaseType;
 
-export type FarmerPersonalInfoType = FarmerFirstDetailFormType;
-
 export type FormErrorType<T> = { [key in keyof T]?: string[] } | null;
 
 export type UpdateUserProfileInfoType = {
@@ -394,97 +437,158 @@ export type UpdateUserProfileInfoType = {
     }
   | {
       success: false;
-      formError?: FormErrorType<FarmerPersonalInfoType>;
+      formError?: FormErrorType<userFarmerInfoPropType>;
     }
 );
 
 export type ChildrenType = Readonly<{ children?: Readonly<ReactNode> }>;
 
-export type FormInputType = {
-  type: string;
-  name: string;
-  placeholder: string;
+export type InputPropType = {
+  type?: string;
+  name?: string;
+  value?: string;
+  defaultValue?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onClick?: () => void;
+  placeholder?: string;
   className?: string;
   required?: boolean;
   disabled?: boolean;
 };
 
-export type ControlledFormInputType = FormInputType & {
-  value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-};
-
-export type FormLabelType = ChildrenType & {
+export type LabelType = ChildrenType & {
   htmlFor: string;
   className?: string;
 };
 
-export type FormTitleType = ChildrenType & {
+export type TitleType = ChildrenType & {
   className?: string;
 };
 
-export type ControlledSelectElementForBarangayType = {
-  selectValue: string;
-  selectName: string;
-  selectClassName?: string;
-  selectIsDisable: boolean;
-  selectOnChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+export type SelectType = ChildrenType & {
+  value?: string;
+  name?: string;
+  className?: string;
+  disable?: boolean;
+  required?: boolean;
+  onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type FormErrorElementType = {
-  messages: string[];
+export type OptionType = ChildrenType & {
+  className?: string;
+  value: string | number;
+};
+
+export type PType = ChildrenType & {
   className?: string;
 };
 
-export type ControlledSelectElementForOrgListType = {
-  selectOrgList: QueryAvailableOrgReturnType;
-  selectValue: string;
-  selectName: string;
-  selectClassName?: string;
-  selectIdDisable: boolean;
-  selectOnChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-};
-
-export type FormElementType = ChildrenType & {
+export type FormType = ChildrenType & {
   onSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
-  classname?: string;
-};
-
-export type FormDivType = ChildrenType & {
   className?: string;
 };
 
-export type FormDivLabelInputType = {
+export type DivPropType = ChildrenType & {
+  className?: string;
+};
+
+export type FormDivLabelInputPropType = {
   labelMessage: string;
   inputType?: string;
-  formErrorMessage?: string[];
-  inputDisable: boolean;
+  formError?: string[];
+  errorClassName?: string;
+  inputDisable?: boolean;
   inputName: string;
-  inputValue: string;
+  inputValue?: string;
+  inputDefaultValue?: string;
   inputPlaceholder: string;
-  inputOnchange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
-export type FormDivLabelSelectType = ControlledSelectElementForBarangayType & {
+export type FormDivLabelSelectType<T> = {
   labelMessage: string;
-  formErrorMessage?: string[];
+  selectValue: string;
+  selectName: string;
+  selectDisable?: boolean;
+  selectRequired?: boolean;
+  optionList: T[];
+  optionDefaultValueLabel?: { value: string | number; label: string };
+  optionOtherValAndLabel?: { value: string | number; label: string }[];
+  optionValue: (list: T) => string | number;
+  optionLabel: (list: T) => string;
+  onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
+  divClass?: string;
+  labelClass?: string;
+  selectClass?: string;
+  optionClass?: string;
+  formError?: string[];
+  errorClassName?: string;
 };
 
-export type FormButtonType = ChildrenType & {
-  type?: "button" | "submit" | "reset";
+export type FormSubmitButton = ChildrenType & {
+  type?: ButtonTypeAttribType;
   onClick?: () => void;
   className?: string;
   logo?: LucideIcon;
   buttonLabel: string;
 };
 
-export type FormCancelSubmitButtonType = {
+export type LogoPropType = {
+  logo: LucideIcon;
+  className?: string;
+};
+
+export type ButtonTypeAttribType = "button" | "submit" | "reset";
+
+export type ButtonPropType = ChildrenType & {
+  type?: ButtonTypeAttribType;
+  onClick?: () => void;
+  logo?: LucideIcon;
+  logoClassName?: string;
+  className?: string;
+};
+
+export type FormCancelSubmitButtonPropType = {
+  divClassName?: string;
   submitOnClick?: () => void;
   submitClassName?: string;
   submitButtonLabel: string;
   submitLogo?: LucideIcon;
+  submitType?: ButtonTypeAttribType;
   cancelOnClick?: () => void;
   cancelClassName?: string;
   cancelButtonLabel: string;
   cancelLogo?: LucideIcon;
 };
+
+export type ModalNoticePropType = {
+  logo?: "warning" | "error";
+  modalTitle: string;
+  closeModal: () => void;
+  modalMessage: ReactNode;
+  procceedButton?: {
+    label: string;
+    onClick: () => void;
+    classsName?: string;
+  };
+  cancelButton?: { label: string; classsName?: string };
+};
+
+export type NewOrgType = {
+  orgId: string;
+  orgRole: string;
+  farmerId: string;
+};
+
+export type UpdateUserProfileOrgReturnType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | {
+      success: true;
+      newOrgIdVal: string;
+    }
+  | {
+      success: false;
+      formError?: FormErrorType<OrgInfoType>;
+    }
+);
