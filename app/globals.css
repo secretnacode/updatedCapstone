@@ -207,7 +207,7 @@ body {
     @apply flex flex-row justify-center items-center gap-2;
   }
   .table-notice {
-    @apply px-2 py-2 rounded-full bg-red-300 text-red-900;
+    @apply px-4 py-2 rounded-full bg-red-300 text-red-900;
   }
   .profile-link {
     @apply bg-orange-300 hover:bg-orange-400 active:ring-orange-800;

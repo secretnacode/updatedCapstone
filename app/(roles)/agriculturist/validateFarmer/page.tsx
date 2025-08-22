@@ -1,9 +1,9 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import {
   ApprovedButton,
   DeleteUser,
-  UserProfileLink,
-} from "@/component/client_component/farmerLeaderComponent";
+} from "@/component/client_component/componentForAllUser";
+import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { UserProfileLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
