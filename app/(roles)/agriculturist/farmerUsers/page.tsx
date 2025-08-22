@@ -35,7 +35,8 @@ export default async function Page() {
                   <td>{farmVal.farmerName}</td>
                   <td>{farmVal.farmerAlias}</td>
                   <td>{ReadableDateFomat(farmVal.dateCreated)}</td>
-                  <td>{farmVal.}</td>
+                  <td></td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
