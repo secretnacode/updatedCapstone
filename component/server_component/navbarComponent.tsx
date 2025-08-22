@@ -12,7 +12,6 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
 import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
-import { Logo } from "./elementComponent";
 
 export const NavbarComponent: FC = async () => {
   console.log("Navbar main component");
@@ -65,17 +64,17 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
   const Links = (
     <>
       <Link href={basePage} className="group nav-link">
-        <Logo logo={Home} className="nav-logo" />
+        <Home className="logo" />
         <span className="nav-span">Home</span>
       </Link>
 
       <Link href={`${basePage}/report`} className="group nav-link">
-        <Logo logo={ClipboardPlus} className="nav-logo" />
+        <ClipboardPlus className="logo" />
         <span className="nav-span">Ulat</span>
       </Link>
 
       <Link href={`${basePage}/crop`} className="group nav-link">
-        <Logo logo={Sprout} className="nav-logo" />
+        <Sprout className="logo" />
         <span className="nav-span">Pananim</span>
       </Link>
 
@@ -85,19 +84,19 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
             href={`${basePage}Leader/validateReport`}
             className="group nav-link"
           >
-            <Logo logo={ClipboardCheck} className="nav-logo" />
+            <ClipboardCheck className="logo" />
             <span className="nav-span">Ulat ng miyembro</span>
           </Link>
 
           <Link href={`${basePage}Leader/orgMember`} className="group nav-link">
-            <Logo logo={ContactRound} className="nav-logo" />
+            <ContactRound className="logo" />
             <span className="nav-span">Mga miyembro</span>
           </Link>
         </>
       )}
 
       <Link href={`${basePage}/profile`} className="group nav-link">
-        <Logo logo={UserPen} className="nav-logo" />
+        <UserPen className="logo" />
         <span className="nav-span">Profile</span>
       </Link>
     </>
@@ -112,47 +111,47 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
   const Links = (
     <>
       <Link href={basePage} className="group nav-link">
-        <Logo logo={Home} className="nav-logo" />
+        <Home className="logo" />
         <span className="nav-span">Home</span>
       </Link>
 
       <Link href={`${basePage}/reports`} className="group nav-link">
-        <Logo logo={ClipboardPlus} className="nav-logo" />
+        <ClipboardPlus className="logo" />
 
         <span className="nav-span">Reports</span>
       </Link>
 
       <Link href={`${basePage}/crops`} className="group nav-link">
-        <Logo logo={Sprout} className="nav-logo" />
+        <Sprout className="logo" />
         <span className="nav-span">Crops</span>
       </Link>
 
       <div className="nav-divider title">Farmers</div>
 
       <Link href={`${basePage}/farmerUsers`} className="group nav-link">
-        <Logo logo={ContactRound} className="nav-logo" />
+        <ContactRound className="logo" />
         <span className="nav-span">Farmer Users</span>
       </Link>
 
       <Link href={`${basePage}/validateFarmer`} className="group nav-link">
-        <Logo logo={ContactRound} className="nav-logo" />
+        <ContactRound className="logo" />
         <span className="nav-span">Validate Farmer</span>
       </Link>
 
       <Link href={`${basePage}/organizations`} className="group nav-link">
-        <Logo logo={Building2} className="nav-logo" />
+        <Building2 className="logo" />
         <span className="nav-span">Organizations</span>
       </Link>
 
       {role === "admin" && (
         <Link href={`${basePage}/agriUsers`} className="group nav-link">
-          <Logo logo={ClipboardCheck} className="nav-logo" />
+          <ClipboardCheck className="logo" />
           <span className="nav-span">Agriculturist</span>
         </Link>
       )}
 
       <Link href={`${basePage}/profile`} className="group nav-link">
-        <Logo logo={UserPen} className="nav-logo" />
+        <UserPen className="logo" />
 
         <span className="nav-span">Profile</span>
       </Link>

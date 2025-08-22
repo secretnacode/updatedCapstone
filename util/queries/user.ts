@@ -385,7 +385,7 @@ export const ViewAllVerifiedFarmerUserQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgId", f."orgRole", o."orgName", count(r."reportId") as "reportCount", count(c."cropId") as "cropCount" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" where f."verified" = $1 group by f."farmerId", f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."verified", f."dateCreated", f."orgId", f."orgRole", o."orgName"`,
+        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgRole", o."orgName", count(r."reportId") as "reportCount", count(c."cropId") as "cropCount" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" where f."verified" = $1 group by f."farmerId", f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."verified", f."dateCreated", f."orgId", f."orgRole", o."orgName"`,
         [true]
       )
     ).rows;

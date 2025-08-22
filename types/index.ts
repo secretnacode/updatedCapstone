@@ -590,7 +590,6 @@ export type ViewAllVerifiedFarmerUserQueryReturnType = {
   farmerName: string;
   farmerAlias: string;
   dateCreated: Date;
-  orgId: string;
   orgRole: string;
   orgName: string;
   reportCount: number;
@@ -635,7 +634,18 @@ export type TableCellPropType = ChildrenType & {
 
 export type TableComponentPropType<T extends object> = {
   caption?: string;
-  tableList: T[];
   noContentMessage: string;
-  tdValue: (val: T) => string;
+  action?: Readonly<ReactNode>;
+  tableHeader: T;
+  tableList: T[];
+};
+
+export type FarmerUserPageTableListType = {
+  farmerName: string;
+  farmerAlias: string;
+  dateCreated: string;
+  orgName: string;
+  orgRole: string;
+  reportCount: string;
+  cropCount: string;
 };
