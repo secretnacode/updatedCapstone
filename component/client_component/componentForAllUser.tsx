@@ -28,14 +28,6 @@ import {
   baranggayList,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
-import {
-  Div,
-  Form,
-  FormDiv,
-  FormTitle,
-  P,
-  Title,
-} from "../server_component/elementComponent";
 import { UpdateUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
@@ -136,8 +128,8 @@ export const UserProFileComponent: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ userFarmerInfo, isViewing, orgList }) => {
   return (
-    <Div>
-      <div className="grid gap-6">
+    <div className="div">
+      <div className="div grid gap-6">
         <UserProfileForm
           isViewing={isViewing}
           userFarmerInfo={{
@@ -160,7 +152,7 @@ export const UserProFileComponent: FC<{
           }}
         />
       </div>
-    </Div>
+    </div>
   );
 };
 
@@ -256,10 +248,10 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
   );
 
   return (
-    <Form onSubmit={handleFormSubmit}>
-      <FormTitle>Pangalan</FormTitle>
+    <form onSubmit={handleFormSubmit}>
+      <h1 className="title form-title">Pangalan</h1>
 
-      <FormDiv className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="form-div grid sm:grid-cols-2 md:grid-cols-4 gap-4">
         <FormDivLabelInput
           labelMessage="Unang Pangalan"
           inputDisable={isViewing}
@@ -353,17 +345,16 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
           inputPlaceholder="july 20, 2024"
           formError={formError?.birthdate}
         />
-      </FormDiv>
+      </div>
 
       {isChangingVal && (
         <FormCancelSubmitButton
           submitButtonLabel="Ipasa"
-          submitClassName="!py-2 !px-6 !rounded-2xl"
           cancelOnClick={handleResetFormVal}
           cancelButtonLabel="Kanselahin"
         />
       )}
-    </Form>
+    </form>
   );
 };
 
@@ -448,11 +439,11 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
   );
 
   return (
-    <Form onSubmit={handleFormSubmit} ref={formRef} className="border-t pt-6">
-      <Title className="text-lg font-semibold text-gray-900 mb-4">
+    <form onSubmit={handleFormSubmit} ref={formRef} className="border-t pt-6">
+      <h1 className="title text-lg font-semibold text-gray-900 mb-4">
         Organisasyon na kasali
-      </Title>
-      <FormDiv className="grid sm:grid-cols-2 gap-4">
+      </h1>
+      <div className="form-div grid sm:grid-cols-2 gap-4">
         <FormDivLabelSelect<QueryAvailableOrgReturnType>
           labelMessage={"Pangalan ng Organisasyon"}
           selectValue={orgInfo.orgId ?? ""}
@@ -497,7 +488,7 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
           inputDefaultValue={userOrgInfo.orgRole}
           inputPlaceholder="Miyembro"
         />
-      </FormDiv>
+      </div>
 
       {isChangingVal && (
         <FormCancelSubmitButton
@@ -516,13 +507,13 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
           closeModal={() => setShowModal(false)}
           modalMessage={
             <>
-              <P className="font-bold !text-lg mb-4">
+              <p className="p font-bold !text-lg mb-4">
                 Kapag nagpalit ka ng organisasyon, kailangan maaprubahan muna
                 ang iyong account bago ulit ka makapagsumite ng ulat.
-              </P>
-              <P className="!text-[17px] tracking-wide">
+              </p>
+              <p className="p !text-[17px] tracking-wide">
                 Magpatuloy sa pagpapalit ng organisasyon?
-              </P>
+              </p>
             </>
           }
           procceedButton={{
@@ -535,6 +526,6 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
           cancelButton={{ label: "Bumalik" }}
         />
       )}
-    </Form>
+    </form>
   );
 };

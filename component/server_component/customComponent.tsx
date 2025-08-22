@@ -239,7 +239,6 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
 export const TableComponent: FC<TableComponentPropType> = ({
   caption,
   noContentMessage,
-  action,
   tableHeaderCell,
   tableCell,
 }) => {
