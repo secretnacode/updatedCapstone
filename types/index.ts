@@ -670,4 +670,10 @@ export type ViewAllUnvalidatedFarmerReturnType =
 export type ApprovedButtonPropType = {
   farmerId: string;
   verificationStatus: boolean;
+  label?: string;
+};
+export type UserProfileLinkPropType = {
+  farmerId: string;
+  label?: string;
+  className?: string;
 };

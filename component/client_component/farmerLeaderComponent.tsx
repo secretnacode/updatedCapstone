@@ -4,7 +4,11 @@ import { FC, useState } from "react";
 import { ViewUserReportTableData } from "./reportComponent";
 import { useLoading } from "./provider/loadingProvider";
 import { useNotification } from "./provider/notificationProvider";
-import { ApprovedButtonPropType, ErrorResponseType } from "@/types";
+import {
+  ApprovedButtonPropType,
+  ErrorResponseType,
+  UserProfileLinkPropType,
+} from "@/types";
 import { ApprovedOrgMember } from "@/lib/server_action/report";
 import { ApprovedOrgFarmerAcc } from "@/lib/server_action/farmerUser";
 import { useRouter } from "next/navigation";
@@ -50,9 +54,7 @@ export const FarmerOrgMemberAction: FC<{
   const [userDelete, setUserDelete] = useState<boolean>(false);
   return (
     <div>
-      <Link className="cursor-pointer" href={`/farmerUser/${farmerId}`}>
-        Tingnan
-      </Link>
+      <UserProfileLink farmerId={farmerId} />
 
       <ApprovedButton
         farmerId={farmerId}
@@ -79,6 +81,7 @@ export const FarmerOrgMemberAction: FC<{
 export const ApprovedButton: FC<ApprovedButtonPropType> = ({
   farmerId,
   verificationStatus,
+  label = "Aprubahan",
 }) => {
   const router = useRouter();
   const { handleSetNotification } = useNotification();
@@ -107,7 +110,22 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
       disabled={verificationStatus}
       onClick={handleApproveFarmerAcc}
     >
-      Aprubahan
+      {label}
     </button>
+  );
+};
+
+export const UserProfileLink: FC<UserProfileLinkPropType> = ({
+  farmerId,
+  label = "Tingnan",
+  className = "",
+}) => {
+  return (
+    <Link
+      className={`profile-link ${className}`}
+      href={`/farmerUser/${farmerId}`}
+    >
+      {label}
+    </Link>
   );
 };

@@ -1,5 +1,8 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
-import { ApprovedButton } from "@/component/client_component/farmerLeaderComponent";
+import {
+  ApprovedButton,
+  UserProfileLink,
+} from "@/component/client_component/farmerLeaderComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
@@ -42,12 +45,10 @@ export default async function Page() {
                   <td>{farmVal.orgRole}</td>
                   <td>
                     <div className="table-action">
-                      <Link
-                        href="/"
-                        className="table-link bg-orange-300 hover:bg-orange-400 active:ring-orange-800"
-                      >
-                        Profile
-                      </Link>
+                      <UserProfileLink
+                        farmerId={farmVal.farmerId}
+                        className="table-link"
+                      />
 
                       <ApprovedButton
                         farmerId={farmVal.farmerId}

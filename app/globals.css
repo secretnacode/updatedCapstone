@@ -165,13 +165,13 @@ body {
     @apply text-gray-500;
   }
   .button {
-    @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-2xl;
+    @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-xl;
   }
   .submit-button {
     @apply bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50;
   }
   .cancel-button {
-    @apply bg-red-500 hover:!bg-red-600 !text-white !py-2 !px-6 !rounded-2xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50;
+    @apply bg-red-500 hover:bg-red-600 text-white flex items-center justify-center gap-3 transition-colors disabled:opacity-50;
   }
   .table-style {
     @apply w-full divide-y divide-gray-200;
@@ -208,5 +208,8 @@ body {
   }
   .table-notice {
     @apply px-2 py-2 rounded-full bg-red-300 text-red-900;
+  }
+  .profile-link {
+    @apply bg-orange-300 hover:bg-orange-400 active:ring-orange-800;
   }
 }
