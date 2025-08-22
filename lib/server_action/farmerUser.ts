@@ -6,6 +6,7 @@ import {
   GetFarmerOrgMemberQuery,
   GetFarmerUserProfileInfoQuery,
   UpdateUserProfileInfoQuery,
+  ViewAllUnvalidatedFarmerQuery,
   ViewAllVerifiedFarmerUserQuery,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
@@ -16,7 +17,8 @@ import {
   NotificationBaseType,
   UpdateUserProfileInfoType,
   userFarmerInfoPropType,
-  ViewAllFarmerUserReturnType,
+  ViewAllUnvalidatedFarmerReturnType,
+  ViewAllValidatedFarmerUserReturnType,
 } from "@/types";
 import { GetSession } from "../session";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
@@ -211,18 +213,50 @@ export const UpdateUserProfileInfo = async (
   }
 };
 
-export const ViewAllFarmerUser =
-  async (): Promise<ViewAllFarmerUserReturnType> => {
+/**
+ * server action for getting all the validated farmer user
+ * @returns list of validated user
+ */
+export const ViewAllValidatedFarmerUser =
+  async (): Promise<ViewAllValidatedFarmerUserReturnType> => {
     try {
       await ProtectedAction("read:farmer:user");
 
       return {
         success: true,
-        farmerInfo: await ViewAllVerifiedFarmerUserQuery(),
+        validatedFarmer: await ViewAllVerifiedFarmerUserQuery(),
       };
     } catch (error) {
       const err = error as Error;
-      console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
+      console.log(
+        `Nagka problema sa pag kuha ng mga farmer na validated: ${err}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const ViewAllUnvalidatedFarmer =
+  async (): Promise<ViewAllUnvalidatedFarmerReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:user");
+
+      return {
+        success: true,
+        notValidatedFarmer: await ViewAllUnvalidatedFarmerQuery(),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Nagka problema sa pag kuha ng mga farmer na hindi pa validated: ${err}`
+      );
       return {
         success: false,
         notifError: [

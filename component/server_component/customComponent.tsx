@@ -14,7 +14,6 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
 export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
@@ -237,13 +236,13 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
  * @param param0 necesarry props to render the table(in tableList, ONLY PASS THE VALUE/DATA YOU WANT TO SHOW IN THE TABLE AND NOT ALL)
  * @returns table component together with the data you want to pass
  */
-export const TableComponent = <T extends object>({
+export const TableComponent: FC<TableComponentPropType> = ({
   caption,
   noContentMessage,
   action,
-  tableHeader,
-  tableList,
-}: TableComponentPropType<T>) => {
+  tableHeaderCell,
+  tableCell,
+}) => {
   return (
     <>
       {tableList.length === 0 ? (
@@ -259,37 +258,9 @@ export const TableComponent = <T extends object>({
             <table className="table-style farmerReportTable">
               {caption && <caption className="caption">{caption}</caption>}
               <thead>
-                <tr>
-                  <th>#</th>
-
-                  {Object.values(tableHeader).map((value) => (
-                    <th key={value}>{value}</th>
-                  ))}
-
-                  <th>Action</th>
-                </tr>
+                <tr>{tableHeaderCell}</tr>
               </thead>
-              <tbody>
-                {tableList.map((userVal, i) => (
-                  <tr key={i}>
-                    <td>{i + 1}</td>
-
-                    {Object.values(userVal).map((val, j) => {
-                      console.log(val);
-
-                      return <td key={`${val}${i}${j}`}>{val}</td>;
-                    })}
-
-                    {action && (
-                      <td>
-                        <div className="flex flex-row justify-center items-center gap-2">
-                          {action}
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
+              <tbody>{tableCell}</tbody>
             </table>
           </div>
         </div>

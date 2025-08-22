@@ -5,6 +5,7 @@ import {
   NewUserType,
   QueryUserLoginReturnType,
   userFarmerInfoPropType,
+  ViewAllUnvalidatedFarmerQueryReturnQuery,
   ViewAllVerifiedFarmerUserQueryReturnType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -391,12 +392,34 @@ export const ViewAllVerifiedFarmerUserQuery = async (): Promise<
     ).rows;
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga magsasaka: ${
+      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga validated na magsasaka: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga magsasaka`
+      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga validated na  magsasaka`
+    );
+  }
+};
+
+export const ViewAllUnvalidatedFarmerQuery = async (): Promise<
+  ViewAllUnvalidatedFarmerQueryReturnQuery[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."verified", f."orgRole", o."orgName",  from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" where f."verified" = $1 order by case when f."orgId" = $2 then $3 else $4 end asc`,
+        [false, null, 1, 2]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka`
     );
   }
 };

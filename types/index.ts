@@ -596,10 +596,10 @@ export type ViewAllVerifiedFarmerUserQueryReturnType = {
   cropCount: number;
 };
 
-export type ViewAllFarmerUserReturnType =
+export type ViewAllValidatedFarmerUserReturnType =
   | {
       success: true;
-      farmerInfo: ViewAllVerifiedFarmerUserQueryReturnType[];
+      validatedFarmer: ViewAllVerifiedFarmerUserQueryReturnType[];
     }
   | { success: false; notifError: NotificationBaseType[] };
 
@@ -632,12 +632,12 @@ export type TableCellPropType = ChildrenType & {
   className?: string;
 };
 
-export type TableComponentPropType<T extends object> = {
+export type TableComponentPropType = {
   caption?: string;
   noContentMessage: string;
   action?: Readonly<ReactNode>;
-  tableHeader: T;
-  tableList: T[];
+  tableHeaderCell: Readonly<ReactNode>;
+  tableCell: Readonly<ReactNode>;
 };
 
 export type FarmerUserPageTableListType = {
@@ -648,4 +648,30 @@ export type FarmerUserPageTableListType = {
   orgRole: string;
   reportCount: string;
   cropCount: string;
+};
+
+export type ViewAllUnvalidatedFarmerQueryReturnQuery = {
+  farmerId: string;
+  farmerName: string;
+  farmerAlias: string;
+  dateCreated: Date;
+  verified: boolean;
+  orgRole: string;
+  orgName: string;
+};
+
+export type ViewAllUnvalidatedFarmerReturnType =
+  | {
+      success: true;
+      notValidatedFarmer: ViewAllUnvalidatedFarmerQueryReturnQuery[];
+    }
+  | { success: false; notifError: NotificationBaseType[] };
+
+export type ValidateFarmerPageTableListType = {
+  farmerName: string;
+  farmerAlias: string;
+  dateCreated: string;
+  verified: boolean;
+  orgRole: string;
+  orgName: string;
 };
