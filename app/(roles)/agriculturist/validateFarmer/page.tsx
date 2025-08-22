@@ -1,6 +1,8 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
+import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
+import Link from "next/link";
 
 export default async function Page() {
   const unvalidatedUser = await ViewAllUnvalidatedFarmer();
@@ -11,7 +13,7 @@ export default async function Page() {
       ) : (
         <TableComponent<FarmerUserPageTableListType>
           noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"
-          tableList={farmers.validatedFarmer.map((info) => ({
+          tableList={unvalidatedUser.notValidatedFarmer.map((info) => ({
             farmerName: info.farmerName,
             farmerAlias: info.farmerAlias,
             dateCreated: ReadableDateFomat(info.dateCreated),

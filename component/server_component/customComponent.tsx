@@ -87,7 +87,9 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
 }) => {
   return (
     <div className="div form-div">
-      <label htmlFor={inputName}>{labelMessage}</label>
+      <label htmlFor={inputName} className="label">
+        {labelMessage}
+      </label>
       <input
         type={inputType}
         disabled={inputDisable}
@@ -96,6 +98,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         onChange={onChange}
         placeholder={inputPlaceholder}
         defaultValue={inputDefaultValue}
+        className="input"
       />
       {formError &&
         formError.map((message, index) => (
