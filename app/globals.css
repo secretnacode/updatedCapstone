@@ -197,4 +197,7 @@ body {
   .nav-divider {
     @apply text-lg font-serif tracking-wide text-gray-400 font-bold my-3 ml-1;
   }
+  .table-action {
+    @apply flex flex-row justify-center items-center gap-2;
+  }
 }

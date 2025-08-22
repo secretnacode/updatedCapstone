@@ -260,7 +260,9 @@ export const TableComponent: FC<TableComponentPropType> = ({
           <div className="div overflow-x-auto">
             <table className="table-style farmerReportTable">
               {caption && <caption className="caption">{caption}</caption>}
-              <thead>{tableHeaderCell}</thead>
+              <thead>
+                <tr>{tableHeaderCell}</tr>
+              </thead>
               <tbody>{tableCell}</tbody>
             </table>
           </div>

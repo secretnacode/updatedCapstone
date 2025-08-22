@@ -635,7 +635,6 @@ export type TableCellPropType = ChildrenType & {
 export type TableComponentPropType = {
   caption?: string;
   noContentMessage: string;
-  action?: Readonly<ReactNode>;
   listCount: number;
   tableHeaderCell: Readonly<ReactNode>;
   tableCell: Readonly<ReactNode>;

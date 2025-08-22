@@ -21,9 +21,10 @@ export default async function Page() {
               <th>Name</th>
               <th>Alias</th>
               <th>Created At</th>
-              <th>Verified</th>
-              <th>Role</th>
               <th>Organization Name</th>
+              <th>Organization Role</th>
+              <th>Report Count</th>
+              <th>Crop Count</th>
               <th>Actions</th>
             </>
           }
@@ -35,37 +36,36 @@ export default async function Page() {
                   <td>{farmVal.farmerName}</td>
                   <td>{farmVal.farmerAlias}</td>
                   <td>{ReadableDateFomat(farmVal.dateCreated)}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{farmVal.orgName}</td>
+                  <td>{farmVal.orgRole}</td>
+                  <td>{farmVal.reportCount}</td>
+                  <td>{farmVal.cropCount}</td>
+                  <td>
+                    <div className="table-action">
+                      <Link
+                        href="/"
+                        className="table-link bg-orange-300 hover:bg-orange-400 active:ring-orange-800"
+                      >
+                        Profile
+                      </Link>
+
+                      <Link
+                        href="/"
+                        className="table-link bg-blue-300 hover:bg-blue-400 active:ring-blue-800"
+                      >
+                        Reports
+                      </Link>
+
+                      <Link
+                        href="/"
+                        className="table-link bg-green-300 hover:bg-green-400 active:ring-green-800"
+                      >
+                        Crops
+                      </Link>
+                    </div>
+                  </td>
                 </tr>
               ))}
-            </>
-          }
-          action={
-            <>
-              <Link
-                href="/"
-                className="table-link bg-orange-300 hover:bg-orange-400 active:ring-orange-800"
-              >
-                Profile
-              </Link>
-
-              <Link
-                href="/"
-                className="table-link bg-blue-300 hover:bg-blue-400 active:ring-blue-800"
-              >
-                Reports
-              </Link>
-
-              <Link
-                href="/"
-                className="table-link bg-green-300 hover:bg-green-400 active:ring-green-800"
-              >
-                Crops
-              </Link>
             </>
           }
         />
