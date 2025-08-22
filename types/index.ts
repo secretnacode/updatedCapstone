@@ -636,6 +636,7 @@ export type TableComponentPropType = {
   caption?: string;
   noContentMessage: string;
   action?: Readonly<ReactNode>;
+  listCount: number;
   tableHeaderCell: Readonly<ReactNode>;
   tableCell: Readonly<ReactNode>;
 };
@@ -666,12 +667,3 @@ export type ViewAllUnvalidatedFarmerReturnType =
       notValidatedFarmer: ViewAllUnvalidatedFarmerQueryReturnQuery[];
     }
   | { success: false; notifError: NotificationBaseType[] };
-
-export type ValidateFarmerPageTableListType = {
-  farmerName: string;
-  farmerAlias: string;
-  dateCreated: string;
-  verified: boolean;
-  orgRole: string;
-  orgName: string;
-};
