@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 import { ViewUserReportTableData } from "./reportComponent";
 import { useLoading } from "./provider/loadingProvider";
 import { useNotification } from "./provider/notificationProvider";
-import { ErrorResponseType } from "@/types";
+import { ApprovedButtonPropType, ErrorResponseType } from "@/types";
 import { ApprovedOrgMember } from "@/lib/server_action/report";
 import { ApprovedOrgFarmerAcc } from "@/lib/server_action/farmerUser";
 import { useRouter } from "next/navigation";
@@ -47,10 +47,42 @@ export const FarmerOrgMemberAction: FC<{
   verificationStatus: boolean;
   farmerName: string;
 }> = ({ farmerId, verificationStatus, farmerName }) => {
+  const [userDelete, setUserDelete] = useState<boolean>(false);
+  return (
+    <div>
+      <Link className="cursor-pointer" href={`/farmerUser/${farmerId}`}>
+        Tingnan
+      </Link>
+
+      <ApprovedButton
+        farmerId={farmerId}
+        verificationStatus={verificationStatus}
+      />
+
+      <button className="cursor-pointer" onClick={() => setUserDelete(true)}>
+        Tanggalin
+      </button>
+
+      {userDelete &&
+        createPortal(
+          <DeleteModalNotif
+            farmerId={farmerId}
+            farmerName={farmerName}
+            setShowDeleteModal={setUserDelete}
+          />,
+          document.body
+        )}
+    </div>
+  );
+};
+
+export const ApprovedButton: FC<ApprovedButtonPropType> = ({
+  farmerId,
+  verificationStatus,
+}) => {
   const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [userDelete, setUserDelete] = useState<boolean>(false);
 
   const handleApproveFarmerAcc = async () => {
     try {
@@ -70,30 +102,12 @@ export const FarmerOrgMemberAction: FC<{
   };
 
   return (
-    <div>
-      <Link className="cursor-pointer" href={`/farmerUser/${farmerId}`}>
-        Tingnan
-      </Link>
-      <button
-        className="cursor-pointer"
-        disabled={verificationStatus}
-        onClick={handleApproveFarmerAcc}
-      >
-        Aprubahan
-      </button>
-      <button className="cursor-pointer" onClick={() => setUserDelete(true)}>
-        Tanggalin
-      </button>
-
-      {userDelete &&
-        createPortal(
-          <DeleteModalNotif
-            farmerId={farmerId}
-            farmerName={farmerName}
-            setShowDeleteModal={setUserDelete}
-          />,
-          document.body
-        )}
-    </div>
+    <button
+      className="button submit-button"
+      disabled={verificationStatus}
+      onClick={handleApproveFarmerAcc}
+    >
+      Aprubahan
+    </button>
   );
 };

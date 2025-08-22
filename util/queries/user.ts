@@ -408,8 +408,8 @@ export const ViewAllUnvalidatedFarmerQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."verified", f."orgRole", o."orgName",  from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" where f."verified" = $1 order by case when f."orgId" = $2 then $3 else $4 end asc`,
-        [false, null, 1, 2]
+        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."verified", f."orgRole", o."orgName"  from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" where (f."verified" = $1 and f."orgId" is null) or (f."orgRole" = $2 and f."verified" = $3) order by case when f."orgId" is null then 1 else 2 end asc`,
+        [false, "leader", false]
       )
     ).rows;
   } catch (error) {

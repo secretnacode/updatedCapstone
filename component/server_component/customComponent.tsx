@@ -25,7 +25,7 @@ export const SubmitButton: FC<ButtonPropType> = ({
     <button
       type={type}
       onClick={onClick}
-      className={`button bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50 ${className}`}
+      className={`button submit-button ${className}`}
     >
       {children}
     </button>
@@ -42,7 +42,7 @@ export const CancelButton: FC<ButtonPropType> = ({
     <button
       type={type}
       onClick={onClick}
-      className={`button bg-red-500 hover:!bg-red-600 !text-white !py-2 !px-6 !rounded-2xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50 ${className}`}
+      className={`button cancel-button ${className}`}
     >
       {children}
     </button>

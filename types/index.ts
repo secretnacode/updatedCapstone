@@ -666,3 +666,8 @@ export type ViewAllUnvalidatedFarmerReturnType =
       notValidatedFarmer: ViewAllUnvalidatedFarmerQueryReturnQuery[];
     }
   | { success: false; notifError: NotificationBaseType[] };
+
+export type ApprovedButtonPropType = {
+  farmerId: string;
+  verificationStatus: boolean;
+};
