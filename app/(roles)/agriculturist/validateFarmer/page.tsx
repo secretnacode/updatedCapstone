@@ -1,12 +1,12 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import {
   ApprovedButton,
+  DeleteUser,
   UserProfileLink,
 } from "@/component/client_component/farmerLeaderComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
-import Link from "next/link";
 
 export default async function Page() {
   const unvalidatedUser = await ViewAllUnvalidatedFarmer();
@@ -55,12 +55,10 @@ export default async function Page() {
                         verificationStatus={farmVal.verified}
                       />
 
-                      <Link
-                        href="/"
-                        className="table-link bg-green-300 hover:bg-green-400 active:ring-green-800"
-                      >
-                        Crops
-                      </Link>
+                      <DeleteUser
+                        farmerId={farmVal.farmerId}
+                        farmerName={farmVal.farmerName}
+                      />
                     </div>
                   </td>
                 </tr>

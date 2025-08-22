@@ -672,8 +672,19 @@ export type ApprovedButtonPropType = {
   verificationStatus: boolean;
   label?: string;
 };
+
 export type UserProfileLinkPropType = {
   farmerId: string;
   label?: string;
   className?: string;
+};
+
+export type DeleteUserPropType = {
+  farmerId: string;
+  farmerName: string;
+  buttonLabel?: string;
+  proceedButtonLabel?: string;
+  cancelButtonLabel?: string;
+  modalTitle?: string;
+  modalMessage?: Readonly<ReactNode>;
 };

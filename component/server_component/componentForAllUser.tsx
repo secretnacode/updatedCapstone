@@ -1,13 +1,19 @@
 import {
   AvailableOrgReturnType,
   GetFarmerUserProfileInfoQueryReturnType,
+  UserProfileLinkPropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
-import { UserProFileComponent } from "../client_component/componentForAllUser";
+import {
+  ApprovedButton,
+  DeleteUser,
+  UserProFileComponent,
+} from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
+import Link from "next/link";
 
 export const FarmerUserProfile: FC<{
   userFarmerInfo: GetFarmerUserProfileInfoQueryReturnType;
@@ -107,5 +113,39 @@ export const FarmerUserProfile: FC<{
         )}
       </div>
     </div>
+  );
+};
+
+export const FarmerOrgMemberAction: FC<{
+  farmerId: string;
+  verificationStatus: boolean;
+  farmerName: string;
+}> = ({ farmerId, verificationStatus, farmerName }) => {
+  return (
+    <div>
+      <UserProfileLink farmerId={farmerId} />
+
+      <ApprovedButton
+        farmerId={farmerId}
+        verificationStatus={verificationStatus}
+      />
+
+      <DeleteUser farmerId={farmerId} farmerName={farmerName} />
+    </div>
+  );
+};
+
+export const UserProfileLink: FC<UserProfileLinkPropType> = ({
+  farmerId,
+  label = "Tingnan",
+  className = "",
+}) => {
+  return (
+    <Link
+      className={`profile-link ${className}`}
+      href={`/farmerUser/${farmerId}`}
+    >
+      {label}
+    </Link>
   );
 };

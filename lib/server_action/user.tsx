@@ -32,8 +32,8 @@ export const DelteUserAccount = async (
     return {
       notifMessage: [
         {
-          message: "Ang user na tatanggalin mo ay hindi mo kamiyembro!!!",
-          type: "warning",
+          message: "Matagumpay na natanggal ang account ng farmer",
+          type: "success",
         },
       ],
     };

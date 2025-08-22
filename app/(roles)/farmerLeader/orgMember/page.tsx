@@ -2,7 +2,7 @@ import {
   RedirectManager,
   RenderNotification,
 } from "@/component/client_component/fallbackComponent";
-import { FarmerOrgMemberAction } from "@/component/client_component/farmerLeaderComponent";
+import { FarmerOrgMemberAction } from "@/component/server_component/componentForAllUser";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
 import { GetFarmerOrgMemberReturnType, NotificationBaseType } from "@/types";
 import { ClipboardX } from "lucide-react";

@@ -1,21 +1,19 @@
 "use client";
 
-import { AlertTriangle, X } from "lucide-react";
 import {
   ChangeEvent,
-  Dispatch,
   FC,
   FormEvent,
-  SetStateAction,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
-import { DelteUserAccount } from "@/lib/server_action/user";
 import { useRouter } from "next/navigation";
 import {
+  ApprovedButtonPropType,
+  DeleteUserPropType,
   FormErrorType,
   OrganizationInfoFormPropType,
   OrgInfoType,
@@ -28,7 +26,10 @@ import {
   baranggayList,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
-import { UpdateUserProfileInfo } from "@/lib/server_action/farmerUser";
+import {
+  ApprovedOrgFarmerAcc,
+  UpdateUserProfileInfo,
+} from "@/lib/server_action/farmerUser";
 import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
@@ -37,89 +38,7 @@ import {
   FormDivLabelSelect,
   ModalNotice,
 } from "../server_component/customComponent";
-
-/**
- * component for the delete modal that will let sure the user will delete the account
- * @param param0 props that takes farmerId(id that you want to delete),
- * farmerName(name of the farmer that you want to delete), setShowDeleteModal(state of modal if it will be shown or not)
- * @returns component modal
- */
-export const DeleteModalNotif: FC<{
-  farmerId: string;
-  farmerName: string;
-  setShowDeleteModal: Dispatch<SetStateAction<boolean>>;
-}> = ({ farmerId, farmerName, setShowDeleteModal }) => {
-  const { handleIsLoading, handleDoneLoading } = useLoading();
-  const { handleSetNotification } = useNotification();
-  const [isPassing, setIsPassing] = useState<boolean>(false);
-  const router = useRouter();
-
-  const handleDeleteFarmerUser = async () => {
-    setIsPassing(true);
-    try {
-      handleIsLoading("Tinatanggal na ang account....");
-
-      const deleteUser = await DelteUserAccount(farmerId);
-
-      handleSetNotification(deleteUser.notifMessage);
-      router.refresh();
-    } catch (error) {
-      const err = error as Error;
-      handleSetNotification([{ message: err.message, type: "error" }]);
-    } finally {
-      setIsPassing(false);
-      handleDoneLoading();
-      setShowDeleteModal(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-6 w-6 text-red-500" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Kumpirmasyon ng Pagtanggal
-            </h2>
-          </div>
-          <button
-            onClick={() => setShowDeleteModal(false)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            disabled={isPassing}
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          <p className="text-gray-600">
-            Sigurado ka ba na gusto mong tanggalin ang account ni{" "}
-            <span className="font-semibold text-gray-900">{farmerName}</span>?
-            Hindi na mababawi ang aksyon na ito.
-          </p>
-        </div>
-
-        <div className="flex gap-3 px-6 pb-6">
-          <button
-            onClick={() => setShowDeleteModal(false)}
-            disabled={isPassing}
-            className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
-          >
-            {isPassing ? "Tinatanggal na..." : "Kanselahin"}
-          </button>
-          <button
-            onClick={handleDeleteFarmerUser}
-            disabled={isPassing}
-            className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
-          >
-            {isPassing ? "Tinatanggal na..." : "Tanggalin"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { DelteUserAccount } from "@/lib/server_action/user";
 
 //FIX: add middle name and extension name
 export const UserProFileComponent: FC<{
@@ -527,5 +446,118 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
         />
       )}
     </form>
+  );
+};
+
+export const ApprovedButton: FC<ApprovedButtonPropType> = ({
+  farmerId,
+  verificationStatus,
+  label = "Aprubahan",
+}) => {
+  const router = useRouter();
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleApproveFarmerAcc = async () => {
+    try {
+      handleIsLoading(`Inaaprubahan na ang account!!!`);
+
+      const approveAcc = await ApprovedOrgFarmerAcc(farmerId);
+
+      handleSetNotification(approveAcc.notifMessage);
+      if (approveAcc.refresh) router.refresh();
+    } catch (error) {
+      const err = error as Error;
+      console.log(`Error in approving the farmer account: ${err.message}`);
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <button
+      className="button submit-button"
+      disabled={verificationStatus}
+      onClick={handleApproveFarmerAcc}
+    >
+      {label}
+    </button>
+  );
+};
+
+export const DeleteUser: FC<DeleteUserPropType> = ({
+  farmerId,
+  farmerName,
+  modalTitle = "Tatanggalin ang account?",
+  proceedButtonLabel = "Mag Patuloy",
+  cancelButtonLabel = "Bumalik",
+  buttonLabel = "Tanggalin",
+  modalMessage = (
+    <>
+      <p className="p font-bold !text-lg mb-4">
+        Burahin ang farmer user na si {farmerName}. Kapag ito ay binura mo, ito
+        ay mawawala na ng tuluyan at hindi na maibabalik
+      </p>
+      <p className="p !text-[17px] tracking-wide">
+        Magpatuloy sa pag tatanggal ng account ng mag sasaka?
+      </p>
+    </>
+  ),
+}) => {
+  const router = useRouter();
+  const { handleSetNotification } = useNotification();
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleDeleteFarmerUser = async () => {
+    try {
+      handleIsLoading("Tinatanggal na ang account....");
+
+      const deleteUser = await DelteUserAccount(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+      router.refresh();
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+      setShowModal(false);
+    }
+  };
+  return (
+    <>
+      <button
+        className="button cancel-button"
+        onClick={() => setShowModal(true)}
+      >
+        {buttonLabel}
+      </button>
+
+      <button
+        className="hidden"
+        onClick={handleDeleteFarmerUser}
+        ref={submitButtonRef}
+      />
+
+      {showModal && (
+        <ModalNotice
+          logo={"warning"}
+          modalTitle={modalTitle}
+          closeModal={() => setShowModal(false)}
+          modalMessage={modalMessage}
+          procceedButton={{
+            label: proceedButtonLabel,
+            onClick: () => {
+              submitButtonRef.current?.click();
+              setShowModal(false);
+            },
+          }}
+          cancelButton={{ label: cancelButtonLabel }}
+        />
+      )}
+    </>
   );
 };
