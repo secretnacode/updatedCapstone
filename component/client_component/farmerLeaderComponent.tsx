@@ -3,18 +3,18 @@
 import { FC, useState } from "react";
 import { ViewUserReportTableData } from "./reportComponent";
 import { useLoading } from "./provider/loadingProvider";
-import { useNotification } from "./provider/notificationProvider";
-import {
-  ApprovedButtonPropType,
-  ErrorResponseType,
-  UserProfileLinkPropType,
-} from "@/types";
 import { ApprovedOrgMember } from "@/lib/server_action/report";
 import { ApprovedOrgFarmerAcc } from "@/lib/server_action/farmerUser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteModalNotif } from "./componentForAllUser";
 import { createPortal } from "react-dom";
+import { useNotification } from "./provider/notificationProvider";
+import {
+  ApprovedButtonPropType,
+  ErrorResponseType,
+  UserProfileLinkPropType,
+} from "@/types";
 
 export const ViewMemberReport: FC<{
   reportId: string;
@@ -60,7 +60,6 @@ export const FarmerOrgMemberAction: FC<{
         farmerId={farmerId}
         verificationStatus={verificationStatus}
       />
-
       <button className="cursor-pointer" onClick={() => setUserDelete(true)}>
         Tanggalin
       </button>
