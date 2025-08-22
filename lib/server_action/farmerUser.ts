@@ -6,6 +6,7 @@ import {
   GetFarmerOrgMemberQuery,
   GetFarmerUserProfileInfoQuery,
   UpdateUserProfileInfoQuery,
+  ViewAllVerifiedFarmerUserQuery,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import {
@@ -15,6 +16,7 @@ import {
   NotificationBaseType,
   UpdateUserProfileInfoType,
   userFarmerInfoPropType,
+  ViewAllFarmerUserReturnType,
 } from "@/types";
 import { GetSession } from "../session";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
@@ -165,7 +167,7 @@ export const UpdateUserProfileInfo = async (
   userProfileInfo: userFarmerInfoPropType
 ): Promise<UpdateUserProfileInfoType> => {
   try {
-    await ProtectedAction("update:user");
+    const userId = await ProtectedAction("update:user");
 
     const validateVal = ZodValidateForm(
       userProfileInfo,
@@ -183,22 +185,17 @@ export const UpdateUserProfileInfo = async (
         ],
       };
 
-    const session = await GetSession();
+    await UpdateUserProfileInfoQuery(userId, userProfileInfo);
 
-    if (session) {
-      await UpdateUserProfileInfoQuery(session.userId, userProfileInfo);
-
-      return {
-        success: true,
-        notifMessage: [
-          {
-            message: "Matagumpay ang pag babago mo ng iyong impormasyon",
-            type: "success",
-          },
-        ],
-      };
-    } else
-      throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pag babago mo ng iyong impormasyon",
+          type: "success",
+        },
+      ],
+    };
   } catch (error) {
     const err = error as Error;
     console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
@@ -213,3 +210,27 @@ export const UpdateUserProfileInfo = async (
     };
   }
 };
+
+export const ViewAllFarmerUser =
+  async (): Promise<ViewAllFarmerUserReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:user");
+
+      return {
+        success: true,
+        farmerInfo: await ViewAllVerifiedFarmerUserQuery(),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(`Nagka problema sa pag uupdate ng profile mo: ${err}`);
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

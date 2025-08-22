@@ -1,5 +1,4 @@
 import { GetSession } from "@/lib/session";
-import { NavbarType } from "@/types";
 import {
   Building2,
   ClipboardCheck,
@@ -11,8 +10,9 @@ import {
 } from "lucide-react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
+import { Logo } from "./elementComponent";
 
 export const NavbarComponent: FC = async () => {
   console.log("Navbar main component");
@@ -61,80 +61,111 @@ export const NavbarComponent: FC = async () => {
 
 const FarmerNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/farmer";
-  let navbar: NavbarType = [
-    { page: basePage, pageLabel: "Home", logo: Home },
-    { page: `${basePage}/report`, pageLabel: "Ulat", logo: ClipboardPlus },
-    { page: `${basePage}/crop`, pageLabel: "Pananim", logo: Sprout },
-    { page: `${basePage}/profile`, pageLabel: "Profile", logo: UserPen },
-  ];
 
-  if (role === "leader")
-    navbar = [
-      ...navbar.slice(0, 3),
-      {
-        page: `${basePage}Leader/validateReport`,
-        pageLabel: "Ulat ng miyembro",
-        logo: ClipboardCheck,
-      },
-      {
-        page: `${basePage}Leader/orgMember`,
-        pageLabel: "Mga miyembro",
-        logo: ContactRound,
-      },
-      ...navbar.slice(3),
-    ];
+  const Links = (
+    <>
+      <Link href={basePage} className="group nav-link">
+        <Logo logo={Home} className="nav-logo" />
+        <span className="nav-span">Home</span>
+      </Link>
 
-  return <Navbar pages={navbar} />;
+      <Link href={`${basePage}/report`} className="group nav-link">
+        <Logo logo={ClipboardPlus} className="nav-logo" />
+        <span className="nav-span">Ulat</span>
+      </Link>
+
+      <Link href={`${basePage}/crop`} className="group nav-link">
+        <Logo logo={Sprout} className="nav-logo" />
+        <span className="nav-span">Pananim</span>
+      </Link>
+
+      {role === "leader" && (
+        <>
+          <Link
+            href={`${basePage}Leader/validateReport`}
+            className="group nav-link"
+          >
+            <Logo logo={ClipboardCheck} className="nav-logo" />
+            <span className="nav-span">Ulat ng miyembro</span>
+          </Link>
+
+          <Link href={`${basePage}Leader/orgMember`} className="group nav-link">
+            <Logo logo={ContactRound} className="nav-logo" />
+            <span className="nav-span">Mga miyembro</span>
+          </Link>
+        </>
+      )}
+
+      <Link href={`${basePage}/profile`} className="group nav-link">
+        <Logo logo={UserPen} className="nav-logo" />
+        <span className="nav-span">Profile</span>
+      </Link>
+    </>
+  );
+
+  return <Navbar>{Links}</Navbar>;
 };
 
 const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/agriculturist";
-  let navbar: NavbarType = [
-    { page: basePage, pageLabel: "Home", logo: Home },
-    { page: `${basePage}/reports`, pageLabel: "Reports", logo: ClipboardPlus },
-    { page: `${basePage}/crops`, pageLabel: "Crops", logo: Sprout },
-    {
-      page: `${basePage}/farmerUsers`,
-      pageLabel: "Farmers",
-      logo: ContactRound,
-    },
-    {
-      page: `${basePage}/organizations`,
-      pageLabel: "Organizations",
-      logo: Building2,
-    },
-    { page: `${basePage}/profile`, pageLabel: "Profile", logo: UserPen },
-  ];
 
-  if (role === "admin")
-    navbar = [
-      ...navbar.slice(0, 5),
-      {
-        page: `${basePage}/agriUsers`,
-        pageLabel: "Agriculturist",
-        logo: ClipboardCheck,
-      },
-      ...navbar.slice(5),
-    ];
+  const Links = (
+    <>
+      <Link href={basePage} className="group nav-link">
+        <Logo logo={Home} className="nav-logo" />
+        <span className="nav-span">Home</span>
+      </Link>
 
-  return <Navbar pages={navbar} />;
+      <Link href={`${basePage}/reports`} className="group nav-link">
+        <Logo logo={ClipboardPlus} className="nav-logo" />
+
+        <span className="nav-span">Reports</span>
+      </Link>
+
+      <Link href={`${basePage}/crops`} className="group nav-link">
+        <Logo logo={Sprout} className="nav-logo" />
+        <span className="nav-span">Crops</span>
+      </Link>
+
+      <div className="nav-divider title">Farmers</div>
+
+      <Link href={`${basePage}/farmerUsers`} className="group nav-link">
+        <Logo logo={ContactRound} className="nav-logo" />
+        <span className="nav-span">Farmer Users</span>
+      </Link>
+
+      <Link href={`${basePage}/validateFarmer`} className="group nav-link">
+        <Logo logo={ContactRound} className="nav-logo" />
+        <span className="nav-span">Validate Farmer</span>
+      </Link>
+
+      <Link href={`${basePage}/organizations`} className="group nav-link">
+        <Logo logo={Building2} className="nav-logo" />
+        <span className="nav-span">Organizations</span>
+      </Link>
+
+      {role === "admin" && (
+        <Link href={`${basePage}/agriUsers`} className="group nav-link">
+          <Logo logo={ClipboardCheck} className="nav-logo" />
+          <span className="nav-span">Agriculturist</span>
+        </Link>
+      )}
+
+      <Link href={`${basePage}/profile`} className="group nav-link">
+        <Logo logo={UserPen} className="nav-logo" />
+
+        <span className="nav-span">Profile</span>
+      </Link>
+    </>
+  );
+
+  return <Navbar>{Links}</Navbar>;
 };
 
-const Navbar: FC<{ pages: NavbarType }> = ({ pages }) => {
+const Navbar: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <nav className="flex-1 py-4">
-      <div className="px-3 space-y-1">
-        {pages.map((page) => (
-          <Link
-            href={page.page}
-            key={page.page}
-            className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors group"
-          >
-            <page.logo className="h-5 w-5 group-hover:text-green-600" />
-            <span className="text-sm font-medium">{page.pageLabel}</span>
-          </Link>
-        ))}
-      </div>
+      <div className="px-3 space-y-1">{children}</div>
     </nav>
   );
 };

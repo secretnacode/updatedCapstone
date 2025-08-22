@@ -1,5 +1,6 @@
 import { AgriFarmerReportAction } from "@/component/client_component/agriReportComponent";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { Logo } from "@/component/server_component/elementComponent";
 import { GetAllFarmerReport } from "@/lib/server_action/report";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 import { ClipboardX } from "lucide-react";
@@ -22,7 +23,7 @@ export default async function Page() {
         {farmerReport.success && farmerReport.validatedReport.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <div className="space-y-3">
-              <ClipboardX className="h-12 w-12 mx-auto text-gray-400" />
+              <Logo logo={ClipboardX} className="table_no_content" />
               <p className="text-gray-500">
                 Wala ka pang naisusumiteng ulat. Magdagdag ng bagong ulat upang
                 masimulan.

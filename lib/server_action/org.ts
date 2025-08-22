@@ -13,8 +13,6 @@ import {
 import { ProtectedAction } from "../protectedActions";
 import { ZodValidateForm } from "../validation/authValidation";
 import { userProfileOrgUpdateSchema } from "@/util/helper_function/validation/validationSchema";
-import { GetSession } from "../session";
-import { LogInAgainMessage } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -49,7 +47,7 @@ export const UpdateUserProfileOrg = async (
   orgInfo: OrgInfoType
 ): Promise<UpdateUserProfileOrgReturnType> => {
   try {
-    await ProtectedAction("update:org");
+    const userId = await ProtectedAction("update:org");
 
     const validate = ZodValidateForm(orgInfo, userProfileOrgUpdateSchema);
     if (!validate.valid)
@@ -64,33 +62,29 @@ export const UpdateUserProfileOrg = async (
         ],
       };
 
-    const session = await GetSession();
+    const newOrgName =
+      orgInfo.orgId === "other" && orgInfo.otherOrgName
+        ? (await CreateNewOrg(orgInfo.otherOrgName, userId)).orgId
+        : null;
 
-    if (session) {
-      const newOrgName =
-        orgInfo.orgId === "other" && orgInfo.otherOrgName
-          ? (await CreateNewOrg(orgInfo.otherOrgName, session.userId)).orgId
-          : null;
+    await UpdateUserOrg({
+      orgId: newOrgName ? newOrgName : orgInfo.orgId,
+      orgRole: newOrgName ? "leader" : "member",
+      farmerId: userId,
+    });
 
-      await UpdateUserOrg({
-        orgId: newOrgName ? newOrgName : orgInfo.orgId,
-        orgRole: newOrgName ? "leader" : "member",
-        farmerId: session.userId,
-      });
+    revalidatePath("/farmer/profile");
 
-      revalidatePath("/farmer/profile");
-
-      return {
-        success: true,
-        newOrgIdVal: newOrgName ? newOrgName : orgInfo.orgId,
-        notifMessage: [
-          {
-            message: "Matagumpay ang pag babago mo nang iyong organisasyon!!!",
-            type: "success",
-          },
-        ],
-      };
-    } else throw new Error(LogInAgainMessage());
+    return {
+      success: true,
+      newOrgIdVal: newOrgName ? newOrgName : orgInfo.orgId,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pag babago mo nang iyong organisasyon!!!",
+          type: "success",
+        },
+      ],
+    };
   } catch (error) {
     const err = error as Error;
     console.log(

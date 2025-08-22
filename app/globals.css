@@ -103,9 +103,6 @@ body {
   .notification button {
     @apply cursor-pointer hover:text-gray-600 hover:scale-110 active:scale-90 active:text-gray-900 transition-all ease-in-out  duration-200;
   }
-  .logo {
-    @apply stroke-[2.5px];
-  }
   .notification-close-logo {
     @apply w-5 h-5 opacity-75 transition-opacity hover:opacity-100 focus:opacity-100 cursor-pointer;
   }
@@ -126,5 +123,78 @@ body {
   }
   .farmerReportTable tbody tr td {
     @apply px-4 py-3 text-sm;
+  }
+
+  /* .div{
+    @apply;
+  } */
+  .form-div {
+    @apply space-y-1;
+  }
+  .input {
+    @apply w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500;
+  }
+  .label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+  .title {
+    @apply font-semibold text-gray-900 mb-4 tracking-wide;
+  }
+  .form-title {
+    @apply text-lg;
+  }
+  .select {
+    @apply w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent;
+  }
+  /* .option {
+    @apply ;
+  } */
+  .p {
+    @apply text-sm;
+  }
+  .p-error {
+    @apply text-red-500;
+  }
+  /* .form {
+    @apply;
+  } */
+  .logo {
+    @apply size-6;
+  }
+  .logo-mild-color {
+    @apply text-gray-500;
+  }
+  .button {
+    @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-2xl;
+  }
+  .table {
+    @apply w-full Divide-y Divide-gray-200 farmerReportTable;
+  }
+  .caption {
+    @apply sr-only;
+  }
+  .thead {
+    @apply bg-gray-50;
+  }
+  .td {
+    @apply text-gray-500;
+  }
+  .table-no-content {
+    @apply mx-auto text-gray-400;
+  }
+  .table-title-text {
+    @apply text-2xl;
+  }
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors;
+  }
+  .nav-span {
+    @apply text-sm font-medium;
+  }
+  .nav-divider {
+    @apply text-lg font-serif tracking-wide text-gray-400 font-bold my-3 ml-1;
+  }
+  .table-link {
+    @apply flex items-center justify-center py-2 px-4 rounded-xl !text-gray-800 transition-colors active:ring-1 active:ring-offset-2;
   }
 }

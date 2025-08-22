@@ -17,6 +17,8 @@ export default async function Page() {
     };
   }
 
+  console.log(userInfo);
+
   return (
     <div>
       {userInfo.success ? (

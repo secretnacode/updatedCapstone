@@ -348,7 +348,7 @@ export type GetFarmerUserProfileInfoQueryReturnType = {
   orgId: string;
   orgRole: string;
   leaderName: string;
-  cropid: string;
+  cropId: string;
 };
 
 export type UserFarmerInfoPropType = {
@@ -496,7 +496,6 @@ export type FormDivLabelInputPropType = {
   labelMessage: string;
   inputType?: string;
   formError?: string[];
-  errorClassName?: string;
   inputDisable?: boolean;
   inputName: string;
   inputValue?: string;
@@ -517,12 +516,7 @@ export type FormDivLabelSelectType<T> = {
   optionValue: (list: T) => string | number;
   optionLabel: (list: T) => string;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
-  divClass?: string;
-  labelClass?: string;
-  selectClass?: string;
-  optionClass?: string;
   formError?: string[];
-  errorClassName?: string;
 };
 
 export type FormSubmitButton = ChildrenType & {
@@ -551,12 +545,10 @@ export type ButtonPropType = ChildrenType & {
 export type FormCancelSubmitButtonPropType = {
   divClassName?: string;
   submitOnClick?: () => void;
-  submitClassName?: string;
   submitButtonLabel: string;
   submitLogo?: LucideIcon;
   submitType?: ButtonTypeAttribType;
   cancelOnClick?: () => void;
-  cancelClassName?: string;
   cancelButtonLabel: string;
   cancelLogo?: LucideIcon;
 };
@@ -592,3 +584,58 @@ export type UpdateUserProfileOrgReturnType = {
       formError?: FormErrorType<OrgInfoType>;
     }
 );
+
+export type ViewAllVerifiedFarmerUserQueryReturnType = {
+  farmerId: string;
+  farmerName: string;
+  farmerAlias: string;
+  dateCreated: Date;
+  orgId: string;
+  orgRole: string;
+  orgName: string;
+  reportCount: number;
+  cropCount: number;
+};
+
+export type ViewAllFarmerUserReturnType =
+  | {
+      success: true;
+      farmerInfo: ViewAllVerifiedFarmerUserQueryReturnType[];
+    }
+  | { success: false; notifError: NotificationBaseType[] };
+
+export type TablePropType = ChildrenType & {
+  className?: string;
+};
+
+export type CaptionPropType = ChildrenType & {
+  className?: string;
+};
+
+export type TableHeaderPropType = ChildrenType & {
+  className?: string;
+};
+
+export type TableBodyPropType = ChildrenType & {
+  className?: string;
+};
+
+export type TableRowPropType = ChildrenType & {
+  className?: string;
+};
+
+export type TableHeaderCellPropType = ChildrenType & {
+  className?: string;
+  scope?: string;
+};
+
+export type TableCellPropType = ChildrenType & {
+  className?: string;
+};
+
+export type TableComponentPropType<T extends object> = {
+  caption?: string;
+  tableList: T[];
+  noContentMessage: string;
+  tdValue: (val: T) => string;
+};

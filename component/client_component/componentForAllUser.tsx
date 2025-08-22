@@ -31,18 +31,20 @@ import {
 import {
   Div,
   Form,
-  FormCancelSubmitButton,
   FormDiv,
-  FormDivLabelInput,
-  FormDivLabelSelect,
   FormTitle,
-  ModalNotice,
   P,
   Title,
-} from "../server_component/elementComponents/formComponent";
+} from "../server_component/elementComponent";
 import { UpdateUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
+import {
+  FormCancelSubmitButton,
+  FormDivLabelInput,
+  FormDivLabelSelect,
+  ModalNotice,
+} from "../server_component/customComponent";
 
 /**
  * component for the delete modal that will let sure the user will delete the account

@@ -78,7 +78,7 @@ export const FarmerUserProfile: FC<{
             <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
             <div className="grid gap-2">
               <ViewCropModalButton
-                cropId={userFarmerInfo.cropid}
+                cropId={userFarmerInfo.cropId}
                 isViewing={isViewing}
               />
             </div>
