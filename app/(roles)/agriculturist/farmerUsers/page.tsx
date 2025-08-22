@@ -13,26 +13,34 @@ export default async function Page() {
       {!farmers.success ? (
         <RenderNotification notif={farmers.notifError} />
       ) : (
-        <TableComponent<FarmerUserPageTableListType>
+        <TableComponent
           noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"
-          tableList={farmers.validatedFarmer.map((info) => ({
-            farmerName: info.farmerName,
-            farmerAlias: info.farmerAlias,
-            dateCreated: ReadableDateFomat(info.dateCreated),
-            orgName: info.orgName,
-            orgRole: info.orgRole,
-            reportCount: String(info.reportCount),
-            cropCount: String(info.cropCount),
-          }))}
-          tableHeader={{
-            farmerName: "Name",
-            farmerAlias: "Alias",
-            dateCreated: "Created at",
-            orgName: "Organization Name",
-            orgRole: "Organization Role",
-            reportCount: "Amount Report",
-            cropCount: "Amount Crop",
-          }}
+          listCount={farmers.validatedFarmer.length}
+          tableHeaderCell={
+            <>
+              <th>#</th>
+              <th>Name</th>
+              <th>Alias</th>
+              <th>Created At</th>
+              <th>Verified</th>
+              <th>Role</th>
+              <th>Organization Name</th>
+              <th>Actions</th>
+            </>
+          }
+          tableCell={
+            <>
+              {farmers.validatedFarmer.map((farmVal, index) => (
+                <tr key={farmVal.farmerId}>
+                  <td>{index + 1}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              ))}
+            </>
+          }
           action={
             <>
               <Link

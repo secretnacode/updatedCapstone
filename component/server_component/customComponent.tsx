@@ -239,12 +239,13 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
 export const TableComponent: FC<TableComponentPropType> = ({
   caption,
   noContentMessage,
+  listCount,
   tableHeaderCell,
   tableCell,
 }) => {
   return (
     <>
-      {tableList.length === 0 ? (
+      {listCount === 0 ? (
         <div className="div text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
           <div className="div space-y-3">
             <ClipboardX className="logo table-no-content" />
@@ -256,9 +257,7 @@ export const TableComponent: FC<TableComponentPropType> = ({
           <div className="div overflow-x-auto">
             <table className="table-style farmerReportTable">
               {caption && <caption className="caption">{caption}</caption>}
-              <thead>
-                <tr>{tableHeaderCell}</tr>
-              </thead>
+              <thead>{tableHeaderCell}</thead>
               <tbody>{tableCell}</tbody>
             </table>
           </div>
