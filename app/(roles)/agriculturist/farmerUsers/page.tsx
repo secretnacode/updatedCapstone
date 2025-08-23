@@ -62,6 +62,7 @@ export default async function Page() {
                       <DynamicLink
                         baseLink="farmerUser"
                         dynamicId={farmVal.farmerId}
+                        label="Profile"
                       />
 
                       <Link

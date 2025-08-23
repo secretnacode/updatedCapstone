@@ -1,5 +1,8 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
-import { UserProfileLink } from "@/component/server_component/componentForAllUser";
+import {
+  DynamicLink,
+  UserProfileLink,
+} from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
@@ -46,10 +49,10 @@ export default async function Page() {
                   <td>{orgVal.totalMember}</td>
                   <td>
                     <div className="table-action">
-                      <UserProfileLink
-                        farmerId={farmVal.farmerId}
-                        className="table-link"
-                        label="Profile"
+                      <DynamicLink
+                        baseLink="organizations"
+                        dynamicId={orgVal.orgId}
+                        label="Organization"
                       />
                     </div>
                   </td>
