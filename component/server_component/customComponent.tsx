@@ -260,21 +260,23 @@ export const TableComponent: FC<TableComponentPropType> = ({
           </div>
         </div>
       ) : (
-        <div className="div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <>
           {tableTitle && (
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center ">
               <h1 className="title !text-2xl !font-bold ">{tableTitle}</h1>
             </div>
           )}
-          <div className="div overflow-x-auto">
-            <table className="table-style farmerReportTable">
-              <thead>
-                <tr>{tableHeaderCell}</tr>
-              </thead>
-              <tbody>{tableCell}</tbody>
-            </table>
+          <div className="div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="div overflow-x-auto">
+              <table className="table-style farmerReportTable">
+                <thead>
+                  <tr>{tableHeaderCell}</tr>
+                </thead>
+                <tbody>{tableCell}</tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
