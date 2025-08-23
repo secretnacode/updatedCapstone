@@ -184,9 +184,9 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
 }) => {
   const logoValue: { logo: LucideIcon; className: string } | undefined =
     logo === "warning"
-      ? { logo: OctagonX as LucideIcon, className: "text-orange-500" }
+      ? { logo: TriangleAlert as LucideIcon, className: "text-orange-500" }
       : logo === "error"
-      ? { logo: TriangleAlert as LucideIcon, className: "text-red-500" }
+      ? { logo: OctagonX as LucideIcon, className: "text-red-500" }
       : undefined;
 
   return (
@@ -194,7 +194,11 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-3">
-            {logoValue && <logoValue.logo className="logo" />}
+            {logoValue && (
+              <logoValue.logo
+                className={`logo !size-10 ${logoValue.className}`}
+              />
+            )}
             <h1 className="title !text-[19px] !mb-0">{modalTitle}</h1>
           </div>
           <button

@@ -48,16 +48,21 @@ export default async function Page() {
                       <UserProfileLink
                         farmerId={farmVal.farmerId}
                         className="table-link"
+                        label="Profile"
                       />
 
                       <ApprovedButton
                         farmerId={farmVal.farmerId}
                         verificationStatus={farmVal.verified}
+                        label="Verify"
                       />
 
                       <DeleteUser
                         farmerId={farmVal.farmerId}
                         farmerName={farmVal.farmerName}
+                        buttonLabel="Delete"
+                        proceedButtonLabel="Proceed"
+                        cancelButtonLabel="Cancel"
                       />
                     </div>
                   </td>
