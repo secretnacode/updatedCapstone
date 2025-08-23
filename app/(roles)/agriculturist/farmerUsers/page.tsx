@@ -1,4 +1,5 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { DynamicLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllValidatedFarmerUser } from "@/lib/server_action/farmerUser";
 import { ViewAllValidatedFarmerUserReturnType } from "@/types";
@@ -58,12 +59,10 @@ export default async function Page() {
                   <td>{farmVal.cropCount}</td>
                   <td>
                     <div className="table-action">
-                      <Link
-                        href="/"
-                        className="table-link bg-orange-300 hover:bg-orange-400 active:ring-orange-800"
-                      >
-                        Profile
-                      </Link>
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={farmVal.farmerId}
+                      />
 
                       <Link
                         href="/"

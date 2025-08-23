@@ -1,7 +1,7 @@
 import {
   AvailableOrgReturnType,
   GetFarmerUserProfileInfoQueryReturnType,
-  UserProfileLinkPropType,
+  DynamicLinkPropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
@@ -123,7 +123,7 @@ export const FarmerOrgMemberAction: FC<{
 }> = ({ farmerId, verificationStatus, farmerName }) => {
   return (
     <div>
-      <UserProfileLink farmerId={farmerId} />
+      <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
 
       <ApprovedButton
         farmerId={farmerId}
@@ -135,15 +135,16 @@ export const FarmerOrgMemberAction: FC<{
   );
 };
 
-export const UserProfileLink: FC<UserProfileLinkPropType> = ({
-  farmerId,
+export const DynamicLink: FC<DynamicLinkPropType> = ({
+  baseLink,
+  dynamicId,
   label = "Tingnan",
   className = "",
 }) => {
   return (
     <Link
       className={`profile-link ${className}`}
-      href={`/farmerUser/${farmerId}`}
+      href={`/${baseLink}/${dynamicId}`}
     >
       {label}
     </Link>

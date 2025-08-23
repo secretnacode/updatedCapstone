@@ -671,8 +671,9 @@ export type ApprovedButtonPropType = {
   label?: string;
 };
 
-export type UserProfileLinkPropType = {
-  farmerId: string;
+export type DynamicLinkPropType = {
+  baseLink: "farmerUser" | "organizations";
+  dynamicId: string;
   label?: string;
   className?: string;
 };
