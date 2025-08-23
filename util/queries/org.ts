@@ -13,10 +13,13 @@ export const GetAvailableOrgQuery = async (): Promise<
     return (await pool.query(`select "orgId", "orgName" from capstone.org`))
       .rows;
   } catch (error) {
-    const err = error as Error;
-    console.error("Error in Getting the available org:", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga available na organisasyon: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error in Getting the available org: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga available na organisasyon`
     );
   }
 };
@@ -39,10 +42,13 @@ export const CreateNewOrg = async (
       )
     ).rows[0];
   } catch (error) {
-    const err = error as Error;
-    console.error("Error in Creating new org after sign up:", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag gawa ng panibagong organisasyon: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error in Creating new org after sign up: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag gawa ng panibagong organisasyon`
     );
   }
 };
@@ -63,10 +69,13 @@ export const GetUserOrgId = async (
       )
     ).rows[0];
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the user orgId: ", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng organisasyon: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the user orgId: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng organisasyon`
     );
   }
 };
@@ -82,10 +91,13 @@ export const UpdateUserOrg = async (newOrg: NewOrgType): Promise<void> => {
       [newOrg.orgId, newOrg.orgRole, newOrg.farmerId]
     );
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the user orgId: ", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng organisasyon: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the user orgId: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng organisasyon`
     );
   }
 };

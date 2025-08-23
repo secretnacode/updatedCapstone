@@ -10,10 +10,13 @@ export const AddNewFarmerReportImage = async (
       [data.picId, data.reportId, data.pictureUrl]
     );
   } catch (error) {
-    const err = error as Error;
-    console.error("Error in adding image in the report:", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang mga imahe: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error in adding image in the report: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang mga imahe`
     );
   }
 };
