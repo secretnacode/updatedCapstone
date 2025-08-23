@@ -6,10 +6,25 @@ import { RenderNotification } from "@/component/client_component/fallbackCompone
 import { UserProfileLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
+import { ViewAllUnvalidatedFarmerReturnType } from "@/types";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
 export default async function Page() {
-  const unvalidatedUser = await ViewAllUnvalidatedFarmer();
+  let unvalidatedUser: ViewAllUnvalidatedFarmerReturnType;
+
+  try {
+    unvalidatedUser = await ViewAllUnvalidatedFarmer();
+  } catch (error) {
+    unvalidatedUser = {
+      success: false,
+      notifError: [
+        {
+          message: (error as Error).message,
+          type: "error",
+        },
+      ],
+    };
+  }
   return (
     <>
       {!unvalidatedUser.success ? (

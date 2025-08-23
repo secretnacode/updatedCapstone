@@ -165,10 +165,8 @@ export type CheckCropListReturnType =
     }
   | { valid: true };
 
-export type FarmerSecondDetailActionReturnType = {
-  success: false;
+export type FarmerSecondDetailActionReturnType = ServerActionFailBaseType & {
   cropErrors?: CropErrorFormType;
-  notifError: NotificationBaseType[];
 };
 
 export type CropErrorFormType =
@@ -601,7 +599,7 @@ export type ViewAllValidatedFarmerUserReturnType =
       success: true;
       validatedFarmer: ViewAllVerifiedFarmerUserQueryReturnType[];
     }
-  | { success: false; notifError: NotificationBaseType[] };
+  | ServerActionFailBaseType;
 
 export type TablePropType = ChildrenType & {
   className?: string;
@@ -665,7 +663,7 @@ export type ViewAllUnvalidatedFarmerReturnType =
       success: true;
       notValidatedFarmer: ViewAllUnvalidatedFarmerQueryReturnQuery[];
     }
-  | { success: false; notifError: NotificationBaseType[] };
+  | ServerActionFailBaseType;
 
 export type ApprovedButtonPropType = {
   farmerId: string;

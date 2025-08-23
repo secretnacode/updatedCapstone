@@ -260,6 +260,12 @@ export const TableComponent: FC<TableComponentPropType> = ({
           </div>
         </div>
       ) : (
+        //title of the table
+        // <div className="flex justify-between items-center">
+        //   <h1 className="text-2xl font-bold text-gray-900">
+        //     Ulat ng mga Miyembro
+        //   </h1>
+        // </div>
         <div className="div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="div overflow-x-auto">
             <table className="table-style farmerReportTable">

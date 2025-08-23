@@ -1,5 +1,6 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { ViewMemberReport } from "@/component/client_component/farmerLeaderComponent";
+import { TableComponent } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
@@ -25,7 +26,73 @@ export default async function Page() {
   }
 
   return (
-    <div className="p-8">
+    <>
+      {!orgReport.success ? (
+        <RenderNotification notif={orgReport.notifError} />
+      ) : (
+        <>
+          {message && <RedirectManager data={message} paramName="error" />}
+          <TableComponent
+            noContentMessage="Wala ka pang miyembro sa iyong organisasyon"
+            listCount={farmerMember.farmerMember.length}
+            tableHeaderCell={
+              <>
+                <th scope="col">#</th>
+                <th scope="col">Pangalan ng magsasaka</th>
+                <th scope="col">Alyas ng magsasaka</th>
+                <th scope="col">Numero ng telepono</th>
+                <th scope="col">Baranggay na tinitirhan</th>
+                <th scope="col">Estado account</th>
+                <th scope="col">Bilang ng pananim</th>
+                <th scope="col">Aksyon</th>
+              </>
+            }
+            tableCell={
+              <>
+                {farmerMember.farmerMember.map((farmer, index) => (
+                  <tr key={farmer.farmerId}>
+                    <td className="text-gray-500">{index + 1}</td>
+
+                    <td className=" text-gray-900 font-medium">
+                      {farmer.farmerName}
+                    </td>
+
+                    <td className="text-gray-500">{farmer.farmerAlias}</td>
+
+                    <td className=" text-gray-900 font-medium">
+                      {farmer.mobileNumber}
+                    </td>
+
+                    <td className="text-gray-500">{farmer.barangay}</td>
+
+                    <td>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          !farmer.verified
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {!farmer.verified ? "Kumpirmahin" : "Kumpirmado"}
+                      </span>
+                    </td>
+
+                    <td className="text-gray-500">{farmer.cropNum}</td>
+
+                    <td className="text-center">
+                      <FarmerOrgMemberAction
+                        farmerId={farmer.farmerId}
+                        verificationStatus={farmer.verified}
+                        farmerName={farmer.farmerName}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </>
+            }
+          />
+        </>
+      )}
       {!orgReport.success && (
         <RenderNotification notif={orgReport.notifError} />
       )}
@@ -113,6 +180,6 @@ export default async function Page() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
