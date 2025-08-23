@@ -686,3 +686,15 @@ export type DeleteUserPropType = {
   modalTitle?: string;
   modalMessage?: Readonly<ReactNode>;
 };
+export type GetAllOrganizationQueryReturnType = {
+  orgId: string;
+  orgName: string;
+  farmerName: string;
+};
+
+export type GetAllOrganizationReturnType =
+  | {
+      success: true;
+      orgList: GetAllOrganizationQueryReturnType[];
+    }
+  | ServerActionFailBaseType;

@@ -1,4 +1,8 @@
-import { NewOrgType, QueryAvailableOrgReturnType } from "@/types";
+import {
+  GetAllOrganizationQueryReturnType,
+  NewOrgType,
+  QueryAvailableOrgReturnType,
+} from "@/types";
 import { pool } from "../configuration";
 import { CreateUUID } from "../helper_function/reusableFunction";
 
@@ -98,6 +102,27 @@ export const UpdateUserOrg = async (newOrg: NewOrgType): Promise<void> => {
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng organisasyon`
+    );
+  }
+};
+
+export const GetAllOrganizationQuery = async (): Promise<
+  GetAllOrganizationQueryReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.org o join capstone.farmer f on o."orgLeadFarmerId" = f."farmerId"`
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga organisasyon: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga organisasyon`
     );
   }
 };
