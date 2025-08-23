@@ -1,4 +1,5 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { UserProfileLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
@@ -37,37 +38,18 @@ export default async function Page() {
           }
           tableCell={
             <>
-              {unvalidatedUser.notValidatedFarmer.map((farmVal, index) => (
-                <tr key={farmVal.farmerId}>
+              {availableOrgs.orgList.map((orgVal, index) => (
+                <tr key={orgVal.orgId}>
                   <td>{index + 1}</td>
-                  <td>{farmVal.farmerName}</td>
-                  <td>{farmVal.farmerAlias}</td>
-                  <td>{ReadableDateFomat(farmVal.dateCreated)}</td>
-                  <td>
-                    <span className="table-notice">Not verified</span>
-                  </td>
-                  <td>{farmVal.orgName}</td>
-                  <td>{farmVal.orgRole}</td>
+                  <td>{orgVal.orgName}</td>
+                  <td>{orgVal.orgName}</td>
+                  <td>{orgVal.totalMember}</td>
                   <td>
                     <div className="table-action">
                       <UserProfileLink
                         farmerId={farmVal.farmerId}
                         className="table-link"
                         label="Profile"
-                      />
-
-                      <ApprovedButton
-                        farmerId={farmVal.farmerId}
-                        verificationStatus={farmVal.verified}
-                        label="Verify"
-                      />
-
-                      <DeleteUser
-                        farmerId={farmVal.farmerId}
-                        farmerName={farmVal.farmerName}
-                        buttonLabel="Delete"
-                        proceedButtonLabel="Proceed"
-                        cancelButtonLabel="Cancel"
                       />
                     </div>
                   </td>
