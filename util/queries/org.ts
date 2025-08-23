@@ -112,7 +112,7 @@ export const GetAllOrganizationQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.org o join capstone.farmer f on o."orgLeadFarmerId" = f."farmerId"`
+        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", count(m."orgId") as "totalMember" from capstone.org o join capstone.farmer f on o."orgLeadFarmerId" = f."farmerId" join capstone.farmer m on o."orgId" = m."orgId" group by o."orgId", o."orgName", f."farmerFirstName", f."farmerLastName"`
       )
     ).rows;
   } catch (error) {

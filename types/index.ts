@@ -638,15 +638,15 @@ export type TableComponentPropType = {
   tableCell: Readonly<ReactNode>;
 };
 
-export type FarmerUserPageTableListType = {
-  farmerName: string;
-  farmerAlias: string;
-  dateCreated: string;
-  orgName: string;
-  orgRole: string;
-  reportCount: string;
-  cropCount: string;
-};
+// export type FarmerUserPageTableListType = {
+//   farmerName: string;
+//   farmerAlias: string;
+//   dateCreated: string;
+//   orgName: string;
+//   orgRole: string;
+//   reportCount: string;
+//   cropCount: string;
+// };
 
 export type ViewAllUnvalidatedFarmerQueryReturnQuery = {
   farmerId: string;
@@ -686,10 +686,12 @@ export type DeleteUserPropType = {
   modalTitle?: string;
   modalMessage?: Readonly<ReactNode>;
 };
+
 export type GetAllOrganizationQueryReturnType = {
   orgId: string;
   orgName: string;
   farmerName: string;
+  totalMember: number;
 };
 
 export type GetAllOrganizationReturnType =
