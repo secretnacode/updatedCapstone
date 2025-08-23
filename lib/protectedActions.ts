@@ -40,12 +40,11 @@ const Actions = {
   // actions that wants to mutate the orgaanization the user is in
   CREATE_ORG: "create:org", // action for creating an organization
   READ_ORG: "read:org", // action of the farmer to know who is the leader of the organization that he's/she's in
-  UPDATE_ORG: "update:org", // action of the farmer if he/she wants to change his/her organization
+  READ_OWN_ORG_LIST: "read:own:org:list", // action for FARMER LEADER ONLY to read the organization member
+  UPDATE_MY_ORG: "update:my:org", // action of the farmer if he/she wants to change his/her organization
 
   // actions to in regarding of organization lists
-  READ_ORG_LIST: "read:org:list", // action to read the org(e.g. its leader and members)
-  UPDATE_ORG_LIST: "update:org:list", // action for updating the organization list(e.g. changing the members)
-  DELETE_ORG_LIST: "delete:org:list", // action for deleting and entire organization
+  READ_ORG_LIST: "read:org:list", // action to read all the organization list
 
   // actions for user farmer role crops
   CREATE_CROP: "create:crop", // action for creating your own crop info
@@ -63,7 +62,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
-    Actions.DELETE_ORG_LIST,
     Actions.READ_FARMER_CROP,
     Actions.READ_FARMER_USER,
     Actions.READ_FARMER_REPORT,
@@ -73,14 +71,12 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_USER,
     Actions.UPDATE_FARMER_USER,
     Actions.UPDATE_FARMER_REPORT,
-    Actions.UPDATE_ORG_LIST,
     Actions.UPDATE_USER,
   ],
   agriculturist: [
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
-    Actions.DELETE_ORG_LIST,
     Actions.READ_FARMER_CROP,
     Actions.READ_FARMER_USER,
     Actions.READ_FARMER_REPORT,
@@ -90,7 +86,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_USER,
     Actions.UPDATE_FARMER_USER,
     Actions.UPDATE_FARMER_REPORT,
-    Actions.UPDATE_ORG_LIST,
     Actions.UPDATE_USER,
   ],
   leader: [
@@ -106,13 +101,13 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_MEMBER_REPORT,
     Actions.READ_FARMER_ORG_MEMBER_USER,
     Actions.READ_REPORT,
-    Actions.READ_ORG_LIST,
     Actions.READ_ORG,
+    Actions.READ_OWN_ORG_LIST,
     Actions.READ_USER,
     Actions.UPDATE_CROP,
     Actions.UPDATE_FARMER_MEMBER_REPORT,
     Actions.UPDATE_FARMER_ORG_MEMBER_USER,
-    Actions.UPDATE_ORG,
+    Actions.UPDATE_MY_ORG,
     Actions.UPDATE_USER,
   ],
   farmer: [
@@ -123,11 +118,10 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELET_CROP,
     Actions.READ_CROP,
     Actions.READ_REPORT,
-    Actions.READ_ORG_LIST,
     Actions.READ_ORG,
     Actions.READ_USER,
     Actions.UPDATE_CROP,
-    Actions.UPDATE_ORG,
+    Actions.UPDATE_MY_ORG,
     Actions.UPDATE_USER,
   ],
 };

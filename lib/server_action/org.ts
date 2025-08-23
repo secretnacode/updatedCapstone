@@ -101,3 +101,23 @@ export const UpdateUserProfileOrg = async (
     };
   }
 };
+
+export const GetAllOrganization = async () => {
+  try {
+    await ProtectedAction("read:org:list");
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May hindi inaasahang pag kakamali sa pagkuha ng mga impormasyon ng mga organisasyon: ${err}`
+    );
+    return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
