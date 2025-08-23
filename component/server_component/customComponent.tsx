@@ -244,7 +244,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
  * @returns table component together with the data you want to pass
  */
 export const TableComponent: FC<TableComponentPropType> = ({
-  caption,
+  tableTitle,
   noContentMessage,
   listCount,
   tableHeaderCell,
@@ -260,16 +260,14 @@ export const TableComponent: FC<TableComponentPropType> = ({
           </div>
         </div>
       ) : (
-        //title of the table
-        // <div className="flex justify-between items-center">
-        //   <h1 className="text-2xl font-bold text-gray-900">
-        //     Ulat ng mga Miyembro
-        //   </h1>
-        // </div>
         <div className="div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          {tableTitle && (
+            <div className="flex justify-between items-center">
+              <h1 className="title !text-2xl !font-bold ">{tableTitle}</h1>
+            </div>
+          )}
           <div className="div overflow-x-auto">
             <table className="table-style farmerReportTable">
-              {caption && <caption className="caption">{caption}</caption>}
               <thead>
                 <tr>{tableHeaderCell}</tr>
               </thead>

@@ -14,7 +14,6 @@ import { FC, ReactNode } from "react";
 import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
 
 export const NavbarComponent: FC = async () => {
-  console.log("Navbar main component");
   const session = await GetSession();
   let role = "";
 
@@ -115,7 +114,7 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
         <span className="nav-span">Home</span>
       </Link>
 
-      <Link href={`${basePage}/reports`} className="group nav-link">
+      <Link href={`${basePage}/farmerReports`} className="group nav-link">
         <ClipboardPlus className="logo" />
 
         <span className="nav-span">Reports</span>

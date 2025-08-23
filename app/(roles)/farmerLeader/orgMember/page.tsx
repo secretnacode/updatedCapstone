@@ -43,6 +43,7 @@ export default async function Page({
           <TableComponent
             noContentMessage="Wala ka pang miyembro sa iyong organisasyon"
             listCount={farmerMember.farmerMember.length}
+            tableTitle="Mga Miyembro sa Organisasyon"
             tableHeaderCell={
               <>
                 <th scope="col">#</th>

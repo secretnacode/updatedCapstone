@@ -176,9 +176,6 @@ body {
   .table-style {
     @apply w-full divide-y divide-gray-200;
   }
-  .caption {
-    @apply sr-only;
-  }
   .thead {
     @apply bg-gray-50;
   }

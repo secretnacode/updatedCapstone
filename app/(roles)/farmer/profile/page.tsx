@@ -5,15 +5,13 @@ import { GetMyProfileInfoType } from "@/types";
 
 export default async function Page() {
   let userInfo: GetMyProfileInfoType;
-  console.log(`Profile main component`);
 
   try {
     userInfo = await GetMyProfileInfo();
   } catch (error) {
-    const err = error as Error;
     userInfo = {
       success: false,
-      notifError: [{ message: err.message, type: "error" }],
+      notifError: [{ message: (error as Error).message, type: "error" }],
     };
   }
 

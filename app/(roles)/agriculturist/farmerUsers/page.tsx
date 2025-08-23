@@ -1,11 +1,26 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllValidatedFarmerUser } from "@/lib/server_action/farmerUser";
+import { ViewAllValidatedFarmerUserReturnType } from "@/types";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 import Link from "next/link";
 
 export default async function Page() {
-  const farmers = await ViewAllValidatedFarmerUser();
+  let farmers: ViewAllValidatedFarmerUserReturnType;
+
+  try {
+    farmers = await ViewAllValidatedFarmerUser();
+  } catch (error) {
+    farmers = {
+      success: false,
+      notifError: [
+        {
+          message: (error as Error).message,
+          type: "error",
+        },
+      ],
+    };
+  }
 
   return (
     <>
@@ -15,6 +30,7 @@ export default async function Page() {
         <TableComponent
           noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"
           listCount={farmers.validatedFarmer.length}
+          tableTitle="Verified Farmer Users"
           tableHeaderCell={
             <>
               <th>#</th>

@@ -25,6 +25,7 @@ export default async function Page() {
         <TableComponent
           noContentMessage="There's no farmer report that's been passed yet!!!"
           listCount={farmerReport.validatedReport.length}
+          tableTitle="Farmer Reports"
           tableHeaderCell={
             <>
               <th scope="col">#</th>
