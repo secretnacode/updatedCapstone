@@ -105,6 +105,10 @@ export const UpdateUserProfileOrg = async (
 export const GetAllOrganization = async () => {
   try {
     await ProtectedAction("read:org:list");
+    return {
+      success: true,
+      orgList: await GetAllOrganizationQuery(),
+    };
   } catch (error) {
     const err = error as Error;
     console.log(

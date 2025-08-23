@@ -1,9 +1,12 @@
 export default async function Page() {
-  let allOrg
+  let allOrg;
   try {
-    allOrg = 
+    allOrg = await GetAllOrganization();
   } catch (error) {
-        allOrg = 
+    allOrg = {
+      success: false,
+      notifError: [{ message: (error as Error).message, type: "error" }],
+    };
   }
   return <div>org</div>;
 }
