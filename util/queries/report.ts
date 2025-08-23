@@ -18,10 +18,13 @@ export const GetUserReport = async (
       )
     ).rows;
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the user report", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang mga impormasyon ng mga ulat: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the user report ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang mga impormasyon ng mga ulat`
     );
   }
 };
@@ -47,10 +50,13 @@ export const AddNewFarmerReport = async (
       ]
     );
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the user report", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag gagawa ng panibagong ulat: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the user report ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag gagawa ng panibagong ulat`
     );
   }
 };
@@ -66,10 +72,13 @@ export const GetFarmerReportDetailQuery = async (
       )
     ).rows[0];
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the user report", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng ulat: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the user report ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng ulat`
     );
   }
 };
@@ -90,10 +99,13 @@ export const GetOrgMemberReportQuery = async (
       )
     ).rows;
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on getting the farm member report:", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on getting the farm member report: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
     );
   }
 };
@@ -109,10 +121,13 @@ export const ApprovedOrgMemberQuery = async (reportId: string) => {
       ["pending", reportId, new Date(), reportId]
     );
   } catch (error) {
-    const err = error as Error;
-    console.error("Error on approving the farmer report:", error);
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng ulat: ${
+        (error as Error).message
+      }`
+    );
     throw new Error(
-      `Error on approving the farmer report: ${err.message as string}`
+      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng ulat`
     );
   }
 };
@@ -127,10 +142,13 @@ export const GetAllFarmerReportQuery =
         )
       ).rows;
     } catch (error) {
-      const err = error as Error;
-      console.error("Error on approving the farmer report:", error);
+      console.error(
+        `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
+          (error as Error).message
+        }`
+      );
       throw new Error(
-        `Error on approving the farmer report: ${err.message as string}`
+        `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
       );
     }
   };

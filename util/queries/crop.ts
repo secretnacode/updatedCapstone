@@ -17,12 +17,13 @@ export const CreateNewCropAfterSignUp = async (
       [data.cropId, data.cropLocation, data.userId, data.farmAreaMeasurement]
     );
   } catch (error) {
-    const err = error as Error;
-    console.error("May pag kakamali sa pag gawa ng panibagong pananim:", error);
-    throw new Error(
-      `May pag kakamali sa pag gawa ng panibagong pananim: ${
-        err.message as string
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag gawa ng panibagong pananim: ${
+        (error as Error).message
       }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag gawa ng panibagong pananim`
     );
   }
 };
@@ -38,15 +39,13 @@ export const GetFarmerCropInfoQuery = async (
       )
     ).rows[0];
   } catch (error) {
-    const err = error as Error;
     console.error(
-      "May pag kakamali sa pag kuha ng pananim sa database:",
-      error
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pananim sa database: ${
+        (error as Error).message
+      }`
     );
     throw new Error(
-      `May pag kakamali sa pag kuha ng pananim sa database: ${
-        err.message as string
-      }`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pananim sa database`
     );
   }
 };
