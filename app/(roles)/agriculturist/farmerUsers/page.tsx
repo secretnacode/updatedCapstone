@@ -63,6 +63,7 @@ export default async function Page() {
                         baseLink="farmerUser"
                         dynamicId={farmVal.farmerId}
                         label="Profile"
+                        className="profile-link-button-design"
                       />
 
                       <Link

@@ -27,12 +27,9 @@ export default async function Page() {
           tableHeaderCell={
             <>
               <th>#</th>
-              <th>Name</th>
-              <th>Alias</th>
-              <th>Created At</th>
-              <th>Verified</th>
+              <th>Farmer Leader Name</th>
               <th>Organization Name</th>
-              <th>Organization Role</th>
+              <th>Total Member</th>
               <th>Actions</th>
             </>
           }
@@ -41,15 +38,23 @@ export default async function Page() {
               {availableOrgs.orgList.map((orgVal, index) => (
                 <tr key={orgVal.orgId}>
                   <td>{index + 1}</td>
-                  <td>{orgVal.orgName}</td>
+                  <td>{orgVal.farmerLeaderName}</td>
                   <td>{orgVal.orgName}</td>
                   <td>{orgVal.totalMember}</td>
                   <td>
                     <div className="table-action">
                       <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={orgVal.farmerId}
+                        label="View Leader"
+                        className="profile-link-button-design"
+                      />
+
+                      <DynamicLink
                         baseLink="organizations"
                         dynamicId={orgVal.orgId}
-                        label="Organization"
+                        label="View Org"
+                        className="submit-button"
                       />
                     </div>
                   </td>

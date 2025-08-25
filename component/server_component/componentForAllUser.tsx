@@ -123,7 +123,11 @@ export const FarmerOrgMemberAction: FC<{
 }> = ({ farmerId, verificationStatus, farmerName }) => {
   return (
     <div>
-      <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
+      <DynamicLink
+        baseLink="farmerUser"
+        dynamicId={farmerId}
+        className="profile-link-button-design"
+      />
 
       <ApprovedButton
         farmerId={farmerId}
@@ -142,10 +146,7 @@ export const DynamicLink: FC<DynamicLinkPropType> = ({
   className = "",
 }) => {
   return (
-    <Link
-      className={`profile-link ${className}`}
-      href={`/${baseLink}/${dynamicId}`}
-    >
+    <Link className={`button ${className}`} href={`/${baseLink}/${dynamicId}`}>
       {label}
     </Link>
   );

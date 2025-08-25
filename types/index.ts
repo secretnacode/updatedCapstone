@@ -691,7 +691,8 @@ export type DeleteUserPropType = {
 export type GetAllOrganizationQueryReturnType = {
   orgId: string;
   orgName: string;
-  farmerName: string;
+  farmerLeaderName: string;
+  farmerId: string;
   totalMember: number;
 };
 
