@@ -32,12 +32,14 @@ export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
     };
   } catch (error) {
     const err = error as Error;
-    console.log(`Error getting the avaliable organization: ${err}`);
+    console.log(
+      `May Hindi inaasahang pag kakamali abang kinukuha ang : ${err.message}`
+    );
     return {
       success: false,
       errors: [
         {
-          message: `Error getting the avaliable organization: ${err}`,
+          message: err.message,
           type: "error",
         },
       ],

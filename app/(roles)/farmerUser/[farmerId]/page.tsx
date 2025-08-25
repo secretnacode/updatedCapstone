@@ -42,7 +42,6 @@ export default async function Page({
       ])}`
     );
 
-  console.log(farmerData);
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {!farmerData.success && farmerData.notifError && (
