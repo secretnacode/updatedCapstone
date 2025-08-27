@@ -45,6 +45,7 @@ const Actions = {
 
   // actions to in regarding of organization lists
   READ_ORG_LIST: "read:org:list", // action to read all the organization list
+  READ_ORG_MEMBER_LIST: "read:org:member:list", // action to read all the member inside an organization
 
   // actions for user farmer role crops
   CREATE_CROP: "create:crop", // action for creating your own crop info
@@ -69,6 +70,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_REPORT,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
+    Actions.READ_ORG_MEMBER_LIST,
     Actions.READ_USER,
     Actions.UPDATE_FARMER_USER,
     Actions.UPDATE_FARMER_REPORT,
@@ -85,6 +87,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_REPORT,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
+    Actions.READ_ORG_MEMBER_LIST,
     Actions.READ_USER,
     Actions.UPDATE_FARMER_USER,
     Actions.UPDATE_FARMER_REPORT,

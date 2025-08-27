@@ -51,7 +51,7 @@ export default async function Page() {
                       />
 
                       <DynamicLink
-                        baseLink="organizations"
+                        baseLink="agriculturist/organizations"
                         dynamicId={orgVal.orgId}
                         label="View Org"
                         className="submit-button"

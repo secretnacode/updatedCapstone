@@ -3,12 +3,14 @@
 import {
   AvailableOrgReturnType,
   GetAllOrganizationReturnType,
+  GetAllOrgMemberListReturnType,
   OrgInfoType,
   UpdateUserProfileOrgReturnType,
 } from "@/types";
 import {
   CreateNewOrg,
   GetAllOrganizationQuery,
+  GetAllOrgMemberListQuery,
   GetAvailableOrgQuery,
   UpdateUserOrg,
 } from "@/util/queries/org";
@@ -16,6 +18,7 @@ import { ProtectedAction } from "../protectedActions";
 import { ZodValidateForm } from "../validation/authValidation";
 import { userProfileOrgUpdateSchema } from "@/util/helper_function/validation/validationSchema";
 import { revalidatePath } from "next/cache";
+import { GetSession } from "../session";
 
 /**
  * gets all the available organizations with their orgId and orgName
@@ -131,3 +134,30 @@ export const GetAllOrganization =
       };
     }
   };
+
+export const GetAllOrgMemberList = async (
+  orgId: string
+): Promise<GetAllOrgMemberListReturnType> => {
+  try {
+    const session = await GetSession();
+
+    if (session?.work === "leader") await ProtectedAction("read:own:org:list");
+    else await ProtectedAction("read:org:member:list");
+
+    return { success: true, memberList: await GetAllOrgMemberListQuery(orgId) };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May hindi inaasahang pag kakamali sa pagkuha ng mga impormasyon ng mga organisasyon: ${err}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

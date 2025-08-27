@@ -2,6 +2,7 @@ import {
   AvailableOrgReturnType,
   GetFarmerUserProfileInfoQueryReturnType,
   DynamicLinkPropType,
+  GetAllOrgMemberListQueryReturnType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
@@ -14,6 +15,7 @@ import {
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
+import { TableComponent } from "./customComponent";
 
 export const FarmerUserProfile: FC<{
   userFarmerInfo: GetFarmerUserProfileInfoQueryReturnType;
@@ -149,5 +151,60 @@ export const DynamicLink: FC<DynamicLinkPropType> = ({
     <Link className={`button ${className}`} href={`/${baseLink}/${dynamicId}`}>
       {label}
     </Link>
+  );
+};
+
+export const OrganizationMemberList: FC<{
+  memberList: GetAllOrgMemberListQueryReturnType[];
+}> = ({ memberList }) => {
+  return (
+    <TableComponent
+      noContentMessage="There's no organization that was listed yet"
+      listCount={memberList.length}
+      tableTitle="Member of the organization"
+      tableHeaderCell={
+        <>
+          <th>#</th>
+          <th>Farmer Name</th>
+          <th>Farmer Alias</th>
+          <th>Barangay</th>
+          <th>Organization Role</th>
+          <th>Verifieed</th>
+          <th>Actions</th>
+        </>
+      }
+      tableCell={
+        <>
+          {memberList.map((member, index) => (
+            <tr key={member.farmerId}>
+              <td>{index + 1}</td>
+              <td>{member.farmerName}</td>
+              <td>{member.farmerAlias}</td>
+              <td>{member.barangay}</td>
+              <td>{member.orgRole}</td>
+              <td>
+                <span
+                  className={`table-verify-cell ${
+                    member.verified ? "table-verified" : "table-unverified"
+                  }`}
+                >
+                  {member.verified ? "Verified" : "Unverified"}
+                </span>
+              </td>
+              <td>
+                <div className="table-action">
+                  <DynamicLink
+                    baseLink="farmerUser"
+                    dynamicId={member.farmerId}
+                    label="View Profile"
+                    className="profile-link-button-design"
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </>
+      }
+    />
   );
 };

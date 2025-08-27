@@ -1,5 +1,6 @@
 import {
   GetAllOrganizationQueryReturnType,
+  GetAllOrgMemberListQueryReturnType,
   NewOrgType,
   QueryAvailableOrgReturnType,
 } from "@/types";
@@ -106,6 +107,10 @@ export const UpdateUserOrg = async (newOrg: NewOrgType): Promise<void> => {
   }
 };
 
+/**
+ * query for getting all the organization query to get all the organization information
+ * @returns list of organization query
+ */
 export const GetAllOrganizationQuery = async (): Promise<
   GetAllOrganizationQueryReturnType[]
 > => {
@@ -123,6 +128,33 @@ export const GetAllOrganizationQuery = async (): Promise<
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga organisasyon`
+    );
+  }
+};
+
+/**
+ * query for getting all the org member
+ * @param orgId orgId the org member you want to get
+ * @returns list of the org member
+ */
+export const GetAllOrgMemberListQuery = async (
+  orgId: string
+): Promise<GetAllOrgMemberListQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select "farmerId", concat("farmerFirstName", ' ', "farmerLastName") as "farmerName", "farmerAlias", "barangay", "verified", "orgRole" from capstone.farmer where "orgId" = $1 order by case when "orgRole" = $2 then $3 else $4 end asc`,
+        [orgId, "leader", 1, 2]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga miyembro ng organisasyon: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga miyembro ng organisasyon`
     );
   }
 };

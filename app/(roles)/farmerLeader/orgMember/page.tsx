@@ -76,10 +76,10 @@ export default async function Page({
 
                     <td>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          !farmer.verified
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+                        className={`table-verify-cell ${
+                          farmer.verified
+                            ? "table-verified"
+                            : "table-unverified"
                         }`}
                       >
                         {!farmer.verified ? "Kumpirmahin" : "Kumpirmado"}

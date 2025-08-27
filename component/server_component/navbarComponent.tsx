@@ -148,12 +148,6 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
           <span className="nav-span">Agriculturist</span>
         </Link>
       )}
-
-      <Link href={`${basePage}/profile`} className="group nav-link">
-        <UserPen className="logo" />
-
-        <span className="nav-span">Profile</span>
-      </Link>
     </>
   );
 

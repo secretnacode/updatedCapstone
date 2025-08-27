@@ -191,6 +191,15 @@ body {
   .table-link {
     @apply flex items-center justify-center py-2 px-4 rounded-xl !text-gray-800 transition-colors active:ring-1 active:ring-offset-2;
   }
+  .table-verify-cell {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .table-verified {
+    @apply bg-green-100 text-green-800;
+  }
+  .table-unverified {
+    @apply bg-yellow-100 text-yellow-800;
+  }
   .nav-link {
     @apply flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors;
   }

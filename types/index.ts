@@ -672,7 +672,7 @@ export type ApprovedButtonPropType = {
 };
 
 export type DynamicLinkPropType = {
-  baseLink: "farmerUser" | "organizations";
+  baseLink: "farmerUser" | "agriculturist/organizations";
   dynamicId: string;
   label?: string;
   className?: string;
@@ -701,4 +701,17 @@ export type GetAllOrganizationReturnType =
       success: true;
       orgList: GetAllOrganizationQueryReturnType[];
     }
+  | ServerActionFailBaseType;
+
+export type GetAllOrgMemberListQueryReturnType = {
+  farmerId: string;
+  farmerName: string;
+  farmerAlias: string;
+  barangay: string;
+  verified: boolean;
+  orgRole: string;
+};
+
+export type GetAllOrgMemberListReturnType =
+  | { success: true; memberList: GetAllOrgMemberListQueryReturnType[] }
   | ServerActionFailBaseType;
