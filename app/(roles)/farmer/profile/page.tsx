@@ -3,6 +3,8 @@ import { FarmerUserProfile } from "@/component/server_component/componentForAllU
 import { GetMyProfileInfo } from "@/lib/server_action/farmerUser";
 import { GetMyProfileInfoType } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let userInfo: GetMyProfileInfoType;
 

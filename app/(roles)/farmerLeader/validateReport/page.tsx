@@ -4,6 +4,9 @@ import { TableComponent } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
+
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   console.log("validate reoport main component");
   let orgReport: GetOrgMemberReportReturnType;

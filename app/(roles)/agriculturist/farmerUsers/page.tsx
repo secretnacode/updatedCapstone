@@ -6,6 +6,8 @@ import { ViewAllValidatedFarmerUserReturnType } from "@/types";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let farmers: ViewAllValidatedFarmerUserReturnType;
 

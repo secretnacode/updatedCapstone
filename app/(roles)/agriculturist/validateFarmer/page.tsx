@@ -9,6 +9,8 @@ import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ViewAllUnvalidatedFarmerReturnType } from "@/types";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let unvalidatedUser: ViewAllUnvalidatedFarmerReturnType;
 

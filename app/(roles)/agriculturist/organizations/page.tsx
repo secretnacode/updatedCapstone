@@ -4,6 +4,8 @@ import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let availableOrgs: GetAllOrganizationReturnType;
   try {
