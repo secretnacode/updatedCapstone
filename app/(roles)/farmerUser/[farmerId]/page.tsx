@@ -2,8 +2,9 @@ import { FarmerUserProfile } from "@/component/server_component/componentForAllU
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { GetViewingFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GetFarmerUserProfileInfoReturnType } from "@/types";
+import { isDynamicValueExist } from "@/lib/server_action/user";
 
 export default async function Page({
   params,
@@ -12,9 +13,17 @@ export default async function Page({
 }) {
   console.log(`farmer user profile`);
   let farmerData: GetFarmerUserProfileInfoReturnType;
+  let isExistDynamicVal: boolean | undefined;
 
   try {
     farmerData = await GetViewingFarmerUserProfileInfo((await params).farmerId);
+
+    isExistDynamicVal = await isDynamicValueExist(
+      "farmer/farmerUser",
+      (
+        await params
+      ).farmerId
+    );
   } catch (error) {
     const err = error as Error;
     farmerData = {
@@ -27,6 +36,8 @@ export default async function Page({
       ],
     };
   }
+
+  if (!isExistDynamicVal) notFound();
 
   if (!farmerData.success && farmerData.notMember)
     redirect(

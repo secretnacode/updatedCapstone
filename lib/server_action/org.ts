@@ -12,6 +12,7 @@ import {
   GetAllOrganizationQuery,
   GetAllOrgMemberListQuery,
   GetAvailableOrgQuery,
+  organizationIsExist,
   UpdateUserOrg,
 } from "@/util/queries/org";
 import { ProtectedAction } from "../protectedActions";
@@ -143,6 +144,8 @@ export const GetAllOrgMemberList = async (
 
     if (session?.work === "leader") await ProtectedAction("read:own:org:list");
     else await ProtectedAction("read:org:member:list");
+
+    if (!organizationIsExist(orgId)) return { success: true, isExist: false };
 
     return { success: true, memberList: await GetAllOrgMemberListQuery(orgId) };
   } catch (error) {

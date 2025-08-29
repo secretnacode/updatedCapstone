@@ -425,3 +425,17 @@ export const ViewAllUnvalidatedFarmerQuery = async (): Promise<
     );
   }
 };
+
+export const farmerIsExist = async (farmerId: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.farmer where "farmerId" = $1)`,
+        [farmerId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    return false;
+  }
+};

@@ -173,13 +173,7 @@ export const organizationIsExist = async (orgId: string): Promise<boolean> => {
       )
     ).rows[0].exists;
   } catch (error) {
-    console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong organisasyon: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong organisasyon`
-    );
+    console.log((error as Error).message);
+    return false;
   }
 };

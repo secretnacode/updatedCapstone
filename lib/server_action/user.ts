@@ -1,11 +1,20 @@
 "use server";
 
-import { CheckMyMemberquery, DelteUserAccountQuery } from "@/util/queries/user";
+import {
+  CheckMyMemberquery,
+  DelteUserAccountQuery,
+  farmerIsExist,
+} from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
 import { NotificationBaseType } from "@/types";
 import { organizationIsExist } from "@/util/queries/org";
 
+/**
+ * server action for deleting a user account
+ * @param farmerId id that you want to delete
+ * @returns notifMessage that will be consumed by the notification provider
+ */
 export const DelteUserAccount = async (
   farmerId: string
 ): Promise<{ notifMessage: NotificationBaseType[] }> => {
@@ -47,18 +56,25 @@ export const DelteUserAccount = async (
   }
 };
 
-export const CheckDynamicVal = (
-  dynamicPath: "agriculturist/organizations",
+/**
+ *
+ * @param dynamicPath base path of the dynamic route where you will use this
+ * @param dynamicVal value of the dynamic page you want to check
+ * @returns boolean
+ */
+export const isDynamicValueExist = async (
+  dynamicPath: "agriculturist/organizations" | "farmer/farmerUser",
   dynamicVal: string
-) => {
+): Promise<boolean> => {
   try {
     if (dynamicPath === "agriculturist/organizations")
       return organizationIsExist(dynamicVal);
+    else if (dynamicPath === "farmer/farmerUser")
+      return farmerIsExist(dynamicVal);
+
+    return false;
   } catch (error) {
-    const err = error as Error;
-    console.log(`Error in getting the farmer reports: ${err}`);
-    return {
-      notifMessage: [{ message: err.message, type: "error" }],
-    };
+    console.log((error as Error).message);
+    return false;
   }
 };
