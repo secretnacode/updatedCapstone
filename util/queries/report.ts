@@ -132,6 +132,10 @@ export const ApprovedOrgMemberQuery = async (reportId: string) => {
   }
 };
 
+/**
+ * server action for getting all the farmer report information where the status of it is pending or is null
+ * @returns farmer report information
+ */
 export const GetAllFarmerReportQuery =
   async (): Promise<GetAllFarmerReportQueryReturnType> => {
     try {

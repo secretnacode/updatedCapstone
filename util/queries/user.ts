@@ -27,12 +27,12 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag susuri ng username ng user: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag susuri ng username ng user: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag susuri ng username ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag susuri ng username ng user`
     );
   }
 };
@@ -51,12 +51,12 @@ export const InsertNewUser = async (data: NewUserType): Promise<void> => {
     );
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag lalagay ng impormasyon sa database: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag lalagay ng impormasyon sa database: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag lalagay ng impormasyon sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag lalagay ng impormasyon sa database`
     );
   }
 };
@@ -89,11 +89,13 @@ export const UserLogin = async (
     };
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag lologin ng user: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user: ${
         (error as Error).message
       }`
     );
-    throw new Error(`May hindi inaasahang pagkakamali sa pag lologin ng user`);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`
+    );
   }
 };
 
@@ -121,12 +123,12 @@ export const FarmerFirstDetailQuery = async (
     );
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag sisign up ng user: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag sisign up ng user: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag sisign up ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag sisign up ng user`
     );
   }
 };
@@ -176,12 +178,12 @@ export const GetFarmerRole = async (
     ).rows[0];
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng role ng magsasaka: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng magsasaka: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng role ng magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng magsasaka`
     );
   }
 };
@@ -203,12 +205,12 @@ export const GetAgriRole = async (
     ).rows[0];
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng role ng agriculturist: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng agriculturist: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng role ng agriculturist`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng agriculturist`
     );
   }
 };
@@ -230,13 +232,13 @@ export const GetFarmerOrgMemberQuery = async (
     ).rows;
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng detalye sa database: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng detalye sa database: ${
         (error as Error).message
       }`,
       error
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng detalye sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng detalye sa database`
     );
   }
 };
@@ -253,12 +255,12 @@ export const ApprovedOrgFarmerAccQuery = async (farmerId: string) => {
     );
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag aapruba ng mag sasaka sa database: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng mag sasaka sa database: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag aapruba ng mag sasaka sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng mag sasaka sa database`
     );
   }
 };
@@ -309,12 +311,12 @@ export const GetFarmerUserProfileInfoQuery = async (
     ).rows[0];
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${
+      `May pagkakamali na hindi inaasahang nang yari sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo`
+      `May pagkakamali na hindi inaasahang nang yari sa database habang tsinetsek kung ang user nato ay ka miyembro mo`
     );
   }
 };
@@ -332,12 +334,12 @@ export const DelteUserAccountQuery = async (
     ]);
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag tatanggal ng account ng user: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag tatanggal ng account ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user`
     );
   }
 };
@@ -366,12 +368,12 @@ export const UpdateUserProfileInfoQuery = async (
     );
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag uupdate ng user sa database: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng user sa database: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag uupdate ng user sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng user sa database`
     );
   }
 };
@@ -392,12 +394,12 @@ export const ViewAllVerifiedFarmerUserQuery = async (): Promise<
     ).rows;
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga validated na magsasaka: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga validated na magsasaka: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga validated na  magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga validated na  magsasaka`
     );
   }
 };
@@ -414,12 +416,12 @@ export const ViewAllUnvalidatedFarmerQuery = async (): Promise<
     ).rows;
   } catch (error) {
     console.error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka`
     );
   }
 };

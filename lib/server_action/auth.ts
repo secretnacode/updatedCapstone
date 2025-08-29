@@ -89,10 +89,14 @@ export async function LoginAuth(
     if (isRedirectError(error)) throw error;
 
     const err = error as Error;
-    console.log(`Error in logging in: ${err}`);
     return {
       success: false,
-      errors: [{ message: `Error in logging in: ${err}`, type: "error" }],
+      errors: [
+        {
+          message: `May pagkakamali na hindi inaasahan sa : ${err}`,
+          type: "error",
+        },
+      ],
     };
   }
 }
