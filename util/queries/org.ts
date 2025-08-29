@@ -158,3 +158,28 @@ export const GetAllOrgMemberListQuery = async (
     );
   }
 };
+
+/**
+ * query that returns a boolean if the passed orgId exist or not
+ * @param orgId orgId you want to check if exist
+ * @returns boolean value
+ */
+export const organizationIsExist = async (orgId: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.org where "orgId" = $1)`,
+        [orgId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong organisasyon: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong organisasyon`
+    );
+  }
+};

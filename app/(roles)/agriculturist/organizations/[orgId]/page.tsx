@@ -2,6 +2,7 @@ import { RenderNotification } from "@/component/client_component/fallbackCompone
 import { OrganizationMemberList } from "@/component/server_component/componentForAllUser";
 import { GetAllOrgMemberList } from "@/lib/server_action/org";
 import { GetAllOrgMemberListReturnType } from "@/types";
+import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
@@ -18,6 +19,7 @@ export default async function Page({
       notifError: [{ message: (error as Error).message, type: "error" }],
     };
   }
+
   return (
     <>
       {!orgMemberList.success ? (
