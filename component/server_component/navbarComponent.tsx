@@ -12,6 +12,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
 import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
+import { AgriculturistNavLinkType } from "@/types";
 
 export const NavbarComponent: FC = async () => {
   const session = await GetSession();
@@ -107,51 +108,54 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
 const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/agriculturist";
 
-  const Links = (
-    <>
-      <Link href={basePage} className="group nav-link">
-        <Home className="logo" />
-        <span className="nav-span">Home</span>
-      </Link>
+  const links: AgriculturistNavLinkType[] = [
+    { link: basePage, logo: Home, linkName: "Home" },
+    {
+      link: `${basePage}/farmerReports`,
+      logo: ClipboardPlus,
+      linkName: "Reports",
+    },
+    {
+      link: `${basePage}/crops`,
+      logo: Sprout,
+      linkName: "Crops",
+    },
+    {
+      link: `${basePage}/farmerUsers`,
+      logo: ContactRound,
+      linkName: "Farmer Users",
+    },
+    {
+      link: `${basePage}/validateFarmer`,
+      logo: ContactRound,
+      linkName: "Validate Farmer",
+    },
+    {
+      link: `${basePage}/organizations`,
+      logo: Building2,
+      linkName: "Organizations",
+    },
+    ...(role === "admin"
+      ? [
+          {
+            link: `${basePage}/agriUsers`,
+            logo: ClipboardCheck,
+            linkName: "Agriculturist",
+          },
+        ]
+      : []),
+  ];
 
-      <Link href={`${basePage}/farmerReports`} className="group nav-link">
-        <ClipboardPlus className="logo" />
-
-        <span className="nav-span">Reports</span>
-      </Link>
-
-      <Link href={`${basePage}/crops`} className="group nav-link">
-        <Sprout className="logo" />
-        <span className="nav-span">Crops</span>
-      </Link>
-
-      <div className="nav-divider title">Farmers</div>
-
-      <Link href={`${basePage}/farmerUsers`} className="group nav-link">
-        <ContactRound className="logo" />
-        <span className="nav-span">Farmer Users</span>
-      </Link>
-
-      <Link href={`${basePage}/validateFarmer`} className="group nav-link">
-        <ContactRound className="logo" />
-        <span className="nav-span">Validate Farmer</span>
-      </Link>
-
-      <Link href={`${basePage}/organizations`} className="group nav-link">
-        <Building2 className="logo" />
-        <span className="nav-span">Organizations</span>
-      </Link>
-
-      {role === "admin" && (
-        <Link href={`${basePage}/agriUsers`} className="group nav-link">
-          <ClipboardCheck className="logo" />
-          <span className="nav-span">Agriculturist</span>
+  return (
+    <Navbar>
+      {links.map((link) => (
+        <Link key={link.link} href={link.link} className="group nav-link">
+          <link.logo className="logo"></link.logo>
+          <span className="nav-span">{link.linkName}</span>
         </Link>
-      )}
-    </>
+      ))}
+    </Navbar>
   );
-
-  return <Navbar>{Links}</Navbar>;
 };
 
 const Navbar: FC<{ children: ReactNode }> = ({ children }) => {

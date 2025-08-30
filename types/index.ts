@@ -716,3 +716,9 @@ export type GetAllOrgMemberListQueryReturnType = {
 export type GetAllOrgMemberListReturnType =
   | { success: true; memberList: GetAllOrgMemberListQueryReturnType[] }
   | (ServerActionFailBaseType & { isExist?: boolean });
+
+export type AgriculturistNavLinkType = {
+  link: string;
+  logo: LucideIcon;
+  linkName: string;
+};
