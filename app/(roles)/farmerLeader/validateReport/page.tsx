@@ -8,7 +8,6 @@ import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  console.log("validate reoport main component");
   let orgReport: GetOrgMemberReportReturnType;
 
   try {

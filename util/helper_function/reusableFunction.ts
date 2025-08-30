@@ -10,11 +10,6 @@ export function CreateUUID(): string {
   return uuidv4();
 }
 
-export function HandleErrorReturn(error: Error, message: string) {
-  console.log(`${message}: ${error.message}`);
-  throw new Error(`${message}: ${error.message}`);
-}
-
 /**
  * used if you want to get the current date
  * @returns current date with the format of YYMMDD eg. 2025-05-23

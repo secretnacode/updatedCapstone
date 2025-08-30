@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 export default function Page(): ReactElement {
-  console.log("unauthorized main component");
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
       <LoadingManager />

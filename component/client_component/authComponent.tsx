@@ -34,8 +34,6 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 export const AuthForm: FC = () => {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
 
-  console.log(`auth component`);
-
   return (
     <>
       {isSignUp ? (
@@ -64,8 +62,6 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const router = useRouter();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
-  console.log(`sign up component`);
-
   const handleFormSubmit = async (
     e: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -78,8 +74,6 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
       password: formData.get("password") as string,
       confirmPassword: formData.get("confirmPassword") as string,
     };
-
-    console.log(authVal);
 
     const err: ValidateAuthValType<NotificationBaseType[]> =
       ValidateSingupVal(authVal);
@@ -178,8 +172,6 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const [isHidden, setIsHidden] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
-
-  console.log(`login component`);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

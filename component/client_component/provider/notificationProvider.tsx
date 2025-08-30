@@ -53,8 +53,6 @@ export function NotificationProvider({
   );
   const timeRef = useRef<NodeJS.Timeout | null>(null);
 
-  console.log(`notification context`);
-
   const handleSetNotification = useCallback((data: NotificationBaseType[]) => {
     if (data) {
       const newNotification: NotificationValType[] = data.map((notif) => {

@@ -10,7 +10,6 @@ export const RedirectManager: FC<{
   data: NotificationBaseType[] | undefined;
   paramName: string;
 }> = ({ data, paramName }) => {
-  console.log("Redirect manager component");
   const { handleSetNotification } = useNotification();
   const { isLoading, handleDoneLoading } = useLoading();
   const route = useRouter();

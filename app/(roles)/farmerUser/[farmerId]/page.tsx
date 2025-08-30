@@ -10,7 +10,6 @@ export default async function Page({
 }: {
   params: Promise<{ farmerId: string }>;
 }) {
-  console.log(`farmer user profile`);
   let farmerData: GetFarmerUserProfileInfoReturnType;
 
   try {

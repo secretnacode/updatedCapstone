@@ -6,8 +6,6 @@ export default async function Page({
 }: {
   searchParams: Promise<{ success?: string }>;
 }) {
-  console.log(`Farmer main page`);
-
   const { success } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 

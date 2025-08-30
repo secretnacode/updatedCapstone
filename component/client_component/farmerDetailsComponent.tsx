@@ -41,8 +41,6 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { AlertTriangle } from "lucide-react";
 
 export const FarmerDetailForm: FC = () => {
-  console.log(`farmer details form`);
-
   const [nextStep, setNextStep] = useState<boolean>(false);
   return (
     <main className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
@@ -88,7 +86,6 @@ export const FarmerDetailForm: FC = () => {
 export const FarmereDetailFirstStep: FC<{
   setNextStep: Dispatch<SetStateAction<boolean>>;
 }> = ({ setNextStep }): ReactElement => {
-  console.log(`farmer 1st detail form`);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [state, formAction, isPending] = useActionState(AddFirstFarmerDetails, {
@@ -281,7 +278,6 @@ export const FarmereDetailFirstStep: FC<{
 };
 
 export const FarmerDetailSecondStep: FC = () => {
-  console.log(`farmer 2nd detail form`);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [otherOrg, setOtherOrg] = useState(false);
@@ -499,7 +495,6 @@ export const FarmerDetailSecondStep: FC = () => {
    * setting the state of otherOrg, error, and currentCrops into their default value
    */
   const handleBackDefault = () => {
-    console.log("back to default");
     setOtherOrg(false);
     setError({ success: null, notifError: null, formError: null });
     setCurrentCrops({
@@ -603,12 +598,10 @@ export const FarmerDetailSecondStep: FC = () => {
     const validateCrop = handleCheckCropList();
     if (!validateCrop.valid) {
       if (validateCrop.showModal) {
-        console.log("error: show modal");
         setCancelProceed(true);
         handleDoneLoading();
         return;
       }
-      console.log("error: no val");
       handleSetNotification(
         validateCrop.error.notifError ?? [
           { message: "Unkown error", type: "warning" },
@@ -654,7 +647,6 @@ export const FarmerDetailSecondStep: FC = () => {
 
     try {
       const res = await AddSecondFarmerDetails(cropList);
-      console.log(res);
       if (!res.success) {
         handleSetNotification(res.notifError);
         if (res.cropErrors) handleBackendValidateFormError(res.cropErrors);
@@ -914,7 +906,6 @@ const CropsValComponent: FC<{
   cropError: string[];
   handleEditCrop: (cropToEdit: FarmerDetailCropType, index: number) => void;
 }> = ({ cropList, availOrg, cropError, handleEditCrop }) => {
-  console.log("Crop Value Component");
   const handleOrg = (currentOrg: string, otherOrg: string | null): string => {
     const name = availOrg.filter((org) => currentOrg === org.orgId);
     if (name.length > 0) return name[0].orgName;

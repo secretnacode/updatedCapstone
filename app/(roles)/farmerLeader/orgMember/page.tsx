@@ -12,7 +12,6 @@ export default async function Page({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  console.log(`farmer org member main component`);
   let farmerMember: GetFarmerOrgMemberReturnType;
   const { error } = await searchParams;
   const message: NotificationBaseType[] | undefined = error

@@ -7,8 +7,6 @@ export default async function Page({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  console.log("Auth main component");
-
   const { error } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 

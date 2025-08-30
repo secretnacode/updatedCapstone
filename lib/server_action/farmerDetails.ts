@@ -171,8 +171,6 @@ const CreateNewOrgForNewUser = async (
   data: HandleInsertCropType
 ): Promise<void> => {
   try {
-    console.log(data);
-
     let orgId = "";
     const isOtherOrg = data.organization === "other";
 

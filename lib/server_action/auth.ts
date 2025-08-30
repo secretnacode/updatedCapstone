@@ -141,7 +141,6 @@ export async function SignUpAuth(
     const err: ValidateAuthValType<NotificationBaseType[]> =
       ValidateSingupVal(data);
     if (!err.valid) {
-      console.log(err.errors);
       return {
         success: false,
         errors: err.errors,

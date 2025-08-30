@@ -25,13 +25,16 @@ import {
 import { useNotification } from "./provider/notificationProvider";
 import Image from "next/image";
 import { Camera, Plus, Upload, X } from "lucide-react";
-import { AddReportPictureType, GetFarmerReportDetailReturnType, ReportDetailType } from "@/types";
+import {
+  AddReportPictureType,
+  GetFarmerReportDetailReturnType,
+  ReportDetailType,
+} from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 export const AddReportComponent: FC = () => {
-  console.log(`component add button`);
   const [addReport, setAddReport] = useState<boolean>(false);
 
   return (
@@ -67,7 +70,6 @@ export const AddReportComponent: FC = () => {
 const AddingReport: FC<{
   setAddReport: Dispatch<SetStateAction<boolean>>;
 }> = ({ setAddReport }) => {
-  console.log(`modal adding report component`);
   const router = useRouter();
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
@@ -193,7 +195,6 @@ const AddingReport: FC<{
                 },
               ]);
             } else {
-              console.log(`failes to make it blob`);
               handleSetNotification([
                 {
                   message: "Hindi matagumpay na nakuha ang larawan",
@@ -208,7 +209,6 @@ const AddingReport: FC<{
           0.9
         );
       } else {
-        console.log(`failes to make it 2d`);
         handleSetNotification([
           {
             message: "Hindi matagumpay na nakuha ang larawan",
@@ -250,7 +250,6 @@ const AddingReport: FC<{
 
   useEffect(() => {
     return () => {
-      console.log(`stopping the camera`);
       if (openCam) handleStopCamera();
     };
   });
@@ -489,16 +488,16 @@ export const UserReportDetails: FC<{
 
   useEffect(() => {
     const report = async () => {
-     let report: GetFarmerReportDetailReturnType
+      let report: GetFarmerReportDetailReturnType;
 
       try {
         report = await GetFarmerReportDetail(reportId);
 
-      if (report.success) setUserReport(report.reportDetail);
-      else {
-        handleSetNotification(report.notifError);
-        setViewReport(false);
-      }
+        if (report.success) setUserReport(report.reportDetail);
+        else {
+          handleSetNotification(report.notifError);
+          setViewReport(false);
+        }
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
