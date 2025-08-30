@@ -401,8 +401,9 @@ export type GetFarmerUserProfileInfoReturnType =
     }
   | {
       success: false;
-      notMember?: boolean;
+      isMember?: false;
       notifError?: NotificationBaseType[];
+      isExist?: false;
     };
 
 export type GetFarmerCropInfoQueryReturnType = {
@@ -714,4 +715,4 @@ export type GetAllOrgMemberListQueryReturnType = {
 
 export type GetAllOrgMemberListReturnType =
   | { success: true; memberList: GetAllOrgMemberListQueryReturnType[] }
-  | ServerActionFailBaseType;
+  | (ServerActionFailBaseType & { isExist?: boolean });

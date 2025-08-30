@@ -162,7 +162,7 @@ export const GetAllOrgMemberListQuery = async (
 /**
  * query that returns a boolean if the passed orgId exist or not
  * @param orgId orgId you want to check if exist
- * @returns boolean value
+ * @returns boolean value wether it doesnt exist or when the query fails(orgId that was past is not UUID type)
  */
 export const organizationIsExist = async (orgId: string): Promise<boolean> => {
   try {

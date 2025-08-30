@@ -3,6 +3,7 @@
 import {
   ApprovedOrgFarmerAccQuery,
   CheckMyMemberquery,
+  farmerIsExist,
   GetFarmerOrgMemberQuery,
   GetFarmerUserProfileInfoQuery,
   UpdateUserProfileInfoQuery,
@@ -102,8 +103,11 @@ export const GetViewingFarmerUserProfileInfo = async (
       await ProtectedAction("read:farmer:org:member:user");
       const myMember = await CheckMyMemberquery(farmerId, session.userId);
 
-      if (!myMember) return { success: false, notMember: true };
+      if (!myMember) return { success: false, isMember: false };
     } else await ProtectedAction("read:farmer:user");
+
+    if (!(await farmerIsExist(farmerId)))
+      return { success: false, isExist: false };
 
     return {
       success: true,

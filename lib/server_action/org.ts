@@ -145,7 +145,12 @@ export const GetAllOrgMemberList = async (
     if (session?.work === "leader") await ProtectedAction("read:own:org:list");
     else await ProtectedAction("read:org:member:list");
 
-    if (!organizationIsExist(orgId)) return { success: true, isExist: false };
+    if (!(await organizationIsExist(orgId)))
+      return {
+        success: false,
+        notifError: [{ message: "", type: "warning" }],
+        isExist: false,
+      };
 
     return { success: true, memberList: await GetAllOrgMemberListQuery(orgId) };
   } catch (error) {
