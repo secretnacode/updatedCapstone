@@ -3,7 +3,6 @@ import { DynamicLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
-import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
@@ -51,10 +50,6 @@ export default async function Page() {
                         label="View Leader"
                         className="profile-link-button-design"
                       />
-                      <Link href={"/agriculturist/organizations/1231231"}>
-                        no org
-                      </Link>
-                      <Link href={"/farmerUser/234234"}>no user</Link>
                       <DynamicLink
                         baseLink="agriculturist/organizations"
                         dynamicId={orgVal.orgId}
