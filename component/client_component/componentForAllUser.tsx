@@ -369,10 +369,7 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
           onChange={handleUserOrgChange}
           selectName={"orgId"}
           selectDisable={isViewing}
-          optionOtherValAndLabel={[
-            { value: "none", label: "wala" },
-            { value: "other", label: "mag lagay ng iba" },
-          ]}
+          selectOrganization={true}
           optionList={availOrgList}
           optionValue={(org) => org.orgId}
           optionLabel={(org) =>

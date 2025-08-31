@@ -496,17 +496,21 @@ export type FormDivLabelInputPropType = {
   inputType?: string;
   formError?: string[];
   inputDisable?: boolean;
+  inputMax?: string | number;
+  inputMin?: string | number;
   inputName: string;
   inputValue?: string;
   inputDefaultValue?: string;
-  inputPlaceholder: string;
+  inputPlaceholder?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 export type FormDivLabelSelectType<T> = {
   labelMessage: string;
-  selectValue: string;
+  selectValue?: string;
+  selectDefaultValue?: string;
   selectName: string;
+  selectOrganization?: boolean;
   selectDisable?: boolean;
   selectRequired?: boolean;
   optionList: T[];

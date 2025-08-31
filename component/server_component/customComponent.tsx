@@ -80,6 +80,8 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   inputDisable,
   inputName,
   inputValue,
+  inputMax,
+  inputMin,
   onChange,
   inputPlaceholder,
   formError,
@@ -99,6 +101,8 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         placeholder={inputPlaceholder}
         defaultValue={inputDefaultValue}
         className="input"
+        max={inputMax}
+        min={inputMin}
       />
       {formError &&
         formError.map((message, index) => (
@@ -113,7 +117,9 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
 export const FormDivLabelSelect = <T,>({
   labelMessage,
   selectValue,
+  selectDefaultValue,
   selectName,
+  selectOrganization = false,
   selectDisable = false,
   selectRequired = false,
   optionList,
@@ -131,6 +137,7 @@ export const FormDivLabelSelect = <T,>({
       </label>
       <select
         value={selectValue}
+        defaultValue={selectDefaultValue}
         name={selectName}
         className="select"
         disabled={selectDisable}
@@ -162,6 +169,18 @@ export const FormDivLabelSelect = <T,>({
               {option.label}
             </option>
           ))}
+
+        {/* this will only show for other option, if the select tag will be used for showing available organization */}
+        {selectOrganization && (
+          <>
+            <option value="other" className="option">
+              Mag lagay ng iba
+            </option>
+            <option value="none" className="option">
+              Wala
+            </option>
+          </>
+        )}
       </select>
 
       {formError &&

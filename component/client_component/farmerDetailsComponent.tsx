@@ -39,6 +39,11 @@ import {
 } from "@/lib/server_action/farmerDetails";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { AlertTriangle } from "lucide-react";
+import {
+  FormDivLabelInput,
+  FormDivLabelSelect,
+  SubmitButton,
+} from "../server_component/customComponent";
 
 export const FarmerDetailForm: FC = () => {
   const [nextStep, setNextStep] = useState<boolean>(false);
@@ -82,11 +87,15 @@ export const FarmereDetailFirstStep: FC<{
     notifError: null,
     fieldValues: {
       firstName: "",
+      // middleName: "",
       lastName: "",
+      // extensionName: "",
       alias: "",
       mobileNumber: "",
-      birthdate: new Date(),
+      birthdate: new Date().toISOString().split("T")[0],
       farmerBarangay: "",
+      // countFamilyMember: "",
+      // organization: "",
     },
   });
 
@@ -115,150 +124,110 @@ export const FarmereDetailFirstStep: FC<{
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h2 className="form-title title text-xl font-semibold text-gray-900 mb-6">
-        Personal na Impormasyon
-      </h2>
+      <h2 className="form-title title">Personal na Impormasyon</h2>
       <form action={formAction} className="space-y-6">
-        <div className="space-y-2">
-          <label
-            htmlFor="firstName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Unang Pangalan:
-          </label>
-          <input
-            type="text"
-            name="firstName"
-            defaultValue={state.fieldValues.firstName}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.firstName?.map((err, index) => (
-              <p key={err + index} className="text-red-500 text-sm">
-                {err}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Unang Pangalan:"
+          inputName="firstName"
+          inputPlaceholder="Hal. Juan"
+          inputDefaultValue={state.fieldValues.firstName}
+          formError={state.formError?.firstName}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Gitnang Pangalan:"
+          inputName="middleName"
+          inputPlaceholder="Hal. Luna"
+          // inputDefaultValue={state.fieldValues.middleName}
+          // formError={state.formError?.middleName}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Apelyido:"
+          inputName="lastName"
+          inputPlaceholder="Hal. Dela Cruz"
+          inputDefaultValue={state.fieldValues.lastName}
+          formError={state.formError?.lastName}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Karagdagang Pagkakilanlan"
+          inputName="extensionName"
+          inputPlaceholder="Hal. Jr."
+          // inputDefaultValue={state.fieldValues.extensionName}
+          // formError={state.formError?.extensionName}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Alyas:"
+          inputName="alias"
+          inputPlaceholder="Hal. Mang. Kanor"
+          inputDefaultValue={state.fieldValues.alias ?? ""}
+          formError={state.formError?.alias}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Mobile Number:"
+          inputName="mobileNumber"
+          inputPlaceholder="Hal. 09*******32 / +639*******32"
+          inputDefaultValue={state.fieldValues.mobileNumber}
+          formError={state.formError?.mobileNumber}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Araw ng kapanganakan:"
+          inputName="birthdate"
+          inputType="date"
+          inputMax={new Date().toISOString().split("T")[0]}
+          inputDefaultValue={
+            state.fieldValues.birthdate instanceof Date
+              ? DateToYYMMDD(state.fieldValues.birthdate)
+              : ""
+          }
+          formError={state.formError?.birthdate}
+        />
+
+        <FormDivLabelSelect<string>
+          labelMessage="Baranggay na iyong tinitirhan:"
+          selectDefaultValue={state.fieldValues.farmerBarangay}
+          selectName={"farmerBarangay"}
+          optionList={baranggayList}
+          optionLabel={(baranggay) => baranggay}
+          optionValue={(baranggay) =>
+            baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
+          }
+          optionDefaultValueLabel={{
+            value: "",
+            label: "--Pumili--Ng--Baranggay--",
+          }}
+        />
+
+        <FormDivLabelSelect<string>
+          labelMessage="Organisasyon na Iyong Kabilang:"
+          selectDefaultValue={state.fieldValues.farmerBarangay}
+          selectName={"farmerBarangay"}
+          selectOrganization={true}
+          optionList={[]}
+          optionLabel={(baranggay) => baranggay}
+          optionValue={(baranggay) =>
+            baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
+          }
+          optionDefaultValueLabel={{
+            value: "",
+            label: "--Pumili--Ng--Organisasyon--",
+          }}
+        />
+
+        <FormDivLabelInput
+          labelMessage="Bilang ng iyong pamilya"
+          inputName="countFamilyMember"
+          inputPlaceholder="Hal. 5"
+          // inputDefaultValue={state.fieldValues.extensionName}
+          // formError={state.formError?.extensionName}
+        />
 
         <div>
-          <label
-            htmlFor="lastName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Apelyido:
-          </label>
-          <input
-            type="text"
-            name="lastName"
-            defaultValue={state.fieldValues.lastName}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.lastName?.map((err, index) => (
-              <p key={err + index} className="text-red-500 text-sm">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <label
-            htmlFor="alias"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Alyas
-          </label>
-          <input
-            type="text"
-            name="alias"
-            defaultValue={state.fieldValues.alias ?? ""}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="mobileNumber"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Mobile Number:
-          </label>
-          <input
-            type="text"
-            name="mobileNumber"
-            defaultValue={state.fieldValues.mobileNumber}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.mobileNumber?.map((err, index) => (
-              <p key={err + index} className="text-red-500 text-sm">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <label
-            htmlFor="birthdate"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Araw ng kapanganakan:
-          </label>
-          <input
-            type="date"
-            name="birthdate"
-            defaultValue={
-              state.success === false &&
-              state.fieldValues.birthdate instanceof Date &&
-              !isNaN(Number(state.fieldValues.birthdate))
-                ? DateToYYMMDD(state.fieldValues.birthdate)
-                : ""
-            }
-            max={new Date().toISOString().split("T")[0]}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.birthdate?.map((err, index) => (
-              <p key={err + index} className="text-red-500 text-sm">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <label
-            htmlFor="farmerBarangay"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Baranggay na iyong tinitirhan:
-          </label>
-          <select
-            name="farmerBarangay"
-            defaultValue={state.fieldValues.farmerBarangay}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">--Pumili--Ng--Baranggay--</option>
-            {baranggayList.map((baranggay, index) => (
-              <option key={index} value={baranggay}>
-                {baranggay.charAt(0).toUpperCase() + baranggay.slice(1)}
-              </option>
-            ))}
-          </select>
-          {!state.success &&
-            state.formError?.farmerBarangay?.map((err, index) => (
-              <p key={err + index} className="text-red-500 text-sm">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            {isPending ? "Ipinapasa...." : "Ipasa"}
-          </button>
+          <SubmitButton>{isPending ? "Ipinapasa...." : "Ipasa"}</SubmitButton>
         </div>
       </form>
     </div>
