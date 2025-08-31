@@ -43,43 +43,31 @@ import { AlertTriangle } from "lucide-react";
 export const FarmerDetailForm: FC = () => {
   const [nextStep, setNextStep] = useState<boolean>(false);
   return (
-    <main className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Impormasyon ng Magsasaka
-          </h1>
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex-1 h-2 rounded-full ${
-                nextStep ? "bg-green-500" : "bg-green-200"
-              }`}
-            />
-            <div
-              className={`flex-1 h-2 rounded-full ${
-                nextStep ? "bg-green-200" : "bg-gray-200"
-              }`}
-            />
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-12">
-          {/* First Step */}
-          <div className={`${nextStep ? "opacity-50" : ""} transition-opacity`}>
-            <FarmereDetailFirstStep setNextStep={setNextStep} />
-          </div>
-
-          {/* Second Step */}
-          <div
-            className={`${
-              !nextStep ? "opacity-50 pointer-events-none" : ""
-            } transition-opacity`}
-          >
-            <FarmerDetailSecondStep />
-          </div>
-        </div>
+    <div className="grid md:grid-cols-2 gap-6 lg:gap-12">
+      {/* First Step */}
+      <div className={`${nextStep ? "opacity-50" : ""} transition-opacity`}>
+        <div
+          className={`flex-1 h-2 rounded-full mb-8 ${
+            nextStep ? "bg-green-500" : "bg-green-200"
+          }`}
+        />
+        <FarmereDetailFirstStep setNextStep={setNextStep} />
       </div>
-    </main>
+
+      {/* Second Step */}
+      <div
+        className={`${
+          !nextStep ? "opacity-50 pointer-events-none" : ""
+        } transition-opacity`}
+      >
+        <div
+          className={`flex-1 h-2 rounded-full mb-8 ${
+            nextStep ? "bg-green-200" : "bg-gray-200"
+          }`}
+        />
+        <FarmerDetailSecondStep />
+      </div>
+    </div>
   );
 };
 
@@ -127,7 +115,7 @@ export const FarmereDetailFirstStep: FC<{
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+      <h2 className="form-title title text-xl font-semibold text-gray-900 mb-6">
         Personal na Impormasyon
       </h2>
       <form action={formAction} className="space-y-6">
@@ -853,7 +841,6 @@ export const FarmerDetailSecondStep: FC = () => {
           )}
         </div>
 
-        <br />
         <button
           type="button"
           onClick={handleFinalizeCropList}

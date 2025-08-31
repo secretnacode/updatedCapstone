@@ -7,11 +7,11 @@ authorizedPath.set(`agriculturist`, [`/agriculturist`, `/farmerUser`]);
 authorizedPath.set(`admin`, [`/agriculturist`, `/farmerUser`]);
 authorizedPath.set(`leader`, [
   `/farmer`,
-  `/farmerDetails`,
+  // `/farmerDetails`,
   `/farmerLeader`,
   `/farmerUser`,
 ]);
-const publicPath = [`/`, `/unauthorized`];
+const publicPath = [`/`, `/unauthorized`, `/farmerDetails`];
 
 export default async function Middleware(req: NextRequest) {
   try {

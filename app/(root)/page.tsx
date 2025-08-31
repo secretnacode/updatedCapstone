@@ -19,9 +19,7 @@ export default async function Page({
         {/* Left Section */}
         <div className="flex flex-col items-center md:items-end md:w-full md:max-w-[500px] lg:pr-4 xl:pr-8 space-y-6 mb-8 md:mb-0">
           <div className="text-center md:text-right">
-            <h1 className="font-bold italic text-4xl md:text-5xl lg:text-7xl title text-green-800 mb-4 tracking-wide">
-              AgroFarm
-            </h1>
+            <h1 className="web-title">AgroFarm</h1>
             <p className="hidden md:block text-lg lg:text-xl text-gray-600 max-w-md">
               Enabling Seamless Reporting and Informed Farmer Reports
             </p>

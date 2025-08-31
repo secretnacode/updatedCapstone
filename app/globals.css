@@ -73,8 +73,8 @@ body {
   .auth_form p button[type="button"] {
     @apply font-medium text-green-600 hover:text-green-700 focus:outline-none focus:underline transition-colors cursor-pointer;
   }
-  .title {
-    @apply font-serif;
+  .web-title {
+    @apply font-bold italic text-4xl md:text-5xl lg:text-7xl text-green-800 mb-4 tracking-wide font-serif;
   }
   .notification-wrapper {
     @apply fixed top-4 right-4 z-50 flex flex-col gap-4;
