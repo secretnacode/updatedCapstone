@@ -3,6 +3,8 @@ import { FarmerDetailForm } from "@/component/client_component/farmerDetailsComp
 import { AvailableOrg } from "@/lib/server_action/org";
 import { AvailableOrgReturnType } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let availbaleOrg: AvailableOrgReturnType;
 

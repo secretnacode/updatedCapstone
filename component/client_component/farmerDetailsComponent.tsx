@@ -5,7 +5,6 @@ import {
   CheckCropListReturnType,
   CropErrorFormType,
   EditCropListType,
-  ErrorResponseType,
   FarmerDetailCropType,
   FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
@@ -324,12 +323,17 @@ export const FarmerDetailSecondStep: FC = () => {
 
         handleDoneLoading();
 
-        if (AvailOrg.success) return setAvailOrg(AvailOrg.data);
-        else throw AvailOrg;
+        if (AvailOrg.success) return setAvailOrg(AvailOrg.orgList);
+        else handleSetNotification(AvailOrg.notifError);
       } catch (error) {
-        const err = error as ErrorResponseType;
-        console.log(error);
-        handleSetNotification(err.errors);
+        console.log((error as Error).message);
+        handleSetNotification([
+          {
+            message:
+              "May nang yaring hindi inaasahan habang kinukuha ang listahan ng organisasyon",
+            type: "error",
+          },
+        ]);
       }
     };
 
