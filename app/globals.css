@@ -155,9 +155,9 @@ body {
   .p-error {
     @apply text-red-500;
   }
-  /* .form {
-    @apply;
-  } */
+  .form {
+    @apply space-y-6;
+  }
   .logo {
     @apply size-6;
   }

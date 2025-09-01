@@ -530,14 +530,6 @@ export type FormDivLabelSelectType<T> = {
   formError?: string[];
 };
 
-export type FormSubmitButton = ChildrenType & {
-  type?: ButtonTypeAttribType;
-  onClick?: () => void;
-  className?: string;
-  logo?: LucideIcon;
-  buttonLabel: string;
-};
-
 export type LogoPropType = {
   logo: LucideIcon;
   className?: string;
@@ -549,6 +541,7 @@ export type ButtonPropType = ChildrenType & {
   type?: ButtonTypeAttribType;
   onClick?: () => void;
   logo?: LucideIcon;
+  disabled?: boolean;
   logoClassName?: string;
   className?: string;
 };

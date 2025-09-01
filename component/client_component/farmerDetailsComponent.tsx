@@ -48,7 +48,7 @@ import {
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(false);
+  const [nextStep, setNextStep] = useState<boolean>(true);
 
   return (
     <div>
@@ -149,7 +149,7 @@ export const FarmereDetailFirstStep: FC<{
   return (
     <div>
       <h2 className="form-title title">Personal na Impormasyon</h2>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="form">
         <FormDivLabelInput
           labelMessage="Unang Pangalan:"
           inputName="firstName"
@@ -297,8 +297,6 @@ export const FarmereDetailFirstStep: FC<{
 export const FarmerDetailSecondStep: FC = () => {
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
-  const [otherOrg, setOtherOrg] = useState(false);
-  const [availOrg, setAvailOrg] = useState<QueryAvailableOrgReturnType[]>([]);
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
   const [cancelProceed, setCancelProceed] = useState<boolean>(false);
@@ -320,32 +318,6 @@ export const FarmerDetailSecondStep: FC = () => {
   const [error, setError] = useState<
     FormActionBaseType<FarmerSecondDetailFormType>
   >({ success: null, formError: null, notifError: null });
-
-  // getting all the available orgs in the database when the component mount
-  useEffect(() => {
-    const GetAvailableOrg = async () => {
-      try {
-        handleIsLoading(`Loading`);
-        const AvailOrg: AvailableOrgReturnType = await AvailableOrg();
-
-        handleDoneLoading();
-
-        if (AvailOrg.success) return setAvailOrg(AvailOrg.orgList);
-        else handleSetNotification(AvailOrg.notifError);
-      } catch (error) {
-        console.log((error as Error).message);
-        handleSetNotification([
-          {
-            message:
-              "May nang yaring hindi inaasahan habang kinukuha ang listahan ng organisasyon",
-            type: "error",
-          },
-        ]);
-      }
-    };
-
-    GetAvailableOrg();
-  }, [handleSetNotification, handleIsLoading, handleDoneLoading]);
 
   /**
    * use effect for only resubmiting()
@@ -693,64 +665,15 @@ export const FarmerDetailSecondStep: FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleFormSubmit} ref={formRef} className="space-y-6">
-        <div className="space-y-2">
-          <label
-            htmlFor="organization"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Organisasyon na kabilang:
-          </label>
-          <select
-            name="organization"
-            id=""
-            onChange={handleChangeVal}
-            value={currentCrops.organization}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">--Pumili--Ng--Organisasyon</option>
-            {availOrg.map((org, index) => (
-              <option key={index} value={org.orgId}>
-                {org.orgName}
-              </option>
-            ))}
-
-            <option value="other">Mag Lagay ng iba</option>
-            <option value="none">Wala</option>
-          </select>
-
-          {error.success === false &&
-            error.formError?.organization?.map((error, key) => (
-              <p key={key + error} className="text-red-500 text-sm">
-                {error}
-              </p>
-            ))}
-        </div>
-
-        {otherOrg && (
-          <div className="space-y-2">
-            <label
-              htmlFor="otherOrg"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Ilagay ang Organisasyon na kinabibilangan:
-            </label>
-            <input
-              type="text"
-              name="otherOrg"
-              onChange={handleChangeVal}
-              value={currentCrops.otherOrg}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-
-            {error.success === false &&
-              error.formError?.otherOrg?.map((error, key) => (
-                <p key={key + error} className="text-red-500 text-sm">
-                  {error}
-                </p>
-              ))}
-          </div>
-        )}
+      <form onSubmit={handleFormSubmit} ref={formRef} className="form">
+        <FormDivLabelInput
+          labelMessage="Sukat ng lote na iyong Pinagtataniman:"
+          inputName="cropFarmArea"
+          onChange={handleChangeVal}
+          inputValue={currentCrops.cropFarmArea}
+          inputRequired={true}
+          formError={formError?.cropFarmArea}
+        />
 
         <div className="space-y-4">
           <div className="space-y-2">
@@ -818,48 +741,34 @@ export const FarmerDetailSecondStep: FC = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="cropBaranggay"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Lugar ng Iyong pinagtataniman:
-          </label>
-          <select
-            name="cropBaranggay"
-            id=""
-            onChange={handleChangeVal}
-            value={currentCrops.cropBaranggay}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">--Pumili--Ng--Lugar</option>
-            {baranggayList.map((brgy, index) => (
-              <option key={index} value={brgy}>
-                {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
-              </option>
-            ))}
-          </select>
-
-          {error.success === false &&
-            error.formError?.cropBaranggay?.map((error, key) => (
-              <p key={key + error} className="text-red-500 text-sm">
-                {error}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelSelect<string>
+          labelMessage="Lugar ng Iyong pinagtataniman:"
+          selectName="cropBaranggay"
+          onChange={handleChangeVal}
+          selectValue={currentCrops.cropBaranggay}
+          formError={formError?.cropBaranggay}
+          optionList={baranggayList}
+          selectRequired={true}
+          optionValue={(branggay) => branggay}
+          optionLabel={(branggay) => branggay}
+          optionDefaultValueLabel={{
+            label: "--Pumili--Ng--Lugar--",
+            value: "",
+          }}
+        />
 
         <div className="flex gap-4">
-          <button
+          <SubmitButton
             type="button"
             onClick={
               editCropId.editing ? handleDoneEditingCrop : handleAddNewCrop
             }
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+            // className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
           >
             {editCropId.editing
               ? "Kumpiramhin ang pag babago"
               : "Mag dagdag ng pananim"}
-          </button>
+          </SubmitButton>
 
           {editCropId.editing && (
             <>
@@ -875,14 +784,14 @@ export const FarmerDetailSecondStep: FC = () => {
           )}
         </div>
 
-        <button
+        <SubmitButton
           type="button"
           onClick={handleFinalizeCropList}
           disabled={editCropId.editing}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Ipasa
-        </button>
+        </SubmitButton>
       </form>
 
       {cancelProceed && (

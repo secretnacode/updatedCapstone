@@ -19,12 +19,14 @@ export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
   onClick,
   className = "",
+  disabled,
   children,
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`button submit-button ${className}`}
     >
       {children}
