@@ -36,7 +36,9 @@ export default async function Page() {
         </div>
 
         <div>
-          <FarmerDetailForm />
+          <FarmerDetailForm
+            orgList={availbaleOrg.success ? availbaleOrg.orgList : []}
+          />
         </div>
       </div>
     </div>

@@ -45,12 +45,14 @@ import {
   SubmitButton,
 } from "../server_component/customComponent";
 
-export const FarmerDetailForm: FC = () => {
+export const FarmerDetailForm: FC<{
+  orgList: QueryAvailableOrgReturnType[];
+}> = ({ orgList }) => {
   const [nextStep, setNextStep] = useState<boolean>(false);
 
   return (
     <div>
-      <div className="grid md:grid-cols-2 gap-6 lg:gap-12 mb-10">
+      <div className="grid grid-cols-2 gap-6 lg:gap-12 mb-10">
         <div
           className={`flex-1 h-2 rounded-full ${
             nextStep ? "bg-green-500" : "bg-green-200"
@@ -64,9 +66,12 @@ export const FarmerDetailForm: FC = () => {
       </div>
 
       <div className="flex justify-center items-center w-full">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 xl:w-1/2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-full m-4 sm:m-0 sm:w-2/3 md:w-1/2">
           {!nextStep ? (
-            <FarmereDetailFirstStep setNextStep={setNextStep} />
+            <FarmereDetailFirstStep
+              setNextStep={setNextStep}
+              orgList={orgList}
+            />
           ) : (
             <FarmerDetailSecondStep />
           )}
@@ -78,7 +83,8 @@ export const FarmerDetailForm: FC = () => {
 
 export const FarmereDetailFirstStep: FC<{
   setNextStep: Dispatch<SetStateAction<boolean>>;
-}> = ({ setNextStep }): ReactElement => {
+  orgList: QueryAvailableOrgReturnType[];
+}> = ({ setNextStep, orgList }): ReactElement => {
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [newOrg, setNewOrg] = useState<boolean>(false);
@@ -238,19 +244,20 @@ export const FarmereDetailFirstStep: FC<{
         />
 
         {/* wala pa yung organisasyon na pamimilian */}
-        <FormDivLabelSelect<string>
+        <FormDivLabelSelect<QueryAvailableOrgReturnType>
           labelMessage="Organisasyon na Iyong Kabilang:"
           selectName={"organization"}
           selectValue={newUserVal.organization}
           onChange={handleChangeVal}
           selectOrganization={true}
-          optionList={[]}
+          optionList={orgList}
           selectRequired={true}
           formError={formError?.organization}
-          optionLabel={(baranggay) => baranggay}
-          optionValue={(baranggay) =>
-            baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
+          optionLabel={(baranggay) =>
+            baranggay.orgName.charAt(0).toUpperCase() +
+            baranggay.orgName.slice(1)
           }
+          optionValue={(baranggay) => baranggay.orgId}
           optionDefaultValueLabel={{
             value: "",
             label: "--Pumili--Ng--Organisasyon--",
