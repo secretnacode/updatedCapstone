@@ -23,21 +23,19 @@ export const FarmerUserProfile: FC<{
 }> = async ({ userFarmerInfo, isViewing }) => {
   let AvailOrg: AvailableOrgReturnType;
 
-  console.log(`Profile info component`);
-
   try {
     AvailOrg = await AvailableOrg();
   } catch (error) {
     AvailOrg = {
       success: false,
-      errors: [{ message: (error as Error).message, type: "error" }],
+      notifError: [{ message: (error as Error).message, type: "error" }],
     };
   }
 
   return (
     <div className="grid md:grid-cols-4 gap-6">
       {/* Left Column - Profile Info */}
-      {!AvailOrg.success && <RenderNotification notif={AvailOrg.errors} />}
+      {!AvailOrg.success && <RenderNotification notif={AvailOrg.notifError} />}
       <div>
         {/* Profile Picture */}
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
@@ -110,7 +108,7 @@ export const FarmerUserProfile: FC<{
               leaderName: userFarmerInfo.leaderName,
             }}
             isViewing={isViewing}
-            orgList={AvailOrg.data}
+            orgList={AvailOrg.orgList}
           />
         )}
       </div>

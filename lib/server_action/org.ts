@@ -32,7 +32,7 @@ export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
 
     return {
       success: true,
-      data: await GetAvailableOrgQuery(),
+      orgList: await GetAvailableOrgQuery(),
     };
   } catch (error) {
     const err = error as Error;
@@ -41,7 +41,7 @@ export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
     );
     return {
       success: false,
-      errors: [
+      notifError: [
         {
           message: err.message,
           type: "error",

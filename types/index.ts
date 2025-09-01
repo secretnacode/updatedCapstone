@@ -102,12 +102,9 @@ export type QueryAvailableOrgReturnType = {
 export type AvailableOrgReturnType =
   | {
       success: true;
-      data: QueryAvailableOrgReturnType[];
+      orgList: QueryAvailableOrgReturnType[];
     }
-  | {
-      success: false;
-      errors: NotificationBaseType[];
-    };
+  | ServerActionFailBaseType;
 
 export type CropListType = {
   cropId: string;
