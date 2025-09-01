@@ -7,8 +7,10 @@ import {
   EditCropListType,
   ErrorResponseType,
   FarmerDetailCropType,
+  FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
   FormActionBaseType,
+  FormErrorType,
   QueryAvailableOrgReturnType,
 } from "@/types";
 import {
@@ -19,7 +21,6 @@ import {
   memo,
   ReactElement,
   SetStateAction,
-  useActionState,
   useEffect,
   useMemo,
   useRef,
@@ -47,30 +48,30 @@ import {
 
 export const FarmerDetailForm: FC = () => {
   const [nextStep, setNextStep] = useState<boolean>(false);
+
   return (
-    <div className="grid md:grid-cols-2 gap-6 lg:gap-12">
-      {/* First Step */}
-      <div className={`${nextStep ? "opacity-50" : ""} transition-opacity`}>
+    <div>
+      <div className="grid md:grid-cols-2 gap-6 lg:gap-12 mb-10">
         <div
-          className={`flex-1 h-2 rounded-full mb-8 ${
+          className={`flex-1 h-2 rounded-full ${
             nextStep ? "bg-green-500" : "bg-green-200"
           }`}
         />
-        <FarmereDetailFirstStep setNextStep={setNextStep} />
-      </div>
-
-      {/* Second Step */}
-      <div
-        className={`${
-          !nextStep ? "opacity-50 pointer-events-none" : ""
-        } transition-opacity`}
-      >
         <div
-          className={`flex-1 h-2 rounded-full mb-8 ${
+          className={`flex-1 h-2 rounded-full ${
             nextStep ? "bg-green-200" : "bg-gray-200"
           }`}
         />
-        <FarmerDetailSecondStep />
+      </div>
+
+      <div className="flex justify-center items-center w-full">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 xl:w-1/2">
+          {!nextStep ? (
+            <FarmereDetailFirstStep setNextStep={setNextStep} />
+          ) : (
+            <FarmerDetailSecondStep />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -81,117 +82,152 @@ export const FarmereDetailFirstStep: FC<{
 }> = ({ setNextStep }): ReactElement => {
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
-  const [state, formAction, isPending] = useActionState(AddFirstFarmerDetails, {
-    success: null,
-    formError: null,
-    notifError: null,
-    fieldValues: {
-      firstName: "",
-      // middleName: "",
-      lastName: "",
-      // extensionName: "",
-      alias: "",
-      mobileNumber: "",
-      birthdate: new Date().toISOString().split("T")[0],
-      farmerBarangay: "",
-      // countFamilyMember: "",
-      // organization: "",
-    },
+  const [newOrg, setNewOrg] = useState<boolean>(false);
+  const [formError, setFormError] =
+    useState<FormErrorType<FarmerFirstDetailFormType>>(null);
+  const [newUserVal, setNewUserVal] = useState<FarmerFirstDetailFormType>({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    extensionName: "",
+    alias: "",
+    mobileNumber: "",
+    birthdate: new Date(),
+    farmerBarangay: "",
+    countFamilyMember: "",
+    organization: "",
+    newOrganization: "",
   });
 
-  useEffect(() => {
-    if (state.success === false && state.notifError) {
-      handleSetNotification(state.notifError);
-    }
+  const handleChangeVal = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setNewUserVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-    if (state.success) {
-      setNextStep(true);
+    if (e.target.name === "organization") {
+      if (e.target.value === "other") setNewOrg(true);
+      else {
+        setNewOrg(false);
+        setNewUserVal((prev) => ({ ...prev, newOrganization: "" }));
+      }
     }
+  };
 
-    if (isPending) {
-      handleIsLoading("passing your information");
-    } else {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+
+      handleIsLoading("Isinusumite na ang iyong impormasyon");
+
+      const res = await AddFirstFarmerDetails(newUserVal);
+
+      if (res.success) setNextStep(true);
+      else {
+        if (res.formError) setFormError(res.formError);
+
+        handleSetNotification(res.notifError);
+      }
+    } catch (error) {
+      console.log((error as Error).message);
+      handleSetNotification([
+        {
+          message:
+            "May hindi inaasahang nang yari sa pag papasa ng iyong impormasyon",
+          type: "error",
+        },
+      ]);
+    } finally {
       handleDoneLoading();
     }
-  }, [
-    state,
-    handleSetNotification,
-    setNextStep,
-    isPending,
-    handleIsLoading,
-    handleDoneLoading,
-  ]);
+  };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div>
       <h2 className="form-title title">Personal na Impormasyon</h2>
-      <form action={formAction} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <FormDivLabelInput
           labelMessage="Unang Pangalan:"
           inputName="firstName"
+          inputValue={newUserVal.firstName}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. Juan"
-          inputDefaultValue={state.fieldValues.firstName}
-          formError={state.formError?.firstName}
+          inputRequired={true}
+          formError={formError?.firstName}
         />
 
         <FormDivLabelInput
           labelMessage="Gitnang Pangalan:"
           inputName="middleName"
+          inputValue={newUserVal.middleName}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. Luna"
-          // inputDefaultValue={state.fieldValues.middleName}
-          // formError={state.formError?.middleName}
+          inputRequired={true}
+          // formError={formError?.middleName}
         />
 
         <FormDivLabelInput
           labelMessage="Apelyido:"
           inputName="lastName"
+          inputValue={newUserVal.lastName}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. Dela Cruz"
-          inputDefaultValue={state.fieldValues.lastName}
-          formError={state.formError?.lastName}
+          inputRequired={true}
+          formError={formError?.lastName}
         />
 
         <FormDivLabelInput
           labelMessage="Karagdagang Pagkakilanlan"
           inputName="extensionName"
+          inputValue={newUserVal.extensionName ?? ""}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. Jr."
-          // inputDefaultValue={state.fieldValues.extensionName}
-          // formError={state.formError?.extensionName}
+          inputRequired={true}
+          // formError={formError?.extensionName}
         />
 
         <FormDivLabelInput
           labelMessage="Alyas:"
           inputName="alias"
+          inputValue={newUserVal.alias ?? ""}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. Mang. Kanor"
-          inputDefaultValue={state.fieldValues.alias ?? ""}
-          formError={state.formError?.alias}
+          inputRequired={true}
+          formError={formError?.alias}
         />
 
         <FormDivLabelInput
           labelMessage="Mobile Number:"
           inputName="mobileNumber"
+          inputValue={newUserVal.mobileNumber}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. 09*******32 / +639*******32"
-          inputDefaultValue={state.fieldValues.mobileNumber}
-          formError={state.formError?.mobileNumber}
+          inputRequired={true}
+          formError={formError?.mobileNumber}
         />
 
         <FormDivLabelInput
           labelMessage="Araw ng kapanganakan:"
           inputName="birthdate"
+          inputValue={
+            newUserVal.birthdate instanceof Date
+              ? DateToYYMMDD(newUserVal.birthdate)
+              : newUserVal.birthdate
+          }
+          onChange={handleChangeVal}
           inputType="date"
           inputMax={new Date().toISOString().split("T")[0]}
-          inputDefaultValue={
-            state.fieldValues.birthdate instanceof Date
-              ? DateToYYMMDD(state.fieldValues.birthdate)
-              : ""
-          }
-          formError={state.formError?.birthdate}
+          inputRequired={true}
+          formError={formError?.birthdate}
         />
 
         <FormDivLabelSelect<string>
           labelMessage="Baranggay na iyong tinitirhan:"
-          selectDefaultValue={state.fieldValues.farmerBarangay}
           selectName={"farmerBarangay"}
+          selectValue={newUserVal.farmerBarangay}
+          onChange={handleChangeVal}
           optionList={baranggayList}
+          selectRequired={true}
+          formError={formError?.farmerBarangay}
           optionLabel={(baranggay) => baranggay}
           optionValue={(baranggay) =>
             baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
@@ -202,12 +238,16 @@ export const FarmereDetailFirstStep: FC<{
           }}
         />
 
+        {/* wala pa yung organisasyon na pamimilian */}
         <FormDivLabelSelect<string>
           labelMessage="Organisasyon na Iyong Kabilang:"
-          selectDefaultValue={state.fieldValues.farmerBarangay}
-          selectName={"farmerBarangay"}
+          selectName={"organization"}
+          selectValue={newUserVal.organization}
+          onChange={handleChangeVal}
           selectOrganization={true}
           optionList={[]}
+          selectRequired={true}
+          formError={formError?.organization}
           optionLabel={(baranggay) => baranggay}
           optionValue={(baranggay) =>
             baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
@@ -218,16 +258,30 @@ export const FarmereDetailFirstStep: FC<{
           }}
         />
 
+        {newOrg && (
+          <FormDivLabelInput
+            labelMessage="Organisasyon na iyong gagawin"
+            inputName="newOrganization"
+            inputValue={newUserVal.newOrganization ?? ""}
+            onChange={handleChangeVal}
+            inputPlaceholder="Hal. 5"
+            inputRequired={true}
+            // formError={formError?.newOrganization}
+          />
+        )}
+
         <FormDivLabelInput
           labelMessage="Bilang ng iyong pamilya"
           inputName="countFamilyMember"
+          inputValue={newUserVal.countFamilyMember}
+          onChange={handleChangeVal}
           inputPlaceholder="Hal. 5"
-          // inputDefaultValue={state.fieldValues.extensionName}
-          // formError={state.formError?.extensionName}
+          inputRequired={true}
+          // formError={formError?.countFamilyMember}
         />
 
         <div>
-          <SubmitButton>{isPending ? "Ipinapasa...." : "Ipasa"}</SubmitButton>
+          <SubmitButton>Ipasa</SubmitButton>
         </div>
       </form>
     </div>
@@ -621,7 +675,7 @@ export const FarmerDetailSecondStep: FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div>
       {editCropId.editing && (
         <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium">
           Binabago ang taniman {editCropId.listNum + 1}

@@ -87,49 +87,89 @@ export const authLogInSchema = z.object({
 /**
  * a schema for validating farmer details form after a new farmer has signed up
  */
-export const farmerFirstDetailFormSchema = z.object({
-  firstName: z
-    .string()
-    .trim()
-    .min(1, { message: `Ilagay ang iyong unang pangalan` })
-    .max(50, {
-      message: `Limangpu pababa lamang ang pede mong mailagay sa una mong Pangalan`,
-    }),
-  lastName: z
-    .string()
-    .trim()
-    .min(1, { message: `Ilagay ang iyong apelyido` })
-    .max(50, {
-      message: `Limangpu pababa lamang ang pede mong mailagay sa iyong Apelyido`,
-    }),
-  alias: z
-    .string()
-    .transform((e) => (e === "" ? null : e))
-    .nullable(),
-  mobileNumber: z
-    .string()
-    .trim()
-    .max(13, {
-      message: `Ang numero mo ay hindi dapat tataas sa labing tatlong(13) na numero`,
-    })
-    .refine(
-      (val) =>
-        /^\+?\d+$/.test(val) &&
-        ((val.startsWith("+639") && val.length === 13) ||
-          (val.startsWith("09") && val.length === 11)),
-      {
-        message: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx/+639xxxxxxxxx)`,
-      }
-    ),
-  birthdate: z.coerce
-    .date({ message: `Ilagay ang araw ng iyong kapanganakan` })
-    .max(Date10YearsAgo(), {
-      message: `Dapat ang edad mo ay mas mahigit pa sa sampu(10)`,
-    }),
-  farmerBarangay: z
-    .string()
-    .min(1, { message: `Ilagay ang iyong barangay ng tinitirhan` }),
-});
+export const farmerFirstDetailFormSchema = z
+  .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, { error: `Ilagay ang iyong unang pangalan` })
+      .max(50, {
+        error: `Limangpu pababa lamang ang pede mong mailagay sa una mong Pangalan`,
+      }),
+    middleName: z
+      .string()
+      .trim()
+      .min(1, { error: `Ilagay ang iyong gitnang pangalan` })
+      .max(50, {
+        error: `Limangpu pababa lamang ang pede mong mailagay sa gitna mong Pangalan`,
+      }),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, { error: `Ilagay ang iyong apelyido` })
+      .max(50, {
+        error: `Limangpu pababa lamang ang pede mong mailagay sa iyong Apelyido`,
+      }),
+    extensionName: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+    alias: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+    mobileNumber: z
+      .string()
+      .trim()
+      .max(13, {
+        error: `Ang numero mo ay hindi dapat tataas sa labing tatlong(13) na numero`,
+      })
+      .refine(
+        (val) =>
+          /^\+?\d+$/.test(val) &&
+          ((val.startsWith("+639") && val.length === 13) ||
+            (val.startsWith("09") && val.length === 11)),
+        {
+          error: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx/+639xxxxxxxxx)`,
+        }
+      ),
+    birthdate: z.coerce
+      .date({ error: `Ilagay ang araw ng iyong kapanganakan` })
+      .max(Date10YearsAgo(), {
+        error: `Dapat ang edad mo ay mas mahigit pa sa sampu(10)`,
+      }),
+    farmerBarangay: z
+      .string()
+      .min(1, { error: `Ilagay ang iyong barangay ng tinitirhan` }),
+    countFamilyMember: z
+      .string()
+      .trim()
+      .min(1, { error: "Mag lagay kung ilang ang bilang ng iyon pamilya" })
+      .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
+        error:
+          "Numero o mas ma-mataas sa zero(0) lang ang pwede mong ilagay dito",
+      }),
+    organization: z
+      .string()
+      .trim()
+      .min(1, { error: "Mag lagay ng organisasyon kung san ka kasali" }),
+    newOrganization: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+  })
+  .refine(
+    (e) =>
+      e.organization !== "other" ||
+      (e.organization === "other" && e.newOrganization),
+    {
+      error: "Mag lagay ng organisasyon na ikaw ang kasali",
+      path: ["newOrganization"],
+    }
+  );
 
 /**
  * a zod schema for validating the 2nd detail of the farmer after the sign up

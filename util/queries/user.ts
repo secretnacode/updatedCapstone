@@ -108,17 +108,22 @@ export const FarmerFirstDetailQuery = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerLastName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "orgId", "orgRole", "dateCreated", "familyMemberCount") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         data.farmerId,
         data.firstName,
+        data.middleName,
         data.lastName,
+        data.extensionName,
         data.alias,
         data.mobileNumber,
         data.farmerBarangay,
         data.birthdate,
         data.verified,
+        data.organization,
+        data.orgRole,
         data.dateCreated,
+        data.countFamilyMember,
       ]
     );
   } catch (error) {

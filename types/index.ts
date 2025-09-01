@@ -126,15 +126,25 @@ export type FormActionBaseType<T> = {
   formError: { [v in keyof T]?: string[] } | null;
 };
 
-export type FarmerFirstDetailActionReturnType =
-  FormActionBaseType<FarmerFirstDetailFormType> & {
-    fieldValues: FarmerFirstDetailFormType;
-  };
+export type FarmerFirstDetailActionReturnType<T> =
+  | { success: true }
+  | (ServerActionFailBaseType & { formError?: FormErrorType<T> });
 
-export type FarmerFirstDetailType = FarmerFirstDetailFormType & {
+export type FarmerFirstDetailType = {
   farmerId: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  extensionName: string | null;
+  alias: string | null;
+  mobileNumber: number;
+  farmerBarangay: string;
+  birthdate: Date;
   verified: boolean;
+  organization: string | null;
+  orgRole: string | null;
   dateCreated: Date;
+  countFamilyMember: number;
 };
 
 export type FarmerSecondDetailFormType = z.infer<
@@ -502,6 +512,7 @@ export type FormDivLabelInputPropType = {
   inputValue?: string;
   inputDefaultValue?: string;
   inputPlaceholder?: string;
+  inputRequired?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 

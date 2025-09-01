@@ -4,6 +4,7 @@ import {
   CropErrorFormType,
   FarmerDetailCropType,
   FarmerFirstDetailActionReturnType,
+  FarmerFirstDetailFormType,
   FarmerSecondDetailActionReturnType,
   HandleInsertCropType,
 } from "@/types";
@@ -29,56 +30,61 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
  * @returns the prevData and a success object that if a falsey value it will return a formError that will show the error of the form and notifError if there's an error that needs to be notified
  */
 export const AddFirstFarmerDetails = async (
-  prevData: FarmerFirstDetailActionReturnType,
-  formData: FormData
-): Promise<FarmerFirstDetailActionReturnType> => {
-  const farmVal = {
-    firstName: formData.get("firstName") as string,
-    lastName: formData.get("lastName") as string,
-    alias: formData.get("alias") as string,
-    mobileNumber: formData.get("mobileNumber") as string,
-    birthdate: new Date(formData.get("birthdate") as string),
-    farmerBarangay: formData.get("farmerBarangay") as string,
-  };
-
-  const returnVal: FarmerFirstDetailActionReturnType = {
-    success: null,
-    formError: null,
-    notifError: null,
-    fieldValues: {
-      ...farmVal,
-    },
-  };
-
+  newUserVal: FarmerFirstDetailFormType
+): Promise<FarmerFirstDetailActionReturnType<FarmerFirstDetailFormType>> => {
   try {
     const userId = await ProtectedAction("create:user");
 
-    const validateVal = ZodValidateForm(farmVal, farmerFirstDetailFormSchema);
+    const validateVal = ZodValidateForm(
+      newUserVal,
+      farmerFirstDetailFormSchema
+    );
     if (!validateVal.valid) {
       return {
-        ...returnVal,
         success: false,
+        notifError: [
+          {
+            message:
+              "May mga mali kang nailagay, ayusin muna ito bago mag pasa ng panibago",
+            type: "warning",
+          },
+        ],
         formError: validateVal.formError,
       };
     }
 
+    const org =
+      newUserVal.organization === "other" && newUserVal.newOrganization
+        ? (await CreateNewOrg(newUserVal.newOrganization, userId)).orgId
+        : newUserVal.organization === "none"
+        ? null
+        : newUserVal.organization;
+
+    const orgRole =
+      newUserVal.organization === "other" && newUserVal.newOrganization
+        ? "leader"
+        : newUserVal.organization === "none"
+        ? null
+        : "member";
+
     await FarmerFirstDetailQuery({
-      ...farmVal,
-      mobileNumber: farmVal.mobileNumber,
+      ...newUserVal,
+      countFamilyMember: Number(newUserVal.countFamilyMember),
+      organization: org,
+      orgRole: orgRole,
+      mobileNumber: Number(newUserVal.mobileNumber),
       farmerId: userId,
       verified: false,
       dateCreated: new Date(),
     });
 
     return {
-      ...returnVal,
       success: true,
     };
   } catch (error) {
     const err = error as Error;
     console.error(`Error in Adding First Farmer Detial: ${err.message}`);
     return {
-      ...returnVal,
       success: false,
       notifError: [
         {

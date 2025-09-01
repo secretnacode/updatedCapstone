@@ -86,6 +86,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   inputPlaceholder,
   formError,
   inputDefaultValue,
+  inputRequired = false,
 }) => {
   return (
     <div className="div form-div">
@@ -103,6 +104,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         className="input"
         max={inputMax}
         min={inputMin}
+        required={inputRequired}
       />
       {formError &&
         formError.map((message, index) => (

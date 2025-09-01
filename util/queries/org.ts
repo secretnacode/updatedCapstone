@@ -33,7 +33,7 @@ export const GetAvailableOrgQuery = async (): Promise<
  * query to create a new org by just passing orgname and userId
  * @param orgName is the name of the organization that the user want to create
  * @param userId is the id of the current user
- * @returns result of the query
+ * @returns orgId that was created
  */
 export const CreateNewOrg = async (
   orgName: string,
