@@ -78,21 +78,31 @@ export const FormCancelSubmitButton: FC<FormCancelSubmitButtonPropType> = ({
 
 export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   labelMessage,
+  labelClassName = "",
+  divClassName = "",
   inputType = "text",
   inputDisable,
   inputName,
   inputValue,
   inputMax,
   inputMin,
+  inputClassName,
   onChange,
   inputPlaceholder,
   formError,
   inputDefaultValue,
+  inputChecked,
   inputRequired = false,
+  labelOnClick,
+  children,
 }) => {
   return (
-    <div className="div form-div">
-      <label htmlFor={inputName} className="label">
+    <div className={`cursor-pointer div form-div ${divClassName}`}>
+      <label
+        htmlFor={inputName}
+        className={`label ${labelClassName}`}
+        onClick={labelOnClick}
+      >
         {labelMessage}
       </label>
       <input
@@ -103,11 +113,14 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         onChange={onChange}
         placeholder={inputPlaceholder}
         defaultValue={inputDefaultValue}
-        className="input"
+        className={`input ${inputClassName}`}
         max={inputMax}
         min={inputMin}
         required={inputRequired}
+        checked={inputChecked}
       />
+
+      {children}
       {formError &&
         formError.map((message, index) => (
           <p key={message + index} className="p p-error">

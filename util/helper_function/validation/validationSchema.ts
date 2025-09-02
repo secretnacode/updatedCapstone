@@ -142,6 +142,7 @@ export const farmerFirstDetailFormSchema = z
       }),
     farmerBarangay: z
       .string()
+      .trim()
       .min(1, { error: `Ilagay ang iyong barangay ng tinitirhan` }),
     countFamilyMember: z
       .string()
@@ -174,41 +175,30 @@ export const farmerFirstDetailFormSchema = z
 /**
  * a zod schema for validating the 2nd detail of the farmer after the sign up
  */
-export const farmerSecondDetailFormSchema = z
-  .object({
-    organization: z
-      .string()
-      .trim()
-      .min(1, { error: "Pumili ng organisasyon kung san ka kasali" }),
-    otherOrg: z
-      .string()
-      .trim()
-      .transform((e) => (e === "" ? null : e))
-      .nullable(),
-    cropFarmArea: z
-      .string()
-      .trim()
-      .min(1, { error: "Mag lagay ng lawak ng iyong pinag tataniman" })
-      .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
-        error:
-          "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
-      }),
-    farmAreaMeasurement: z
-      .string()
-      .min(1, { error: "Pumili ng unit ng lupain" }),
-    cropBaranggay: z.string().trim().min(1, {
-      error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
-    }),
-  })
-  .refine(
-    (e) =>
-      e.organization !== "other" || (e.organization === "other" && e.otherOrg),
-    {
+const MEASSUREMENT = ["ha", "ac", "sqft", "sqm"];
+export const farmerSecondDetailFormSchema = z.object({
+  cropName: z.string().trim().min(1, {
+    error: "Mag lagay ng pangalan na sumisimbulo sa pananim nato",
+  }),
+  cropFarmArea: z
+    .string()
+    .trim()
+    .min(1, { error: "Mag lagay ng lawak ng iyong pinag tataniman" })
+    .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
       error:
-        "Mag lagay ng organisasyon kung san ka kasali kung wala sa pamimilian ang organisasyon na kasali ka",
-      path: ["otherOrg"],
-    }
-  );
+        "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
+    }),
+  farmAreaMeasurement: z
+    .string()
+    .trim()
+    .min(1, { error: "Pumili ng unit ng lupain" })
+    .refine((e) => MEASSUREMENT.includes(e), {
+      error: "Pumili lamang sa pamimilian",
+    }),
+  cropBaranggay: z.string().trim().min(1, {
+    error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
+  }),
+});
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];

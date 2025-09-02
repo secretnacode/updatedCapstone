@@ -38,7 +38,7 @@ import {
   AddSecondFarmerDetails,
 } from "@/lib/server_action/farmerDetails";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Check, Plus } from "lucide-react";
 import {
   FormDivLabelInput,
   FormDivLabelSelect,
@@ -300,7 +300,9 @@ export const FarmerDetailSecondStep: FC = () => {
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
   const [cancelProceed, setCancelProceed] = useState<boolean>(false);
-  const [formErrorList, setFormErrorList] = useState<CropErrorFormType>([]);
+  const [formError, setFormError] = useState<FormErrorType<CropErrorFormType>>(
+    []
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const [editCropId, setEditCropId] = useState<EditCropListType>({
     editing: false,
@@ -309,8 +311,7 @@ export const FarmerDetailSecondStep: FC = () => {
   });
   const [currentCrops, setCurrentCrops] = useState({
     cropId: "",
-    organization: "",
-    otherOrg: "",
+    cropName: "",
     cropFarmArea: "",
     farmAreaMeasurement: "",
     cropBaranggay: "",
@@ -334,16 +335,6 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleChangeVal = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    if (e.target.name === "organization") {
-      if (e.target.value === "other") setOtherOrg(true);
-      else {
-        if (currentCrops.otherOrg)
-          setCurrentCrops((prev) => ({ ...prev, otherOrg: "" }));
-
-        setOtherOrg(false);
-      }
-    }
-
     setCurrentCrops((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -360,18 +351,11 @@ export const FarmerDetailSecondStep: FC = () => {
     | { [v in keyof FarmerSecondDetailFormType]?: string[] }
     | null => {
     let err: { [v in keyof FarmerSecondDetailFormType]?: string[] } = {};
-    for (const [key, value] of Object.entries(currentCrops)) {
-      if (key === "otherOrg" && currentCrops.organization !== "other") continue;
 
+    for (const [key, value] of Object.entries(currentCrops)) {
       if (value === "") {
         switch (key) {
-          case "organization":
-            err = {
-              ...err,
-              organization: ["Pumili ng organisasyon na ikaw ay kasali"],
-            };
-            break;
-          case "otherOrg":
+          case "cropName":
             err = {
               ...err,
               otherOrg: [
@@ -417,11 +401,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleAddNewCrop = () => {
     const validate = handleValidateCurrentCrops();
     if (validate && Object.entries(validate).length > 0) {
-      return setError({
-        success: false,
-        notifError: null,
-        formError: validate,
-      });
+      return setFormErrorList(validate);
     }
 
     handleSaveListAndBackDefault();
@@ -596,11 +576,13 @@ export const FarmerDetailSecondStep: FC = () => {
         handleDoneLoading();
         return;
       }
+
       handleSetNotification(
         validateCrop.error.notifError ?? [
           { message: "Unkown error", type: "warning" },
         ]
       );
+
       setError(validateCrop.error);
       handleDoneLoading();
       return;
@@ -639,23 +621,25 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      const res = await AddSecondFarmerDetails(cropList);
-      if (!res.success) {
-        handleSetNotification(res.notifError);
-        if (res.cropErrors) handleBackendValidateFormError(res.cropErrors);
-        handleDoneLoading();
-        return;
-      }
-    } catch (error) {
-      if (!isRedirectError(error)) {
-        const err = error as Error;
-        handleSetNotification([{ message: err.message, type: "error" }]);
-      }
-    }
+    // try {
+    //   const res = await AddSecondFarmerDetails(cropList);
+    //   if (!res.success) {
+    //     handleSetNotification(res.notifError);
+    //     if (res.cropErrors) handleBackendValidateFormError(res.cropErrors);
+    //     handleDoneLoading();
+    //     return;
+    //   }
+    // } catch (error) {
+    //   if (!isRedirectError(error)) {
+    //     const err = error as Error;
+    //     handleSetNotification([{ message: err.message, type: "error" }]);
+    //   }
+    // }
 
     handleDoneLoading();
   };
+
+  console.log(currentCrops);
 
   return (
     <div>
@@ -665,80 +649,84 @@ export const FarmerDetailSecondStep: FC = () => {
         </div>
       )}
 
+      <div className="flex flex-row justify-between items-center mb-4">
+        <h1 className="title form-title !mb-0 ">
+          Impormasyon ng iyong pananim
+        </h1>
+        <button
+          type="button"
+          onClick={handleAddNewCrop}
+          className={`flex items-center justify-center p-1.5 rounded-lg font-medium transition-all duration-200 cursor-pointer text-white ${
+            editCropId.editing
+              ? "bg-green-300 !text-gray-400 !cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+          disabled={editCropId.editing}
+        >
+          <Plus className="logo !size-5" />
+        </button>
+      </div>
+
       <form onSubmit={handleFormSubmit} ref={formRef} className="form">
+        <FormDivLabelInput
+          labelMessage="Pangalanan ng taniman:"
+          inputName="cropName"
+          onChange={handleChangeVal}
+          inputValue={currentCrops.cropName}
+          inputRequired={true}
+          // formError={formError?.cropFarmArea}
+        />
+
         <FormDivLabelInput
           labelMessage="Sukat ng lote na iyong Pinagtataniman:"
           inputName="cropFarmArea"
           onChange={handleChangeVal}
           inputValue={currentCrops.cropFarmArea}
           inputRequired={true}
-          formError={formError?.cropFarmArea}
+          // formError={formError?.cropFarmArea}
         />
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="cropFarmArea"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Sukat ng lote na iyong Pinagtataniman:
-            </label>
-            <input
-              type="text"
-              name="cropFarmArea"
-              onChange={handleChangeVal}
-              value={currentCrops.cropFarmArea}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-
-            {error.success === false &&
-              error.formError?.cropFarmArea?.map((error, key) => (
-                <p key={key + error} className="text-red-500 text-sm">
-                  {error}
-                </p>
-              ))}
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Ektarya (Hectares)", value: "ha" },
-                { label: "Akre (Acres)", value: "ac" },
-                { label: "Talampakang Kuwadrado (Square Feet)", value: "sqft" },
-                { label: "Metrong Kuwadrado (Square Meter)", value: "sqm" },
-              ].map((measurement) => (
-                <div key={measurement.label}>
-                  <input
-                    type="radio"
-                    name="farmAreaMeasurement"
-                    value={measurement.value}
-                    checked={
-                      currentCrops.farmAreaMeasurement === measurement.value
-                    }
-                    onChange={handleChangeVal}
-                    className="text-green-600 focus:ring-green-500 cursor-pointer"
-                  />
-                  <label
-                    htmlFor="farmAreaMeasurement"
-                    className="text-sm text-gray-700 cursor-pointer"
-                    onClick={() =>
-                      setCurrentCrops((prev) => ({
-                        ...prev,
-                        farmAreaMeasurement: measurement.value,
-                      }))
-                    }
-                  >
-                    {measurement.label}
-                  </label>
-                </div>
-              ))}
-
-              {error.success === false &&
-                error.formError?.farmAreaMeasurement?.map((error, key) => (
-                  <p key={key + error} className="text-red-500 text-sm">
-                    {error}
-                  </p>
-                ))}
-            </div>
+        <div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Ektarya (Hectares)", value: "ha" },
+              { label: "Akre (Acres)", value: "ac" },
+              { label: "Talampakang Kuwadrado (Square Feet)", value: "sqft" },
+              { label: "Metrong Kuwadrado (Square Meter)", value: "sqm" },
+            ].map((measurement) => (
+              <div key={measurement.label}>
+                <input
+                  type="radio"
+                  name="farmAreaMeasurement"
+                  value={measurement.value}
+                  checked={
+                    currentCrops.farmAreaMeasurement === measurement.value
+                  }
+                  onChange={handleChangeVal}
+                  className="text-green-600 focus:ring-green-500 cursor-pointer"
+                  required
+                />
+                <label
+                  htmlFor="farmAreaMeasurement"
+                  className="text-sm text-gray-700 cursor-pointer"
+                  onClick={() =>
+                    setCurrentCrops((prev) => ({
+                      ...prev,
+                      farmAreaMeasurement: measurement.value,
+                    }))
+                  }
+                >
+                  {measurement.label}
+                </label>
+              </div>
+            ))}
           </div>
+          {error.success === false &&
+            error.formError?.farmAreaMeasurement?.map((error, key) => (
+              <p key={key + error} className="text-red-500 text-sm">
+                {error}
+              </p>
+            ))}
         </div>
 
         <FormDivLabelSelect<string>
@@ -746,7 +734,7 @@ export const FarmerDetailSecondStep: FC = () => {
           selectName="cropBaranggay"
           onChange={handleChangeVal}
           selectValue={currentCrops.cropBaranggay}
-          formError={formError?.cropBaranggay}
+          // formError={formError?.cropBaranggay}
           optionList={baranggayList}
           selectRequired={true}
           optionValue={(branggay) => branggay}
@@ -757,35 +745,26 @@ export const FarmerDetailSecondStep: FC = () => {
           }}
         />
 
-        <div className="flex gap-4">
-          <SubmitButton
-            type="button"
-            onClick={
-              editCropId.editing ? handleDoneEditingCrop : handleAddNewCrop
-            }
-            // className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            {editCropId.editing
-              ? "Kumpiramhin ang pag babago"
-              : "Mag dagdag ng pananim"}
-          </SubmitButton>
-
-          {editCropId.editing && (
-            <>
-              <br />
-              <button
-                type="button"
-                onClick={handleCancelEditCrop}
-                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Kanselahin ang pag babago
-              </button>
-            </>
-          )}
-        </div>
+        {editCropId.editing && (
+          <div className="flex gap-4">
+            <SubmitButton
+              type="button"
+              onClick={handleDoneEditingCrop}
+              // className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Kumpiramhin ang pag babago
+            </SubmitButton>
+            <button
+              type="button"
+              onClick={handleCancelEditCrop}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Kanselahin ang pag babago
+            </button>
+          </div>
+        )}
 
         <SubmitButton
-          type="button"
           onClick={handleFinalizeCropList}
           disabled={editCropId.editing}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -820,12 +799,12 @@ export const FarmerDetailSecondStep: FC = () => {
         </div>
       )}
 
-      <MemoizedCropsValComponent
+      {/* <MemoizedCropsValComponent
         cropList={cropList}
         availOrg={availOrg}
         cropError={formErrorList.map((crop) => crop.cropId)}
         handleEditCrop={handleEditCrop}
-      />
+      /> */}
     </div>
   );
 };

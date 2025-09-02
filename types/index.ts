@@ -173,14 +173,8 @@ export type CheckCropListReturnType =
   | { valid: true };
 
 export type FarmerSecondDetailActionReturnType = ServerActionFailBaseType & {
-  cropErrors?: CropErrorFormType;
+  cropErrors?: FormErrorType<FarmerSecondDetailFormType>;
 };
-
-export type CropErrorFormType =
-  | {
-      formError: { [v in keyof FarmerSecondDetailFormType]?: string[] } | null;
-      cropId: string;
-    }[];
 
 export type FirstErrorType = {
   organization: string;
@@ -498,15 +492,20 @@ export type DivPropType = ChildrenType & {
   className?: string;
 };
 
-export type FormDivLabelInputPropType = {
+export type FormDivLabelInputPropType = ChildrenType & {
   labelMessage: string;
+  labelClassName?: string;
+  divClassName?: string;
+  labelOnClick?: () => void;
   inputType?: string;
   formError?: string[];
   inputDisable?: boolean;
   inputMax?: string | number;
   inputMin?: string | number;
   inputName: string;
+  inputChecked?: boolean;
   inputValue?: string;
+  inputClassName?: string;
   inputDefaultValue?: string;
   inputPlaceholder?: string;
   inputRequired?: boolean;
