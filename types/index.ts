@@ -156,12 +156,10 @@ export type EditCropListType =
   | {
       editing: false;
       cropId: null;
-      listNum: null;
     }
   | {
       editing: true;
       cropId: string;
-      listNum: number;
     };
 
 export type CheckCropListReturnType =
