@@ -162,16 +162,20 @@ export type EditCropListType =
       cropId: string;
     };
 
+export type CropFormErrorsType = {
+  cropId: string;
+  formErrors: FormErrorType<FarmerSecondDetailFormType>[];
+}[];
+
 export type CheckCropListReturnType =
-  | {
+  | (FormActionBaseType<FarmerSecondDetailFormType> & {
       showModal: boolean;
       valid: false;
-      error: FormActionBaseType<FarmerSecondDetailFormType>;
-    }
+    })
   | { valid: true };
 
 export type FarmerSecondDetailActionReturnType = ServerActionFailBaseType & {
-  cropErrors?: FormErrorType<FarmerSecondDetailFormType>;
+  formList: CropFormErrorsType;
 };
 
 export type FirstErrorType = {

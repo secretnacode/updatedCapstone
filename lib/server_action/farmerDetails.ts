@@ -2,6 +2,7 @@
 
 import {
   CropErrorFormType,
+  CropFormErrorsType,
   FarmerDetailCropType,
   FarmerFirstDetailActionReturnType,
   FarmerFirstDetailFormType,
@@ -103,71 +104,78 @@ export const AddFirstFarmerDetails = async (
  */
 export const AddSecondFarmerDetails = async (
   cropList: FarmerDetailCropType[]
-): Promise<FarmerSecondDetailActionReturnType> => {
-  try {
-    const userId = await ProtectedAction("create:crop");
+) =>
+  // : Promise<FarmerSecondDetailActionReturnType>
+  {
+    try {
+      const userId = await ProtectedAction("create:crop");
 
-    const validateCropList: CropErrorFormType = cropList.reduce(
-      (acc: CropErrorFormType | [], crop: FarmerDetailCropType) => {
-        const validateCrop = ZodValidateForm(
-          crop,
-          farmerSecondDetailFormSchema
-        );
+      const validateCropList: CropFormErrorsType = cropList.reduce(
+        (acc: CropErrorFormType | [], crop: FarmerDetailCropType) => {
+          const validateCrop = ZodValidateForm(
+            crop,
+            farmerSecondDetailFormSchema
+          );
 
-        if (!validateCrop.valid)
-          return [
-            ...acc,
-            { cropId: crop.cropId, formError: validateCrop.formError },
-          ];
+          if (!validateCrop.valid)
+            return [
+              ...acc,
+              { cropId: crop.cropId, formError: validateCrop.formError },
+            ];
 
-        return acc;
-      },
-      []
-    );
+          return acc;
+        },
+        []
+      );
 
-    if (validateCropList.length > 0)
+      console.log(`cropList`);
+      console.log(cropList);
+      console.log(`formErrors`);
+      console.log(validateCropList);
+
+      if (validateCropList.length > 0)
+        return {
+          success: false,
+          formList: validateCropList,
+          notifError: [
+            {
+              message:
+                "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
+              type: "warning",
+            },
+          ],
+        };
+
+      // cropList.forEach(async (crop) => {
+      //   const convertedMeasurement = ConvertMeassurement(
+      //     crop.cropFarmArea,
+      //     crop.farmAreaMeasurement
+      //   );
+
+      //   await CreateNewOrgForNewUser({
+      //     ...crop,
+      //     farmAreaMeasurement: convertedMeasurement,
+      //     userId: userId,
+      //   });
+      // });
+
+      // redirect("/farmer");
+    } catch (error) {
+      if (isRedirectError(error)) throw error;
+
+      const err = error as Error;
+      console.error(`Error in Adding First Farmer Detial: ${err.message}`);
       return {
         success: false,
-        cropErrors: validateCropList,
         notifError: [
           {
-            message:
-              "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
-            type: "warning",
+            message: err.message,
+            type: "error",
           },
         ],
       };
-
-    cropList.forEach(async (crop) => {
-      const convertedMeasurement = ConvertMeassurement(
-        crop.cropFarmArea,
-        crop.farmAreaMeasurement
-      );
-
-      await CreateNewOrgForNewUser({
-        ...crop,
-        farmAreaMeasurement: convertedMeasurement,
-        userId: userId,
-      });
-    });
-
-    redirect("/farmer");
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-
-    const err = error as Error;
-    console.error(`Error in Adding First Farmer Detial: ${err.message}`);
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
+    }
+  };
 
 /**
  * functions to call another function to inserted the data in the db
