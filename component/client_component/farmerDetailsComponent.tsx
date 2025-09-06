@@ -16,10 +16,11 @@ import {
   FC,
   FormEvent,
   memo,
+  MouseEvent,
   ReactElement,
   SetStateAction,
+  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -298,7 +299,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
-  const [formErrorList, setFormErrorList] = useState<CropFormErrorsType>([]);
+  const [formErrorList, setFormErrorList] = useState<CropFormErrorsType[]>([]);
   const [cancelProceed, setCancelProceed] = useState<boolean>(false);
   const [formError, setFormError] =
     useState<FormErrorType<FarmerSecondDetailFormType>>(null);
@@ -394,9 +395,10 @@ export const FarmerDetailSecondStep: FC = () => {
       return handleSetFormError({ ...validate, cropId: [currentCrops.cropId] });
     }
 
+    if (handleIsExistingName()) return;
+
     handleSaveListAndBackDefault();
   };
-  console.log(cropList);
 
   const handleRemoveCropFromList = (cropId: string) => {
     setCropList((prev) => prev.filter((crop) => cropId !== crop.cropId));
@@ -413,7 +415,7 @@ export const FarmerDetailSecondStep: FC = () => {
    * executing handleSaveListAndBackDefault and handleDefaultEdiState
    */
   const handleDoneEditingCrop = () => {
-    if (handleIsExistingName()) return handleSetFormErrorChangeCropName();
+    if (handleIsExistingName()) return;
 
     setCropList((prev) =>
       prev.map((crop) =>
@@ -422,6 +424,14 @@ export const FarmerDetailSecondStep: FC = () => {
     );
     handleBackDefault();
     handleDefaultEditState();
+
+    const hasError = handleFindIfFormErrorExist(currentCrops);
+
+    //check if the crop that was being edited has a formError thats existing in the formErrorList, if it is, it will be removed
+    if (hasError)
+      setFormErrorList((prev) =>
+        prev.filter((error) => error.cropId !== hasError.cropId)
+      );
   };
 
   /**
@@ -451,21 +461,24 @@ export const FarmerDetailSecondStep: FC = () => {
   };
 
   /**
-   * function for checking the current crop name is already existing in the cropList, the cropName should be the same as in the cropList and its id is not listed in the editCropId to be considered existing
-   * @returns boolean vaye
+   * function for checking the current crop name is already existing in the cropList, if it exist, it will set a formError that say change tha name of the crop
    */
   const handleIsExistingName = (): boolean => {
-    return cropList.some(
-      (crop) =>
-        crop.cropName === currentCrops.cropName &&
-        crop.cropId !== editCropId.cropId
-    );
-  };
+    if (
+      cropList.some(
+        (crop) =>
+          crop.cropName === currentCrops.cropName &&
+          crop.cropId !== editCropId.cropId
+      )
+    ) {
+      handleSetFormError({
+        cropName: ["Baguhin ang pangalan dahil ito ay may kagaya na"],
+      });
 
-  const handleSetFormErrorChangeCropName = () => {
-    setFormError({
-      cropName: ["Baguhin ang pangalan dahil ito ay may kagaya na"],
-    });
+      return true;
+    }
+
+    return false;
   };
 
   /**
@@ -498,8 +511,11 @@ export const FarmerDetailSecondStep: FC = () => {
    * setting all back to default value and setting the reSubmit into true, after the renders it will trigger the useEffect for the re submitting of the form
    */
   const handleForceProceed = () => {
-    handleBackDefault();
     setCancelProceed(false);
+
+    if (handleIsExistingName()) return;
+
+    handleBackDefault();
     setResubmit(true);
     handleIsLoading("Loading");
   };
@@ -534,7 +550,6 @@ export const FarmerDetailSecondStep: FC = () => {
     )
       return {
         showModal: false,
-        success: false,
         valid: false,
         formError: hasCurrentCrop,
         notifError: [
@@ -555,9 +570,15 @@ export const FarmerDetailSecondStep: FC = () => {
       return {
         showModal: true,
         valid: false,
-        success: false,
         formError: hasCurrentCrop,
-        notifError: null,
+      };
+
+    if (handleIsExistingName())
+      return {
+        showModal: false,
+        valid: false,
+        formError: null,
+        isExistName: true,
       };
 
     if (hasCurrentCrop && Object.entries(hasCurrentCrop).length === 0) {
@@ -573,13 +594,78 @@ export const FarmerDetailSecondStep: FC = () => {
   };
 
   /**
+   * function for setting the form error if the crop value that will be edited has a formErrorList
+   */
+  const handleEditCropHasFormError = useCallback(
+    (existError: CropFormErrorsType | undefined) => {
+      if (existError) setFormError(existError.formError);
+    },
+    []
+  );
+
+  /**
+   * function for finding if the crop that will be edited has a formError
+   */
+  const handleFindIfFormErrorExist = useCallback(
+    (cropToEdit: FarmerDetailCropType) => {
+      return formErrorList.find(
+        (formError) => formError.cropId === cropToEdit.cropId
+      );
+    },
+    [formErrorList]
+  );
+
+  /**
+   * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
+   */
+  const handleEditCrop = useCallback(
+    (cropToEdit: FarmerDetailCropType) => {
+      setEditCropId({
+        editing: true,
+        cropId: cropToEdit.cropId,
+      });
+
+      setCurrentCrops({ ...cropToEdit });
+
+      handleEditCropHasFormError(handleFindIfFormErrorExist(cropToEdit));
+    },
+    [handleEditCropHasFormError, handleFindIfFormErrorExist]
+  );
+
+  /**
+   * function for handling the response formError of the server action
+   * @param formList list of formError that comes from server action
+   */
+  const handleBackendValidateFormError = (formList: CropFormErrorsType[]) => {
+    if (!formList)
+      return handleSetNotification([
+        { message: "No err value", type: "warning" },
+      ]);
+
+    setFormErrorList(formList);
+
+    console.log(formList);
+
+    const toEditVal = cropList.find(
+      (crop) => crop.cropId === formList[0].cropId
+    );
+
+    if (toEditVal) handleEditCrop(toEditVal);
+
+    setFormError(formList[0].formError);
+  };
+
+  /**
    * last function to be called after the submission of the form
    * @returns or exit the function if the validation is not met
    */
   const handleFinalizeCropList = () => {
-    handleIsLoading("Loading");
+    // handleIsLoading("Loading");\
     const validateCrop = handleCheckCropList();
+
     if (!validateCrop.valid) {
+      if (validateCrop.isExistName) return;
+
       if (validateCrop.showModal) {
         setCancelProceed(true);
         return;
@@ -591,44 +677,14 @@ export const FarmerDetailSecondStep: FC = () => {
         ]
       );
 
-      setFormError(validateCrop.formError);
+      handleSetFormError(validateCrop.formError);
       handleDoneLoading();
       return;
     }
 
+    if (handleIsExistingName()) return;
+
     setResubmit(true);
-  };
-
-  /**
-   * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
-   */
-  const handleEditCrop = useMemo(() => {
-    return (cropToEdit: FarmerDetailCropType) => {
-      setEditCropId({
-        editing: true,
-        cropId: cropToEdit.cropId,
-      });
-      setCurrentCrops({ ...cropToEdit });
-    };
-  }, []);
-
-  /**
-   * function for handling the response formError of the server action
-   * @param formList list of formError that comes from server action
-   */
-  const handleBackendValidateFormError = (formList: CropFormErrorsType) => {
-    if (!formList)
-      return handleSetNotification([
-        { message: "No err value", type: "warning" },
-      ]);
-
-    setFormErrorList(formList);
-
-    const firstErr = cropList.find(
-      (crop) => crop.cropId === formList[0].cropId
-    );
-
-    if (firstErr) handleEditCrop(firstErr);
   };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -693,7 +749,6 @@ export const FarmerDetailSecondStep: FC = () => {
           inputName="cropName"
           onChange={handleChangeVal}
           inputValue={currentCrops.cropName}
-          inputRequired={true}
           formError={formError?.cropName}
         />
 
@@ -702,7 +757,6 @@ export const FarmerDetailSecondStep: FC = () => {
           inputName="cropFarmArea"
           onChange={handleChangeVal}
           inputValue={currentCrops.cropFarmArea}
-          inputRequired={true}
           formError={formError?.cropFarmArea}
         />
 
@@ -724,7 +778,6 @@ export const FarmerDetailSecondStep: FC = () => {
                   }
                   onChange={handleChangeVal}
                   className="text-green-600 focus:ring-green-500 cursor-pointer"
-                  required
                 />
                 <label
                   htmlFor="farmAreaMeasurement"
@@ -756,7 +809,6 @@ export const FarmerDetailSecondStep: FC = () => {
           selectValue={currentCrops.cropBaranggay}
           formError={formError?.cropBaranggay}
           optionList={baranggayList}
-          selectRequired={true}
           optionValue={(branggay) => branggay}
           optionLabel={(branggay) => branggay}
           optionDefaultValueLabel={{
@@ -777,6 +829,7 @@ export const FarmerDetailSecondStep: FC = () => {
         ) : (
           <SubmitButton
             onClick={handleFinalizeCropList}
+            type="button"
             disabled={editCropId.editing}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -843,7 +896,7 @@ const CropsValComponent: FC<{
   };
 
   return (
-    <div className=" grid gap-4 mt-6">
+    <div className=" grid grid-cols-2 gap-4 mt-6">
       {cropList?.map((crop, index) => {
         const isError = cropErrors.includes(crop.cropId);
 
@@ -851,44 +904,51 @@ const CropsValComponent: FC<{
           <div
             key={index}
             onClick={() => handleEditCrop(crop)}
-            className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md
+            className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md group relative border-l-4
               ${
                 isError
-                  ? "border-red-300 bg-red-50 hover:border-green-400"
-                  : "border-gray-200 bg-white hover:border-green-300"
+                  ? "border-red-300 bg-red-50 hover:border-red-400"
+                  : "border-green-200 bg-white hover:border-green-300"
               }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium text-gray-900">
-                  Pangalan ng taniman: {crop.cropName}
-                </h3>
+            {isError && (
+              <div className="absolute top-0 right-0 m-2 overflow-hidden rounded-md flex justify-center items-center gap-2 bg-white border-red-500 border-2 px-3 py-1.5 text-red-700 group-hover:shadow-lg transition-all duration-250">
+                <AlertTriangle className="logo !size-5" />
+                <span>Baguhin Ito</span>
               </div>
+            )}
 
-              {isError && (
-                <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>Baguhin ito</span>
+            <div className="">
+              <dl className="grid gap-1 text-sm space-y-1">
+                <div>
+                  <dt className="text-gray-500">Crop name:</dt>
+                  <dd className="font-medium">{crop.cropName}</dd>
                 </div>
-              )}
+
+                <div>
+                  <dt className="text-gray-500">Lote:</dt>
+                  <dd className="font-medium">
+                    {crop.cropFarmArea}{" "}
+                    {convertMeasurement(crop.farmAreaMeasurement)}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-gray-500">Lokasyon:</dt>
+                  <dd className="font-medium">{crop.cropBaranggay}</dd>
+                </div>
+              </dl>
+
+              <CancelButton
+                onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                  e.stopPropagation();
+                  handleRemoveCropFromList(crop.cropId);
+                }}
+                className="!px-4 !py-2 m-3 text-sm !rounded-sm absolute right-0 bottom-0 opacity-0 translate-y-1 !transition-all duration-200 ease-linear group-hover:opacity-100 group-hover:translate-y-0 hover:!bg-red-600"
+              >
+                Tanggalin
+              </CancelButton>
             </div>
-            <dl className="grid gap-1 text-sm space-y-1">
-              <div>
-                <dt className="text-gray-500">Crop name:</dt>
-                <dd className="font-medium">{crop.cropName}</dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">Lote:</dt>
-                <dd className="font-medium">
-                  {crop.cropFarmArea}{" "}
-                  {convertMeasurement(crop.farmAreaMeasurement)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">Lokasyon:</dt>
-                <dd className="font-medium">{crop.cropBaranggay}</dd>
-              </div>
-            </dl>
           </div>
         );
       })}

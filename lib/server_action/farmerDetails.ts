@@ -110,7 +110,7 @@ export const AddSecondFarmerDetails = async (
     try {
       const userId = await ProtectedAction("create:crop");
 
-      const validateCropList: CropFormErrorsType = cropList.reduce(
+      const validateCropList: CropFormErrorsType[] = cropList.reduce(
         (acc: CropErrorFormType | [], crop: FarmerDetailCropType) => {
           const validateCrop = ZodValidateForm(
             crop,

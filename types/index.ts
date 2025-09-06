@@ -11,6 +11,7 @@ import {
   ChangeEvent,
   FormEvent,
   ForwardRefExoticComponent,
+  MouseEvent,
   ReactNode,
   RefAttributes,
 } from "react";
@@ -164,18 +165,21 @@ export type EditCropListType =
 
 export type CropFormErrorsType = {
   cropId: string;
-  formErrors: FormErrorType<FarmerSecondDetailFormType>[];
-}[];
+  formError: FormErrorType<FarmerSecondDetailFormType>;
+};
 
 export type CheckCropListReturnType =
-  | (FormActionBaseType<FarmerSecondDetailFormType> & {
+  | {
       showModal: boolean;
       valid: false;
-    })
+      formError: FormErrorType<FarmerSecondDetailFormType>;
+      notifError?: NotificationBaseType[];
+      isExistName?: boolean;
+    }
   | { valid: true };
 
 export type FarmerSecondDetailActionReturnType = ServerActionFailBaseType & {
-  formList: CropFormErrorsType;
+  formList: CropFormErrorsType[];
 };
 
 export type FirstErrorType = {
@@ -540,7 +544,7 @@ export type ButtonTypeAttribType = "button" | "submit" | "reset";
 
 export type ButtonPropType = ChildrenType & {
   type?: ButtonTypeAttribType;
-  onClick?: () => void;
+  onClick?: () => void | ((e: MouseEvent<HTMLButtonElement>) => void);
   logo?: LucideIcon;
   disabled?: boolean;
   logoClassName?: string;
