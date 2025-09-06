@@ -8,6 +8,7 @@ import {
 } from "@/util/helper_function/validation/validationSchema";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
+  ButtonHTMLAttributes,
   ChangeEvent,
   FormEvent,
   ForwardRefExoticComponent,
@@ -542,14 +543,8 @@ export type LogoPropType = {
 
 export type ButtonTypeAttribType = "button" | "submit" | "reset";
 
-export type ButtonPropType = ChildrenType & {
-  type?: ButtonTypeAttribType;
-  onClick?: () => void | ((e: MouseEvent<HTMLButtonElement>) => void);
-  logo?: LucideIcon;
-  disabled?: boolean;
-  logoClassName?: string;
-  className?: string;
-};
+export type ButtonPropType = ChildrenType &
+  ButtonHTMLAttributes<HTMLButtonElement>;
 
 export type FormCancelSubmitButtonPropType = {
   divClassName?: string;

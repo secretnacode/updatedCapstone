@@ -66,7 +66,7 @@ export const FarmerDetailForm: FC<{
       </div>
 
       <div className="flex justify-center items-center w-full">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-full m-4 sm:m-0 sm:w-2/3 md:w-1/2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-md m-4 sm:m-0 sm:w-2/3 md:w-3/4 xl:w-1/2">
           {!nextStep ? (
             <FarmereDetailFirstStep
               setNextStep={setNextStep}
@@ -402,6 +402,11 @@ export const FarmerDetailSecondStep: FC = () => {
 
   const handleRemoveCropFromList = (cropId: string) => {
     setCropList((prev) => prev.filter((crop) => cropId !== crop.cropId));
+
+    if (editCropId.cropId === cropId) {
+      handleBackDefault();
+      setEditCropId({ editing: false, cropId: null });
+    }
   };
 
   /**
@@ -643,8 +648,6 @@ export const FarmerDetailSecondStep: FC = () => {
       ]);
 
     setFormErrorList(formList);
-
-    console.log(formList);
 
     const toEditVal = cropList.find(
       (crop) => crop.cropId === formList[0].cropId
@@ -896,7 +899,7 @@ const CropsValComponent: FC<{
   };
 
   return (
-    <div className=" grid grid-cols-2 gap-4 mt-6">
+    <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 mt-6">
       {cropList?.map((crop, index) => {
         const isError = cropErrors.includes(crop.cropId);
 
