@@ -48,7 +48,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(true);
+  const [nextStep, setNextStep] = useState<boolean>(false);
 
   return (
     <div>

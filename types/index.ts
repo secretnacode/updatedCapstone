@@ -12,7 +12,6 @@ import {
   ChangeEvent,
   FormEvent,
   ForwardRefExoticComponent,
-  MouseEvent,
   ReactNode,
   RefAttributes,
 } from "react";
@@ -198,7 +197,12 @@ export type CropAfterSignUpType = {
   farmAreaMeasurement: string;
 };
 
-export type HandleInsertCropType = FarmerDetailCropType & { userId: string };
+export type HandleInsertCropType = {
+  farmAreaMeasurement: string;
+  userId: string;
+  cropId: string;
+  cropLocation: string;
+};
 
 export type InsertCropAfterSignUpType = CropAfterSignUpType & {
   userId: string;

@@ -1,12 +1,10 @@
 "use server";
 
 import {
-  CropErrorFormType,
   CropFormErrorsType,
   FarmerDetailCropType,
   FarmerFirstDetailActionReturnType,
   FarmerFirstDetailFormType,
-  FarmerSecondDetailActionReturnType,
   HandleInsertCropType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -14,10 +12,7 @@ import {
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import {
-  FarmerFirstDetailQuery,
-  UpdateUserOrgAndRoleAfterSignUp,
-} from "@/util/queries/user";
+import { FarmerFirstDetailQuery } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
 import { CreateNewOrg } from "@/util/queries/org";
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
@@ -111,7 +106,7 @@ export const AddSecondFarmerDetails = async (
       const userId = await ProtectedAction("create:crop");
 
       const validateCropList: CropFormErrorsType[] = cropList.reduce(
-        (acc: CropErrorFormType | [], crop: FarmerDetailCropType) => {
+        (acc: CropFormErrorsType[] | [], crop: FarmerDetailCropType) => {
           const validateCrop = ZodValidateForm(
             crop,
             farmerSecondDetailFormSchema
@@ -128,11 +123,6 @@ export const AddSecondFarmerDetails = async (
         []
       );
 
-      console.log(`cropList`);
-      console.log(cropList);
-      console.log(`formErrors`);
-      console.log(validateCropList);
-
       if (validateCropList.length > 0)
         return {
           success: false,
@@ -146,20 +136,24 @@ export const AddSecondFarmerDetails = async (
           ],
         };
 
-      // cropList.forEach(async (crop) => {
-      //   const convertedMeasurement = ConvertMeassurement(
-      //     crop.cropFarmArea,
-      //     crop.farmAreaMeasurement
-      //   );
+      cropList.forEach(async (crop) => {
+        const convertedMeasurement = ConvertMeassurement(
+          crop.cropFarmArea,
+          crop.farmAreaMeasurement
+        );
 
-      //   await CreateNewOrgForNewUser({
-      //     ...crop,
-      //     farmAreaMeasurement: convertedMeasurement,
-      //     userId: userId,
-      //   });
-      // });
+        console.log(userId);
+        console.log(crop);
 
-      // redirect("/farmer");
+        await CreateNewOrgForNewUser({
+          cropId: crop.cropId,
+          cropLocation: crop.cropBaranggay,
+          farmAreaMeasurement: convertedMeasurement,
+          userId: userId,
+        });
+      });
+
+      redirect("/farmer");
     } catch (error) {
       if (isRedirectError(error)) throw error;
 
@@ -185,27 +179,10 @@ const CreateNewOrgForNewUser = async (
   data: HandleInsertCropType
 ): Promise<void> => {
   try {
-    let orgId = "";
-    const isOtherOrg = data.organization === "other";
-
-    if (isOtherOrg && data.otherOrg) {
-      orgId = (await CreateNewOrg(data.otherOrg, data.userId)).orgId;
-    }
-
-    await UpdateUserOrgAndRoleAfterSignUp(
-      data.organization === "none"
-        ? null
-        : isOtherOrg
-        ? orgId
-        : data.organization,
-      data.organization === "none" ? null : isOtherOrg ? "leader" : "member",
-      data.userId
-    );
-
     await CreateNewCropAfterSignUp({
       cropId: data.cropId,
       userId: data.userId,
-      cropLocation: data.cropBaranggay,
+      cropLocation: data.cropLocation,
       farmAreaMeasurement: data.farmAreaMeasurement,
     });
   } catch (error) {
