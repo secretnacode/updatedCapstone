@@ -1,48 +1,58 @@
 "use client";
 
 import { GetFarmerCropInfo } from "@/lib/server_action/crop";
-import {
-  Dispatch,
-  FC,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { FC, memo, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNotification } from "./provider/notificationProvider";
-import { GetFarmerCropInfoQueryReturnType } from "@/types";
+import {
+  GetFarmerCropInfoQueryReturnType,
+  ViewCropModalButtonPropType,
+} from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { X } from "lucide-react";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
+import { SubmitButton } from "../server_component/customComponent";
 
-export const ViewCropModalButton: FC<{
-  cropId: string;
-  isViewing: boolean;
-}> = ({ cropId, isViewing }) => {
+export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
+  cropInfo,
+  isViewing,
+}) => {
   const [viewCrop, setViewCrop] = useState<boolean>(false);
+  const [cropIdToView, setCropIdToView] = useState<string | null>(null);
 
-  const handleSplitCropId = cropId.split(", ");
+  const handleViewCrop = (cropId: string) => {
+    setViewCrop(true);
+    setCropIdToView(cropId);
+  };
+
+  const handleCancelViewCrop = useCallback(() => {
+    setViewCrop(true);
+    setCropIdToView(null);
+  }, []);
 
   return (
     <>
-      {handleSplitCropId.length > 0 ? (
-        <button
-          onClick={() => setViewCrop(true)}
-          className="w-full px-3 py-2 text-sm bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
-        >
-          {cropId}
-        </button>
+      {cropInfo.length > 0 ? (
+        cropInfo.map((crop) => (
+          <SubmitButton
+            key={crop.cropId}
+            type="button"
+            onClick={() => handleViewCrop(crop.cropId)}
+            className="!w-full!px-3 !py-2 !text-sm !bg-green-50 !hover:bg-green-100 !text-green-700 rounded-lg transition-colors"
+          >
+            {crop.cropName}
+          </SubmitButton>
+        ))
       ) : (
         <p>Wala ka pang pananim</p>
       )}
 
       {viewCrop &&
+        cropIdToView &&
         createPortal(
           <MemoViewCropModal
-            cropId={cropId}
-            setViewCrop={setViewCrop}
+            cropId={cropIdToView}
+            removeModal={handleCancelViewCrop}
             isViewing={isViewing}
           />,
           document.body
@@ -53,9 +63,9 @@ export const ViewCropModalButton: FC<{
 
 export const ViewCropModal: FC<{
   cropId: string;
-  setViewCrop: Dispatch<SetStateAction<boolean>>;
+  removeModal: () => void;
   isViewing: boolean;
-}> = ({ cropId, setViewCrop, isViewing }) => {
+}> = ({ cropId, removeModal, isViewing }) => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [isDoneFetching, setIsDoneFetching] = useState<boolean>(false);
@@ -65,14 +75,14 @@ export const ViewCropModal: FC<{
     farmAreaMeasurement: "",
   });
 
-  const GetCrop = useCallback(
-    async (cropId: string, isViewing: boolean) => {
+  useEffect(() => {
+    const GetCrop = async (cropId: string, isViewing: boolean) => {
       try {
         handleIsLoading("Kinukuha ang impormasyon ng pananim....");
         const res = await GetFarmerCropInfo(cropId, isViewing);
 
         if (!res.success) {
-          setViewCrop(false);
+          removeModal();
           handleSetNotification(res.notifError);
         }
 
@@ -82,17 +92,21 @@ export const ViewCropModal: FC<{
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
-        setViewCrop(false);
+        removeModal();
       } finally {
         handleDoneLoading();
       }
-    },
-    [handleSetNotification, handleIsLoading, handleDoneLoading, setViewCrop]
-  );
+    };
 
-  useEffect(() => {
     GetCrop(cropId, isViewing);
-  }, [GetCrop, cropId, isViewing]);
+  }, [
+    cropId,
+    isViewing,
+    handleSetNotification,
+    handleIsLoading,
+    handleDoneLoading,
+    removeModal,
+  ]);
 
   return (
     <>
@@ -104,7 +118,7 @@ export const ViewCropModal: FC<{
                 Impormasyon ng Pananim
               </h2>
               <button
-                onClick={() => setViewCrop(false)}
+                onClick={() => removeModal()}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -140,7 +154,7 @@ export const ViewCropModal: FC<{
               </div>
 
               <button
-                onClick={() => setViewCrop(false)}
+                onClick={() => removeModal()}
                 className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Isara

@@ -1,8 +1,8 @@
 import {
   AvailableOrgReturnType,
-  GetFarmerUserProfileInfoQueryReturnType,
   DynamicLinkPropType,
   GetAllOrgMemberListQueryReturnType,
+  FarmerUserProfilePropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
@@ -17,10 +17,10 @@ import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
 import { TableComponent } from "./customComponent";
 
-export const FarmerUserProfile: FC<{
-  userFarmerInfo: GetFarmerUserProfileInfoQueryReturnType;
-  isViewing: boolean;
-}> = async ({ userFarmerInfo, isViewing }) => {
+export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
+  userFarmerInfo,
+  isViewing,
+}) => {
   let AvailOrg: AvailableOrgReturnType;
 
   try {
@@ -42,7 +42,7 @@ export const FarmerUserProfile: FC<{
           <div className="flex flex-col items-center">
             <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
               <span className="text-4xl text-green-700 font-bold">
-                {userFarmerInfo.farmerFirstName.charAt(0)}
+                {userFarmerInfo.farmerInfo.farmerFirstName.charAt(0)}
               </span>
             </div>
           </div>
@@ -51,29 +51,30 @@ export const FarmerUserProfile: FC<{
           <div className="space-y-4">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900">
-                {userFarmerInfo.farmerFirstName} {userFarmerInfo.farmerLastName}
+                {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
+                {userFarmerInfo.farmerInfo.farmerLastName}
               </h2>
-              {userFarmerInfo.farmerAlias && (
+              {userFarmerInfo.farmerInfo.farmerAlias && (
                 <p className="text-gray-500 text-sm">
-                  &quot;{userFarmerInfo.farmerAlias}&quot;
+                  &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
                 </p>
               )}
             </div>
 
             <div className="flex items-start gap-2 text-gray-600">
               <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <p>Laguna, Calauan, {userFarmerInfo.barangay}</p>
+              <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
             </div>
 
             {/* Verification Badge */}
             <div
               className={`rounded-lg p-3 text-center text-sm font-medium ${
-                userFarmerInfo.verified
+                userFarmerInfo.farmerInfo.verified
                   ? "bg-green-50 text-green-700"
                   : "bg-yellow-50 text-yellow-700"
               }`}
             >
-              {userFarmerInfo.verified
+              {userFarmerInfo.farmerInfo.verified
                 ? "✓ Verified Account"
                 : "⚠ Pending Verification"}
             </div>
@@ -84,7 +85,7 @@ export const FarmerUserProfile: FC<{
             <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
             <div className="grid gap-2">
               <ViewCropModalButton
-                cropId={userFarmerInfo.cropId}
+                cropInfo={userFarmerInfo.cropInfo}
                 isViewing={isViewing}
               />
             </div>
@@ -96,19 +97,10 @@ export const FarmerUserProfile: FC<{
       <div className="md:col-span-3 bg-white rounded-lg shadow-sm p-6">
         {AvailOrg.success && (
           <UserProFileComponent
-            userFarmerInfo={{
-              farmerFirstName: userFarmerInfo.farmerFirstName,
-              farmerLastName: userFarmerInfo.farmerLastName,
-              farmerAlias: userFarmerInfo.farmerAlias,
-              mobileNumber: userFarmerInfo.mobileNumber,
-              barangay: userFarmerInfo.barangay,
-              birthdate: userFarmerInfo.birthdate,
-              orgId: userFarmerInfo.orgId,
-              orgRole: userFarmerInfo.orgRole,
-              leaderName: userFarmerInfo.leaderName,
-            }}
-            isViewing={isViewing}
+            userFarmerInfo={userFarmerInfo.farmerInfo}
+            orgInfo={userFarmerInfo.orgInfo}
             orgList={AvailOrg.orgList}
+            isViewing={isViewing}
           />
         )}
       </div>

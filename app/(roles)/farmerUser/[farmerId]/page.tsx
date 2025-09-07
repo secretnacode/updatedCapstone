@@ -54,14 +54,14 @@ export default async function Page({
             <h1 className="text-2xl font-semibold">
               Personal na impormasyon ni:{" "}
               <span className="font-bold">
-                {farmerData.farmerUserInfo.farmerFirstName}{" "}
-                {farmerData.farmerUserInfo.farmerLastName}
+                {farmerData.farmerInfo.farmerFirstName}{" "}
+                {farmerData.farmerInfo.farmerLastName}
               </span>
             </h1>
           </div>
 
           <FarmerUserProfile
-            userFarmerInfo={farmerData.farmerUserInfo}
+            userFarmerInfo={farmerData.farmerInfo}
             isViewing={true}
           />
         </div>

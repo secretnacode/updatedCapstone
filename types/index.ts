@@ -338,18 +338,30 @@ export type GetFarmerOrgMemberReturnType =
     }
   | ServerActionFailBaseType;
 
-export type GetFarmerUserProfileInfoQueryReturnType = {
+export type GetFarmerProfilePersonalInfoQueryReturnType = {
+  farmerId: string;
   farmerFirstName: string;
-  farmerLastName: string;
   farmerAlias: string;
   mobileNumber: string;
   barangay: string;
   birthdate: Date;
-  verified: string;
+  verified: boolean;
+  farmerLastName: string;
+  farmerMiddleName: string;
+  farmerExtensionName: string;
+  familyMemberCount: number;
+};
+
+export type GetFarmerProfileCropInfoQueryReturnType = {
+  cropId: string;
+  cropName: string;
+};
+
+export type GetFarmerProfileOrgInfoQueryReturnType = {
   orgId: string;
   orgRole: string;
-  leaderName: string;
-  cropId: string;
+  orgName: string;
+  farmerLeader: string;
 };
 
 export type UserFarmerInfoPropType = {
@@ -398,10 +410,7 @@ export type CreateNewOrgAfterSignUpType = {
 };
 
 export type GetFarmerUserProfileInfoReturnType =
-  | {
-      success: true;
-      farmerUserInfo: GetFarmerUserProfileInfoQueryReturnType;
-    }
+  | SuccessGetMyProfileInfoType
   | {
       success: false;
       isMember?: false;
@@ -422,11 +431,26 @@ export type GetFarmerCropInfoReturnType =
     }
   | ServerActionFailBaseType;
 
+export type FarmerProfileCropInfoQueryReturnType = {
+  cropInfo: GetFarmerProfileCropInfoQueryReturnType[];
+};
+
+export type FarmerProfilePersonalInfoQueryReturnType = {
+  farmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+};
+
+export type FarmerProfileOrgInfoQueryReturnType = {
+  orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+};
+
+export type SuccessGetMyProfileInfoType = FarmerProfileCropInfoQueryReturnType &
+  FarmerProfilePersonalInfoQueryReturnType &
+  FarmerProfileOrgInfoQueryReturnType;
+
 export type GetMyProfileInfoType =
-  | {
+  | (SuccessGetMyProfileInfoType & {
       success: true;
-      farmerInfo: GetFarmerUserProfileInfoQueryReturnType;
-    }
+    })
   | ServerActionFailBaseType;
 
 export type FormErrorType<T> = { [key in keyof T]?: string[] } | null;
@@ -639,16 +663,6 @@ export type TableComponentPropType = {
   tableCell: Readonly<ReactNode>;
 };
 
-// export type FarmerUserPageTableListType = {
-//   farmerName: string;
-//   farmerAlias: string;
-//   dateCreated: string;
-//   orgName: string;
-//   orgRole: string;
-//   reportCount: string;
-//   cropCount: string;
-// };
-
 export type ViewAllUnvalidatedFarmerQueryReturnQuery = {
   farmerId: string;
   farmerName: string;
@@ -721,4 +735,21 @@ export type AgriculturistNavLinkType = {
   link: string;
   logo: LucideIcon;
   linkName: string;
+};
+
+export type FarmerUserProfilePropType = {
+  userFarmerInfo: SuccessGetMyProfileInfoType;
+  isViewing: boolean;
+};
+
+export type ViewCropModalButtonPropType = {
+  cropInfo: GetFarmerProfileCropInfoQueryReturnType[];
+  isViewing: boolean;
+};
+
+export type UserProFileComponentPropType = {
+  userFarmerInfo: FarmerProfilePersonalInfoQueryReturnType;
+  orgInfo: FarmerProfileOrgInfoQueryReturnType;
+  orgList: QueryAvailableOrgReturnType[];
+  isViewing: boolean;
 };

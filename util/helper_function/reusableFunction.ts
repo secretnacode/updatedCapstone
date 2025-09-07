@@ -120,3 +120,7 @@ export const NotifToUriComponent = (notif: NotificationBaseType[]) => {
 export const LogInAgainMessage = (): string => {
   return "Nag expire na ang iyong pag lo-log in, mag log in ulit ng panibago";
 };
+
+export const UnexpectedErrorMessage = (): string => {
+  return "May hindi inaasahang pag kakamali ang nangyari";
+};

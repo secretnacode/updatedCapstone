@@ -5,7 +5,9 @@ import {
   CheckMyMemberquery,
   farmerIsExist,
   GetFarmerOrgMemberQuery,
-  GetFarmerUserProfileInfoQuery,
+  GetFarmerProfileCropInfoQuery,
+  GetFarmerProfileOrgInfoQuery,
+  GetFarmerProfilePersonalInfoQuery,
   UpdateUserProfileInfoQuery,
   ViewAllUnvalidatedFarmerQuery,
   ViewAllVerifiedFarmerUserQuery,
@@ -16,6 +18,7 @@ import {
   GetFarmerUserProfileInfoReturnType,
   GetMyProfileInfoType,
   NotificationBaseType,
+  SuccessGetMyProfileInfoType,
   UpdateUserProfileInfoType,
   userFarmerInfoPropType,
   ViewAllUnvalidatedFarmerReturnType,
@@ -109,10 +112,7 @@ export const GetViewingFarmerUserProfileInfo = async (
     if (!(await farmerIsExist(farmerId)))
       return { success: false, isExist: false };
 
-    return {
-      success: true,
-      farmerUserInfo: await GetFarmerUserProfileInfoQuery(farmerId),
-    };
+    return await userFarmerProfileInfo(farmerId);
   } catch (error) {
     const err = error as Error;
     console.log(
@@ -140,11 +140,7 @@ export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
 
     const session = await GetSession();
 
-    if (session)
-      return {
-        success: true,
-        farmerInfo: await GetFarmerUserProfileInfoQuery(session.userId),
-      };
+    if (session) return await userFarmerProfileInfo(session.userId);
     else
       throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
   } catch (error) {
@@ -162,6 +158,23 @@ export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
       ],
     };
   }
+};
+
+const userFarmerProfileInfo = async (
+  userId: string
+): Promise<SuccessGetMyProfileInfoType> => {
+  const [farmerInfo, cropInfo, orgInfo] = await Promise.all([
+    GetFarmerProfilePersonalInfoQuery(userId),
+    GetFarmerProfileCropInfoQuery(userId),
+    GetFarmerProfileOrgInfoQuery(userId),
+  ]);
+
+  return {
+    success: true,
+    farmerInfo: farmerInfo,
+    cropInfo: cropInfo,
+    orgInfo: orgInfo,
+  };
 };
 
 /**

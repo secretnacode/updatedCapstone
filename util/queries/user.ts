@@ -1,7 +1,9 @@
 import {
   FarmerFirstDetailType,
   GetFarmerOrgMemberQueryReturnType,
-  GetFarmerUserProfileInfoQueryReturnType,
+  GetFarmerProfileCropInfoQueryReturnType,
+  GetFarmerProfileOrgInfoQueryReturnType,
+  GetFarmerProfilePersonalInfoQueryReturnType,
   NewUserType,
   QueryUserLoginReturnType,
   userFarmerInfoPropType,
@@ -304,24 +306,78 @@ export const CheckMyMemberquery = async (
  * @param farmerId id of the farmer you want to get the info
  * @returns info of the farmer
  */
-export const GetFarmerUserProfileInfoQuery = async (
+export const GetFarmerProfilePersonalInfoQuery = async (
   farmerId: string
-): Promise<GetFarmerUserProfileInfoQueryReturnType> => {
+): Promise<GetFarmerProfilePersonalInfoQueryReturnType> => {
   try {
     return (
       await pool.query(
-        `select f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgId", (select concat(fl."farmerFirstName", ' ', fl."farmerLastName") from capstone.farmer fl join capstone.org o on fl."farmerId" = o."orgLeadFarmerId" join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1) as "leaderName", f."orgRole", string_agg(c."cropId"::text, ', ') as "cropId" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" join capstone.crop c on f."farmerId" = c."farmerId" where f."farmerId" = $2 group by f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate" , f."verified", o."orgId", f."orgRole"`,
-        [farmerId, farmerId]
+        `select "farmerId", "farmerFirstName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "farmerLastName", "farmerMiddleName", "farmerExtensionName", "familyMemberCount" from capstone.farmer where "farmerId" = $1`,
+        [farmerId]
       )
     ).rows[0];
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personaol na impormasyon: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang tsinetsek kung ang user nato ay ka miyembro mo`
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personaol na impormasyon`
+    );
+  }
+};
+
+/**
+ * getting the necesarry information about the farmer CROPS
+ * @param farmerId id of the farmer you want to get the info
+ * @returns crop info of the farmer
+ */
+export const GetFarmerProfileCropInfoQuery = async (
+  farmerId: string
+): Promise<GetFarmerProfileCropInfoQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropId", "cropName" from capstone.crop where "farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng pananim`
+    );
+  }
+};
+
+/**
+ * getting the necesarry information about the farmer ORG
+ * @param farmerId id of the farmer you want to get the info
+ * @returns org info of the farmer
+ */
+export const GetFarmerProfileOrgInfoQuery = async (
+  farmerId: string
+): Promise<GetFarmerProfileOrgInfoQueryReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select f."orgId", f."orgRole", o."orgName", concat(fl."farmerFirstName", ' ', fl."farmerLastName") as "farmerLeader" from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where f."farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng organisasyon: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng organisasyon`
     );
   }
 };

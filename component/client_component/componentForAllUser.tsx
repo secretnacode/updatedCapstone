@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import {
   ApprovedButtonPropType,
   DeleteUserPropType,
+  FarmerProfileOrgInfoQueryReturnType,
+  FarmerProfilePersonalInfoQueryReturnType,
   FormErrorType,
   OrganizationInfoFormPropType,
   OrgInfoType,
@@ -42,9 +44,10 @@ import { DelteUserAccount } from "@/lib/server_action/user";
 
 //FIX: add middle name and extension name
 export const UserProFileComponent: FC<{
-  userFarmerInfo: UserFarmerInfoPropType;
-  isViewing: boolean;
+  userFarmerInfo: FarmerProfilePersonalInfoQueryReturnType;
+  orgInfo: FarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
+  isViewing: boolean;
 }> = ({ userFarmerInfo, isViewing, orgList }) => {
   return (
     <div className="div">
