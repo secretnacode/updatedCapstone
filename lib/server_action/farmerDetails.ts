@@ -35,6 +35,7 @@ export const AddFirstFarmerDetails = async (
       newUserVal,
       farmerFirstDetailFormSchema
     );
+    console.log(validateVal);
     if (!validateVal.valid) {
       return {
         success: false,
@@ -142,11 +143,9 @@ export const AddSecondFarmerDetails = async (
           crop.farmAreaMeasurement
         );
 
-        console.log(userId);
-        console.log(crop);
-
         await CreateNewOrgForNewUser({
           cropId: crop.cropId,
+          cropName: crop.cropName,
           cropLocation: crop.cropBaranggay,
           farmAreaMeasurement: convertedMeasurement,
           userId: userId,
@@ -182,6 +181,7 @@ const CreateNewOrgForNewUser = async (
     await CreateNewCropAfterSignUp({
       cropId: data.cropId,
       userId: data.userId,
+      cropName: data.cropName,
       cropLocation: data.cropLocation,
       farmAreaMeasurement: data.farmAreaMeasurement,
     });

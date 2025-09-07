@@ -283,7 +283,7 @@ export const FarmereDetailFirstStep: FC<{
           onChange={handleChangeVal}
           inputPlaceholder="Hal. 5"
           inputRequired={true}
-          // formError={formError?.countFamilyMember}
+          formError={formError?.countFamilyMember}
         />
 
         <div>
@@ -663,7 +663,7 @@ export const FarmerDetailSecondStep: FC = () => {
    * @returns or exit the function if the validation is not met
    */
   const handleFinalizeCropList = () => {
-    // handleIsLoading("Loading");\
+    handleIsLoading("Loading");
     const validateCrop = handleCheckCropList();
 
     if (!validateCrop.valid) {

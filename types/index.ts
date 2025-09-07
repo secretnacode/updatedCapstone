@@ -191,21 +191,12 @@ export type FirstErrorType = {
   cropId: string;
 };
 
-export type CropAfterSignUpType = {
-  cropId: string;
-  cropLocation: string;
-  farmAreaMeasurement: string;
-};
-
 export type HandleInsertCropType = {
-  farmAreaMeasurement: string;
   userId: string;
   cropId: string;
+  cropName: string;
+  farmAreaMeasurement: string;
   cropLocation: string;
-};
-
-export type InsertCropAfterSignUpType = CropAfterSignUpType & {
-  userId: string;
 };
 
 export type NavbarType =

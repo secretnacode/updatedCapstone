@@ -1,6 +1,6 @@
 import {
   GetFarmerCropInfoQueryReturnType,
-  InsertCropAfterSignUpType,
+  HandleInsertCropType,
 } from "@/types";
 import { pool } from "../configuration";
 
@@ -9,12 +9,18 @@ import { pool } from "../configuration";
  * @param data of the user crop that will be inserted in the DB
  */
 export const CreateNewCropAfterSignUp = async (
-  data: InsertCropAfterSignUpType
+  data: HandleInsertCropType
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.crop ("cropId", "cropLocation", "farmerId", "farmAreaMeasurement") values ($1, $2, $3, $4)`,
-      [data.cropId, data.cropLocation, data.userId, data.farmAreaMeasurement]
+      `insert into capstone.crop ("cropId", "cropName", "cropLocation", "farmerId", "farmAreaMeasurement") values ($1, $2, $3, $4, $5)`,
+      [
+        data.cropId,
+        data.cropName,
+        data.cropLocation,
+        data.userId,
+        data.farmAreaMeasurement,
+      ]
     );
   } catch (error) {
     console.error(
