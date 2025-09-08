@@ -6,7 +6,6 @@ import {
   GetFarmerProfilePersonalInfoQueryReturnType,
   NewUserType,
   QueryUserLoginReturnType,
-  userFarmerInfoPropType,
   ViewAllUnvalidatedFarmerQueryReturnQuery,
   ViewAllVerifiedFarmerUserQueryReturnType,
 } from "@/types";
@@ -412,18 +411,21 @@ export const DelteUserAccountQuery = async (
  */
 export const UpdateUserProfileInfoQuery = async (
   userId: string,
-  newProfileInfo: userFarmerInfoPropType
+  newProfileInfo: GetFarmerProfilePersonalInfoQueryReturnType
 ): Promise<void> => {
   try {
     await pool.query(
-      `update capstone.farmer set "farmerFirstName" = $1, "farmerAlias" = $2, "mobileNumber" = $3, "barangay" = $4, "birthdate" = $5, "farmerLastName" = $6 where "farmerId" = $7`,
+      `update capstone.farmer set "farmerFirstName" = $1, "farmerAlias" = $2, "mobileNumber" = $3, "barangay" = $4, "birthdate" = $5, "farmerLastName" = $6, "farmerMiddleName" = $7, "farmerExtensionName" = $8, "familyMemberCount" = $9, where "farmerId" = $10`,
       [
-        newProfileInfo.firstName,
-        newProfileInfo.alias,
+        newProfileInfo.farmerFirstName,
+        newProfileInfo.farmerAlias,
         newProfileInfo.mobileNumber,
-        newProfileInfo.farmerBarangay,
+        newProfileInfo.barangay,
         newProfileInfo.birthdate,
-        newProfileInfo.lastName,
+        newProfileInfo.farmerLastName,
+        newProfileInfo.farmerMiddleName,
+        newProfileInfo.farmerExtensionName,
+        newProfileInfo.familyMemberCount,
         userId,
       ]
     );

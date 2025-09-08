@@ -61,7 +61,11 @@ export default async function Page({
           </div>
 
           <FarmerUserProfile
-            userFarmerInfo={farmerData.farmerInfo}
+            userFarmerInfo={{
+              farmerInfo: farmerData.farmerInfo,
+              cropInfo: farmerData.cropInfo,
+              orgInfo: farmerData.orgInfo,
+            }}
             isViewing={true}
           />
         </div>

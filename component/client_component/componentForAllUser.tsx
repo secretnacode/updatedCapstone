@@ -5,7 +5,6 @@ import {
   FC,
   FormEvent,
   useCallback,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -14,14 +13,12 @@ import { useRouter } from "next/navigation";
 import {
   ApprovedButtonPropType,
   DeleteUserPropType,
-  FarmerProfileOrgInfoQueryReturnType,
-  FarmerProfilePersonalInfoQueryReturnType,
   FormErrorType,
+  GetFarmerProfilePersonalInfoQueryReturnType,
   OrganizationInfoFormPropType,
   OrgInfoType,
   QueryAvailableOrgReturnType,
-  userFarmerInfoPropType,
-  UserFarmerInfoPropType,
+  UserProFileComponentPropType,
   UserProfileFormPropType,
 } from "@/types";
 import {
@@ -43,35 +40,24 @@ import {
 import { DelteUserAccount } from "@/lib/server_action/user";
 
 //FIX: add middle name and extension name
-export const UserProFileComponent: FC<{
-  userFarmerInfo: FarmerProfilePersonalInfoQueryReturnType;
-  orgInfo: FarmerProfileOrgInfoQueryReturnType;
-  orgList: QueryAvailableOrgReturnType[];
-  isViewing: boolean;
-}> = ({ userFarmerInfo, isViewing, orgList }) => {
+export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
+  userFarmerInfo,
+  orgInfo,
+  orgList,
+  isViewing,
+}) => {
   return (
     <div className="div">
       <div className="div grid gap-6">
         <UserProfileForm
           isViewing={isViewing}
-          userFarmerInfo={{
-            firstName: userFarmerInfo.farmerFirstName,
-            lastName: userFarmerInfo.farmerLastName,
-            alias: userFarmerInfo.farmerAlias,
-            mobileNumber: userFarmerInfo.mobileNumber,
-            birthdate: userFarmerInfo.birthdate,
-            farmerBarangay: userFarmerInfo.barangay,
-          }}
+          userFarmerInfo={userFarmerInfo}
         />
 
         <UserOrganizationInfoForm
           isViewing={isViewing}
           availOrgList={orgList}
-          userOrgInfo={{
-            orgId: userFarmerInfo.orgId,
-            leaderName: userFarmerInfo.leaderName,
-            orgRole: userFarmerInfo.orgRole,
-          }}
+          userOrgInfo={orgInfo}
         />
       </div>
     </div>
@@ -87,28 +73,9 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
   const [formError, setFormError] =
-    useState<FormErrorType<userFarmerInfoPropType>>();
-  const personalInfo = useMemo(
-    () =>
-      ({
-        firstName: userFarmerInfo.firstName,
-        lastName: userFarmerInfo.lastName,
-        alias: userFarmerInfo.alias,
-        mobileNumber: userFarmerInfo.mobileNumber,
-        birthdate: userFarmerInfo.birthdate,
-        farmerBarangay: userFarmerInfo.farmerBarangay,
-      } as const),
-    [
-      userFarmerInfo.firstName,
-      userFarmerInfo.lastName,
-      userFarmerInfo.alias,
-      userFarmerInfo.mobileNumber,
-      userFarmerInfo.birthdate,
-      userFarmerInfo.farmerBarangay,
-    ]
-  );
+    useState<FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>>();
   const [userInfoState, setUserInfoState] =
-    useState<userFarmerInfoPropType>(personalInfo);
+    useState<GetFarmerProfilePersonalInfoQueryReturnType>(userFarmerInfo);
 
   const handleUserInput = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -131,9 +98,9 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
    * resets the value and its form val if not passed yet
    */
   const handleResetFormVal = useCallback(() => {
-    setUserInfoState(personalInfo);
+    setUserInfoState(userFarmerInfo);
     handleReset();
-  }, [personalInfo, handleReset]);
+  }, [userFarmerInfo, handleReset]);
 
   const handleFormSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -177,49 +144,51 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
         <FormDivLabelInput
           labelMessage="Unang Pangalan"
           inputDisable={isViewing}
-          inputName={"firstName"}
-          inputValue={userInfoState.firstName}
+          inputName={"farmerFirstName"}
+          inputValue={userInfoState.farmerFirstName ?? ""}
           onChange={handleUserInput}
           inputPlaceholder="Mang kanor"
-          formError={formError?.firstName}
+          formError={formError?.farmerFirstName}
         />
 
-        {/* WALA PA NITO SA DATABASE */}
         <FormDivLabelInput
           labelMessage="Gitnang Pangalan"
           inputDisable={isViewing}
           inputName={"farmerMiddleName"}
-          inputDefaultValue={"wala pa sa db"}
+          inputValue={userInfoState.farmerMiddleName ?? ""}
+          onChange={handleUserInput}
           inputPlaceholder="wala pa sa db"
+          formError={formError?.farmerMiddleName}
         />
 
         <FormDivLabelInput
           labelMessage="Apelyido"
           inputDisable={isViewing}
-          inputName={"lastName"}
-          inputValue={userInfoState.lastName}
+          inputName={"farmerLastName"}
+          inputValue={userInfoState.farmerLastName ?? ""}
           onChange={handleUserInput}
           inputPlaceholder="e.g. Juan Delacruz"
-          formError={formError?.lastName}
+          formError={formError?.farmerLastName}
         />
 
-        {/* WALA PA NITO SA DATABASE */}
         <FormDivLabelInput
           labelMessage="Palayaw na pagdugtong"
           inputDisable={isViewing}
           inputName={"farmerExtensionName"}
-          inputDefaultValue={`wala pang nakalagay sa DB`}
+          inputValue={userInfoState.farmerExtensionName ?? ""}
+          onChange={handleUserInput}
           inputPlaceholder="e.g. Jr."
+          formError={formError?.farmerExtensionName}
         />
 
         <FormDivLabelInput
           labelMessage="Alyas"
           inputDisable={isViewing}
-          inputName={"alias"}
-          inputValue={userInfoState.alias ?? ""}
+          inputName={"farmerAlias"}
+          inputValue={userInfoState.farmerAlias ?? ""}
           onChange={handleUserInput}
           inputPlaceholder="e.g. Mang Kanor"
-          formError={formError?.alias}
+          formError={formError?.farmerAlias}
         />
 
         {/* WALA PA NITO SA DATABASE */}
@@ -233,21 +202,21 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
 
         <FormDivLabelSelect<string>
           labelMessage="Baranggay na tinitirhan"
-          selectValue={userInfoState.farmerBarangay}
-          selectName={"farmerBarangay"}
+          selectValue={userInfoState.barangay ?? ""}
+          selectName={"barangay"}
           selectDisable={isViewing}
           onChange={handleUserInput}
           optionList={baranggayList}
           optionValue={(brgy: string) => brgy}
           optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
-          formError={formError?.farmerBarangay}
+          formError={formError?.barangay}
         />
 
         <FormDivLabelInput
           labelMessage="Numero ng Telepono"
           inputDisable={isViewing}
           inputName={"mobileNumber"}
-          inputValue={userInfoState.mobileNumber}
+          inputValue={userInfoState.mobileNumber ?? ""}
           onChange={handleUserInput}
           inputPlaceholder="09** *** ****"
           formError={formError?.mobileNumber}
@@ -264,12 +233,11 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
               : userInfoState.birthdate
           }
           onChange={handleUserInput}
-          inputPlaceholder="july 20, 2024"
           formError={formError?.birthdate}
         />
       </div>
 
-      {isChangingVal && (
+      {isChangingVal && !isViewing && (
         <FormCancelSubmitButton
           submitButtonLabel="Ipasa"
           cancelOnClick={handleResetFormVal}
@@ -293,7 +261,7 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
   const [orgInfo, setOrgInfo] = useState<OrgInfoType>({
-    orgId: userOrgInfo.orgId,
+    orgId: "",
     otherOrgName: "",
   });
 
@@ -396,7 +364,7 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
           labelMessage="Leader ng Organisasyon"
           inputDisable={true}
           inputName={"leaderName"}
-          inputDefaultValue={userOrgInfo.leaderName}
+          inputDefaultValue={userOrgInfo.farmerLeader}
           inputPlaceholder="Miyembro"
         />
 
@@ -409,7 +377,7 @@ export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
         />
       </div>
 
-      {isChangingVal && (
+      {isChangingVal && !isViewing && (
         <FormCancelSubmitButton
           submitButtonLabel="Ipasa"
           submitType="button"

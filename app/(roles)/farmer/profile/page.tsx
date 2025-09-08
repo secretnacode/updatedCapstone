@@ -1,13 +1,13 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
 import { GetMyProfileInfo } from "@/lib/server_action/farmerUser";
-import { GetMyProfileInfoType } from "@/types";
+import { GetMyProfileInfoReturnType } from "@/types";
 import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  let userInfo: GetMyProfileInfoType;
+  let userInfo: GetMyProfileInfoReturnType;
 
   try {
     userInfo = await GetMyProfileInfo();

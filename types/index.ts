@@ -341,14 +341,14 @@ export type GetFarmerOrgMemberReturnType =
 export type GetFarmerProfilePersonalInfoQueryReturnType = {
   farmerId: string;
   farmerFirstName: string;
-  farmerAlias: string;
+  farmerAlias?: string;
   mobileNumber: string;
   barangay: string;
   birthdate: Date;
   verified: boolean;
   farmerLastName: string;
   farmerMiddleName: string;
-  farmerExtensionName: string;
+  farmerExtensionName?: string;
   familyMemberCount: number;
 };
 
@@ -376,24 +376,15 @@ export type UserFarmerInfoPropType = {
   leaderName: string;
 };
 
-export type userFarmerInfoPropType = {
-  firstName: string;
-  lastName: string;
-  alias: string;
-  mobileNumber: string;
-  birthdate: Date;
-  farmerBarangay: string;
-};
-
 export type UserProfileFormPropType = {
   isViewing: boolean;
-  userFarmerInfo: userFarmerInfoPropType;
+  userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
 };
 
 export type OrganizationInfoFormPropType = {
   isViewing: boolean;
   availOrgList: QueryAvailableOrgReturnType[];
-  userOrgInfo: { orgId: string; leaderName: string; orgRole: string };
+  userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
 };
 
 export type OrgInfoType = z.infer<typeof userProfileOrgUpdateSchema>;
@@ -410,7 +401,7 @@ export type CreateNewOrgAfterSignUpType = {
 };
 
 export type GetFarmerUserProfileInfoReturnType =
-  | SuccessGetMyProfileInfoType
+  | SuccessGetMyProfileInfoReturnType
   | {
       success: false;
       isMember?: false;
@@ -431,31 +422,23 @@ export type GetFarmerCropInfoReturnType =
     }
   | ServerActionFailBaseType;
 
-export type FarmerProfileCropInfoQueryReturnType = {
+export type ProfileInfoReturnType = {
   cropInfo: GetFarmerProfileCropInfoQueryReturnType[];
-};
-
-export type FarmerProfilePersonalInfoQueryReturnType = {
   farmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
-};
-
-export type FarmerProfileOrgInfoQueryReturnType = {
   orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
 };
 
-export type SuccessGetMyProfileInfoType = FarmerProfileCropInfoQueryReturnType &
-  FarmerProfilePersonalInfoQueryReturnType &
-  FarmerProfileOrgInfoQueryReturnType;
+export type SuccessGetMyProfileInfoReturnType = ProfileInfoReturnType & {
+  success: true;
+};
 
-export type GetMyProfileInfoType =
-  | (SuccessGetMyProfileInfoType & {
-      success: true;
-    })
+export type GetMyProfileInfoReturnType =
+  | SuccessGetMyProfileInfoReturnType
   | ServerActionFailBaseType;
 
 export type FormErrorType<T> = { [key in keyof T]?: string[] } | null;
 
-export type UpdateUserProfileInfoType = {
+export type UpdateUserProfileInfoReturnType = {
   notifMessage: NotificationBaseType[];
 } & (
   | {
@@ -463,7 +446,7 @@ export type UpdateUserProfileInfoType = {
     }
   | {
       success: false;
-      formError?: FormErrorType<userFarmerInfoPropType>;
+      formError?: FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>;
     }
 );
 
@@ -738,7 +721,7 @@ export type AgriculturistNavLinkType = {
 };
 
 export type FarmerUserProfilePropType = {
-  userFarmerInfo: SuccessGetMyProfileInfoType;
+  userFarmerInfo: ProfileInfoReturnType;
   isViewing: boolean;
 };
 
@@ -748,8 +731,8 @@ export type ViewCropModalButtonPropType = {
 };
 
 export type UserProFileComponentPropType = {
-  userFarmerInfo: FarmerProfilePersonalInfoQueryReturnType;
-  orgInfo: FarmerProfileOrgInfoQueryReturnType;
+  userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+  orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
   isViewing: boolean;
 };

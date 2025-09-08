@@ -15,18 +15,19 @@ import {
 import { ProtectedAction } from "../protectedActions";
 import {
   GetFarmerOrgMemberReturnType,
+  GetFarmerProfilePersonalInfoQueryReturnType,
   GetFarmerUserProfileInfoReturnType,
-  GetMyProfileInfoType,
+  GetMyProfileInfoReturnType,
   NotificationBaseType,
-  SuccessGetMyProfileInfoType,
-  UpdateUserProfileInfoType,
-  userFarmerInfoPropType,
+  SuccessGetMyProfileInfoReturnType,
+  UpdateUserProfileInfoReturnType,
   ViewAllUnvalidatedFarmerReturnType,
   ViewAllValidatedFarmerUserReturnType,
 } from "@/types";
 import { GetSession } from "../session";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
+import { headers } from "next/headers";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -134,35 +135,36 @@ export const GetViewingFarmerUserProfileInfo = async (
  * server action for GETTING the user information of the current user
  * @returns user profile info
  */
-export const GetMyProfileInfo = async (): Promise<GetMyProfileInfoType> => {
-  try {
-    await ProtectedAction("read:user");
+export const GetMyProfileInfo =
+  async (): Promise<GetMyProfileInfoReturnType> => {
+    try {
+      await ProtectedAction("read:user");
 
-    const session = await GetSession();
+      const session = await GetSession();
 
-    if (session) return await userFarmerProfileInfo(session.userId);
-    else
-      throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `Nagka problema sa pag kuha ng impormasyon ng mag sasaka ${err}`
-    );
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
+      if (session) return await userFarmerProfileInfo(session.userId);
+      else
+        throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Nagka problema sa pag kuha ng impormasyon ng mag sasaka ${err}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
 
 const userFarmerProfileInfo = async (
   userId: string
-): Promise<SuccessGetMyProfileInfoType> => {
+): Promise<SuccessGetMyProfileInfoReturnType> => {
   const [farmerInfo, cropInfo, orgInfo] = await Promise.all([
     GetFarmerProfilePersonalInfoQuery(userId),
     GetFarmerProfileCropInfoQuery(userId),
@@ -183,28 +185,39 @@ const userFarmerProfileInfo = async (
  * if the value that was pass is invalid(by zod) it will throw additional formError object that contains all the error
  */
 export const UpdateUserProfileInfo = async (
-  userProfileInfo: userFarmerInfoPropType
-): Promise<UpdateUserProfileInfoType> => {
+  userProfileInfo: GetFarmerProfilePersonalInfoQueryReturnType
+): Promise<UpdateUserProfileInfoReturnType> => {
   try {
     const userId = await ProtectedAction("update:user");
 
-    const validateVal = ZodValidateForm(
-      userProfileInfo,
-      farmerFirstDetailFormSchema
-    );
-    if (!validateVal.valid)
-      return {
-        success: false,
-        formError: validateVal.formError,
-        notifMessage: [
-          {
-            message: "May mga mali sa iyong binago, itama muna ito",
-            type: "warning",
-          },
-        ],
-      };
+    const headersList: Headers = await headers();
+    const referer = headersList.get("referer") || "";
+    const routeUserId = referer.match(/\/profile\/([^\/?\#]+)/)?.[1];
 
-    await UpdateUserProfileInfoQuery(userId, userProfileInfo);
+    console.log("header");
+    console.log(headersList);
+    console.log("referer");
+    console.log(referer);
+    console.log("userId");
+    console.log(routeUserId);
+
+    // const validateVal = ZodValidateForm(
+    //   userProfileInfo,
+    //   farmerFirstDetailFormSchema
+    // );
+    // if (!validateVal.valid)
+    //   return {
+    //     success: false,
+    //     formError: validateVal.formError,
+    //     notifMessage: [
+    //       {
+    //         message: "May mga mali sa iyong binago, itama muna ito",
+    //         type: "warning",
+    //       },
+    //     ],
+    //   };
+
+    // await UpdateUserProfileInfoQuery(userId, userProfileInfo);
 
     return {
       success: true,
