@@ -194,8 +194,6 @@ export const UpdateUserProfileInfo = async (
     const referer = headersList.get("referer") || "";
     const routeUserId = referer.match(/\/profile\/([^\/?\#]+)/)?.[1];
 
-    console.log("header");
-    console.log(headersList);
     console.log("referer");
     console.log(referer);
     console.log("userId");
