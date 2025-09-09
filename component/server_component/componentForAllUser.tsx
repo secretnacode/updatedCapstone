@@ -6,6 +6,8 @@ import {
   UserProFileComponentPropType,
   UserProfileFormPropType,
   InputComponentPropType,
+  QueryAvailableOrgReturnType,
+  UserOrganizationInfoFormPropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
@@ -236,11 +238,6 @@ export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
   );
 };
 
-/**
- * if its only for viewing the profile, you should only pass a
- * @param param0
- * @returns
- */
 export const UserProfileForm: FC<UserProfileFormPropType> = (
   profileFormProp
 ) => {
@@ -360,6 +357,74 @@ export const UserProfileForm: FC<UserProfileFormPropType> = (
           labelMessage="Kapanganakan"
           inputType="date"
           inputName={"birthdate"}
+        />
+      </div>
+    </>
+  );
+};
+
+export const UserOrganizationInfoForm: FC<UserOrganizationInfoFormPropType> = (
+  orgFormProp
+) => {
+  const SelectComponent: FC = () =>
+    orgFormProp.isViewing ? (
+      <FormDivLabelSelect
+        labelMessage={"Pangalan ng Organisasyon"}
+        selectName={"orgId"}
+        selectDisable={orgFormProp.isViewing}
+        selectDefaultValue={orgFormProp.userOrgInfo.orgId}
+        optionList={[]}
+        optionValue={() => ""}
+        optionLabel={() => ""}
+      />
+    ) : (
+      <FormDivLabelSelect<QueryAvailableOrgReturnType>
+        labelMessage={"Pangalan ng Organisasyon"}
+        selectName={"orgId"}
+        selectOrganization={true}
+        selectValue={orgFormProp.orgInfo.orgId ?? ""}
+        onChange={orgFormProp.handleUserOrgChange}
+        selectDisable={orgFormProp.isViewing}
+        optionList={orgFormProp.availOrgList}
+        optionValue={(org) => org.orgId}
+        optionLabel={(org) => `${org.orgName.charAt(0) + org.orgName.slice(1)}`}
+        formError={orgFormProp.formError?.orgId}
+      />
+    );
+
+  return (
+    <>
+      <h1 className="title text-lg font-semibold text-gray-900 mb-4">
+        Organisasyon na kasali
+      </h1>
+      <div className="form-div grid sm:grid-cols-2 gap-4">
+        <SelectComponent />
+
+        {!orgFormProp.isViewing && orgFormProp.otherOrg && (
+          <FormDivLabelInput
+            labelMessage="Mag lagay ng panibagong organisasyon"
+            inputName={"otherOrgName"}
+            inputValue={orgFormProp.orgInfo.otherOrgName ?? ""}
+            inputPlaceholder="e.g. Kataniman"
+            onChange={orgFormProp.handleUserOrgChange}
+            formError={orgFormProp.formError?.otherOrgName}
+          />
+        )}
+
+        <FormDivLabelInput
+          labelMessage="Leader ng Organisasyon"
+          inputDisable={true}
+          inputName={"leaderName"}
+          inputDefaultValue={orgFormProp.userOrgInfo.farmerLeader}
+          inputPlaceholder="Miyembro"
+        />
+
+        <FormDivLabelInput
+          labelMessage="Posisyon"
+          inputDisable={true}
+          inputName={"orgRole"}
+          inputDefaultValue={orgFormProp.userOrgInfo.orgRole}
+          inputPlaceholder="Miyembro"
         />
       </div>
     </>

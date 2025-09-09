@@ -376,6 +376,11 @@ export type UserFarmerInfoPropType = {
   leaderName: string;
 };
 
+export type ClientUserProfileFormPropType = {
+  isViewing: false;
+  userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+};
+
 export type UserProfileFormPropType =
   | {
       isViewing: true;
@@ -417,16 +422,29 @@ export type selectElementReturnPropType =
       onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     };
 
-export type ClientUserProfileFormPropType = {
+export type ClientOrganizationInfoFormPropType = {
   isViewing: false;
-  userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
-};
-
-export type OrganizationInfoFormPropType = {
-  isViewing: boolean;
   availOrgList: QueryAvailableOrgReturnType[];
   userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
 };
+
+export type UserOrganizationInfoFormPropType = {
+  userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+} & (
+  | {
+      isViewing: true;
+    }
+  | {
+      isViewing: false;
+      orgInfo: OrgInfoType;
+      handleUserOrgChange: (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      ) => void;
+      availOrgList: QueryAvailableOrgReturnType[];
+      formError: FormErrorType<OrgInfoType>;
+      otherOrg: boolean;
+    }
+);
 
 export type OrgInfoType = z.infer<typeof userProfileOrgUpdateSchema>;
 

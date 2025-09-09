@@ -15,7 +15,7 @@ import {
   DeleteUserPropType,
   FormErrorType,
   GetFarmerProfilePersonalInfoQueryReturnType,
-  OrganizationInfoFormPropType,
+  ClientOrganizationInfoFormPropType,
   OrgInfoType,
   QueryAvailableOrgReturnType,
   ClientUserProfileFormPropType,
@@ -127,11 +127,9 @@ export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   );
 };
 
-export const UserOrganizationInfoForm: FC<OrganizationInfoFormPropType> = ({
-  isViewing,
-  availOrgList,
-  userOrgInfo,
-}) => {
+export const ClientUserOrganizationInfoForm: FC<
+  ClientOrganizationInfoFormPropType
+> = ({ isViewing, availOrgList, userOrgInfo }) => {
   const formRef = useRef<HTMLFormElement>(null);
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
