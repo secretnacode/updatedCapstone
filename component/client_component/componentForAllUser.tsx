@@ -17,7 +17,6 @@ import {
   GetFarmerProfilePersonalInfoQueryReturnType,
   ClientOrganizationInfoFormPropType,
   OrgInfoType,
-  QueryAvailableOrgReturnType,
   ClientUserProfileFormPropType,
 } from "@/types";
 import {
@@ -28,12 +27,13 @@ import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
   FormCancelSubmitButton,
-  FormDivLabelInput,
-  FormDivLabelSelect,
   ModalNotice,
 } from "../server_component/customComponent";
 import { DelteUserAccount } from "@/lib/server_action/user";
-import { UserProfileForm } from "../server_component/componentForAllUser";
+import {
+  UserOrganizationInfoForm,
+  UserProfileForm,
+} from "../server_component/componentForAllUser";
 
 export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   isViewing,
@@ -133,7 +133,7 @@ export const ClientUserOrganizationInfoForm: FC<
   const formRef = useRef<HTMLFormElement>(null);
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [formError, setFormError] = useState<FormErrorType<OrgInfoType>>();
+  const [formError, setFormError] = useState<FormErrorType<OrgInfoType>>(null);
   const [otherOrg, setOtherOrg] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
@@ -207,52 +207,15 @@ export const ClientUserOrganizationInfoForm: FC<
 
   return (
     <form onSubmit={handleFormSubmit} ref={formRef} className="border-t pt-6">
-      <h1 className="title text-lg font-semibold text-gray-900 mb-4">
-        Organisasyon na kasali
-      </h1>
-      <div className="form-div grid sm:grid-cols-2 gap-4">
-        <FormDivLabelSelect<QueryAvailableOrgReturnType>
-          labelMessage={"Pangalan ng Organisasyon"}
-          selectValue={orgInfo.orgId ?? ""}
-          onChange={handleUserOrgChange}
-          selectName={"orgId"}
-          selectDisable={isViewing}
-          selectOrganization={true}
-          optionList={availOrgList}
-          optionValue={(org) => org.orgId}
-          optionLabel={(org) =>
-            `${org.orgName.charAt(0) + org.orgName.slice(1)}`
-          }
-          formError={formError?.orgId}
-        />
-
-        {otherOrg && (
-          <FormDivLabelInput
-            labelMessage="Mag lagay ng panibagong organisasyon"
-            inputName={"otherOrgName"}
-            inputValue={orgInfo.otherOrgName ?? ""}
-            inputPlaceholder="e.g. Kataniman"
-            onChange={handleUserOrgChange}
-            formError={formError?.otherOrgName}
-          />
-        )}
-
-        <FormDivLabelInput
-          labelMessage="Leader ng Organisasyon"
-          inputDisable={true}
-          inputName={"leaderName"}
-          inputDefaultValue={userOrgInfo.farmerLeader}
-          inputPlaceholder="Miyembro"
-        />
-
-        <FormDivLabelInput
-          labelMessage="Posisyon"
-          inputDisable={true}
-          inputName={"orgRole"}
-          inputDefaultValue={userOrgInfo.orgRole}
-          inputPlaceholder="Miyembro"
-        />
-      </div>
+      <UserOrganizationInfoForm
+        userOrgInfo={userOrgInfo}
+        isViewing={isViewing}
+        orgInfo={orgInfo}
+        handleUserOrgChange={handleUserOrgChange}
+        availOrgList={availOrgList}
+        formError={formError}
+        otherOrg={otherOrg}
+      />
 
       {isChangingVal && !isViewing && (
         <FormCancelSubmitButton

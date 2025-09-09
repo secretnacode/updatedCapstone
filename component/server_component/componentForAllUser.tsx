@@ -14,9 +14,9 @@ import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
   ApprovedButton,
+  ClientUserOrganizationInfoForm,
+  ClientUserProfileForm,
   DeleteUser,
-  UserOrganizationInfoForm,
-  UserProfileForm,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
@@ -223,16 +223,32 @@ export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
   return (
     <div className="div">
       <div className="div grid gap-6">
-        <UserProfileForm
-          isViewing={isViewing}
-          userFarmerInfo={userFarmerInfo}
-        />
+        {isViewing ? (
+          <>
+            <UserProfileForm
+              isViewing={isViewing}
+              userFarmerInfo={userFarmerInfo}
+            />
 
-        <UserOrganizationInfoForm
-          isViewing={isViewing}
-          availOrgList={orgList}
-          userOrgInfo={orgInfo}
-        />
+            <UserOrganizationInfoForm
+              isViewing={isViewing}
+              userOrgInfo={orgInfo}
+            />
+          </>
+        ) : (
+          <>
+            <ClientUserProfileForm
+              isViewing={isViewing}
+              userFarmerInfo={userFarmerInfo}
+            />
+
+            <ClientUserOrganizationInfoForm
+              isViewing={isViewing}
+              availOrgList={orgList}
+              userOrgInfo={orgInfo}
+            />
+          </>
+        )}
       </div>
     </div>
   );
