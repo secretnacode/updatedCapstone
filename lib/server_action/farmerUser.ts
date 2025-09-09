@@ -27,7 +27,6 @@ import {
 import { GetSession } from "../session";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
-import { headers } from "next/headers";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -190,32 +189,23 @@ export const UpdateUserProfileInfo = async (
   try {
     const userId = await ProtectedAction("update:user");
 
-    const headersList: Headers = await headers();
-    const referer = headersList.get("referer") || "";
-    const routeUserId = referer.match(/\/profile\/([^\/?\#]+)/)?.[1];
+    const validateVal = ZodValidateForm(
+      userProfileInfo,
+      farmerFirstDetailFormSchema
+    );
+    if (!validateVal.valid)
+      return {
+        success: false,
+        formError: validateVal.formError,
+        notifMessage: [
+          {
+            message: "May mga mali sa iyong binago, itama muna ito",
+            type: "warning",
+          },
+        ],
+      };
 
-    console.log("referer");
-    console.log(referer);
-    console.log("userId");
-    console.log(routeUserId);
-
-    // const validateVal = ZodValidateForm(
-    //   userProfileInfo,
-    //   farmerFirstDetailFormSchema
-    // );
-    // if (!validateVal.valid)
-    //   return {
-    //     success: false,
-    //     formError: validateVal.formError,
-    //     notifMessage: [
-    //       {
-    //         message: "May mga mali sa iyong binago, itama muna ito",
-    //         type: "warning",
-    //       },
-    //     ],
-    //   };
-
-    // await UpdateUserProfileInfoQuery(userId, userProfileInfo);
+    await UpdateUserProfileInfoQuery(userId, userProfileInfo);
 
     return {
       success: true,

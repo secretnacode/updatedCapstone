@@ -18,13 +18,8 @@ import {
   OrganizationInfoFormPropType,
   OrgInfoType,
   QueryAvailableOrgReturnType,
-  UserProFileComponentPropType,
-  UserProfileFormPropType,
+  ClientUserProfileFormPropType,
 } from "@/types";
-import {
-  baranggayList,
-  DateToYYMMDD,
-} from "@/util/helper_function/reusableFunction";
 import {
   ApprovedOrgFarmerAcc,
   UpdateUserProfileInfo,
@@ -38,33 +33,9 @@ import {
   ModalNotice,
 } from "../server_component/customComponent";
 import { DelteUserAccount } from "@/lib/server_action/user";
+import { UserProfileForm } from "../server_component/componentForAllUser";
 
-//FIX: add middle name and extension name
-export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
-  userFarmerInfo,
-  orgInfo,
-  orgList,
-  isViewing,
-}) => {
-  return (
-    <div className="div">
-      <div className="div grid gap-6">
-        <UserProfileForm
-          isViewing={isViewing}
-          userFarmerInfo={userFarmerInfo}
-        />
-
-        <UserOrganizationInfoForm
-          isViewing={isViewing}
-          availOrgList={orgList}
-          userOrgInfo={orgInfo}
-        />
-      </div>
-    </div>
-  );
-};
-
-export const UserProfileForm: FC<UserProfileFormPropType> = ({
+export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   isViewing,
   userFarmerInfo,
 }) => {
@@ -73,11 +44,11 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
   const [formError, setFormError] =
-    useState<FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>>();
+    useState<FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>>(null);
   const [userInfoState, setUserInfoState] =
     useState<GetFarmerProfilePersonalInfoQueryReturnType>(userFarmerInfo);
 
-  const handleUserInput = useCallback(
+  const handleChangeState = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setUserInfoState((prev) => ({
         ...prev,
@@ -138,104 +109,12 @@ export const UserProfileForm: FC<UserProfileFormPropType> = ({
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <h1 className="title form-title">Pangalan</h1>
-
-      <div className="form-div grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <FormDivLabelInput
-          labelMessage="Unang Pangalan"
-          inputDisable={isViewing}
-          inputName={"farmerFirstName"}
-          inputValue={userInfoState.farmerFirstName ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="Mang kanor"
-          formError={formError?.farmerFirstName}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Gitnang Pangalan"
-          inputDisable={isViewing}
-          inputName={"farmerMiddleName"}
-          inputValue={userInfoState.farmerMiddleName ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="wala pa sa db"
-          formError={formError?.farmerMiddleName}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Apelyido"
-          inputDisable={isViewing}
-          inputName={"farmerLastName"}
-          inputValue={userInfoState.farmerLastName ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="e.g. Juan Delacruz"
-          formError={formError?.farmerLastName}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Palayaw na pagdugtong"
-          inputDisable={isViewing}
-          inputName={"farmerExtensionName"}
-          inputValue={userInfoState.farmerExtensionName ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="e.g. Jr."
-          formError={formError?.farmerExtensionName}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Alyas"
-          inputDisable={isViewing}
-          inputName={"farmerAlias"}
-          inputValue={userInfoState.farmerAlias ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="e.g. Mang Kanor"
-          formError={formError?.farmerAlias}
-        />
-
-        {/* WALA PA NITO SA DATABASE */}
-        <FormDivLabelInput
-          labelMessage="Kasarian"
-          inputDisable={isViewing}
-          inputName={"farmerSex"}
-          inputDefaultValue={`wala pang nakalagay sa database`}
-          inputPlaceholder="e.g. lalaki"
-        />
-
-        <FormDivLabelSelect<string>
-          labelMessage="Baranggay na tinitirhan"
-          selectValue={userInfoState.barangay ?? ""}
-          selectName={"barangay"}
-          selectDisable={isViewing}
-          onChange={handleUserInput}
-          optionList={baranggayList}
-          optionValue={(brgy: string) => brgy}
-          optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
-          formError={formError?.barangay}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Numero ng Telepono"
-          inputDisable={isViewing}
-          inputName={"mobileNumber"}
-          inputValue={userInfoState.mobileNumber ?? ""}
-          onChange={handleUserInput}
-          inputPlaceholder="09** *** ****"
-          formError={formError?.mobileNumber}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Kapanganakan"
-          inputType="date"
-          inputDisable={isViewing}
-          inputName={"birthdate"}
-          inputValue={
-            userInfoState.birthdate instanceof Date
-              ? DateToYYMMDD(userInfoState.birthdate)
-              : userInfoState.birthdate
-          }
-          onChange={handleUserInput}
-          formError={formError?.birthdate}
-        />
-      </div>
+      <UserProfileForm
+        isViewing={isViewing}
+        userInfoState={userInfoState}
+        formError={formError}
+        handleChangeState={handleChangeState}
+      />
 
       {isChangingVal && !isViewing && (
         <FormCancelSubmitButton

@@ -3,6 +3,9 @@ import {
   DynamicLinkPropType,
   GetAllOrgMemberListQueryReturnType,
   FarmerUserProfilePropType,
+  UserProFileComponentPropType,
+  UserProfileFormPropType,
+  InputComponentPropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
 import { FC } from "react";
@@ -10,12 +13,21 @@ import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
   ApprovedButton,
   DeleteUser,
-  UserProFileComponent,
+  UserOrganizationInfoForm,
+  UserProfileForm,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
-import { TableComponent } from "./customComponent";
+import {
+  FormDivLabelInput,
+  FormDivLabelSelect,
+  TableComponent,
+} from "./customComponent";
+import {
+  baranggayList,
+  DateToYYMMDD,
+} from "@/util/helper_function/reusableFunction";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -196,5 +208,160 @@ export const OrganizationMemberList: FC<{
         </>
       }
     />
+  );
+};
+
+//FIX: add sexual of the user
+export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
+  userFarmerInfo,
+  orgInfo,
+  orgList,
+  isViewing,
+}) => {
+  return (
+    <div className="div">
+      <div className="div grid gap-6">
+        <UserProfileForm
+          isViewing={isViewing}
+          userFarmerInfo={userFarmerInfo}
+        />
+
+        <UserOrganizationInfoForm
+          isViewing={isViewing}
+          availOrgList={orgList}
+          userOrgInfo={orgInfo}
+        />
+      </div>
+    </div>
+  );
+};
+
+/**
+ * if its only for viewing the profile, you should only pass a
+ * @param param0
+ * @returns
+ */
+export const UserProfileForm: FC<UserProfileFormPropType> = (
+  profileFormProp
+) => {
+  const InputComponent: FC<InputComponentPropType> = ({
+    inputType = "text",
+    labelMessage,
+    inputName,
+    inputPlaceholder,
+  }) =>
+    profileFormProp.isViewing ? (
+      <FormDivLabelInput
+        labelMessage={labelMessage}
+        inputName={inputName}
+        inputType={inputType}
+        inputPlaceholder={inputPlaceholder}
+        inputDisable={profileFormProp.isViewing}
+        inputDefaultValue={String(profileFormProp.userFarmerInfo?.[inputName])}
+      />
+    ) : (
+      <FormDivLabelInput
+        labelMessage={labelMessage}
+        inputName={inputName}
+        inputType={inputType}
+        inputPlaceholder={inputPlaceholder}
+        inputDisable={profileFormProp.isViewing}
+        inputValue={
+          inputName !== "birthdate"
+            ? String(profileFormProp.userInfoState?.[inputName])
+            : profileFormProp.userInfoState?.[inputName] instanceof Date &&
+              profileFormProp.userInfoState?.[inputName]
+            ? DateToYYMMDD(profileFormProp.userInfoState?.[inputName])
+            : String(profileFormProp.userInfoState?.[inputName])
+        }
+        formError={profileFormProp.formError?.[inputName]}
+        onChange={profileFormProp.handleChangeState}
+      />
+    );
+
+  const SelectComponent: FC = () =>
+    profileFormProp.isViewing ? (
+      <FormDivLabelSelect<string>
+        labelMessage="Baranggay na tinitirhan"
+        selectName={"barangay"}
+        optionList={baranggayList}
+        optionValue={(brgy: string) => brgy}
+        optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
+        selectDisable={profileFormProp.isViewing}
+        selectDefaultValue={profileFormProp.userFarmerInfo?.barangay}
+      />
+    ) : (
+      <FormDivLabelSelect<string>
+        labelMessage="Baranggay na tinitirhan"
+        selectName={"barangay"}
+        optionList={baranggayList}
+        optionValue={(brgy: string) => brgy}
+        optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
+        selectDisable={profileFormProp.isViewing}
+        selectValue={profileFormProp.userInfoState?.barangay}
+        formError={profileFormProp.formError?.barangay}
+        onChange={profileFormProp.handleChangeState}
+      />
+    );
+
+  return (
+    <>
+      <h1 className="title form-title">Pangalan</h1>
+
+      <div className="form-div grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <InputComponent
+          labelMessage="Unang Pangalan"
+          inputName={"farmerFirstName"}
+          inputPlaceholder="e.g. Jose"
+        />
+
+        <InputComponent
+          labelMessage="Gitnang Pangalan"
+          inputName={"farmerMiddleName"}
+          inputPlaceholder="e.g. Luzviminda"
+        />
+
+        <InputComponent
+          inputName={"farmerLastName"}
+          inputPlaceholder="e.g. Juan Delacruz"
+          labelMessage="Apelyido"
+        />
+
+        <InputComponent
+          labelMessage="Palayaw na pagdugtong"
+          inputName={"farmerExtensionName"}
+          inputPlaceholder="e.g. Jr."
+        />
+
+        <InputComponent
+          labelMessage="Alyas"
+          inputName={"farmerAlias"}
+          inputPlaceholder="e.g. Mang Kanor"
+        />
+
+        {/* WALA PA NITO SA DATABASE */}
+        <FormDivLabelInput
+          labelMessage="Kasarian"
+          inputDisable={profileFormProp.isViewing}
+          inputName={"farmerSex"}
+          inputDefaultValue={`wala pang nakalagay sa database`}
+          inputPlaceholder="e.g. lalaki"
+        />
+
+        <SelectComponent />
+
+        <InputComponent
+          labelMessage="Numero ng Telepono"
+          inputName={"mobileNumber"}
+          inputPlaceholder="09** *** ****"
+        />
+
+        <InputComponent
+          labelMessage="Kapanganakan"
+          inputType="date"
+          inputName={"birthdate"}
+        />
+      </div>
+    </>
   );
 };

@@ -376,8 +376,49 @@ export type UserFarmerInfoPropType = {
   leaderName: string;
 };
 
-export type UserProfileFormPropType = {
-  isViewing: boolean;
+export type UserProfileFormPropType =
+  | {
+      isViewing: true;
+      userFarmerInfo?: GetFarmerProfilePersonalInfoQueryReturnType;
+    }
+  | {
+      isViewing: false;
+      userInfoState?: GetFarmerProfilePersonalInfoQueryReturnType;
+      formError?: FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>;
+      handleChangeState?: (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      ) => void;
+    };
+
+export type InputComponentPropType = {
+  labelMessage: string;
+  inputType?: string;
+  inputName: keyof GetFarmerProfilePersonalInfoQueryReturnType;
+  inputPlaceholder?: string;
+};
+
+export type propValFunctionReturnType =
+  | inputElementReturnPropType
+  | selectElementReturnPropType;
+
+export type inputElementReturnPropType =
+  | { inputDefaultValue: string | number | boolean | Date | undefined }
+  | {
+      inputValue: string | number | boolean | undefined;
+      formError: string[] | undefined;
+      onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    };
+
+export type selectElementReturnPropType =
+  | { selectDefaultValue: string | number | boolean | Date | undefined }
+  | {
+      selectValue: string | number | boolean | undefined;
+      formError: string[] | undefined;
+      onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    };
+
+export type ClientUserProfileFormPropType = {
+  isViewing: false;
   userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
 };
 
