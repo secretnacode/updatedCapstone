@@ -167,7 +167,7 @@ export const FarmereDetailFirstStep: FC<{
           onChange={handleChangeVal}
           inputPlaceholder="Hal. Luna"
           inputRequired={true}
-          // formError={formError?.middleName}
+          formError={formError?.middleName}
         />
 
         <FormDivLabelInput
@@ -187,7 +187,7 @@ export const FarmereDetailFirstStep: FC<{
           onChange={handleChangeVal}
           inputPlaceholder="Hal. Jr."
           inputRequired={true}
-          // formError={formError?.extensionName}
+          formError={formError?.extensionName}
         />
 
         <FormDivLabelInput
