@@ -31,6 +31,7 @@ import {
   baranggayList,
   CreateUUID,
   DateToYYMMDD,
+  getPointCoordinate,
 } from "@/util/helper_function/reusableFunction";
 import {
   AddFirstFarmerDetails,
@@ -123,11 +124,11 @@ export const FarmereDetailFirstStep: FC<{
   };
 
   const handleMapView = useCallback(
-    (coordinate: getPointCoordinateReturnType) => {
+    (coodinate: getPointCoordinateReturnType) => {
       if (mapRef.current)
         mapRef.current.flyTo(
           {
-            center: [coordinate.longitude, coordinate.latitude],
+            center: [coodinate.longitude, coodinate.latitude],
             duration: 200,
           },
           []
@@ -243,43 +244,46 @@ export const FarmereDetailFirstStep: FC<{
           formError={formError?.birthdate}
         />
 
-        <FormDivLabelSelect<string>
+        <FormDivLabelSelect
           labelMessage="Baranggay na iyong tinitirhan:"
           selectName={"farmerBarangay"}
           selectValue={newUserVal.farmerBarangay}
-          onChange={handleChangeVal}
-          optionList={baranggayList}
           selectRequired={true}
-          formError={formError?.farmerBarangay}
-          optionLabel={(baranggay) => baranggay}
-          optionValue={(baranggay) =>
-            baranggay.charAt(0).toUpperCase() + baranggay.slice(1)
-          }
+          onChange={handleChangeVal}
           optionDefaultValueLabel={{
             value: "",
             label: "--Pumili--Ng--Baranggay--",
           }}
+          childrenOption={baranggayList.map((brgy) => (
+            <option
+              key={brgy}
+              value={brgy}
+              onClick={() => handleMapView(getPointCoordinate(brgy))}
+            >
+              {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+            </option>
+          ))}
+          formError={formError?.farmerBarangay}
         />
 
         {/* wala pa yung organisasyon na pamimilian */}
-        <FormDivLabelSelect<QueryAvailableOrgReturnType>
+        <FormDivLabelSelect
           labelMessage="Organisasyon na Iyong Kabilang:"
           selectName={"organization"}
           selectValue={newUserVal.organization}
           onChange={handleChangeVal}
           selectOrganization={true}
-          optionList={orgList}
           selectRequired={true}
-          formError={formError?.organization}
-          optionLabel={(baranggay) =>
-            baranggay.orgName.charAt(0).toUpperCase() +
-            baranggay.orgName.slice(1)
-          }
-          optionValue={(baranggay) => baranggay.orgId}
           optionDefaultValueLabel={{
             value: "",
             label: "--Pumili--Ng--Organisasyon--",
           }}
+          childrenOption={orgList.map((org) => (
+            <option key={org.orgId} value={org.orgId}>
+              {org.orgName}
+            </option>
+          ))}
+          formError={formError?.organization}
         />
 
         {newOrg && (
@@ -823,19 +827,22 @@ export const FarmerDetailSecondStep: FC = () => {
             ))}
         </div>
 
-        <FormDivLabelSelect<string>
+        <FormDivLabelSelect
           labelMessage="Lugar ng Iyong pinagtataniman:"
           selectName="cropBaranggay"
-          onChange={handleChangeVal}
           selectValue={currentCrops.cropBaranggay}
-          formError={formError?.cropBaranggay}
-          optionList={baranggayList}
-          optionValue={(branggay) => branggay}
-          optionLabel={(branggay) => branggay}
+          selectRequired={true}
+          onChange={handleChangeVal}
           optionDefaultValueLabel={{
             label: "--Pumili--Ng--Lugar--",
             value: "",
           }}
+          childrenOption={baranggayList.map((brgy) => (
+            <option key={brgy} value={brgy}>
+              {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+            </option>
+          ))}
+          formError={formError?.cropBaranggay}
         />
 
         {editCropId.editing ? (

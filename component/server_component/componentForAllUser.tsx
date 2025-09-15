@@ -6,7 +6,6 @@ import {
   UserProFileComponentPropType,
   UserProfileFormPropType,
   InputComponentPropType,
-  QueryAvailableOrgReturnType,
   UserOrganizationInfoFormPropType,
 } from "@/types";
 import { MapPinHouse } from "lucide-react";
@@ -294,23 +293,22 @@ export const UserProfileForm: FC<UserProfileFormPropType> = (
 
   const SelectComponent: FC = () =>
     profileFormProp.isViewing ? (
-      <FormDivLabelSelect<string>
+      <FormDivLabelSelect
         labelMessage="Baranggay na tinitirhan"
         selectName={"barangay"}
-        optionList={baranggayList}
-        optionValue={(brgy: string) => brgy}
-        optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
+        childrenOption={<></>}
         selectDisable={profileFormProp.isViewing}
         selectDefaultValue={profileFormProp.userFarmerInfo?.barangay}
       />
     ) : (
-      <FormDivLabelSelect<string>
+      <FormDivLabelSelect
         labelMessage="Baranggay na tinitirhan"
         selectName={"barangay"}
-        optionList={baranggayList}
-        optionValue={(brgy: string) => brgy}
-        optionLabel={(brgy: string) => `${brgy.charAt(0) + brgy.slice(1)}`}
-        selectDisable={profileFormProp.isViewing}
+        childrenOption={baranggayList.map((brgy) => (
+          <option key={brgy} value={brgy}>
+            {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+          </option>
+        ))}
         selectValue={profileFormProp.userInfoState?.barangay}
         formError={profileFormProp.formError?.barangay}
         onChange={profileFormProp.handleChangeState}
@@ -389,21 +387,21 @@ export const UserOrganizationInfoForm: FC<UserOrganizationInfoFormPropType> = (
         selectName={"orgId"}
         selectDisable={orgFormProp.isViewing}
         selectDefaultValue={orgFormProp.userOrgInfo.orgId}
-        optionList={[]}
-        optionValue={() => ""}
-        optionLabel={() => ""}
+        childrenOption={<></>}
       />
     ) : (
-      <FormDivLabelSelect<QueryAvailableOrgReturnType>
+      <FormDivLabelSelect
         labelMessage={"Pangalan ng Organisasyon"}
         selectName={"orgId"}
         selectOrganization={true}
         selectValue={orgFormProp.orgInfo.orgId ?? ""}
         onChange={orgFormProp.handleUserOrgChange}
         selectDisable={orgFormProp.isViewing}
-        optionList={orgFormProp.availOrgList}
-        optionValue={(org) => org.orgId}
-        optionLabel={(org) => `${org.orgName.charAt(0) + org.orgName.slice(1)}`}
+        childrenOption={orgFormProp.availOrgList.map((org) => (
+          <option key={org.orgId} value={org.orgId}>
+            {org.orgName.charAt(0).toUpperCase() + org.orgName.slice(1)}
+          </option>
+        ))}
         formError={orgFormProp.formError?.orgId}
       />
     );

@@ -131,7 +131,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   );
 };
 
-export const FormDivLabelSelect = <T,>({
+export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
   labelMessage,
   selectValue,
   selectDefaultValue,
@@ -139,14 +139,12 @@ export const FormDivLabelSelect = <T,>({
   selectOrganization = false,
   selectDisable = false,
   selectRequired = false,
-  optionList,
+  childrenOption,
   optionDefaultValueLabel,
   optionOtherValAndLabel,
-  optionValue,
-  optionLabel,
   onChange,
   formError,
-}: FormDivLabelSelectType<T>) => {
+}) => {
   return (
     <div className="div form-div">
       <label htmlFor={selectName} className="label">
@@ -169,15 +167,7 @@ export const FormDivLabelSelect = <T,>({
         )}
 
         {/* option lists */}
-        {optionList.map((list) => (
-          <option
-            key={optionValue(list)}
-            value={optionValue(list)}
-            className="option"
-          >
-            {optionLabel(list)}
-          </option>
-        ))}
+        {childrenOption}
 
         {/* option other value */}
         {optionOtherValAndLabel &&

@@ -582,19 +582,17 @@ export type FormDivLabelInputPropType = ChildrenType & {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
-export type FormDivLabelSelectType<T> = {
+export type FormDivLabelSelectType = {
   labelMessage: string;
   selectValue?: string;
   selectDefaultValue?: string;
   selectName: string;
   selectOrganization?: boolean;
   selectDisable?: boolean;
-  selectRequired?: boolean;
-  optionList: T[];
+  selectRequired?: boolean; // what you should pass in here is always a function
+  childrenOption: Readonly<ReactNode>;
   optionDefaultValueLabel?: { value: string | number; label: string };
   optionOtherValAndLabel?: { value: string | number; label: string }[];
-  optionValue: (list: T) => string | number;
-  optionLabel: (list: T) => string;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
   formError?: string[];
 };
