@@ -6,6 +6,7 @@ import {
   farmerSecondDetailFormSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
+import { MapRef } from "@vis.gl/react-maplibre";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
@@ -13,6 +14,7 @@ import {
   FormEvent,
   ForwardRefExoticComponent,
   ReactNode,
+  Ref,
   RefAttributes,
 } from "react";
 import z from "zod/v4";
@@ -794,4 +796,39 @@ export type UserProFileComponentPropType = {
   orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
   isViewing: boolean;
+};
+
+export type barangayType =
+  | "balayhangin"
+  | "bangyas"
+  | "dayap"
+  | "hanggan"
+  | "imok"
+  | "kanluran"
+  | "lamot 1"
+  | "lamot 2"
+  | "limao"
+  | "mabacan"
+  | "masiit"
+  | "paliparan"
+  | "perez"
+  | "san isidro"
+  | "santo tomas"
+  | "silangan"
+  | "prinza";
+
+export type pointCoordinatesType = Record<barangayType | "calauan", number[]>;
+
+export type polygonCoordinatesType = Record<
+  barangayType | "calauan",
+  number[][]
+>;
+
+export type MapComponentPropType = {
+  ref?: Ref<MapRef>;
+};
+
+export type getPointCoordinateReturnType = {
+  longitude: number;
+  latitude: number;
 };

@@ -1,6 +1,11 @@
-import { NotificationBaseType } from "@/types";
+import {
+  barangayType,
+  getPointCoordinateReturnType,
+  NotificationBaseType,
+} from "@/types";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { pointCoordinates } from "./barangayCoordinates";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -81,7 +86,7 @@ export function ReadableDateFomat(date: Date) {
   });
 }
 
-export const baranggayList = [
+export const baranggayList: barangayType[] = [
   "balayhangin",
   "bangyas",
   "dayap",
@@ -94,9 +99,11 @@ export const baranggayList = [
   "mabacan",
   "masiit",
   "paliparan",
+  "perez",
+  "prinza",
   "san isidro",
   "santo tomas",
-  "prinza",
+  "silangan",
 ];
 
 /**
@@ -124,3 +131,12 @@ export const LogInAgainMessage = (): string => {
 export const UnexpectedErrorMessage = (): string => {
   return "May hindi inaasahang pag kakamali ang nangyari";
 };
+
+export function getPointCoordinate(
+  brgy: barangayType
+): getPointCoordinateReturnType {
+  return {
+    longitude: pointCoordinates[brgy][0],
+    latitude: pointCoordinates[brgy][1],
+  };
+}

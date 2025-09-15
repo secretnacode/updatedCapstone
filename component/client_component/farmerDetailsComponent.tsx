@@ -8,6 +8,7 @@ import {
   FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
   FormErrorType,
+  getPointCoordinateReturnType,
   QueryAvailableOrgReturnType,
 } from "@/types";
 import {
@@ -44,6 +45,8 @@ import {
   SubmitButton,
 } from "../server_component/customComponent";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { MapComponent } from "./mapComponent";
+import { MapRef } from "@vis.gl/react-maplibre";
 
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
@@ -85,6 +88,7 @@ export const FarmereDetailFirstStep: FC<{
   setNextStep: Dispatch<SetStateAction<boolean>>;
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ setNextStep, orgList }): ReactElement => {
+  const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [newOrg, setNewOrg] = useState<boolean>(false);
@@ -118,6 +122,20 @@ export const FarmereDetailFirstStep: FC<{
     }
   };
 
+  const handleMapView = useCallback(
+    (coordinate: getPointCoordinateReturnType) => {
+      if (mapRef.current)
+        mapRef.current.flyTo(
+          {
+            center: [coordinate.longitude, coordinate.latitude],
+            duration: 200,
+          },
+          []
+        );
+    },
+    []
+  );
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
@@ -145,10 +163,10 @@ export const FarmereDetailFirstStep: FC<{
       handleDoneLoading();
     }
   };
-
   return (
     <div>
       <h2 className="form-title title">Personal na Impormasyon</h2>
+      <MapComponent ref={mapRef} />
       <form onSubmit={handleFormSubmit} className="form">
         <FormDivLabelInput
           labelMessage="Unang Pangalan:"
