@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  barangayType,
   CheckCropListReturnType,
   CropFormErrorsType,
   EditCropListType,
@@ -8,7 +9,6 @@ import {
   FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
   FormErrorType,
-  getPointCoordinateReturnType,
   QueryAvailableOrgReturnType,
 } from "@/types";
 import {
@@ -48,6 +48,7 @@ import {
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { MapComponent } from "./mapComponent";
 import { MapRef } from "@vis.gl/react-maplibre";
+import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
@@ -92,6 +93,9 @@ export const FarmereDetailFirstStep: FC<{
   const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
+  const [geoPolygon, setGeoPolygon] = useState<GeoJSON.GeoJSON | undefined>(
+    undefined
+  );
   const [newOrg, setNewOrg] = useState<boolean>(false);
   const [formError, setFormError] =
     useState<FormErrorType<FarmerFirstDetailFormType>>(null);
@@ -115,27 +119,33 @@ export const FarmereDetailFirstStep: FC<{
     setNewUserVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
     if (e.target.name === "organization") {
-      if (e.target.value === "other") setNewOrg(true);
+      if (e.target.value === "other") return setNewOrg(true);
       else {
         setNewOrg(false);
         setNewUserVal((prev) => ({ ...prev, newOrganization: "" }));
+        return;
       }
+    }
+
+    if (e.target.name === "farmerBarangay") {
+      if (baranggayList.includes(e.target.value))
+        return handleMapView(e.target.value as barangayType);
+
+      handleMapView("calauan");
     }
   };
 
-  const handleMapView = useCallback(
-    (coodinate: getPointCoordinateReturnType) => {
-      if (mapRef.current)
-        mapRef.current.flyTo(
-          {
-            center: [coodinate.longitude, coodinate.latitude],
-            duration: 200,
-          },
-          []
-        );
-    },
-    []
-  );
+  const handleMapView = (brgy: barangayType | "calauan") => {
+    const { longitude, latitude } = getPointCoordinate(brgy);
+
+    setGeoPolygon(polygonCoordinates[brgy]);
+
+    mapRef.current?.flyTo({
+      center: [longitude, latitude],
+      duration: 2500,
+      zoom: 15,
+    });
+  };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     try {
@@ -167,7 +177,6 @@ export const FarmereDetailFirstStep: FC<{
   return (
     <div>
       <h2 className="form-title title">Personal na Impormasyon</h2>
-      <MapComponent ref={mapRef} />
       <form onSubmit={handleFormSubmit} className="form">
         <FormDivLabelInput
           labelMessage="Unang Pangalan:"
@@ -244,28 +253,6 @@ export const FarmereDetailFirstStep: FC<{
           formError={formError?.birthdate}
         />
 
-        <FormDivLabelSelect
-          labelMessage="Baranggay na iyong tinitirhan:"
-          selectName={"farmerBarangay"}
-          selectValue={newUserVal.farmerBarangay}
-          selectRequired={true}
-          onChange={handleChangeVal}
-          optionDefaultValueLabel={{
-            value: "",
-            label: "--Pumili--Ng--Baranggay--",
-          }}
-          childrenOption={baranggayList.map((brgy) => (
-            <option
-              key={brgy}
-              value={brgy}
-              onClick={() => handleMapView(getPointCoordinate(brgy))}
-            >
-              {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
-            </option>
-          ))}
-          formError={formError?.farmerBarangay}
-        />
-
         {/* wala pa yung organisasyon na pamimilian */}
         <FormDivLabelSelect
           labelMessage="Organisasyon na Iyong Kabilang:"
@@ -292,9 +279,9 @@ export const FarmereDetailFirstStep: FC<{
             inputName="newOrganization"
             inputValue={newUserVal.newOrganization ?? ""}
             onChange={handleChangeVal}
-            inputPlaceholder="Hal. 5"
+            inputPlaceholder="Hal. Kapalayan sa silangan"
             inputRequired={true}
-            // formError={formError?.newOrganization}
+            formError={formError?.newOrganization}
           />
         )}
 
@@ -307,6 +294,26 @@ export const FarmereDetailFirstStep: FC<{
           inputRequired={true}
           formError={formError?.countFamilyMember}
         />
+
+        <FormDivLabelSelect
+          labelMessage="Baranggay na iyong tinitirhan:"
+          selectName={"farmerBarangay"}
+          selectValue={newUserVal.farmerBarangay}
+          selectRequired={true}
+          onChange={handleChangeVal}
+          optionDefaultValueLabel={{
+            value: "",
+            label: "--Pumili--Ng--Baranggay--",
+          }}
+          childrenOption={baranggayList.map((brgy) => (
+            <option key={brgy} value={brgy}>
+              {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+            </option>
+          ))}
+          formError={formError?.farmerBarangay}
+        />
+
+        <MapComponent ref={mapRef} cityToHighlight={geoPolygon} />
 
         <div>
           <SubmitButton>Ipasa</SubmitButton>

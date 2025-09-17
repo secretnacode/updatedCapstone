@@ -1,6 +1,14 @@
 import { MapComponentPropType } from "@/types";
-import { pointCoordinates } from "@/util/helper_function/barangayCoordinates";
-import Map, { LngLatBoundsLike, ViewState } from "@vis.gl/react-maplibre";
+import {
+  pointCoordinates,
+  polygonCoordinates,
+} from "@/util/helper_function/barangayCoordinates";
+import Map, {
+  Layer,
+  LngLatBoundsLike,
+  Source,
+  ViewState,
+} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Head from "next/head";
 import { FC } from "react";
@@ -18,7 +26,10 @@ const calauanMaxBounds: LngLatBoundsLike = [
   [121.44236799329536, 14.221868980179238], //longitude, latitude
 ];
 
-export const MapComponent: FC<MapComponentPropType> = ({ ref }) => {
+export const MapComponent: FC<MapComponentPropType> = ({
+  ref,
+  cityToHighlight = polygonCoordinates.calauan,
+}) => {
   return (
     <div className="relative w-full !h-[400px]">
       <Head>
@@ -35,7 +46,17 @@ export const MapComponent: FC<MapComponentPropType> = ({ ref }) => {
         maxPitch={0}
         maxBounds={calauanMaxBounds}
         ref={ref}
-      />
+        cursor="pointer"
+        doubleClickZoom={false}
+      >
+        <Source type={"geojson"} data={cityToHighlight}>
+          <Layer
+            type="fill"
+            paint={{ "fill-color": "yellow", "fill-opacity": 0.2 }}
+          />
+          <Layer type="line" paint={{ "line-dasharray": [2, 3] }} />
+        </Source>
+      </Map>
     </div>
   );
 };

@@ -2,7 +2,6 @@ import {
   addFarmerReportSchema,
   authLogInSchema,
   authSignUpSchema,
-  farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
@@ -116,9 +115,19 @@ export type CropListType = {
   cropBaranggay: string;
 };
 
-export type FarmerFirstDetailFormType = z.infer<
-  typeof farmerFirstDetailFormSchema
->;
+export type FarmerFirstDetailFormType = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  extensionName: string | null;
+  alias: string | null;
+  mobileNumber: string;
+  birthdate: Date;
+  farmerBarangay: barangayType | string;
+  countFamilyMember: string;
+  organization: string;
+  newOrganization: string | null;
+};
 
 export type FormActionBaseType<T> = {
   success: boolean | null;
@@ -810,20 +819,39 @@ export type barangayType =
   | "masiit"
   | "paliparan"
   | "perez"
+  | "prinza"
   | "san isidro"
   | "santo tomas"
-  | "silangan"
-  | "prinza";
+  | "silangan";
 
 export type pointCoordinatesType = Record<barangayType | "calauan", number[]>;
 
+export type barangayTypeForMissingPolygon =
+  | "balayhangin"
+  | "bangyas"
+  | "dayap"
+  | "hanggan"
+  | "imok"
+  | "kanluran"
+  | "lamot 1"
+  | "lamot 2"
+  | "limao"
+  | "mabacan"
+  | "masiit"
+  | "paliparan"
+  | "perez"
+  | "prinza"
+  | "san isidro"
+  | "silangan";
+
 export type polygonCoordinatesType = Record<
   barangayType | "calauan",
-  number[][]
+  GeoJSON.GeoJSON
 >;
 
 export type MapComponentPropType = {
   ref?: Ref<MapRef>;
+  cityToHighlight?: GeoJSON.GeoJSON;
 };
 
 export type getPointCoordinateReturnType = {

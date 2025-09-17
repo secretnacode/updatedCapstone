@@ -86,7 +86,7 @@ export function ReadableDateFomat(date: Date) {
   });
 }
 
-export const baranggayList: barangayType[] = [
+export const baranggayList = [
   "balayhangin",
   "bangyas",
   "dayap",
@@ -133,7 +133,7 @@ export const UnexpectedErrorMessage = (): string => {
 };
 
 export function getPointCoordinate(
-  brgy: barangayType
+  brgy: barangayType | "calauan"
 ): getPointCoordinateReturnType {
   return {
     longitude: pointCoordinates[brgy][0],
