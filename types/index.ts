@@ -109,13 +109,6 @@ export type AvailableOrgReturnType =
     }
   | ServerActionFailBaseType;
 
-export type CropListType = {
-  cropId: string;
-  cropFarmArea: number;
-  farmAreaMeasurement: "sqft" | "sqm" | "ac" | "ha" | null; // sqaure feet, square meter, acre, hectare
-  cropBaranggay: string;
-};
-
 export type FarmerFirstDetailFormType = {
   firstName: string;
   middleName: string;
@@ -161,10 +154,6 @@ export type FarmerSecondDetailFormType = z.infer<
   typeof farmerSecondDetailFormSchema
 >;
 
-export type FarmerDetailCropType = FarmerSecondDetailFormType & {
-  cropId: string;
-};
-
 export type EditCropListType =
   | {
       editing: false;
@@ -207,8 +196,12 @@ export type HandleInsertCropType = {
   userId: string;
   cropId: string;
   cropName: string;
-  farmAreaMeasurement: string;
-  cropLocation: string;
+  cropBaranggay: string;
+  cropCoor: {
+    lng: number;
+    lat: number;
+  };
+  farmArea: string;
 };
 
 export type NavbarType =

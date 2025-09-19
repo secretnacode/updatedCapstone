@@ -3,7 +3,9 @@ import {
   Date10YearsAgo,
   FourDaysBefore,
   MaxDateToday,
+  pointIsInsidePolygon,
 } from "../reusableFunction";
+import { barangayType } from "@/types";
 // /**
 //  * trasnforming the value data type that zod expects(string)
 //  */
@@ -176,45 +178,55 @@ export const farmerFirstDetailFormSchema = z
  * a zod schema for validating the 2nd detail of the farmer after the sign up
  */
 const MEASSUREMENT = ["ha", "ac", "sqft", "sqm"];
-export const farmerSecondDetailFormSchema = z.object({
-  cropName: z.string().trim().min(1, {
-    error: "Mag lagay ng pangalan na sumisimbulo sa pananim nato",
-  }),
-  cropFarmArea: z
-    .string()
-    .trim()
-    .min(1, { error: "Mag lagay ng lawak ng iyong pinag tataniman" })
-    .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
-      error:
-        "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
+export const farmerSecondDetailFormSchema = z
+  .object({
+    cropId: z.string().trim().min(1, { error: "The CropId is missing" }),
+    cropName: z.string().trim().min(1, {
+      error: "Mag lagay ng pangalan na sumisimbulo sa pananim nato",
     }),
-  farmAreaMeasurement: z
-    .string()
-    .trim()
-    .min(1, { error: "Pumili ng unit ng lupain" })
-    .refine((e) => MEASSUREMENT.includes(e), {
-      error: "Pumili lamang sa pamimilian",
+    cropFarmArea: z
+      .string()
+      .trim()
+      .min(1, { error: "Mag lagay ng lawak ng iyong pinag tataniman" })
+      .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
+        error:
+          "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
+      }),
+    farmAreaMeasurement: z
+      .string()
+      .trim()
+      .min(1, { error: "Pumili ng unit ng lupain" })
+      .refine((e) => MEASSUREMENT.includes(e), {
+        error: "Pumili lamang sa pamimilian",
+      }),
+    cropBaranggay: z.string().trim().min(1, {
+      error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
     }),
-  cropBaranggay: z.string().trim().min(1, {
-    error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
-  }),
-  cropCoor: z.object({
-    lng: z
-      .number({ error: "Unexpcted error in longitude of the crop" })
-      .refine((e) => !isNaN(Number(e)), {
+    cropCoor: z.object({
+      lng: z.number().refine((e) => !isNaN(Number(e)), {
         error:
           "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
         path: ["cropCoor"],
       }),
-    lat: z
-      .number({ error: "Unexpcted error in latitude of the crop" })
-      .refine((e) => !isNaN(Number(e)), {
+      lat: z.number().refine((e) => !isNaN(Number(e)), {
         error:
           "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
         path: ["cropCoor"],
       }),
-  }),
-});
+    }),
+  })
+  .refine(
+    (e) =>
+      pointIsInsidePolygon(
+        e.cropCoor.lng,
+        e.cropCoor.lat,
+        e.cropBaranggay as barangayType
+      ),
+    {
+      error: "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+      path: ["cropCoor"],
+    }
+  );
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];

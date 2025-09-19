@@ -2,11 +2,10 @@
 
 import {
   CropFormErrorsType,
-  FarmerDetailCropType,
   FarmerFirstDetailActionReturnType,
   FarmerFirstDetailFormType,
   FarmerSecondDetailActionReturnType,
-  HandleInsertCropType,
+  FarmerSecondDetailFormType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -100,13 +99,14 @@ export const AddFirstFarmerDetails = async (
  * @returns redirect the use if the validation was success
  */
 export const AddSecondFarmerDetails = async (
-  cropList: FarmerDetailCropType[]
+  cropList: FarmerSecondDetailFormType[]
 ): Promise<FarmerSecondDetailActionReturnType> => {
   try {
     console.log(cropList);
     const userId = await ProtectedAction("create:crop");
+
     const validateCropList: CropFormErrorsType[] = cropList.reduce(
-      (acc: CropFormErrorsType[] | [], crop: FarmerDetailCropType) => {
+      (acc: CropFormErrorsType[] | [], crop: FarmerSecondDetailFormType) => {
         const validateCrop = ZodValidateForm(
           crop,
           farmerSecondDetailFormSchema
@@ -120,6 +120,8 @@ export const AddSecondFarmerDetails = async (
       },
       []
     );
+
+    console.log(validateCropList);
     if (validateCropList.length > 0)
       return {
         success: false,
@@ -133,30 +135,18 @@ export const AddSecondFarmerDetails = async (
         ],
       };
 
-    // cropList.forEach(async (crop) => {
-    //   const convertedMeasurement = ConvertMeassurement(
-    //     crop.cropFarmArea,
-    //     crop.farmAreaMeasurement
-    //   );
-    //   await CreateNewOrgForNewUser({
-    //     cropId: crop.cropId,
-    //     cropName: crop.cropName,
-    //     cropLocation: crop.cropBaranggay,
-    //     farmAreaMeasurement: convertedMeasurement,
-    //     userId: userId,
-    //   });
-    // });
+    // one by one inserting the crop information in the database
+    cropList.forEach(async (crop) => {
+      const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
 
-    return {
-      success: false,
-      notifError: [
-        {
-          message: "success",
-          type: "error",
-        },
-      ],
-    };
-    // redirect("/farmer");
+      await CreateNewCropAfterSignUp({
+        farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+        userId,
+        ...cropVal,
+      });
+    });
+
+    redirect("/farmer");
   } catch (error) {
     if (isRedirectError(error)) throw error;
 
@@ -171,31 +161,6 @@ export const AddSecondFarmerDetails = async (
         },
       ],
     };
-  }
-};
-
-/**
- * functions to call another function to inserted the data in the db
- * @param data of the user that will be inserted and updated in the DB
- */
-const CreateNewOrgForNewUser = async (
-  data: HandleInsertCropType
-): Promise<void> => {
-  try {
-    await CreateNewCropAfterSignUp({
-      cropId: data.cropId,
-      userId: data.userId,
-      cropName: data.cropName,
-      cropLocation: data.cropLocation,
-      farmAreaMeasurement: data.farmAreaMeasurement,
-    });
-  } catch (error) {
-    const err = error as Error;
-    console.error(
-      "Error updating the farmer and inserting a value in org and crop:",
-      error
-    );
-    throw new Error(`${err.message as string}`);
   }
 };
 

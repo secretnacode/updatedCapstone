@@ -13,13 +13,15 @@ export const CreateNewCropAfterSignUp = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.crop ("cropId", "cropName", "cropLocation", "farmerId", "farmAreaMeasurement") values ($1, $2, $3, $4, $5)`,
+      `insert into capstone.crop ("cropId", "cropName", "cropLocation", "farmerId", "farmAreaMeasurement", "cropLng", "cropLat") values ($1, $2, $3, $4, $5, $6, $7)`,
       [
         data.cropId,
         data.cropName,
-        data.cropLocation,
+        data.cropBaranggay,
         data.userId,
-        data.farmAreaMeasurement,
+        data.farmArea,
+        data.cropCoor.lng,
+        data.cropCoor.lat,
       ]
     );
   } catch (error) {

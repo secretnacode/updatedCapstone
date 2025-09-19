@@ -6,7 +6,6 @@ import {
   CheckCropListReturnType,
   CropFormErrorsType,
   EditCropListType,
-  FarmerDetailCropType,
   FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
   FormErrorType,
@@ -57,7 +56,7 @@ import { Feature, Polygon } from "geojson";
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(true);
+  const [nextStep, setNextStep] = useState<boolean>(false);
 
   return (
     <div>
@@ -307,7 +306,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading, isLoading } = useLoading();
   const [resubmit, setResubmit] = useState(false);
-  const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
+  const [cropList, setCropList] = useState<FarmerSecondDetailFormType[]>([]);
   const [geoJson, setGeoJson] = useState<Feature<Polygon> | undefined>(
     undefined
   );
@@ -320,7 +319,7 @@ export const FarmerDetailSecondStep: FC = () => {
     editing: false,
     cropId: null,
   });
-  const [currentCrops, setCurrentCrops] = useState<FarmerDetailCropType>({
+  const [currentCrops, setCurrentCrops] = useState<FarmerSecondDetailFormType>({
     cropId: "",
     cropName: "",
     cropFarmArea: "",
@@ -614,7 +613,9 @@ export const FarmerDetailSecondStep: FC = () => {
       handleSetFormError({ ...formError, cropId: [currentCrops.cropId] });
   };
 
-  const handleSetFormError = (obj: FormErrorType<FarmerDetailCropType>) => {
+  const handleSetFormError = (
+    obj: FormErrorType<FarmerSecondDetailFormType>
+  ) => {
     setFormError(obj);
   };
 
@@ -692,7 +693,7 @@ export const FarmerDetailSecondStep: FC = () => {
    * function for finding if the crop that will be edited has a formError
    */
   const handleFindIfFormErrorExist = useCallback(
-    (cropToEdit: FarmerDetailCropType) => {
+    (cropToEdit: FarmerSecondDetailFormType) => {
       return formErrorList.find(
         (formError) => formError.cropId === cropToEdit.cropId
       );
@@ -704,7 +705,7 @@ export const FarmerDetailSecondStep: FC = () => {
    * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
    */
   const handleEditCrop = useCallback(
-    (cropToEdit: FarmerDetailCropType) => {
+    (cropToEdit: FarmerSecondDetailFormType) => {
       setEditCropId({
         editing: true,
         cropId: cropToEdit.cropId,
@@ -790,6 +791,8 @@ export const FarmerDetailSecondStep: FC = () => {
       }
     }
   };
+
+  console.log(formErrorList);
 
   return (
     <div>
@@ -989,9 +992,9 @@ export const FarmerDetailSecondStep: FC = () => {
 };
 
 const CropsValComponent: FC<{
-  cropList: FarmerDetailCropType[];
+  cropList: FarmerSecondDetailFormType[];
   cropErrors: string[];
-  handleEditCrop: (cropToEdit: FarmerDetailCropType) => void;
+  handleEditCrop: (cropToEdit: FarmerSecondDetailFormType) => void;
   handleRemoveCropFromList: (cropId: string) => void;
 }> = ({ cropList, cropErrors, handleEditCrop, handleRemoveCropFromList }) => {
   const convertMeasurement = (measure: string) => {
