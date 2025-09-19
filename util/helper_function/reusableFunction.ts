@@ -153,6 +153,10 @@ export function getPointCoordinate(
   };
 }
 
-export function pointIsInsidePolygon(lng, lat, brgy) {
+export function pointIsInsidePolygon(
+  lng: number,
+  lat: number,
+  brgy: barangayType
+) {
   return booleanPointInPolygon(point([lng, lat]), polygonCoordinates[brgy]);
 }
