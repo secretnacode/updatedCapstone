@@ -16,7 +16,6 @@ import { FC } from "react";
 const calauanViewState: Partial<ViewState> = {
   longitude: pointCoordinates.calauan[0],
   latitude: pointCoordinates.calauan[1],
-  zoom: 10.8,
 };
 
 const calauanMaxBounds: LngLatBoundsLike = [

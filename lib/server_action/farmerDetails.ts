@@ -5,6 +5,7 @@ import {
   FarmerDetailCropType,
   FarmerFirstDetailActionReturnType,
   FarmerFirstDetailFormType,
+  FarmerSecondDetailActionReturnType,
   HandleInsertCropType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -96,79 +97,82 @@ export const AddFirstFarmerDetails = async (
 /**
  * server action for second farmer detail where the user i
  * @param cropList
- * @returns
+ * @returns redirect the use if the validation was success
  */
 export const AddSecondFarmerDetails = async (
   cropList: FarmerDetailCropType[]
-) =>
-  // : Promise<FarmerSecondDetailActionReturnType>
-  {
-    try {
-      const userId = await ProtectedAction("create:crop");
-
-      const validateCropList: CropFormErrorsType[] = cropList.reduce(
-        (acc: CropFormErrorsType[] | [], crop: FarmerDetailCropType) => {
-          const validateCrop = ZodValidateForm(
-            crop,
-            farmerSecondDetailFormSchema
-          );
-
-          if (!validateCrop.valid)
-            return [
-              ...acc,
-              { cropId: crop.cropId, formError: validateCrop.formError },
-            ];
-
-          return acc;
-        },
-        []
-      );
-
-      if (validateCropList.length > 0)
-        return {
-          success: false,
-          formList: validateCropList,
-          notifError: [
-            {
-              message:
-                "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
-              type: "warning",
-            },
-          ],
-        };
-
-      cropList.forEach(async (crop) => {
-        const convertedMeasurement = ConvertMeassurement(
-          crop.cropFarmArea,
-          crop.farmAreaMeasurement
+): Promise<FarmerSecondDetailActionReturnType> => {
+  try {
+    console.log(cropList);
+    const userId = await ProtectedAction("create:crop");
+    const validateCropList: CropFormErrorsType[] = cropList.reduce(
+      (acc: CropFormErrorsType[] | [], crop: FarmerDetailCropType) => {
+        const validateCrop = ZodValidateForm(
+          crop,
+          farmerSecondDetailFormSchema
         );
-
-        await CreateNewOrgForNewUser({
-          cropId: crop.cropId,
-          cropName: crop.cropName,
-          cropLocation: crop.cropBaranggay,
-          farmAreaMeasurement: convertedMeasurement,
-          userId: userId,
-        });
-      });
-
-      redirect("/farmer");
-    } catch (error) {
-      if (isRedirectError(error)) throw error;
-
-      const err = error as Error;
-      console.error(`Error in Adding First Farmer Detial: ${err.message}`);
+        if (!validateCrop.valid)
+          return [
+            ...acc,
+            { cropId: crop.cropId, formError: validateCrop.formError },
+          ];
+        return acc;
+      },
+      []
+    );
+    if (validateCropList.length > 0)
       return {
         success: false,
+        formList: validateCropList,
         notifError: [
           {
-            message: err.message,
-            type: "error",
+            message:
+              "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
+            type: "warning",
           },
         ],
       };
-    }
-  };
+
+    // cropList.forEach(async (crop) => {
+    //   const convertedMeasurement = ConvertMeassurement(
+    //     crop.cropFarmArea,
+    //     crop.farmAreaMeasurement
+    //   );
+    //   await CreateNewOrgForNewUser({
+    //     cropId: crop.cropId,
+    //     cropName: crop.cropName,
+    //     cropLocation: crop.cropBaranggay,
+    //     farmAreaMeasurement: convertedMeasurement,
+    //     userId: userId,
+    //   });
+    // });
+
+    return {
+      success: false,
+      notifError: [
+        {
+          message: "success",
+          type: "error",
+        },
+      ],
+    };
+    // redirect("/farmer");
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+    console.error(`Error in Adding First Farmer Detial: ${err.message}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
 
 /**
  * functions to call another function to inserted the data in the db

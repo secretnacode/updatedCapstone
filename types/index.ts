@@ -6,6 +6,7 @@ import {
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import { MapProps, MapRef } from "@vis.gl/react-maplibre";
+import { Feature, Polygon } from "geojson";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
@@ -190,7 +191,7 @@ export type CheckCropListReturnType =
   | { valid: true };
 
 export type FarmerSecondDetailActionReturnType = ServerActionFailBaseType & {
-  formList: CropFormErrorsType[];
+  formList?: CropFormErrorsType[];
 };
 
 export type FirstErrorType = {
@@ -830,7 +831,7 @@ export type pointCoordinatesType = Record<brangayaWithCalauanType, number[]>;
 
 export type polygonCoordinatesType = Record<
   brangayaWithCalauanType,
-  GeoJSON.GeoJSON
+  Feature<Polygon>
 >;
 
 export type MapComponentPropType = ChildrenType &

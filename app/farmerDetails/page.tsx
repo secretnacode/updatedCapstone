@@ -1,6 +1,5 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { FarmerDetailForm } from "@/component/client_component/farmerDetailsComponent";
-import { LoadingManager } from "@/component/client_component/provider/loadingProvider";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { AvailableOrgReturnType } from "@/types";
 
@@ -26,7 +25,6 @@ export default async function Page() {
   }
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
-      <LoadingManager />
       {!availbaleOrg.success && (
         <RenderNotification notif={availbaleOrg.notifError} />
       )}

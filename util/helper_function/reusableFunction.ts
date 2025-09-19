@@ -1,5 +1,6 @@
 import {
   barangayType,
+  brangayaWithCalauanType,
   getPointCoordinateReturnType,
   NotificationBaseType,
 } from "@/types";
@@ -153,10 +154,58 @@ export function getPointCoordinate(
   };
 }
 
+/**
+ * function that checks the mark location if its inside the polygon(highlithed part of the city)
+ * @param lng longtitude coordinate
+ * @param lat latitude coordinate
+ * @param brgy name of the barangay
+ * @returns boolean val
+ */
 export function pointIsInsidePolygon(
   lng: number,
   lat: number,
   brgy: barangayType
 ) {
   return booleanPointInPolygon(point([lng, lat]), polygonCoordinates[brgy]);
+}
+
+export function mapZoomValByBarangay(brgy: brangayaWithCalauanType) {
+  switch (brgy) {
+    case "balayhangin":
+      return 13.5;
+    case "bangyas":
+      return 13.2;
+    case "dayap":
+      return 13.4;
+    case "hanggan":
+      return 13.8;
+    case "imok":
+      return 14;
+    case "kanluran":
+      return 15;
+    case "lamot 1":
+      return 13.2;
+    case "lamot 2":
+      return 13;
+    case "limao":
+      return 13;
+    case "mabacan":
+      return 13.3;
+    case "masiit":
+      return 13.2;
+    case "paliparan":
+      return 13.3;
+    case "perez":
+      return 13;
+    case "prinza":
+      return 14;
+    case "san isidro":
+      return 13.5;
+    case "santo tomas":
+      return 14;
+    case "silangan":
+      return 16;
+    default:
+      return 8;
+  }
 }

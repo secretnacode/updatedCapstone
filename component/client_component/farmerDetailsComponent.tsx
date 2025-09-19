@@ -33,6 +33,8 @@ import {
   CreateUUID,
   DateToYYMMDD,
   getPointCoordinate,
+  mapZoomValByBarangay,
+  pointIsInsidePolygon,
 } from "@/util/helper_function/reusableFunction";
 import {
   AddFirstFarmerDetails,
@@ -48,11 +50,9 @@ import {
 } from "../server_component/customComponent";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { MapComponent } from "./mapComponent";
-import { LngLat, MapMouseEvent, MapRef, Marker } from "@vis.gl/react-maplibre";
-import {
-  polygonCoordinates,
-} from "@/util/helper_function/barangayCoordinates";
-
+import { MapMouseEvent, MapRef, Marker } from "@vis.gl/react-maplibre";
+import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
+import { Feature, Polygon } from "geojson";
 
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
@@ -305,14 +305,14 @@ export const FarmereDetailFirstStep: FC<{
 export const FarmerDetailSecondStep: FC = () => {
   const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
-  const { handleDoneLoading, handleIsLoading } = useLoading();
+  const { handleDoneLoading, handleIsLoading, isLoading } = useLoading();
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
-  const [geoJson, setGeoJson] = useState<GeoJSON.GeoJSON | undefined>(
+  const [geoJson, setGeoJson] = useState<Feature<Polygon> | undefined>(
     undefined
   );
   const [formErrorList, setFormErrorList] = useState<CropFormErrorsType[]>([]);
-  const [cancelProceed, setCancelProceed] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [formError, setFormError] =
     useState<FormErrorType<FarmerSecondDetailFormType>>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -329,19 +329,18 @@ export const FarmerDetailSecondStep: FC = () => {
     cropCoor: { lng: Number(""), lat: Number("") },
   });
 
-  console.log(cropList);
+  console.log(isLoading);
 
   /**
    * use effect for only resubmiting()
    */
   useEffect(() => {
     if (resubmit) {
-      if (formRef.current) {
-        formRef.current.requestSubmit();
-        setResubmit(false);
-      }
+      handleIsLoading("Loading...");
+      formRef.current?.requestSubmit();
+      setResubmit(false);
     }
-  }, [resubmit]);
+  }, [resubmit, handleIsLoading]);
 
   const handleChangeVal = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -351,8 +350,18 @@ export const FarmerDetailSecondStep: FC = () => {
       [e.target.name]: e.target.value,
     }));
 
-    if (e.target.name === "cropBaranggay")
+    if (e.target.name === "cropBaranggay") {
       handleMapCityToHighLight((e.target.value as barangayType) || "calauan");
+
+      if (e.target.value === "")
+        setCurrentCrops((prev) => ({
+          ...prev,
+          cropCoor: {
+            lng: Number(""),
+            lat: Number(""),
+          },
+        }));
+    }
   };
 
   const handleMapCityToHighLight = (brgy: brangayaWithCalauanType) => {
@@ -363,15 +372,49 @@ export const FarmerDetailSecondStep: FC = () => {
     mapRef.current?.flyTo({
       center: [longitude, latitude],
       duration: 2000,
-      zoom: brgy !== "calauan" ? 13 : 8,
+      zoom: mapZoomValByBarangay(brgy),
     });
   };
 
-  const handleSetLngLat = (e: MapMouseEvent) => {
-    const { lng, lat } = e.lngLat;
+  const handlePickBrgyFirst = () => {
+    setFormError((prev) => ({
+      ...prev,
+      cropCoor: ["Pumili muna ng barangay na pinag tataniman"],
+    }));
+  };
 
-    if(turf.booleanPointInPolygon(turf.point([lng, lat]), polygonCoordinates[currentCrops.cropBaranggay as barangayType]))
-  };  
+  /**
+   * function for setting the longitude and latitude by checking first if the picked coor is inside the polygon(highlighted barangay)
+   * @param e event of the map component
+   */
+  const handleSetLngLat = useCallback(
+    (e: MapMouseEvent) => {
+      const { lng, lat } = e.lngLat;
+
+      if (
+        pointIsInsidePolygon(
+          lng,
+          lat,
+          currentCrops.cropBaranggay as barangayType
+        )
+      ) {
+        setCurrentCrops((prev) => ({
+          ...prev,
+          cropCoor: { lng: lng, lat: lat },
+        }));
+
+        if (formError?.cropCoor)
+          setFormError((prev) => ({ ...prev, cropCoor: [] }));
+      } else
+        setFormError((prev) => ({
+          ...prev,
+          cropCoor: [
+            "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+          ],
+        }));
+    },
+    [currentCrops.cropBaranggay, formError?.cropCoor]
+  );
 
   /**
    * simple validation for the currentCrops,
@@ -557,17 +600,13 @@ export const FarmerDetailSecondStep: FC = () => {
    * setting all back to default value and setting the reSubmit into true, after the renders it will trigger the useEffect for the re submitting of the form
    */
   const handleForceProceed = () => {
-    setCancelProceed(false);
-
-    if (handleIsExistingName()) return;
-
+    setShowModal(false);
     handleBackDefault();
     setResubmit(true);
-    handleIsLoading("Loading");
   };
 
   const handleCancelProceed = () => {
-    setCancelProceed(false);
+    setShowModal(false);
 
     const formError = handleValidateCurrentCrops();
 
@@ -708,11 +747,11 @@ export const FarmerDetailSecondStep: FC = () => {
     const validateCrop = handleCheckCropList();
 
     if (!validateCrop.valid) {
-      if (validateCrop.isExistName) return;
+      if (validateCrop.isExistName) return handleDoneLoading();
 
       if (validateCrop.showModal) {
-        setCancelProceed(true);
-        return;
+        setShowModal(true);
+        return handleDoneLoading();
       }
 
       handleSetNotification(
@@ -726,8 +765,6 @@ export const FarmerDetailSecondStep: FC = () => {
       return;
     }
 
-    if (handleIsExistingName()) return;
-
     setResubmit(true);
   };
 
@@ -735,10 +772,11 @@ export const FarmerDetailSecondStep: FC = () => {
     e.preventDefault();
 
     try {
+      handleIsLoading("Ipinapasa na ang iyong impormasyon...");
       const res = await AddSecondFarmerDetails(cropList);
 
       if (res && !res.success) {
-        // handleSetNotification(res.notifError);
+        handleSetNotification(res.notifError);
 
         if (res.formList) handleBackendValidateFormError(res.formList);
 
@@ -751,8 +789,6 @@ export const FarmerDetailSecondStep: FC = () => {
         handleSetNotification([{ message: err.message, type: "error" }]);
       }
     }
-
-    handleDoneLoading();
   };
 
   return (
@@ -850,7 +886,6 @@ export const FarmerDetailSecondStep: FC = () => {
           labelMessage="Lugar ng Iyong pinagtataniman:"
           selectName="cropBaranggay"
           selectValue={currentCrops.cropBaranggay}
-          selectRequired={true}
           onChange={handleChangeVal}
           optionDefaultValueLabel={{
             label: "--Pumili--Ng--Lugar--",
@@ -869,22 +904,34 @@ export const FarmerDetailSecondStep: FC = () => {
             Pindutin ang mapa para ma-markahan kung saan makikita ang iyong
             taniman:
           </label>
-          {formError?.cropBaranggay}
+
+          {formError?.cropCoor &&
+            formError.cropCoor.map((error, index) => (
+              <p key={index} className="p-error">
+                {error}
+              </p>
+            ))}
 
           <div className="rounded-xl overflow-hidden input !p-0">
             <MapComponent
               ref={mapRef}
               cityToHighlight={geoJson}
-              onClick={handleSetLngLat}
+              onClick={
+                currentCrops.cropBaranggay
+                  ? handleSetLngLat
+                  : handlePickBrgyFirst
+              }
             >
-              <Marker
-                longitude={currentCrops.cropCoor.lng}
-                latitude={currentCrops.cropCoor.lat}
-                anchor="bottom"
-                style={{ cursor: "pointer" }}
-              >
-                <MapPin className="logo bg-red-400" />
-              </Marker>
+              {currentCrops.cropCoor.lng && currentCrops.cropCoor.lat && (
+                <Marker
+                  longitude={currentCrops.cropCoor.lng}
+                  latitude={currentCrops.cropCoor.lat}
+                  anchor="bottom"
+                  style={{ cursor: "pointer" }}
+                >
+                  <MapPin className="logo bg-red-400" />
+                </Marker>
+              )}
             </MapComponent>
           </div>
         </div>
@@ -910,8 +957,8 @@ export const FarmerDetailSecondStep: FC = () => {
         )}
       </form>
 
-      {cancelProceed && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-40">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">
               Mag patuloy padin sa pag papasa?
@@ -920,18 +967,13 @@ export const FarmerDetailSecondStep: FC = () => {
               May kulang na impormasyon kang hindi panailalagay, mag patuloy
               padin at baliwalain itong kasalukuyang inilalagay mo?
             </p>
-            <button
-              onClick={handleForceProceed}
-              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Mag patuloy
-            </button>
-            <button
-              onClick={handleCancelProceed}
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Bumalik
-            </button>
+            <FormCancelSubmitButton
+              submitButtonLabel={"Mag patuloy"}
+              submitOnClick={handleForceProceed}
+              submitType="button"
+              cancelButtonLabel={"Bumalik"}
+              cancelOnClick={handleCancelProceed}
+            />
           </div>
         </div>
       )}
