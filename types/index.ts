@@ -5,7 +5,7 @@ import {
   farmerSecondDetailFormSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { MapRef } from "@vis.gl/react-maplibre";
+import { MapProps, MapRef } from "@vis.gl/react-maplibre";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
@@ -824,35 +824,20 @@ export type barangayType =
   | "santo tomas"
   | "silangan";
 
-export type pointCoordinatesType = Record<barangayType | "calauan", number[]>;
+export type brangayaWithCalauanType = barangayType | "calauan";
 
-export type barangayTypeForMissingPolygon =
-  | "balayhangin"
-  | "bangyas"
-  | "dayap"
-  | "hanggan"
-  | "imok"
-  | "kanluran"
-  | "lamot 1"
-  | "lamot 2"
-  | "limao"
-  | "mabacan"
-  | "masiit"
-  | "paliparan"
-  | "perez"
-  | "prinza"
-  | "san isidro"
-  | "silangan";
+export type pointCoordinatesType = Record<brangayaWithCalauanType, number[]>;
 
 export type polygonCoordinatesType = Record<
-  barangayType | "calauan",
+  brangayaWithCalauanType,
   GeoJSON.GeoJSON
 >;
 
-export type MapComponentPropType = {
-  ref?: Ref<MapRef>;
-  cityToHighlight?: GeoJSON.GeoJSON;
-};
+export type MapComponentPropType = ChildrenType &
+  MapProps & {
+    cityToHighlight?: GeoJSON.GeoJSON;
+    ref?: Ref<MapRef>;
+  };
 
 export type getPointCoordinateReturnType = {
   longitude: number;

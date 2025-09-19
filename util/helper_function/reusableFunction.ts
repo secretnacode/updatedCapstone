@@ -5,7 +5,8 @@ import {
 } from "@/types";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { pointCoordinates } from "./barangayCoordinates";
+import { pointCoordinates, polygonCoordinates } from "./barangayCoordinates";
+import { booleanPointInPolygon, point } from "@turf/turf";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -124,14 +125,25 @@ export const NotifToUriComponent = (notif: NotificationBaseType[]) => {
   return encodeURIComponent(JSON.stringify(notif));
 };
 
+/**
+ * @returns a value message for the log in again message
+ */
 export const LogInAgainMessage = (): string => {
   return "Nag expire na ang iyong pag lo-log in, mag log in ulit ng panibago";
 };
 
+/**
+ * @returns a value mesage for the unexpected error message
+ */
 export const UnexpectedErrorMessage = (): string => {
   return "May hindi inaasahang pag kakamali ang nangyari";
 };
 
+/**
+ * function for getting the point coordinate(longitude and latitude) of the brgy
+ * @param brgy that you want to get the coordinate
+ * @returns longitude and latitude object
+ */
 export function getPointCoordinate(
   brgy: barangayType | "calauan"
 ): getPointCoordinateReturnType {
@@ -139,4 +151,8 @@ export function getPointCoordinate(
     longitude: pointCoordinates[brgy][0],
     latitude: pointCoordinates[brgy][1],
   };
+}
+
+export function pointIsInsidePolygon(lng, lat, brgy) {
+  return booleanPointInPolygon(point([lng, lat]), polygonCoordinates[brgy]);
 }

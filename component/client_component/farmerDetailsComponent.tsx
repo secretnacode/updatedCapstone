@@ -2,6 +2,7 @@
 
 import {
   barangayType,
+  brangayaWithCalauanType,
   CheckCropListReturnType,
   CropFormErrorsType,
   EditCropListType,
@@ -37,7 +38,7 @@ import {
   AddFirstFarmerDetails,
   AddSecondFarmerDetails,
 } from "@/lib/server_action/farmerDetails";
-import { AlertTriangle, ClipboardPlus } from "lucide-react";
+import { AlertTriangle, ClipboardPlus, MapPin } from "lucide-react";
 import {
   CancelButton,
   FormCancelSubmitButton,
@@ -47,13 +48,17 @@ import {
 } from "../server_component/customComponent";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { MapComponent } from "./mapComponent";
-import { MapRef } from "@vis.gl/react-maplibre";
-import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
+import { LngLat, MapMouseEvent, MapRef, Marker } from "@vis.gl/react-maplibre";
+import {
+  polygonCoordinates,
+} from "@/util/helper_function/barangayCoordinates";
+import * as turf from "@turf/turf"
+
 
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(false);
+  const [nextStep, setNextStep] = useState<boolean>(true);
 
   return (
     <div>
@@ -90,12 +95,8 @@ export const FarmereDetailFirstStep: FC<{
   setNextStep: Dispatch<SetStateAction<boolean>>;
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ setNextStep, orgList }): ReactElement => {
-  const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
-  const [geoPolygon, setGeoPolygon] = useState<GeoJSON.GeoJSON | undefined>(
-    undefined
-  );
   const [newOrg, setNewOrg] = useState<boolean>(false);
   const [formError, setFormError] =
     useState<FormErrorType<FarmerFirstDetailFormType>>(null);
@@ -126,25 +127,6 @@ export const FarmereDetailFirstStep: FC<{
         return;
       }
     }
-
-    if (e.target.name === "farmerBarangay") {
-      if (baranggayList.includes(e.target.value))
-        return handleMapView(e.target.value as barangayType);
-
-      handleMapView("calauan");
-    }
-  };
-
-  const handleMapView = (brgy: barangayType | "calauan") => {
-    const { longitude, latitude } = getPointCoordinate(brgy);
-
-    setGeoPolygon(polygonCoordinates[brgy]);
-
-    mapRef.current?.flyTo({
-      center: [longitude, latitude],
-      duration: 2500,
-      zoom: 15,
-    });
   };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -313,8 +295,6 @@ export const FarmereDetailFirstStep: FC<{
           formError={formError?.farmerBarangay}
         />
 
-        <MapComponent ref={mapRef} cityToHighlight={geoPolygon} />
-
         <div>
           <SubmitButton>Ipasa</SubmitButton>
         </div>
@@ -324,10 +304,14 @@ export const FarmereDetailFirstStep: FC<{
 };
 
 export const FarmerDetailSecondStep: FC = () => {
+  const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
   const { handleDoneLoading, handleIsLoading } = useLoading();
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerDetailCropType[]>([]);
+  const [geoJson, setGeoJson] = useState<GeoJSON.GeoJSON | undefined>(
+    undefined
+  );
   const [formErrorList, setFormErrorList] = useState<CropFormErrorsType[]>([]);
   const [cancelProceed, setCancelProceed] = useState<boolean>(false);
   const [formError, setFormError] =
@@ -337,13 +321,16 @@ export const FarmerDetailSecondStep: FC = () => {
     editing: false,
     cropId: null,
   });
-  const [currentCrops, setCurrentCrops] = useState({
+  const [currentCrops, setCurrentCrops] = useState<FarmerDetailCropType>({
     cropId: "",
     cropName: "",
     cropFarmArea: "",
     farmAreaMeasurement: "",
     cropBaranggay: "",
+    cropCoor: { lng: Number(""), lat: Number("") },
   });
+
+  console.log(cropList);
 
   /**
    * use effect for only resubmiting()
@@ -364,6 +351,27 @@ export const FarmerDetailSecondStep: FC = () => {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+
+    if (e.target.name === "cropBaranggay")
+      handleMapCityToHighLight((e.target.value as barangayType) || "calauan");
+  };
+
+  const handleMapCityToHighLight = (brgy: brangayaWithCalauanType) => {
+    const { longitude, latitude } = getPointCoordinate(brgy);
+
+    setGeoJson(polygonCoordinates[brgy]);
+
+    mapRef.current?.flyTo({
+      center: [longitude, latitude],
+      duration: 2000,
+      zoom: brgy !== "calauan" ? 13 : 8,
+    });
+  };
+
+  const handleSetLngLat = (e: MapMouseEvent) => {
+    const { lng, lat } = e.lngLat;
+
+    if(turf.booleanPointInPolygon(turf.point([lng, lat], polygonCoordinates[currentCrops.cropBaranggay as barangayType])))
   };
 
   /**
@@ -525,8 +533,13 @@ export const FarmerDetailSecondStep: FC = () => {
       cropFarmArea: "",
       farmAreaMeasurement: "",
       cropBaranggay: "",
+      cropCoor: {
+        lng: Number(""),
+        lat: Number(""),
+      },
     });
     setFormError(null);
+    handleMapCityToHighLight("calauan");
   };
 
   /**
@@ -851,6 +864,31 @@ export const FarmerDetailSecondStep: FC = () => {
           ))}
           formError={formError?.cropBaranggay}
         />
+
+        <div>
+          <label className="label">
+            Pindutin ang mapa para ma-markahan kung saan makikita ang iyong
+            taniman:
+          </label>
+          {formError?.cropBaranggay}
+
+          <div className="rounded-xl overflow-hidden input !p-0">
+            <MapComponent
+              ref={mapRef}
+              cityToHighlight={geoJson}
+              onClick={handleSetLngLat}
+            >
+              <Marker
+                longitude={currentCrops.cropCoor.lng}
+                latitude={currentCrops.cropCoor.lat}
+                anchor="bottom"
+                style={{ cursor: "pointer" }}
+              >
+                <MapPin className="logo bg-red-400" />
+              </Marker>
+            </MapComponent>
+          </div>
+        </div>
 
         {editCropId.editing ? (
           <FormCancelSubmitButton

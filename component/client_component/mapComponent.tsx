@@ -27,8 +27,10 @@ const calauanMaxBounds: LngLatBoundsLike = [
 ];
 
 export const MapComponent: FC<MapComponentPropType> = ({
-  ref,
   cityToHighlight = polygonCoordinates.calauan,
+  children,
+  ref,
+  ...mapProp
 }) => {
   return (
     <div className="relative w-full !h-[400px]">
@@ -45,9 +47,10 @@ export const MapComponent: FC<MapComponentPropType> = ({
         minZoom={calauanViewState.zoom}
         maxPitch={0}
         maxBounds={calauanMaxBounds}
-        ref={ref}
         cursor="pointer"
         doubleClickZoom={false}
+        ref={ref}
+        {...mapProp}
       >
         <Source type={"geojson"} data={cityToHighlight}>
           <Layer
@@ -56,6 +59,8 @@ export const MapComponent: FC<MapComponentPropType> = ({
           />
           <Layer type="line" paint={{ "line-dasharray": [2, 3] }} />
         </Source>
+
+        {children}
       </Map>
     </div>
   );

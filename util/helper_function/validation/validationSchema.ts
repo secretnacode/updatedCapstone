@@ -198,6 +198,22 @@ export const farmerSecondDetailFormSchema = z.object({
   cropBaranggay: z.string().trim().min(1, {
     error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
   }),
+  cropCoor: z.object({
+    lng: z
+      .number({ error: "Unexpcted error in longitude of the crop" })
+      .refine((e) => !isNaN(Number(e)), {
+        error:
+          "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
+        path: ["cropCoor"],
+      }),
+    lat: z
+      .number({ error: "Unexpcted error in latitude of the crop" })
+      .refine((e) => !isNaN(Number(e)), {
+        error:
+          "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
+        path: ["cropCoor"],
+      }),
+  }),
 });
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
