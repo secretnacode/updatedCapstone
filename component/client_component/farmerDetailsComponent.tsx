@@ -52,7 +52,6 @@ import { LngLat, MapMouseEvent, MapRef, Marker } from "@vis.gl/react-maplibre";
 import {
   polygonCoordinates,
 } from "@/util/helper_function/barangayCoordinates";
-import * as turf from "@turf/turf"
 
 
 export const FarmerDetailForm: FC<{
@@ -371,8 +370,8 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleSetLngLat = (e: MapMouseEvent) => {
     const { lng, lat } = e.lngLat;
 
-    if(turf.booleanPointInPolygon(turf.point([lng, lat], polygonCoordinates[currentCrops.cropBaranggay as barangayType])))
-  };
+    if(turf.booleanPointInPolygon(turf.point([lng, lat]), polygonCoordinates[currentCrops.cropBaranggay as barangayType]))
+  };  
 
   /**
    * simple validation for the currentCrops,
