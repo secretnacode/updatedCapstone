@@ -1,5 +1,6 @@
 import {
   GetFarmerCropInfoQueryReturnType,
+  GetMyCropInfoQueryRetrunType,
   HandleInsertCropType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -54,6 +55,28 @@ export const GetFarmerCropInfoQuery = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pananim sa database`
+    );
+  }
+};
+
+export const GetMyCropInfoQuery = async (
+  userId: string
+): Promise<GetMyCropInfoQueryRetrunType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select "dayPlanted", "expectedHarvest", "cropLocation", "farmAreaMeasurement", "cropName", "cropLng", "cropLat" from capstone.crop where "farmerId" = $1`,
+        [userId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng iyong pananim sa database: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng iyong pananim sa database`
     );
   }
 };

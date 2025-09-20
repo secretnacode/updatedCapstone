@@ -831,9 +831,32 @@ export type MapComponentPropType = ChildrenType &
   MapProps & {
     cityToHighlight?: GeoJSON.GeoJSON;
     ref?: Ref<MapRef>;
+    mapWidth?: string | number;
+    mapHeight: string | number;
   };
 
 export type getPointCoordinateReturnType = {
   longitude: number;
   latitude: number;
+};
+
+export type GetMyCropInfoQueryRetrunType = {
+  dayPlanted: Date;
+  expectedHarvest: Date;
+  cropLocation: barangayType;
+  farmAreaMeasurement: string;
+  cropName: string;
+  cropLng: number;
+  cropLat: number;
+};
+
+export type GetMyCropInfoReturnType =
+  | ServerActionFailBaseType
+  | {
+      success: true;
+      myCropInfoList: GetMyCropInfoQueryRetrunType[];
+    };
+
+export type FarmerCropPagePropType = {
+  myCropInfoList: GetMyCropInfoQueryRetrunType[];
 };

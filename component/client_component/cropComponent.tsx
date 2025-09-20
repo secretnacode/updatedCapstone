@@ -5,6 +5,7 @@ import { FC, memo, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNotification } from "./provider/notificationProvider";
 import {
+  FarmerCropPagePropType,
   GetFarmerCropInfoQueryReturnType,
   ViewCropModalButtonPropType,
 } from "@/types";
@@ -12,6 +13,7 @@ import { useLoading } from "./provider/loadingProvider";
 import { X } from "lucide-react";
 import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 import { SubmitButton } from "../server_component/customComponent";
+import { MapComponent } from "./mapComponent";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -168,3 +170,21 @@ export const ViewCropModal: FC<{
 };
 
 export const MemoViewCropModal = memo(ViewCropModal);
+
+export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
+  myCropInfoList,
+}) => {
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      <div className="col-span-3">
+        <MapComponent mapHeight={400} cityToHighlight={} />
+      </div>
+
+      <div></div>
+    </div>
+  );
+};
+
+export const CropSideViewCard = () => {
+  return <div>side view</div>;
+};

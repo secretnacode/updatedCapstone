@@ -1,8 +1,11 @@
 "use server";
 
-import { GetFarmerCropInfoQuery } from "@/util/queries/crop";
+import {
+  GetFarmerCropInfoQuery,
+  GetMyCropInfoQuery,
+} from "@/util/queries/crop";
 import { ProtectedAction } from "../protectedActions";
-import { GetFarmerCropInfoReturnType } from "@/types";
+import { GetFarmerCropInfoReturnType, GetMyCropInfoReturnType } from "@/types";
 
 export const GetFarmerNameCrop = async () => {
   try {
@@ -34,6 +37,28 @@ export const GetFarmerCropInfo = async (
   } catch (error) {
     const err = error as Error;
     console.log(`May pag kakamali sa pag gawa ng mga pananim: ${err.message}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const GetMyCropInfo = async (): Promise<GetMyCropInfoReturnType> => {
+  try {
+    const userId = await ProtectedAction("read:crop");
+
+    return { success: true, myCropInfoList: await GetMyCropInfoQuery(userId) };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag kuha ng impormasyon sa iyong pananim: ${err.message}`
+    );
     return {
       success: false,
       notifError: [

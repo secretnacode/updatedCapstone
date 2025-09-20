@@ -49,7 +49,7 @@ export const NavbarComponent: FC = async () => {
   return (
     <div className="w-64 min-h-full bg-white border-r border-gray-200 flex flex-col">
       <Link href={`/${session?.work}`} className="p-6 border-b border-gray-200">
-        <h1 className="font-bold italic text-2xl title text-green-800 tracking-wide">
+        <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
           AgroFarm
         </h1>
       </Link>

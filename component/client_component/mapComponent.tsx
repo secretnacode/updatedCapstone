@@ -29,10 +29,12 @@ export const MapComponent: FC<MapComponentPropType> = ({
   cityToHighlight = polygonCoordinates.calauan,
   children,
   ref,
+  mapWidth = "100%",
+  mapHeight,
   ...mapProp
 }) => {
   return (
-    <div className="relative w-full !h-[400px]">
+    <>
       <Head>
         <link
           href="https://unpkg.com/maplibre-gl@5.7.1/dist/maplibre-gl.css"
@@ -42,7 +44,7 @@ export const MapComponent: FC<MapComponentPropType> = ({
       <Map
         initialViewState={calauanViewState}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"
-        style={{ position: "absolute" }}
+        style={{ width: mapWidth, height: mapHeight }}
         minZoom={calauanViewState.zoom}
         maxPitch={0}
         maxBounds={calauanMaxBounds}
@@ -61,6 +63,6 @@ export const MapComponent: FC<MapComponentPropType> = ({
 
         {children}
       </Map>
-    </div>
+    </>
   );
 };

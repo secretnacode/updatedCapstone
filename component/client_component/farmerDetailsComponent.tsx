@@ -56,7 +56,7 @@ import { Feature, Polygon } from "geojson";
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(false);
+  const [nextStep, setNextStep] = useState<boolean>(true);
 
   return (
     <div>
@@ -917,6 +917,7 @@ export const FarmerDetailSecondStep: FC = () => {
 
           <div className="rounded-xl overflow-hidden input !p-0">
             <MapComponent
+              mapHeight={"400px"}
               ref={mapRef}
               cityToHighlight={geoJson}
               onClick={
