@@ -3,6 +3,7 @@ import {
   pointCoordinates,
   polygonCoordinates,
 } from "@/util/helper_function/barangayCoordinates";
+import { intoFeaturePolygon } from "@/util/helper_function/reusableFunction";
 import Map, {
   Layer,
   LngLatBoundsLike,
@@ -26,7 +27,7 @@ const calauanMaxBounds: LngLatBoundsLike = [
 ];
 
 export const MapComponent: FC<MapComponentPropType> = ({
-  cityToHighlight = polygonCoordinates.calauan,
+  cityToHighlight = intoFeaturePolygon(polygonCoordinates.calauan),
   children,
   ref,
   mapWidth = "100%",

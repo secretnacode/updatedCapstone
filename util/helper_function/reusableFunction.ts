@@ -2,12 +2,19 @@ import {
   barangayType,
   brangayaWithCalauanType,
   getPointCoordinateReturnType,
+  intoFeatureCollectionDataParam,
   NotificationBaseType,
 } from "@/types";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { pointCoordinates, polygonCoordinates } from "./barangayCoordinates";
-import { booleanPointInPolygon, point } from "@turf/turf";
+import {
+  booleanPointInPolygon,
+  featureCollection,
+  point,
+  polygon,
+} from "@turf/turf";
+import { Feature } from "geojson";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -166,9 +173,17 @@ export function pointIsInsidePolygon(
   lat: number,
   brgy: barangayType
 ) {
-  return booleanPointInPolygon(point([lng, lat]), polygonCoordinates[brgy]);
+  return booleanPointInPolygon(
+    point([lng, lat]),
+    polygon(polygonCoordinates[brgy])
+  );
 }
 
+/**
+ * function for dynamic zoom of the map
+ * @param brgy that you want to zoom
+ * @returns value that can be use for the zoom prop of mapComponent
+ */
 export function mapZoomValByBarangay(brgy: brangayaWithCalauanType) {
   switch (brgy) {
     case "balayhangin":
@@ -208,4 +223,37 @@ export function mapZoomValByBarangay(brgy: brangayaWithCalauanType) {
     default:
       return 8;
   }
+}
+
+/**
+ * function for transforming the given coordinates into Geojson structure feature type point
+ * @param coordinates that you want to make a point type
+ * @returns a geojson fature point type
+ */
+export function intoFeaturePoint(lng: number, lat: number, name?: string) {
+  return point([lng, lat], name ? { name: name } : undefined);
+}
+
+/**
+ * function for transforming the given coordinates into Geojson structure feature type polygon
+ * @param coordinates that you want to make a polygon type
+ * @returns a geojson fature polygon type
+ */
+export function intoFeaturePolygon(coordinates: number[][][]) {
+  return polygon(coordinates);
+}
+
+export function intoFeatureCollection(data: intoFeatureCollectionDataParam[]) {
+  const val = data.map((geoType) => {
+    if (geoType.type === "polygon")
+      return polygon(geoType.coordinates, {
+        name: geoType.name,
+      });
+    else
+      return point([geoType.coordinates.lng, geoType.coordinates.lat], {
+        name: geoType.name,
+      });
+  });
+
+  return featureCollection(val as Feature[]);
 }

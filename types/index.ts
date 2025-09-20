@@ -6,7 +6,13 @@ import {
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import { MapProps, MapRef } from "@vis.gl/react-maplibre";
-import { Feature, Polygon } from "geojson";
+import {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  Polygon,
+} from "geojson";
 import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
@@ -824,12 +830,14 @@ export type pointCoordinatesType = Record<brangayaWithCalauanType, number[]>;
 
 export type polygonCoordinatesType = Record<
   brangayaWithCalauanType,
-  Feature<Polygon>
+  number[][][]
 >;
 
 export type MapComponentPropType = ChildrenType &
   MapProps & {
-    cityToHighlight?: GeoJSON.GeoJSON;
+    cityToHighlight?:
+      | FeatureCollection<Geometry, GeoJsonProperties>
+      | Feature<Polygon, GeoJsonProperties>;
     ref?: Ref<MapRef>;
     mapWidth?: string | number;
     mapHeight: string | number;
@@ -860,3 +868,7 @@ export type GetMyCropInfoReturnType =
 export type FarmerCropPagePropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType[];
 };
+
+export type intoFeatureCollectionDataParam =
+  | { type: "polygon"; coordinates: number[][][]; name: string }
+  | { type: "point"; coordinates: { lng: number; lat: number }; name: string };

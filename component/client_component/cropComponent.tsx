@@ -11,7 +11,10 @@ import {
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { X } from "lucide-react";
-import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
+import {
+  intoFeatureCollection,
+  ReadableDateFomat,
+} from "@/util/helper_function/reusableFunction";
 import { SubmitButton } from "../server_component/customComponent";
 import { MapComponent } from "./mapComponent";
 
@@ -177,7 +180,16 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="col-span-3">
-        <MapComponent mapHeight={400} cityToHighlight={} />
+        <MapComponent
+          mapHeight={400}
+          cityToHighlight={intoFeatureCollection(
+            myCropInfoList.map((brgy) => ({
+              type: "point",
+              coordinates: { lng: brgy.cropLng, lat: brgy.cropLat },
+              name: brgy.cropName,
+            }))
+          )}
+        />
       </div>
 
       <div></div>
