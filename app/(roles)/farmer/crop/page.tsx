@@ -16,12 +16,18 @@ export default async function Page() {
   }
 
   return (
-    <>
+    <div>
       {!cropInfo.success ? (
         <RenderNotification notif={cropInfo.notifError} />
       ) : (
-        <FarmerCropPage cropInfo={cropInfo.myCropInfoList} />
+        <div className="grid grid-cols-4 gap-4 h-full">
+          <div className="col-span-3 h-full">
+            <FarmerCropPage myCropInfoList={cropInfo.myCropInfoList} />
+          </div>
+
+          <div>side view</div>
+        </div>
       )}
-    </>
+    </div>
   );
 }

@@ -65,7 +65,7 @@ export const GetMyCropInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "dayPlanted", "expectedHarvest", "cropLocation", "farmAreaMeasurement", "cropName", "cropLng", "cropLat" from capstone.crop where "farmerId" = $1`,
+        `select "cropId", "dayPlanted", "expectedHarvest", "cropLocation", "farmAreaMeasurement", "cropName", "cropLng", "cropLat" from capstone.crop where "farmerId" = $1`,
         [userId]
       )
     ).rows;

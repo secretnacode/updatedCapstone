@@ -271,6 +271,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
  */
 export const TableComponent: FC<TableComponentPropType> = ({
   tableTitle,
+  tableClassName,
   noContentMessage,
   listCount,
   tableHeaderCell,
@@ -292,7 +293,9 @@ export const TableComponent: FC<TableComponentPropType> = ({
               <h1 className="title !text-2xl !font-bold ">{tableTitle}</h1>
             </div>
           )}
-          <div className="div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div
+            className={`div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${tableClassName}`}
+          >
             <div className="div overflow-x-auto">
               <table className="table-style farmerReportTable">
                 <thead>

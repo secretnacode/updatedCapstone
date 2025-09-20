@@ -32,6 +32,7 @@ import {
   CreateUUID,
   DateToYYMMDD,
   getPointCoordinate,
+  intoFeaturePolygon,
   mapZoomValByBarangay,
   pointIsInsidePolygon,
 } from "@/util/helper_function/reusableFunction";
@@ -39,7 +40,7 @@ import {
   AddFirstFarmerDetails,
   AddSecondFarmerDetails,
 } from "@/lib/server_action/farmerDetails";
-import { AlertTriangle, ClipboardPlus, MapPin } from "lucide-react";
+import { AlertTriangle, ClipboardPlus } from "lucide-react";
 import {
   CancelButton,
   FormCancelSubmitButton,
@@ -48,8 +49,8 @@ import {
   SubmitButton,
 } from "../server_component/customComponent";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { MapComponent } from "./mapComponent";
-import { MapMouseEvent, MapRef, Marker } from "@vis.gl/react-maplibre";
+import { MapComponent, MapMarkerComponent } from "./mapComponent";
+import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import { Feature, Polygon } from "geojson";
 
@@ -366,7 +367,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const handleMapCityToHighLight = (brgy: brangayaWithCalauanType) => {
     const { longitude, latitude } = getPointCoordinate(brgy);
 
-    setGeoJson(polygonCoordinates[brgy]);
+    setGeoJson(intoFeaturePolygon(polygonCoordinates[brgy]));
 
     mapRef.current?.flyTo({
       center: [longitude, latitude],
@@ -915,29 +916,21 @@ export const FarmerDetailSecondStep: FC = () => {
               </p>
             ))}
 
-          <div className="rounded-xl overflow-hidden input !p-0">
-            <MapComponent
-              mapHeight={"400px"}
-              ref={mapRef}
-              cityToHighlight={geoJson}
-              onClick={
-                currentCrops.cropBaranggay
-                  ? handleSetLngLat
-                  : handlePickBrgyFirst
-              }
-            >
-              {currentCrops.cropCoor.lng && currentCrops.cropCoor.lat && (
-                <Marker
-                  longitude={currentCrops.cropCoor.lng}
-                  latitude={currentCrops.cropCoor.lat}
-                  anchor="bottom"
-                  style={{ cursor: "pointer" }}
-                >
-                  <MapPin className="logo bg-red-400" />
-                </Marker>
-              )}
-            </MapComponent>
-          </div>
+          <MapComponent
+            mapHeight={"400px"}
+            ref={mapRef}
+            cityToHighlight={geoJson}
+            onClick={
+              currentCrops.cropBaranggay ? handleSetLngLat : handlePickBrgyFirst
+            }
+          >
+            {currentCrops.cropCoor.lng && currentCrops.cropCoor.lat && (
+              <MapMarkerComponent
+                markerLng={currentCrops.cropCoor.lng}
+                markerLat={currentCrops.cropCoor.lat}
+              />
+            )}
+          </MapComponent>
         </div>
 
         {editCropId.editing ? (

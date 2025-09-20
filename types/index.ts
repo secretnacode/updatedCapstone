@@ -17,11 +17,13 @@ import { LucideIcon, LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
   ChangeEvent,
+  Dispatch,
   FormEvent,
   ForwardRefExoticComponent,
   ReactNode,
   Ref,
   RefAttributes,
+  SetStateAction,
 } from "react";
 import z from "zod/v4";
 
@@ -708,6 +710,7 @@ export type TableCellPropType = ChildrenType & {
 
 export type TableComponentPropType = {
   tableTitle?: string;
+  tableClassName?: string;
   noContentMessage: string;
   listCount: number;
   tableHeaderCell: Readonly<ReactNode>;
@@ -849,6 +852,7 @@ export type getPointCoordinateReturnType = {
 };
 
 export type GetMyCropInfoQueryRetrunType = {
+  cropId: string;
   dayPlanted: Date;
   expectedHarvest: Date;
   cropLocation: barangayType;
@@ -872,3 +876,26 @@ export type FarmerCropPagePropType = {
 export type intoFeatureCollectionDataParam =
   | { type: "polygon"; coordinates: number[][][]; name: string }
   | { type: "point"; coordinates: { lng: number; lat: number }; name: string };
+
+export type MapSourceComponentPropType = {
+  data?:
+    | FeatureCollection<Geometry, GeoJsonProperties>
+    | Feature<Polygon, GeoJsonProperties>;
+};
+
+export type MapMarkerComponentPropType = {
+  markerLng: number;
+  markerLat: number;
+};
+
+export type FarmerCropPageShowModalStateType = {
+  addModal: boolean;
+  editModal: boolean;
+  deleteModal: boolean;
+};
+
+export type EditCropModalPropType = {
+  myCropInfoList: GetMyCropInfoQueryRetrunType | undefined;
+  hideEditCropModal: () => void;
+  setCropIdToModify: Dispatch<SetStateAction<string | null>>;
+};
