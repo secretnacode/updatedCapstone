@@ -15,6 +15,7 @@ import {
   polygon,
 } from "@turf/turf";
 import { Feature } from "geojson";
+import { LngLatLike } from "maplibre-gl";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -161,6 +162,10 @@ export function getPointCoordinate(
   };
 }
 
+export function getBrgyCoordinate(brgy: brangayaWithCalauanType): LngLatLike {
+  return [pointCoordinates[brgy][0], pointCoordinates[brgy][1]];
+}
+
 /**
  * function that checks the mark location if its inside the polygon(highlithed part of the city)
  * @param lng longtitude coordinate
@@ -268,4 +273,8 @@ export function farmAreaMeasurementValue(): {
     { radioLabel: "Talampakang Kuwadrado (Square Feet)", radioValue: "sqft" },
     { radioLabel: "Metrong Kuwadrado (Square Meter)", radioValue: "sqm" },
   ];
+}
+
+export function pickBrgyFirst(): string {
+  return "Pumili muna ng barangay na pinag tataniman";
 }

@@ -1,10 +1,12 @@
 import {
+  barangayType,
   ButtonPropType,
   CropFormPropType,
   FormCancelSubmitButtonPropType,
   FormDivInputRadioPropType,
   FormDivLabelInputPropType,
   FormDivLabelSelectType,
+  FormMapComponentPropType,
   ModalNoticePropType,
   TableComponentPropType,
 } from "@/types";
@@ -19,7 +21,13 @@ import {
 import {
   baranggayList,
   farmAreaMeasurementValue,
+  intoFeaturePolygon,
 } from "@/util/helper_function/reusableFunction";
+import {
+  MapComponent,
+  MapMarkerComponent,
+} from "../client_component/mapComponent";
+import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 
 export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
@@ -229,15 +237,16 @@ export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
             <input
               type="radio"
               name={inputName}
+              id={val.radioValue}
               onChange={onChange}
               value={val.radioValue}
               checked={inputVal === val.radioValue}
-              className={`${inputClassName} input input-radio`}
+              className={`${inputClassName} text-green-600 focus:ring-green-500 cursor-pointer mr-1`}
             />
 
             <label
-              htmlFor={inputName}
-              className="label !font-normal cursor-pointer"
+              htmlFor={val.radioValue}
+              className="text-sm text-gray-700 cursor-pointer"
             >
               {val.radioLabel}
             </label>
@@ -366,13 +375,52 @@ export const TableComponent: FC<TableComponentPropType> = ({
   );
 };
 
-export const CropForm: FC<CropFormPropType> = ({
-  handleChangeVal,
-  currentCrops,
+export const FormMapComponent: FC<FormMapComponentPropType> = ({
+  label = "Pindutin ang mapa para ma-markahan kung saan makikita ang iyong taniman:",
+  mapRef,
+  mapHeight,
+  cityToHighlight,
+  mapOnClick,
+  coor,
   formError,
 }) => {
   return (
-    <>
+    <div>
+      <label className="label">{label}</label>
+
+      {formError &&
+        formError.map((error, index) => (
+          <p key={index} className="p-error">
+            {error}
+          </p>
+        ))}
+
+      <MapComponent
+        mapHeight={mapHeight}
+        ref={mapRef}
+        cityToHighlight={intoFeaturePolygon(
+          polygonCoordinates[cityToHighlight]
+        )}
+        onClick={mapOnClick}
+      >
+        {coor.lng && coor.lat && (
+          <MapMarkerComponent markerLng={coor.lng} markerLat={coor.lat} />
+        )}
+      </MapComponent>
+    </div>
+  );
+};
+
+export const CropForm: FC<CropFormPropType> = ({
+  handleChangeVal,
+  currentCrops,
+  mapHeight,
+  mapRef,
+  mapOnClick,
+  formError,
+}) => {
+  return (
+    <div className="space-y-5">
       <FormDivLabelInput
         labelMessage="Pangalanan ng taniman:"
         inputName="cropName"
@@ -402,10 +450,6 @@ export const CropForm: FC<CropFormPropType> = ({
         selectName="cropBaranggay"
         selectValue={currentCrops.cropBaranggay}
         onChange={handleChangeVal}
-        optionDefaultValueLabel={{
-          label: "--Pumili--Ng--Lugar--",
-          value: "",
-        }}
         childrenOption={baranggayList.map((brgy) => (
           <option key={brgy} value={brgy}>
             {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
@@ -413,6 +457,18 @@ export const CropForm: FC<CropFormPropType> = ({
         ))}
         formError={formError?.cropBaranggay}
       />
-    </>
+
+      <FormMapComponent
+        mapOnClick={mapOnClick}
+        mapHeight={mapHeight}
+        mapRef={mapRef}
+        cityToHighlight={currentCrops.cropBaranggay as barangayType}
+        coor={{
+          lat: currentCrops.cropCoor.lat,
+          lng: currentCrops.cropCoor.lng,
+        }}
+        formError={formError?.cropCoor}
+      />
+    </div>
   );
 };

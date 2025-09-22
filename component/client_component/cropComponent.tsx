@@ -2,6 +2,7 @@
 
 import { GetFarmerCropInfo } from "@/lib/server_action/crop";
 import {
+  ChangeEvent,
   FC,
   memo,
   MouseEvent,
@@ -18,23 +19,29 @@ import {
   GetFarmerCropInfoQueryReturnType,
   EditCropModalPropType,
   ViewCropModalButtonPropType,
+  FarmerSecondDetailFormType,
+  FormErrorType,
+  barangayType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
 import {
-  DateToYYMMDD,
+  getBrgyCoordinate,
   intoFeatureCollection,
+  mapZoomValByBarangay,
+  pickBrgyFirst,
   ReadableDateFomat,
 } from "@/util/helper_function/reusableFunction";
 import {
   CancelButton,
+  CropForm,
   FormCancelSubmitButton,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
-import { MapRef } from "@vis.gl/react-maplibre";
+import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -266,21 +273,19 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           listCount={myCropInfoList.length}
           tableHeaderCell={
             <>
+              <th>#</th>
               <th>Pangalan</th>
               <th>Lokasyon</th>
               <th>Sukat(HA)</th>
-              <th>Araw na itinanim</th>
-              <th>inaasahang araw ng pag-aani</th>
               <th></th>
             </>
           }
-          tableCell={myCropInfoList.map((crop) => (
+          tableCell={myCropInfoList.map((crop, index) => (
             <tr key={crop.cropName}>
-              <td>{crop.cropName}</td>
-              <td>{crop.cropLocation}</td>
-              <td>{crop.farmAreaMeasurement}</td>
-              <td>{DateToYYMMDD(new Date())}</td>
-              <td>{DateToYYMMDD(new Date())}</td>
+              <td className="text-color">{index + 1}</td>
+              <td className="text-color">{crop.cropName}</td>
+              <td className="text-color">{crop.cropLocation}</td>
+              <td className="text-color">{crop.farmAreaMeasurement}</td>
               <td>
                 <div className="flex flex-row gap-1">
                   <SubmitButton
@@ -293,7 +298,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
 
                   <SubmitButton
                     type="button"
-                    className="slimer-button !bg-blue-500 hover:!bg-blue-700"
+                    className="slimer-button blue-button"
                     onClick={() => {
                       setShowModal((prev) => ({ ...prev, editModal: true }));
                       setCropIdToModify(crop.cropId);
@@ -334,8 +339,50 @@ const EditCropModal: FC<EditCropModalPropType> = ({
   myCropInfoList,
   hideEditCropModal,
 }) => {
+  const mapRef = useRef<MapRef>(null);
+  const [formError, setFormError] =
+    useState<FormErrorType<FarmerSecondDetailFormType>>(null);
+  const [cropVal, setCropVal] = useState<FarmerSecondDetailFormType>({
+    cropId: myCropInfoList?.cropId ?? "",
+    cropName: myCropInfoList?.cropName ?? "",
+    cropFarmArea: myCropInfoList?.farmAreaMeasurement ?? "",
+    farmAreaMeasurement: myCropInfoList?.farmAreaMeasurement ?? "",
+    cropBaranggay: myCropInfoList?.cropLocation ?? "",
+    cropCoor: {
+      lat: myCropInfoList?.cropLat ?? 0,
+      lng: myCropInfoList?.cropLng ?? 0,
+    },
+  });
+
   // check if the myCropInfoList exist, if not it will hide the modal because .find() also return undefined
-  if (!myCropInfoList) hideEditCropModal("editModal");
+  useEffect(() => {
+    if (!myCropInfoList) hideEditCropModal("editModal");
+  }, [myCropInfoList, hideEditCropModal]);
+
+  const handleChangeVal = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+    if (e.target.name === "cropBaranggay") {
+      mapRef.current?.flyTo({
+        center: getBrgyCoordinate(e.target.value as barangayType),
+        duration: 2000,
+        zoom: mapZoomValByBarangay(e.target.value as barangayType),
+      });
+    }
+  };
+
+  const handleSetLngLat = (e: MapMouseEvent) => {
+    setCropVal((prev) => ({
+      ...prev,
+      cropCoor: { lng: e.lngLat.lng, lat: e.lngLat.lat },
+    }));
+  };
+
+  const handleSetBrgyFirst = () => {
+    setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
+  };
 
   return (
     <div
@@ -347,24 +394,27 @@ const EditCropModal: FC<EditCropModalPropType> = ({
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
         <form action="">
-          <MapComponent mapHeight={250} />
-          <div>
-            <p>
-              WORK IN PROGRESS: iniintay kung lalagyan ba ng function kung san
-              mag rerequeset si farmer para makapag edit/dagdag ng panibagong
-              set ng pananim
-            </p>
-          </div>
-          <div>
-            <FormCancelSubmitButton
-              submitButtonLabel="Baguhin"
-              cancelButtonLabel="Baguhin"
-              cancelOnClick={() => hideEditCropModal("editModal")}
-              submitType="button"
-              submitClassName="slimer-button"
-              cancelClassName="slimer-button"
+          <div className="max-h-[500px] overflow-y-auto">
+            <CropForm
+              currentCrops={cropVal}
+              handleChangeVal={handleChangeVal}
+              mapOnClick={
+                cropVal.cropBaranggay ? handleSetLngLat : handleSetBrgyFirst
+              }
+              mapRef={mapRef}
+              mapHeight={"300px"}
+              formError={formError}
             />
           </div>
+
+          <FormCancelSubmitButton
+            submitButtonLabel="Baguhin"
+            cancelButtonLabel="Baguhin"
+            cancelOnClick={() => hideEditCropModal("editModal")}
+            submitType="button"
+            submitClassName="slimer-button"
+            cancelClassName="slimer-button"
+          />
         </form>
       </div>
     </div>

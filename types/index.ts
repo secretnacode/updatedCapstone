@@ -14,6 +14,7 @@ import {
   Polygon,
 } from "geojson";
 import { LucideIcon, LucideProps } from "lucide-react";
+import { MapMouseEvent } from "maplibre-gl";
 import {
   ButtonHTMLAttributes,
   ChangeEvent,
@@ -865,8 +866,6 @@ export type getPointCoordinateReturnType = {
 
 export type GetMyCropInfoQueryRetrunType = {
   cropId: string;
-  dayPlanted: Date;
-  expectedHarvest: Date;
   cropLocation: barangayType;
   farmAreaMeasurement: string;
   cropName: string;
@@ -912,17 +911,23 @@ export type EditCropModalPropType = {
   setCropIdToModify: Dispatch<SetStateAction<string | null>>;
 };
 
-export type CropFormInputNameType = {
-  cropName: string;
-  cropFarmArea: string;
-  farmAreaMeasurement: string;
-  cropBaranggay: string;
-};
-
 export type CropFormPropType = {
-  currentCrops: CropFormInputNameType;
+  currentCrops: FarmerSecondDetailFormType;
   handleChangeVal: (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
-  formError: FormErrorType<CropFormInputNameType>;
+  mapRef: Ref<MapRef>;
+  mapHeight: string | number;
+  mapOnClick: (e: MapMouseEvent) => void;
+  formError: FormErrorType<FarmerSecondDetailFormType>;
+};
+
+export type FormMapComponentPropType = {
+  label?: string;
+  mapRef: Ref<MapRef>;
+  mapHeight: string | number;
+  cityToHighlight: barangayType;
+  mapOnClick: (e: MapMouseEvent) => void;
+  coor: { lng: number; lat: number };
+  formError?: string[];
 };

@@ -179,6 +179,9 @@ body {
   .cancel-button {
     @apply bg-red-500 hover:bg-red-600 text-white flex items-center justify-center gap-3 transition-colors disabled:opacity-50;
   }
+  .blue-button {
+    @apply !bg-blue-500 hover:!bg-blue-700;
+  }
   .table-style {
     @apply w-full divide-y divide-gray-200;
   }
@@ -223,5 +226,8 @@ body {
   }
   .profile-link-button-design {
     @apply bg-orange-300 hover:bg-orange-400 active:ring-orange-500;
+  }
+  .text-color {
+    @apply text-gray-900;
   }
 }

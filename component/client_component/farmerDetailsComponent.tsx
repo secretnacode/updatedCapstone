@@ -31,9 +31,11 @@ import {
   baranggayList,
   CreateUUID,
   DateToYYMMDD,
+  farmAreaMeasurementValue,
   getPointCoordinate,
   intoFeaturePolygon,
   mapZoomValByBarangay,
+  pickBrgyFirst,
   pointIsInsidePolygon,
 } from "@/util/helper_function/reusableFunction";
 import {
@@ -44,6 +46,7 @@ import { AlertTriangle, ClipboardPlus } from "lucide-react";
 import {
   CancelButton,
   FormCancelSubmitButton,
+  FormDivInputRadio,
   FormDivLabelInput,
   FormDivLabelSelect,
   SubmitButton,
@@ -379,7 +382,7 @@ export const FarmerDetailSecondStep: FC = () => {
   const handlePickBrgyFirst = () => {
     setFormError((prev) => ({
       ...prev,
-      cropCoor: ["Pumili muna ng barangay na pinag tataniman"],
+      cropCoor: [pickBrgyFirst()],
     }));
   };
 
@@ -844,47 +847,13 @@ export const FarmerDetailSecondStep: FC = () => {
           formError={formError?.cropFarmArea}
         />
 
-        <div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Ektarya (Hectares)", value: "ha" },
-              { label: "Akre (Acres)", value: "ac" },
-              { label: "Talampakang Kuwadrado (Square Feet)", value: "sqft" },
-              { label: "Metrong Kuwadrado (Square Meter)", value: "sqm" },
-            ].map((measurement) => (
-              <div key={measurement.label}>
-                <input
-                  type="radio"
-                  name="farmAreaMeasurement"
-                  value={measurement.value}
-                  checked={
-                    currentCrops.farmAreaMeasurement === measurement.value
-                  }
-                  onChange={handleChangeVal}
-                  className="text-green-600 focus:ring-green-500 cursor-pointer"
-                />
-                <label
-                  htmlFor="farmAreaMeasurement"
-                  className="text-sm text-gray-700 cursor-pointer"
-                  onClick={() =>
-                    setCurrentCrops((prev) => ({
-                      ...prev,
-                      farmAreaMeasurement: measurement.value,
-                    }))
-                  }
-                >
-                  {measurement.label}
-                </label>
-              </div>
-            ))}
-          </div>
-          {formError?.farmAreaMeasurement &&
-            formError?.farmAreaMeasurement?.map((error) => (
-              <p key={error} className="text-red-500 text-sm">
-                {error}
-              </p>
-            ))}
-        </div>
+        <FormDivInputRadio
+          radioList={farmAreaMeasurementValue()}
+          inputName="farmAreaMeasurement"
+          inputVal={currentCrops.farmAreaMeasurement}
+          onChange={handleChangeVal}
+          formError={formError?.farmAreaMeasurement}
+        />
 
         <FormDivLabelSelect
           labelMessage="Lugar ng Iyong pinagtataniman:"
