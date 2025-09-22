@@ -3,6 +3,8 @@ import { RenderNotification } from "@/component/client_component/fallbackCompone
 import { GetMyCropInfo } from "@/lib/server_action/crop";
 import { GetMyCropInfoReturnType } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let cropInfo: GetMyCropInfoReturnType;
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   MapComponentPropType,
   MapMarkerComponentPropType,
@@ -15,9 +17,9 @@ import Map, {
   Source,
   ViewState,
 } from "@vis.gl/react-maplibre";
+
 import { MapPin } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import Head from "next/head";
 import { FC } from "react";
 
 const calauanViewState: Partial<ViewState> = {
@@ -48,12 +50,6 @@ export const MapComponent: FC<MapComponentPropType> = ({
 }) => {
   return (
     <div className="rounded-xl overflow-hidden input !p-0">
-      <Head>
-        <link
-          href="https://unpkg.com/maplibre-gl@5.7.1/dist/maplibre-gl.css"
-          rel="stylesheet"
-        />
-      </Head>
       <Map
         initialViewState={calauanViewState}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"
