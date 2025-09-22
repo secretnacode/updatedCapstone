@@ -1,6 +1,8 @@
 import {
   ButtonPropType,
+  CropFormPropType,
   FormCancelSubmitButtonPropType,
+  FormDivInputRadioPropType,
   FormDivLabelInputPropType,
   FormDivLabelSelectType,
   ModalNoticePropType,
@@ -14,6 +16,10 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
+import {
+  baranggayList,
+  farmAreaMeasurementValue,
+} from "@/util/helper_function/reusableFunction";
 
 export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
@@ -36,15 +42,15 @@ export const SubmitButton: FC<ButtonPropType> = ({
 
 export const CancelButton: FC<ButtonPropType> = ({
   type = "button",
-  onClick,
   className = "",
   children,
+  ...buttonProp
 }) => {
   return (
     <button
       type={type}
-      onClick={onClick}
       className={`button cancel-button ${className}`}
+      {...buttonProp}
     >
       {children}
     </button>
@@ -56,19 +62,25 @@ export const FormCancelSubmitButton: FC<FormCancelSubmitButtonPropType> = ({
   submitOnClick,
   submitLogo: SubmitLogo,
   submitButtonLabel,
+  submitClassName = "",
   submitType = "submit",
   cancelOnClick,
   cancelLogo: CancelLogo,
   cancelButtonLabel,
+  cancelClassName = "",
 }) => {
   return (
     <div className={`div flex justify-end gap-4 pt-6 ${divClassName}`}>
-      <SubmitButton onClick={submitOnClick} type={submitType}>
+      <SubmitButton
+        onClick={submitOnClick}
+        className={`${submitClassName}`}
+        type={submitType}
+      >
         {SubmitLogo && <SubmitLogo />}
         {submitButtonLabel}
       </SubmitButton>
 
-      <CancelButton onClick={cancelOnClick}>
+      <CancelButton onClick={cancelOnClick} className={`${cancelClassName}`}>
         {CancelLogo && <CancelLogo />}
         {cancelButtonLabel}
       </CancelButton>
@@ -200,6 +212,49 @@ export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
   );
 };
 
+export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
+  radioList,
+  inputName,
+  inputVal,
+  onChange,
+  divClassName = "",
+  inputClassName = "",
+  formError,
+}) => {
+  return (
+    <div>
+      <div className={`${divClassName} grid grid-cols-2 gap-4`}>
+        {radioList.map((val) => (
+          <div key={val.radioLabel}>
+            <input
+              type="radio"
+              name={inputName}
+              onChange={onChange}
+              value={val.radioValue}
+              checked={inputVal === val.radioValue}
+              className={`${inputClassName} input input-radio`}
+            />
+
+            <label
+              htmlFor={inputName}
+              className="label !font-normal cursor-pointer"
+            >
+              {val.radioLabel}
+            </label>
+          </div>
+        ))}
+      </div>
+
+      {formError &&
+        formError.map((message, index) => (
+          <p key={message + index} className="p p-error">
+            {message}
+          </p>
+        ))}
+    </div>
+  );
+};
+
 export const ModalNotice: FC<ModalNoticePropType> = ({
   logo,
   modalTitle,
@@ -307,6 +362,57 @@ export const TableComponent: FC<TableComponentPropType> = ({
           </div>
         </>
       )}
+    </>
+  );
+};
+
+export const CropForm: FC<CropFormPropType> = ({
+  handleChangeVal,
+  currentCrops,
+  formError,
+}) => {
+  return (
+    <>
+      <FormDivLabelInput
+        labelMessage="Pangalanan ng taniman:"
+        inputName="cropName"
+        onChange={handleChangeVal}
+        inputValue={currentCrops.cropName}
+        formError={formError?.cropName}
+      />
+
+      <FormDivLabelInput
+        labelMessage="Sukat ng lote na iyong Pinagtataniman:"
+        inputName="cropFarmArea"
+        onChange={handleChangeVal}
+        inputValue={currentCrops.cropFarmArea}
+        formError={formError?.cropFarmArea}
+      />
+
+      <FormDivInputRadio
+        radioList={farmAreaMeasurementValue()}
+        inputName="farmAreaMeasurement"
+        inputVal={currentCrops.farmAreaMeasurement}
+        onChange={handleChangeVal}
+        formError={formError?.farmAreaMeasurement}
+      />
+
+      <FormDivLabelSelect
+        labelMessage="Lugar ng Iyong pinagtataniman:"
+        selectName="cropBaranggay"
+        selectValue={currentCrops.cropBaranggay}
+        onChange={handleChangeVal}
+        optionDefaultValueLabel={{
+          label: "--Pumili--Ng--Lugar--",
+          value: "",
+        }}
+        childrenOption={baranggayList.map((brgy) => (
+          <option key={brgy} value={brgy}>
+            {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+          </option>
+        ))}
+        formError={formError?.cropBaranggay}
+      />
     </>
   );
 };

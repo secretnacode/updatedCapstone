@@ -608,6 +608,16 @@ export type FormDivLabelSelectType = {
   formError?: string[];
 };
 
+export type FormDivInputRadioPropType = {
+  radioList: { radioValue: string; radioLabel: string }[];
+  inputName: string;
+  inputVal: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  divClassName?: string;
+  inputClassName?: string;
+  formError?: string[];
+};
+
 export type LogoPropType = {
   logo: LucideIcon;
   className?: string;
@@ -623,10 +633,12 @@ export type FormCancelSubmitButtonPropType = {
   submitOnClick?: () => void;
   submitButtonLabel: string;
   submitLogo?: LucideIcon;
+  submitClassName?: string;
   submitType?: ButtonTypeAttribType;
   cancelOnClick?: () => void;
   cancelButtonLabel: string;
   cancelLogo?: LucideIcon;
+  cancelClassName?: string;
 };
 
 export type ModalNoticePropType = {
@@ -896,6 +908,21 @@ export type FarmerCropPageShowModalStateType = {
 
 export type EditCropModalPropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType | undefined;
-  hideEditCropModal: () => void;
+  hideEditCropModal: (modal: keyof FarmerCropPageShowModalStateType) => void;
   setCropIdToModify: Dispatch<SetStateAction<string | null>>;
+};
+
+export type CropFormInputNameType = {
+  cropName: string;
+  cropFarmArea: string;
+  farmAreaMeasurement: string;
+  cropBaranggay: string;
+};
+
+export type CropFormPropType = {
+  currentCrops: CropFormInputNameType;
+  handleChangeVal: (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
+  formError: FormErrorType<CropFormInputNameType>;
 };

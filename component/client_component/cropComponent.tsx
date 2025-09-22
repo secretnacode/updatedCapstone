@@ -1,7 +1,15 @@
 "use client";
 
 import { GetFarmerCropInfo } from "@/lib/server_action/crop";
-import { FC, memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  FC,
+  memo,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useNotification } from "./provider/notificationProvider";
 import {
@@ -20,6 +28,7 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import {
   CancelButton,
+  FormCancelSubmitButton,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
@@ -202,6 +211,11 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleCloseModal = (modal: keyof FarmerCropPageShowModalStateType) => {
+    setShowModal((prev) => ({ ...prev, [modal]: false }));
+    setCropIdToModify(null);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -271,7 +285,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                 <div className="flex flex-row gap-1">
                   <SubmitButton
                     type="button"
-                    className="!px-3 !py-1 !rounded-lg"
+                    className="slimer-button"
                     onClick={() => handleViewCrop(crop.cropLng, crop.cropLat)}
                   >
                     Tingnan
@@ -279,7 +293,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
 
                   <SubmitButton
                     type="button"
-                    className="!px-3 !py-1 !rounded-lg !bg-blue-500 hover:!bg-blue-700"
+                    className="slimer-button !bg-blue-500 hover:!bg-blue-700"
                     onClick={() => {
                       setShowModal((prev) => ({ ...prev, editModal: true }));
                       setCropIdToModify(crop.cropId);
@@ -289,7 +303,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   </SubmitButton>
 
                   <CancelButton
-                    className="!px-3 !py-1 !rounded-lg"
+                    className="slimer-button"
                     onClick={() => {
                       setShowModal((prev) => ({ ...prev, deleteModal: true }));
                       setCropIdToModify(crop.cropId);
@@ -308,9 +322,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           myCropInfoList={myCropInfoList.find(
             (crop) => crop.cropId === cropIdToModify
           )}
-          hideEditCropModal={() =>
-            setShowModal((prev) => ({ ...prev, editModal: false }))
-          }
+          hideEditCropModal={handleCloseModal}
           setCropIdToModify={setCropIdToModify}
         />
       )}
@@ -321,9 +333,40 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
 const EditCropModal: FC<EditCropModalPropType> = ({
   myCropInfoList,
   hideEditCropModal,
-  setCropIdToModify,
 }) => {
-  // check if the myCropInfoList exist, if not it will hide the modal
-  if (!myCropInfoList) hideEditCropModal();
-  return <div>hawow po</div>;
+  // check if the myCropInfoList exist, if not it will hide the modal because .find() also return undefined
+  if (!myCropInfoList) hideEditCropModal("editModal");
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-40"
+      onClick={() => hideEditCropModal("editModal")}
+    >
+      <div
+        className="p-4 bg-white rounded-lg w-1/2"
+        onClick={(e: MouseEvent) => e.stopPropagation()}
+      >
+        <form action="">
+          <MapComponent mapHeight={250} />
+          <div>
+            <p>
+              WORK IN PROGRESS: iniintay kung lalagyan ba ng function kung san
+              mag rerequeset si farmer para makapag edit/dagdag ng panibagong
+              set ng pananim
+            </p>
+          </div>
+          <div>
+            <FormCancelSubmitButton
+              submitButtonLabel="Baguhin"
+              cancelButtonLabel="Baguhin"
+              cancelOnClick={() => hideEditCropModal("editModal")}
+              submitType="button"
+              submitClassName="slimer-button"
+              cancelClassName="slimer-button"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };

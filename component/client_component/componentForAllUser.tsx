@@ -34,7 +34,6 @@ import {
   UserOrganizationInfoForm,
   UserProfileForm,
 } from "../server_component/componentForAllUser";
-
 export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   isViewing,
   userFarmerInfo,

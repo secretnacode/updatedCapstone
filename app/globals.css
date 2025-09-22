@@ -134,6 +134,9 @@ body {
   .input {
     @apply w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 disabled:text-gray-500;
   }
+  .input-radio {
+    @apply !text-green-600 focus:ring-green-500 cursor-pointer !p-0 bg-transparent border-0 !rounded-none;
+  }
   .label {
     @apply block text-sm font-medium text-gray-700;
   }
@@ -166,6 +169,9 @@ body {
   }
   .button {
     @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-xl text-nowrap;
+  }
+  .slimer-button {
+    @apply !px-3 !py-1 !rounded-lg;
   }
   .submit-button {
     @apply bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50;

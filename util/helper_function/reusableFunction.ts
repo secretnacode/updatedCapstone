@@ -257,3 +257,15 @@ export function intoFeatureCollection(data: intoFeatureCollectionDataParam[]) {
 
   return featureCollection(val as Feature[]);
 }
+
+export function farmAreaMeasurementValue(): {
+  radioLabel: string;
+  radioValue: string;
+}[] {
+  return [
+    { radioLabel: "Ektarya (Hectares)", radioValue: "ha" },
+    { radioLabel: "Akre (Acres)", radioValue: "ac" },
+    { radioLabel: "Talampakang Kuwadrado (Square Feet)", radioValue: "sqft" },
+    { radioLabel: "Metrong Kuwadrado (Square Meter)", radioValue: "sqm" },
+  ];
+}
