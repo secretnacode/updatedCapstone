@@ -22,6 +22,7 @@ import {
   FarmerSecondDetailFormType,
   FormErrorType,
   barangayType,
+  intoFeatureCollectionDataParam,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
@@ -30,6 +31,7 @@ import {
   intoFeatureCollection,
   mapZoomValByBarangay,
   pickBrgyFirst,
+  pointIsInsidePolygon,
   ReadableDateFomat,
 } from "@/util/helper_function/reusableFunction";
 import {
@@ -223,6 +225,26 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     setCropIdToModify(null);
   };
 
+  const handleCityToLight = (): intoFeatureCollectionDataParam[] => {
+    return myCropInfoList.reduce(
+      (acc: intoFeatureCollectionDataParam[], info) => {
+        if (acc.some((val) => val.name === info.cropLocation)) {
+          return acc;
+        }
+
+        return [
+          ...acc,
+          {
+            type: "polygon",
+            coordinates: polygonCoordinates[info.cropLocation],
+            name: info.cropLocation,
+          },
+        ] as intoFeatureCollectionDataParam[];
+      },
+      []
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -230,13 +252,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           id="Map"
           mapHeight={400}
           ref={mapRef}
-          cityToHighlight={intoFeatureCollection(
-            myCropInfoList.map((brgy) => ({
-              type: "polygon",
-              coordinates: polygonCoordinates[brgy.cropLocation],
-              name: brgy.cropName,
-            }))
-          )}
+          cityToHighlight={intoFeatureCollection(handleCityToLight())}
         >
           {myCropInfoList[0].cropLat &&
             myCropInfoList[0].cropLat &&
@@ -371,16 +387,36 @@ const EditCropModal: FC<EditCropModalPropType> = ({
         zoom: mapZoomValByBarangay(e.target.value as barangayType),
       });
 
-      document.getElementById("mapCanvas")?.scrollTo({ behavior: "smooth" });
+      document
+        .getElementById("mapCanvas")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
-  const handleSetLngLat = (e: MapMouseEvent) => {
-    setCropVal((prev) => ({
-      ...prev,
-      cropCoor: { lng: e.lngLat.lng, lat: e.lngLat.lat },
-    }));
-  };
+  const handleSetLngLat = useCallback(
+    (e: MapMouseEvent) => {
+      const { lng, lat } = e.lngLat;
+
+      if (
+        pointIsInsidePolygon(lng, lat, cropVal.cropBaranggay as barangayType)
+      ) {
+        setCropVal((prev) => ({
+          ...prev,
+          cropCoor: { lng: lng, lat: lat },
+        }));
+
+        if (formError?.cropCoor)
+          setFormError((prev) => ({ ...prev, cropCoor: [] }));
+      } else
+        setFormError((prev) => ({
+          ...prev,
+          cropCoor: [
+            "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+          ],
+        }));
+    },
+    [cropVal.cropBaranggay, formError?.cropCoor]
+  );
 
   const handleSetBrgyFirst = () => {
     setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
@@ -388,15 +424,19 @@ const EditCropModal: FC<EditCropModalPropType> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-40"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40"
       onClick={() => hideEditCropModal("editModal")}
     >
       <div
-        className="p-4 bg-white rounded-lg w-1/2"
+        className=" bg-white rounded-lg w-1/2"
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
         <form action="">
-          <div className="max-h-[500px] overflow-y-auto">
+          <h1 className="title p-5 !m-0 font-bold">
+            Baguhin ang impormasyon ng iyong pananim
+          </h1>
+
+          <div className="max-h-[500px] overflow-y-auto border-2 border-gray-400 border-x-0 p-4">
             <CropForm
               currentCrops={cropVal}
               handleChangeVal={handleChangeVal}
@@ -411,9 +451,10 @@ const EditCropModal: FC<EditCropModalPropType> = ({
 
           <FormCancelSubmitButton
             submitButtonLabel="Baguhin"
-            cancelButtonLabel="Baguhin"
+            cancelButtonLabel="Kanselahin"
             cancelOnClick={() => hideEditCropModal("editModal")}
             submitType="button"
+            divClassName="p-4 pt-0"
             submitClassName="slimer-button"
             cancelClassName="slimer-button"
           />
