@@ -370,6 +370,8 @@ const EditCropModal: FC<EditCropModalPropType> = ({
         duration: 2000,
         zoom: mapZoomValByBarangay(e.target.value as barangayType),
       });
+
+      document.getElementById("mapCanvas")?.scrollTo({ behavior: "smooth" });
     }
   };
 
