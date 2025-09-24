@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AddUserCropInfo,
   DeleteUserCropInfo,
   GetFarmerCropInfo,
   UpdateUserCropInfo,
@@ -10,7 +11,6 @@ import {
   FC,
   FormEvent,
   memo,
-  MouseEvent,
   useCallback,
   useEffect,
   useRef,
@@ -30,6 +30,8 @@ import {
   intoFeatureCollectionDataParam,
   DeleteUserCropInfoReturnType,
   FarmerCropPageHandleOpenModalParamType,
+  FormCropModalPropType,
+  AddCropModalPropType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
@@ -320,6 +322,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           <SubmitButton
             type="button"
             className="flex flex-row justify-center items-center !px-4 !rounded-lg"
+            onClick={() => handleOpenModal({ modalName: "addModal" })}
           >
             <ClipboardPlus className="logo !size-5" />
             <span>Magdagdag ng pananim</span>
@@ -348,7 +351,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
               <td className="text-color">{crop.cropLocation}</td>
               <td className="text-color">{crop.farmAreaMeasurement}</td>
               <td>
-                <div className="flex flex-row gap-1">
+                <div className="flex flex-row gap-2">
                   <SubmitButton
                     type="button"
                     className="slimer-button"
@@ -388,22 +391,28 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
         />
       </div>
 
-      {showModal.editModal ? (
+      {showModal.addModal && (
+        <AddCropModal hideAddCropModal={() => handleCloseModal("addModal")} />
+      )}
+
+      {showModal.editModal && (
         <EditCropModal
-          myCropInfoList={myCropInfoList.find(
-            (crop) => crop.cropId === cropIdToModify
-          )}
+          myCropInfoList={
+            myCropInfoList.find((crop) => crop.cropId === cropIdToModify)!
+          }
           hideEditCropModal={() => handleCloseModal("editModal")}
           setCropIdToModify={setCropIdToModify}
         />
-      ) : showModal.deleteModal ? (
+      )}
+
+      {showModal.deleteModal && (
         <ModalNotice
           type="warning"
           title="Tanggalin ang pananim?"
           message={
             <>
               Sigurado ka bang tatanggalin mo ang pananim{" "}
-              <span className="font-bold">
+              <span className="modal-highligt-word">
                 {
                   myCropInfoList.find((crop) => crop.cropId === cropIdToModify)!
                     .cropName
@@ -418,8 +427,197 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           proceed={{ label: "Tanggalin" }}
           cancel={{ label: "Kanselahin" }}
         />
-      ) : undefined}
+      )}
+
+      {showModal.cropHasReportModal && (
+        <ModalNotice
+          type="warning"
+          title="Bawal tanggalin ang taniman"
+          message={
+            <>
+              Bawal mong tanggalin ang taniman na ito sapagkat ikaw ay{" "}
+              <span className="modal-highligt-word">
+                nakapag sagawa na ng ulat
+              </span>{" "}
+              tungkol sa taniman na ito. Maari mo lang itong baguhin
+            </>
+          }
+          onClose={() => handleCloseModal("cropHasReportModal")}
+          showCancelButton={false}
+        />
+      )}
     </div>
+  );
+};
+
+/**
+ * component for editing and adding crop
+ * @returns form components
+ */
+const FormCropModal = memo(
+  ({
+    hideCropModal,
+    formSubmit,
+    formTitle,
+    cropVal,
+    error,
+  }: FormCropModalPropType) => {
+    const mapRef = useRef<MapRef>(null);
+    const [formError, setFormError] = useState<
+      FormErrorType<FarmerSecondDetailFormType>
+    >(error ? { ...error } : null);
+    const [crop, setCropVal] = useState<FarmerSecondDetailFormType>({
+      cropId: cropVal?.cropId ?? "",
+      cropName: cropVal?.cropName ?? "",
+      cropFarmArea: cropVal?.farmAreaMeasurement ?? "",
+      farmAreaMeasurement: cropVal?.farmAreaMeasurement ? "ha" : "",
+      cropBaranggay: cropVal?.cropLocation ?? "",
+      cropCoor: {
+        lat: cropVal?.cropLat ?? 0,
+        lng: cropVal?.cropLng ?? 0,
+      },
+    });
+
+    useEffect(() => {
+      if (error) setFormError(error);
+    }, [error]);
+
+    const handleChangeVal = (
+      e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+      setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+      if (e.target.name === "cropBaranggay") {
+        mapRef.current?.flyTo({
+          center: getBrgyCoordinate(e.target.value as barangayType),
+          duration: 2000,
+          zoom: mapZoomValByBarangay(e.target.value as barangayType),
+        });
+
+        document
+          .getElementById("mapCanvas")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        // restart the coordinates(no mark in the map yet)
+        setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
+      }
+    };
+
+    const handleSetLngLat = useCallback(
+      (e: MapMouseEvent) => {
+        const { lng, lat } = e.lngLat;
+
+        if (
+          pointIsInsidePolygon(lng, lat, crop.cropBaranggay as barangayType)
+        ) {
+          setCropVal((prev) => ({
+            ...prev,
+            cropCoor: { lng: lng, lat: lat },
+          }));
+
+          if (formError?.cropCoor)
+            setFormError((prev) => ({ ...prev, cropCoor: [] }));
+        } else
+          setFormError((prev) => ({
+            ...prev,
+            cropCoor: [
+              "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+            ],
+          }));
+      },
+      [crop.cropBaranggay, formError?.cropCoor]
+    );
+
+    const handleSetBrgyFirst = () => {
+      setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40">
+        <div className="absolute inset-0 " onClick={hideCropModal} />
+
+        <div className="relative bg-white rounded-lg w-1/2">
+          <form
+            onSubmit={(e: FormEvent<HTMLFormElement>) => formSubmit(e, crop)}
+          >
+            <h1 className="title p-5 !m-0 font-bold">{formTitle}</h1>
+
+            <div className="max-h-[500px] overflow-y-auto border-2 border-gray-400 border-x-0 p-4">
+              <CropForm
+                currentCrops={crop}
+                handleChangeVal={handleChangeVal}
+                mapOnClick={
+                  crop.cropBaranggay ? handleSetLngLat : handleSetBrgyFirst
+                }
+                mapRef={mapRef}
+                mapHeight={"300px"}
+                formError={formError}
+              />
+            </div>
+
+            <FormCancelSubmitButton
+              submitButtonLabel="Baguhin"
+              cancelButtonLabel="Kanselahin"
+              cancelOnClick={hideCropModal}
+              divClassName="p-4 pt-0"
+              submitClassName="slimer-button"
+              cancelClassName="slimer-button"
+            />
+          </form>
+        </div>
+      </div>
+    );
+  }
+);
+FormCropModal.displayName = "FormCropModal";
+
+const AddCropModal: FC<AddCropModalPropType> = ({ hideAddCropModal }) => {
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+  const [formError, setFormError] =
+    useState<FormErrorType<FarmerSecondDetailFormType>>(null);
+
+  const handleFormSubmit = useCallback(
+    async (
+      e: FormEvent<HTMLFormElement>,
+      cropInfo: FarmerSecondDetailFormType
+    ) => {
+      e.preventDefault();
+      handleIsLoading("Inuupdate na ang iyong pananim");
+      try {
+        const addCrop = await AddUserCropInfo(cropInfo);
+
+        if (addCrop.success) hideAddCropModal();
+
+        if (!addCrop.success && addCrop.formError)
+          setFormError(addCrop.formError);
+
+        handleSetNotification(addCrop.notifMessage);
+      } catch (error) {
+        console.log((error as Error).message);
+
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      } finally {
+        handleDoneLoading();
+      }
+    },
+    [
+      handleIsLoading,
+      handleSetNotification,
+      handleDoneLoading,
+      hideAddCropModal,
+    ]
+  );
+
+  return (
+    <FormCropModal
+      hideCropModal={hideAddCropModal}
+      formSubmit={handleFormSubmit}
+      formTitle="Ilagay ang impormasyon ng iyong bagong taniman"
+      error={formError}
+    />
   );
 };
 
@@ -427,139 +625,54 @@ const EditCropModal: FC<EditCropModalPropType> = ({
   myCropInfoList,
   hideEditCropModal,
 }) => {
-  const mapRef = useRef<MapRef>(null);
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
   const [formError, setFormError] =
     useState<FormErrorType<FarmerSecondDetailFormType>>(null);
-  const [cropVal, setCropVal] = useState<FarmerSecondDetailFormType>({
-    cropId: myCropInfoList?.cropId ?? "",
-    cropName: myCropInfoList?.cropName ?? "",
-    cropFarmArea: myCropInfoList?.farmAreaMeasurement ?? "",
-    farmAreaMeasurement: "ha",
-    cropBaranggay: myCropInfoList?.cropLocation ?? "",
-    cropCoor: {
-      lat: myCropInfoList?.cropLat ?? 0,
-      lng: myCropInfoList?.cropLng ?? 0,
+
+  const handleFormSubmit = useCallback(
+    async (
+      e: FormEvent<HTMLFormElement>,
+      cropInfo: FarmerSecondDetailFormType
+    ) => {
+      e.preventDefault();
+      handleIsLoading("Inuupdate na ang iyong pananim");
+      try {
+        const updateCrop = await UpdateUserCropInfo(cropInfo);
+
+        if (
+          updateCrop.success ||
+          (!updateCrop.success && updateCrop.closeModal)
+        ) {
+          hideEditCropModal();
+        } else if (updateCrop.formError) setFormError(updateCrop.formError);
+
+        handleSetNotification(updateCrop.notifMessage);
+      } catch (error) {
+        console.log((error as Error).message);
+
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      } finally {
+        handleDoneLoading();
+      }
     },
-  });
-
-  // check if the myCropInfoList exist, if not it will hide the modal because .find() also return undefined
-  useEffect(() => {
-    if (!myCropInfoList) hideEditCropModal();
-  }, [myCropInfoList, hideEditCropModal]);
-
-  const handleChangeVal = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-    if (e.target.name === "cropBaranggay") {
-      mapRef.current?.flyTo({
-        center: getBrgyCoordinate(e.target.value as barangayType),
-        duration: 2000,
-        zoom: mapZoomValByBarangay(e.target.value as barangayType),
-      });
-
-      document
-        .getElementById("mapCanvas")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
-    }
-  };
-
-  const handleSetLngLat = useCallback(
-    (e: MapMouseEvent) => {
-      const { lng, lat } = e.lngLat;
-
-      if (
-        pointIsInsidePolygon(lng, lat, cropVal.cropBaranggay as barangayType)
-      ) {
-        setCropVal((prev) => ({
-          ...prev,
-          cropCoor: { lng: lng, lat: lat },
-        }));
-
-        if (formError?.cropCoor)
-          setFormError((prev) => ({ ...prev, cropCoor: [] }));
-      } else
-        setFormError((prev) => ({
-          ...prev,
-          cropCoor: [
-            "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
-          ],
-        }));
-    },
-    [cropVal.cropBaranggay, formError?.cropCoor]
+    [
+      handleDoneLoading,
+      handleIsLoading,
+      handleSetNotification,
+      hideEditCropModal,
+    ]
   );
 
-  const handleSetBrgyFirst = () => {
-    setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
-  };
-
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleIsLoading("Inuupdate na ang iyong pananim");
-    try {
-      const updateCrop = await UpdateUserCropInfo(cropVal);
-
-      if (
-        updateCrop.success ||
-        (!updateCrop.success && updateCrop.closeModal)
-      ) {
-        hideEditCropModal();
-      } else if (updateCrop.formError) setFormError(updateCrop.formError);
-
-      handleSetNotification(updateCrop.notifMessage);
-    } catch (error) {
-      console.log((error as Error).message);
-
-      handleSetNotification([
-        { message: UnexpectedErrorMessage(), type: "error" },
-      ]);
-    } finally {
-      handleDoneLoading();
-    }
-  };
-
   return (
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40"
-      onClick={() => hideEditCropModal()}
-    >
-      <div
-        className=" bg-white rounded-lg w-1/2"
-        onClick={(e: MouseEvent) => e.stopPropagation()}
-      >
-        <form onSubmit={handleFormSubmit}>
-          <h1 className="title p-5 !m-0 font-bold">
-            Baguhin ang impormasyon ng iyong pananim
-          </h1>
-
-          <div className="max-h-[500px] overflow-y-auto border-2 border-gray-400 border-x-0 p-4">
-            <CropForm
-              currentCrops={cropVal}
-              handleChangeVal={handleChangeVal}
-              mapOnClick={
-                cropVal.cropBaranggay ? handleSetLngLat : handleSetBrgyFirst
-              }
-              mapRef={mapRef}
-              mapHeight={"300px"}
-              formError={formError}
-            />
-          </div>
-
-          <FormCancelSubmitButton
-            submitButtonLabel="Baguhin"
-            cancelButtonLabel="Kanselahin"
-            cancelOnClick={() => hideEditCropModal()}
-            divClassName="p-4 pt-0"
-            submitClassName="slimer-button"
-            cancelClassName="slimer-button"
-          />
-        </form>
-      </div>
-    </div>
+    <FormCropModal
+      hideCropModal={hideEditCropModal}
+      formSubmit={handleFormSubmit}
+      formTitle="Baguhin ang impormasyon ng iyong pananim"
+      cropVal={myCropInfoList}
+      error={formError}
+    />
   );
 };

@@ -2,7 +2,7 @@
 
 import {
   barangayType,
-  brangayaWithCalauanType,
+  brangayWithCalauanType,
   CheckCropListReturnType,
   CropFormErrorsType,
   EditCropListType,
@@ -367,7 +367,7 @@ export const FarmerDetailSecondStep: FC = () => {
     }
   };
 
-  const handleMapCityToHighLight = (brgy: brangayaWithCalauanType) => {
+  const handleMapCityToHighLight = (brgy: brangayWithCalauanType) => {
     const { longitude, latitude } = getPointCoordinate(brgy);
 
     setGeoJson(intoFeaturePolygon(polygonCoordinates[brgy]));

@@ -233,4 +233,13 @@ body {
   .text-color {
     @apply text-gray-900;
   }
+  .modal-highligt-word {
+    @apply font-bold;
+  }
+  .modal-green-button {
+    @apply !bg-white !text-black !border border-gray-400 hover:!bg-green-700 hover:!text-white;
+  }
+  .modal-red-button {
+    @apply !bg-red-700 hover:!bg-red-500;
+  }
 }

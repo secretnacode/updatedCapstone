@@ -840,12 +840,12 @@ export type barangayType =
   | "santo tomas"
   | "silangan";
 
-export type brangayaWithCalauanType = barangayType | "calauan";
+export type brangayWithCalauanType = barangayType | "calauan";
 
-export type pointCoordinatesType = Record<brangayaWithCalauanType, number[]>;
+export type pointCoordinatesType = Record<brangayWithCalauanType, number[]>;
 
 export type polygonCoordinatesType = Record<
-  brangayaWithCalauanType,
+  brangayWithCalauanType,
   number[][][]
 >;
 
@@ -893,13 +893,10 @@ export type FarmerCropPageShowModalStateType = {
 
 export type FarmerCropPageHandleOpenModalParamType =
   | {
-      modalName: "cropHasReportModal";
+      modalName: "addModal" | "cropHasReportModal";
     }
   | {
-      modalName: Exclude<
-        keyof FarmerCropPageShowModalStateType,
-        "cropHasReportModal"
-      >;
+      modalName: "editModal" | "deleteModal";
       cropId: string;
     };
 
@@ -918,8 +915,23 @@ export type MapMarkerComponentPropType = {
   markerLat: number;
 };
 
+export type FormCropModalPropType = {
+  hideCropModal: () => void;
+  formSubmit: (
+    e: FormEvent<HTMLFormElement>,
+    cropInfo: FarmerSecondDetailFormType
+  ) => void;
+  formTitle: string;
+  cropVal?: GetMyCropInfoQueryRetrunType;
+  error?: FormErrorType<FarmerSecondDetailFormType>;
+};
+
+export type AddCropModalPropType = {
+  hideAddCropModal: () => void;
+};
+
 export type EditCropModalPropType = {
-  myCropInfoList: GetMyCropInfoQueryRetrunType | undefined;
+  myCropInfoList: GetMyCropInfoQueryRetrunType;
   hideEditCropModal: () => void;
   setCropIdToModify: Dispatch<SetStateAction<string | null>>;
 };
@@ -939,7 +951,7 @@ export type FormMapComponentPropType = {
   label?: string;
   mapRef: Ref<MapRef>;
   mapHeight: string | number;
-  cityToHighlight: barangayType;
+  cityToHighlight: brangayWithCalauanType;
   mapOnClick: (e: MapMouseEvent) => void;
   coor: { lng: number; lat: number };
   formError?: string[];
@@ -968,4 +980,11 @@ export type DeleteUserCropInfoReturnType = {
       success: false;
       openNotifModal?: true;
     }
+);
+
+export type AddUserCropInfoReturnType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | { success: true }
+  | { success: false; formError?: FormErrorType<FarmerSecondDetailFormType> }
 );

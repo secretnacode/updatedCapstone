@@ -3,6 +3,7 @@
 import {
   CheckCropIfHasReport,
   checkIfFarmerCrop,
+  CreateNewCropAfterSignUp,
   DeleteUserCropInfoQuery,
   GetFarmerCropInfoQuery,
   GetMyCropInfoQuery,
@@ -10,6 +11,7 @@ import {
 } from "@/util/queries/crop";
 import { ProtectedAction } from "../protectedActions";
 import {
+  AddUserCropInfoReturnType,
   DeleteUserCropInfoReturnType,
   FarmerSecondDetailFormType,
   GetFarmerCropInfoReturnType,
@@ -20,6 +22,7 @@ import { ZodValidateForm } from "../validation/authValidation";
 import { farmerSecondDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import {
   ConvertMeassurement,
+  CreateUUID,
   FormErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
@@ -94,7 +97,6 @@ export const UpdateUserCropInfo = async (
   try {
     const userId = await ProtectedAction("update:crop");
 
-    // validate crop val
     const validate = ZodValidateForm<FarmerSecondDetailFormType>(
       cropVal,
       farmerSecondDetailFormSchema
@@ -188,6 +190,63 @@ export const DeleteUserCropInfo = async (
       notifMessage: [
         {
           message: "Matagumpay na nabago ang impormasyong ng iyong pananim",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag uupdate ng impormasyon sa iyong pananim: ${err.message}`
+    );
+    return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const AddUserCropInfo = async (
+  cropVal: FarmerSecondDetailFormType
+): Promise<AddUserCropInfoReturnType> => {
+  try {
+    const userId = await ProtectedAction("create:crop");
+
+    // eslint-disable-next-line prefer-const
+    let { cropId, farmAreaMeasurement, cropFarmArea, ...otherCropInfo } =
+      cropVal;
+    cropId = CreateUUID();
+
+    const validate = ZodValidateForm<FarmerSecondDetailFormType>(
+      { ...otherCropInfo, cropId, farmAreaMeasurement, cropFarmArea },
+      farmerSecondDetailFormSchema
+    );
+    if (!validate.valid)
+      return {
+        success: false,
+        formError: validate.formError,
+        notifMessage: [{ message: FormErrorMessage(), type: "warning" }],
+      };
+
+    await CreateNewCropAfterSignUp({
+      cropId,
+      userId,
+      ...otherCropInfo,
+      farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+    });
+
+    revalidatePath("/farmer/crop");
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pagdadagdag mo ng taniman",
           type: "success",
         },
       ],

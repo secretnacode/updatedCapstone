@@ -322,19 +322,16 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
         </div>
 
         <div>
-          <p className="font-light text-gray-800 leading-relaxed mb-5">
+          <p className="font-light text-gray-800 tracking-wide leading-relaxed mb-5">
             {message}
           </p>
           {/* use 2 seperate button instead of single component(FormCancelSubmitButton) because the modal component can still be called for just an important notification  */}
-          <div
-            className={`grid grid-cols-2 gap-3`}
-            dir={showCancelButton ? "rtl" : "ltr"}
-          >
+          <div className={`grid grid-cols-2 gap-3`} dir="rtl">
             <SubmitButton
               onClick={onProceed}
               type="button"
               className={`${proceed.className ?? ""} !rounded-md ${
-                showCancelButton ? "!bg-red-700 hover:!bg-red-500" : ""
+                showCancelButton ? "modal-red-button" : "modal-green-button"
               }`}
             >
               {proceed.label}
@@ -343,11 +340,9 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
             {showCancelButton && cancel && (
               <CancelButton
                 onClick={onClose}
-                className={`${cancel.className ?? ""} !rounded-md ${
-                  showCancelButton
-                    ? "!bg-white !text-black !border-2 border-gray-400 hover:!bg-green-800 hover:!text-white"
-                    : ""
-                }`}
+                className={`${
+                  cancel.className ?? ""
+                } !rounded-md modal-green-button`}
               >
                 {cancel.label}
               </CancelButton>
@@ -430,7 +425,9 @@ export const FormMapComponent: FC<FormMapComponentPropType> = ({
         mapHeight={mapHeight}
         ref={mapRef}
         cityToHighlight={intoFeaturePolygon(
-          polygonCoordinates[cityToHighlight]
+          cityToHighlight
+            ? polygonCoordinates[cityToHighlight]
+            : polygonCoordinates.calauan
         )}
         onClick={mapOnClick}
       >
@@ -486,6 +483,14 @@ export const CropForm: FC<CropFormPropType> = ({
             {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
           </option>
         ))}
+        optionDefaultValueLabel={
+          currentCrops.cropBaranggay
+            ? undefined
+            : {
+                label: "--Pumili--Ng--Lugar--",
+                value: "",
+              }
+        }
         formError={formError?.cropBaranggay}
       />
 

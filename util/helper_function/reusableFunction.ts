@@ -1,6 +1,6 @@
 import {
   barangayType,
-  brangayaWithCalauanType,
+  brangayWithCalauanType,
   getPointCoordinateReturnType,
   intoFeatureCollectionDataParam,
   NotificationBaseType,
@@ -188,7 +188,7 @@ export function getPointCoordinate(
   };
 }
 
-export function getBrgyCoordinate(brgy: brangayaWithCalauanType): LngLatLike {
+export function getBrgyCoordinate(brgy: brangayWithCalauanType): LngLatLike {
   return [pointCoordinates[brgy][0], pointCoordinates[brgy][1]];
 }
 
@@ -215,7 +215,7 @@ export function pointIsInsidePolygon(
  * @param brgy that you want to zoom
  * @returns value that can be use for the zoom prop of mapComponent
  */
-export function mapZoomValByBarangay(brgy: brangayaWithCalauanType) {
+export function mapZoomValByBarangay(brgy: brangayWithCalauanType) {
   switch (brgy) {
     case "balayhangin":
       return 13.5;

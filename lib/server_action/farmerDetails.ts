@@ -103,7 +103,6 @@ export const AddSecondFarmerDetails = async (
   cropList: FarmerSecondDetailFormType[]
 ): Promise<FarmerSecondDetailActionReturnType> => {
   try {
-    console.log(cropList);
     const userId = await ProtectedAction("create:crop");
 
     const validateCropList: CropFormErrorsType[] = cropList.reduce(
@@ -122,7 +121,6 @@ export const AddSecondFarmerDetails = async (
       []
     );
 
-    console.log(validateCropList);
     if (validateCropList.length > 0)
       return {
         success: false,
