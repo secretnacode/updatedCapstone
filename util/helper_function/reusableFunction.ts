@@ -148,6 +148,32 @@ export const UnexpectedErrorMessage = (): string => {
   return "May hindi inaasahang pag kakamali ang nangyari";
 };
 
+export const FormErrorMessage = (): string => {
+  return "May mali sa iyong ipinasa, baguhin muna ito";
+};
+
+/**
+ * used to convert the user farmerAreaMasurement into a hectare value
+ * @param measurement of the area (e.g. 200)
+ * @param unit of the area (e.g. sqm(square meter))
+ * @returns the converted measurements value of the area into a hectare value
+ */
+export const ConvertMeassurement = (
+  measurement: string,
+  unit: string
+): string => {
+  switch (unit) {
+    case "ac":
+      return (Number(measurement) / 2.471).toFixed(4);
+    case "sqft":
+      return (Number(measurement) / 107600).toFixed(4);
+    case "sqm":
+      return (Number(measurement) / 10000).toFixed(4);
+    default:
+      return measurement;
+  }
+};
+
 /**
  * function for getting the point coordinate(longitude and latitude) of the brgy
  * @param brgy that you want to get the coordinate

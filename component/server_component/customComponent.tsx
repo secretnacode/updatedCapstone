@@ -282,7 +282,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             {logoValue && (
               <logoValue.logo
@@ -299,15 +299,16 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
           </button>
         </div>
 
-        <div className="p-6">{modalMessage}</div>
+        <div className="p-6 border-y border-gray-400">{modalMessage}</div>
 
+        {/* use 2 seperate button instead of single component(FormCancelSubmitButton) because the modal component can still be called for just an important notification  */}
         {procceedButton && cancelButton && (
-          <div className="flex justify-end gap-3 p-5 border-t ">
+          <div className="grid grid-cols-2 gap-3 p-3 ">
             {procceedButton && (
               <SubmitButton
                 onClick={procceedButton.onClick}
                 type="button"
-                className={procceedButton.classsName}
+                className={`${procceedButton.classsName ?? ""}`}
               >
                 {procceedButton.label}
               </SubmitButton>
@@ -316,7 +317,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
             {cancelButton && (
               <CancelButton
                 onClick={closeModal}
-                className={cancelButton.classsName}
+                className={cancelButton.classsName ?? ""}
               >
                 {cancelButton.label}
               </CancelButton>

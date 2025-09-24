@@ -203,27 +203,36 @@ export const farmerSecondDetailFormSchema = z
       error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
     }),
     cropCoor: z.object({
-      lng: z.number().refine((e) => !isNaN(Number(e)), {
-        error:
-          "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
-        path: ["cropCoor"],
-      }),
-      lat: z.number().refine((e) => !isNaN(Number(e)), {
-        error:
-          "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
-        path: ["cropCoor"],
-      }),
+      lng: z.coerce
+        .number({ error: "Numero lng ang pede mong mailagay dito" })
+        .refine((e) => !isNaN(Number(e)), {
+          error:
+            "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
+          path: ["cropCoor"],
+        }),
+      lat: z.coerce
+        .number({ error: "Numero lng ang pede mong mailagay dito" })
+        .refine((e) => !isNaN(Number(e)), {
+          error:
+            "Numero lang ang pwedeng maging value ng coordinates ng iyong pananim",
+          path: ["cropCoor"],
+        }),
     }),
+  })
+  .refine((e) => e.cropCoor.lng !== 0 || e.cropCoor.lat !== 0, {
+    error: "Markahan ang lugar kung asaan ang iyong pananim",
+    path: ["cropCoor"],
   })
   .refine(
     (e) =>
+      (e.cropCoor.lng !== 0 || e.cropCoor.lat !== 0) &&
       pointIsInsidePolygon(
         e.cropCoor.lng,
         e.cropCoor.lat,
         e.cropBaranggay as barangayType
       ),
     {
-      error: "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+      error: "Markahan lamang ang barangay na may kulay",
       path: ["cropCoor"],
     }
   );

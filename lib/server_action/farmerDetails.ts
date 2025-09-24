@@ -18,6 +18,7 @@ import { CreateNewOrg } from "@/util/queries/org";
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { ConvertMeassurement } from "@/util/helper_function/reusableFunction";
 
 /**
  * server action that partners with the actionState hook
@@ -161,24 +162,5 @@ export const AddSecondFarmerDetails = async (
         },
       ],
     };
-  }
-};
-
-/**
- * used to convert the user farmerAreaMasurement into a hectare value
- * @param measurement of the area (e.g. 200)
- * @param unit of the area (e.g. sqm(square meter))
- * @returns the converted measurements value of the area into a hectare value
- */
-const ConvertMeassurement = (measurement: string, unit: string): string => {
-  switch (unit) {
-    case "ac":
-      return (Number(measurement) / 2.471).toFixed(4);
-    case "sqft":
-      return (Number(measurement) / 107600).toFixed(4);
-    case "sqm":
-      return (Number(measurement) / 10000).toFixed(4);
-    default:
-      return measurement;
   }
 };

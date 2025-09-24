@@ -1,9 +1,13 @@
 "use client";
 
-import { GetFarmerCropInfo } from "@/lib/server_action/crop";
+import {
+  GetFarmerCropInfo,
+  UpdateUserCropInfo,
+} from "@/lib/server_action/crop";
 import {
   ChangeEvent,
   FC,
+  FormEvent,
   memo,
   MouseEvent,
   useCallback,
@@ -33,11 +37,13 @@ import {
   pickBrgyFirst,
   pointIsInsidePolygon,
   ReadableDateFomat,
+  UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import {
   CancelButton,
   CropForm,
   FormCancelSubmitButton,
+  ModalNotice,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
@@ -220,11 +226,20 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleOpenModal = (
+    modalName: keyof FarmerCropPageShowModalStateType,
+    cropId: string
+  ) => {
+    setShowModal((prev) => ({ ...prev, [modalName]: true }));
+    setCropIdToModify(cropId);
+  };
+
   const handleCloseModal = (modal: keyof FarmerCropPageShowModalStateType) => {
     setShowModal((prev) => ({ ...prev, [modal]: false }));
     setCropIdToModify(null);
   };
 
+  // make this to avoid multiple layer in the map because the crop info can have multiple same location
   const handleCityToLight = (): intoFeatureCollectionDataParam[] => {
     return myCropInfoList.reduce(
       (acc: intoFeatureCollectionDataParam[], info) => {
@@ -245,6 +260,12 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     );
   };
 
+  const handleDeleteCrop = () => {
+    console.log(
+      myCropInfoList.find((cropVal) => cropVal.cropId === cropIdToModify)
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -258,7 +279,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             myCropInfoList[0].cropLat &&
             myCropInfoList.map((coor) => (
               <MapMarkerComponent
-                key={coor.cropName}
+                key={coor.cropId}
                 markerLng={coor.cropLng}
                 markerLat={coor.cropLat}
               />
@@ -297,7 +318,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             </>
           }
           tableCell={myCropInfoList.map((crop, index) => (
-            <tr key={crop.cropName}>
+            <tr key={crop.cropId}>
               <td className="text-color">{index + 1}</td>
               <td className="text-color">{crop.cropName}</td>
               <td className="text-color">{crop.cropLocation}</td>
@@ -315,20 +336,14 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   <SubmitButton
                     type="button"
                     className="slimer-button blue-button"
-                    onClick={() => {
-                      setShowModal((prev) => ({ ...prev, editModal: true }));
-                      setCropIdToModify(crop.cropId);
-                    }}
+                    onClick={() => handleOpenModal("editModal", crop.cropId)}
                   >
                     Baguhin
                   </SubmitButton>
 
                   <CancelButton
                     className="slimer-button"
-                    onClick={() => {
-                      setShowModal((prev) => ({ ...prev, deleteModal: true }));
-                      setCropIdToModify(crop.cropId);
-                    }}
+                    onClick={() => handleOpenModal("deleteModal", crop.cropId)}
                   >
                     Tanggalin
                   </CancelButton>
@@ -338,15 +353,26 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           ))}
         />
       </div>
-      {showModal.editModal && (
+      {showModal.editModal ? (
         <EditCropModal
           myCropInfoList={myCropInfoList.find(
             (crop) => crop.cropId === cropIdToModify
           )}
-          hideEditCropModal={handleCloseModal}
+          hideEditCropModal={() => handleCloseModal("editModal")}
           setCropIdToModify={setCropIdToModify}
         />
-      )}
+      ) : showModal.deleteModal ? (
+        <ModalNotice
+          logo="warning"
+          modalTitle={"Tanggalin ang pananim?"}
+          closeModal={() => handleCloseModal("deleteModal")}
+          procceedButton={{ label: "Tanggalin", onClick: handleDeleteCrop }}
+          cancelButton={{ label: "Kanselahin" }}
+          modalMessage={
+            "Sigurado ka bang tatanggalin mo ang impormasyon na ito? Pag ito ay tinaggal, hindi na ito maibabalik."
+          }
+        />
+      ) : undefined}
     </div>
   );
 };
@@ -356,23 +382,26 @@ const EditCropModal: FC<EditCropModalPropType> = ({
   hideEditCropModal,
 }) => {
   const mapRef = useRef<MapRef>(null);
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
   const [formError, setFormError] =
     useState<FormErrorType<FarmerSecondDetailFormType>>(null);
   const [cropVal, setCropVal] = useState<FarmerSecondDetailFormType>({
     cropId: myCropInfoList?.cropId ?? "",
     cropName: myCropInfoList?.cropName ?? "",
     cropFarmArea: myCropInfoList?.farmAreaMeasurement ?? "",
-    farmAreaMeasurement: myCropInfoList?.farmAreaMeasurement ?? "",
+    farmAreaMeasurement: "ha",
     cropBaranggay: myCropInfoList?.cropLocation ?? "",
     cropCoor: {
       lat: myCropInfoList?.cropLat ?? 0,
       lng: myCropInfoList?.cropLng ?? 0,
     },
   });
+  console.log(cropVal);
 
   // check if the myCropInfoList exist, if not it will hide the modal because .find() also return undefined
   useEffect(() => {
-    if (!myCropInfoList) hideEditCropModal("editModal");
+    if (!myCropInfoList) hideEditCropModal();
   }, [myCropInfoList, hideEditCropModal]);
 
   const handleChangeVal = (
@@ -390,6 +419,8 @@ const EditCropModal: FC<EditCropModalPropType> = ({
       document
         .getElementById("mapCanvas")
         ?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
     }
   };
 
@@ -422,16 +453,41 @@ const EditCropModal: FC<EditCropModalPropType> = ({
     setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
   };
 
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleIsLoading("Inuupdate na ang iyong pananim");
+    try {
+      const updateCrop = await UpdateUserCropInfo(cropVal);
+
+      if (
+        updateCrop.success ||
+        (!updateCrop.success && updateCrop.closeModal)
+      ) {
+        hideEditCropModal();
+      } else if (updateCrop.formError) setFormError(updateCrop.formError);
+
+      handleSetNotification(updateCrop.notifMessage);
+    } catch (error) {
+      console.log((error as Error).message);
+
+      handleSetNotification([
+        { message: UnexpectedErrorMessage(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40"
-      onClick={() => hideEditCropModal("editModal")}
+      onClick={() => hideEditCropModal()}
     >
       <div
         className=" bg-white rounded-lg w-1/2"
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
-        <form action="">
+        <form onSubmit={handleFormSubmit}>
           <h1 className="title p-5 !m-0 font-bold">
             Baguhin ang impormasyon ng iyong pananim
           </h1>
@@ -452,8 +508,7 @@ const EditCropModal: FC<EditCropModalPropType> = ({
           <FormCancelSubmitButton
             submitButtonLabel="Baguhin"
             cancelButtonLabel="Kanselahin"
-            cancelOnClick={() => hideEditCropModal("editModal")}
-            submitType="button"
+            cancelOnClick={() => hideEditCropModal()}
             divClassName="p-4 pt-0"
             submitClassName="slimer-button"
             cancelClassName="slimer-button"

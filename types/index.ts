@@ -907,7 +907,7 @@ export type FarmerCropPageShowModalStateType = {
 
 export type EditCropModalPropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType | undefined;
-  hideEditCropModal: (modal: keyof FarmerCropPageShowModalStateType) => void;
+  hideEditCropModal: () => void;
   setCropIdToModify: Dispatch<SetStateAction<string | null>>;
 };
 
@@ -931,3 +931,16 @@ export type FormMapComponentPropType = {
   coor: { lng: number; lat: number };
   formError?: string[];
 };
+
+export type UpdateUserCropInfoReturnType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      formError?: FormErrorType<FarmerSecondDetailFormType>;
+      closeModal?: true;
+    }
+);
