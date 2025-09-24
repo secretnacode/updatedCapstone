@@ -264,66 +264,96 @@ export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
   );
 };
 
+/**
+ * Modal component for showing an important notice through modal
+ * for just showing an important notice that needs a single button(e.g. Proceed button), just pass the necesarry props, the component will show a just a normal modal
+ *
+ * if you need a modal for deleting an important info(e.g. deletion of user), make sure to fill all the props to make the component show a modal that ask the user to procceed or not(e.g. with the deletion of user)
+ */
 export const ModalNotice: FC<ModalNoticePropType> = ({
-  logo,
-  modalTitle,
-  closeModal,
-  modalMessage,
-  procceedButton,
-  cancelButton,
+  type,
+  title,
+  message,
+  onClose,
+  onProceed = onClose,
+  showCancelButton,
+  cancel,
+  proceed = { label: "Mag patuloy", className: "" },
 }) => {
-  const logoValue: { logo: LucideIcon; className: string } | undefined =
-    logo === "warning"
-      ? { logo: TriangleAlert as LucideIcon, className: "text-orange-500" }
-      : logo === "error"
-      ? { logo: OctagonX as LucideIcon, className: "text-red-500" }
+  const logo:
+    | { logo: LucideIcon; logoColor: string; bgColor: string }
+    | undefined =
+    type === "warning"
+      ? {
+          logo: TriangleAlert as LucideIcon,
+          logoColor: "text-orange-600",
+          bgColor: "bg-orange-100",
+        }
+      : type === "error"
+      ? {
+          logo: OctagonX as LucideIcon,
+          logoColor: "text-red-600",
+          bgColor: "bg-red-100",
+        }
       : undefined;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            {logoValue && (
-              <logoValue.logo
-                className={`logo !size-10 ${logoValue.className}`}
-              />
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex items-center justify-center">
+      <div className="absolute inset-0" onClick={onClose} />
+
+      <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {logo && (
+              <div
+                className={`p-3 grid place-items-center rounded-full ${logo.bgColor}`}
+              >
+                <logo.logo className={`logo ${logo.logoColor}`} />
+              </div>
             )}
-            <h1 className="title !text-[19px] !mb-0">{modalTitle}</h1>
+            <h1 className="title !text-[18px] !text-gray-800 !mb-0">{title}</h1>
           </div>
           <button
-            onClick={closeModal}
+            onClick={onClose}
             className="button !p-2 hover:bg-gray-100 !rounded-full transition-colors"
           >
-            <X className="logo logo-mild-color" />
+            <X className="logo !size-4" />
           </button>
         </div>
 
-        <div className="p-6 border-y border-gray-400">{modalMessage}</div>
+        <div>
+          <p className="font-light text-gray-800 leading-relaxed mb-5">
+            {message}
+          </p>
+          {/* use 2 seperate button instead of single component(FormCancelSubmitButton) because the modal component can still be called for just an important notification  */}
+          <div
+            className={`grid grid-cols-2 gap-3`}
+            dir={showCancelButton ? "rtl" : "ltr"}
+          >
+            <SubmitButton
+              onClick={onProceed}
+              type="button"
+              className={`${proceed.className ?? ""} !rounded-md ${
+                showCancelButton ? "!bg-red-700 hover:!bg-red-500" : ""
+              }`}
+            >
+              {proceed.label}
+            </SubmitButton>
 
-        {/* use 2 seperate button instead of single component(FormCancelSubmitButton) because the modal component can still be called for just an important notification  */}
-        {procceedButton && cancelButton && (
-          <div className="grid grid-cols-2 gap-3 p-3 ">
-            {procceedButton && (
-              <SubmitButton
-                onClick={procceedButton.onClick}
-                type="button"
-                className={`${procceedButton.classsName ?? ""}`}
-              >
-                {procceedButton.label}
-              </SubmitButton>
-            )}
-
-            {cancelButton && (
+            {showCancelButton && cancel && (
               <CancelButton
-                onClick={closeModal}
-                className={cancelButton.classsName ?? ""}
+                onClick={onClose}
+                className={`${cancel.className ?? ""} !rounded-md ${
+                  showCancelButton
+                    ? "!bg-white !text-black !border-2 border-gray-400 hover:!bg-green-800 hover:!text-white"
+                    : ""
+                }`}
               >
-                {cancelButton.label}
+                {cancel.label}
               </CancelButton>
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

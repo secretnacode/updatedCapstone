@@ -523,7 +523,9 @@ export type UpdateUserProfileInfoReturnType = {
     }
 );
 
-export type ChildrenType = Readonly<{ children?: Readonly<ReactNode> }>;
+export type ChildrenType = Readonly<ReactNode>;
+
+export type ChildrenPropType = Readonly<{ children?: ChildrenType }>;
 
 export type InputPropType = {
   type?: string;
@@ -538,16 +540,16 @@ export type InputPropType = {
   disabled?: boolean;
 };
 
-export type LabelType = ChildrenType & {
+export type LabelType = ChildrenPropType & {
   htmlFor: string;
   className?: string;
 };
 
-export type TitleType = ChildrenType & {
+export type TitleType = ChildrenPropType & {
   className?: string;
 };
 
-export type SelectType = ChildrenType & {
+export type SelectType = ChildrenPropType & {
   value?: string;
   name?: string;
   className?: string;
@@ -556,25 +558,25 @@ export type SelectType = ChildrenType & {
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type OptionType = ChildrenType & {
+export type OptionType = ChildrenPropType & {
   className?: string;
   value: string | number;
 };
 
-export type PType = ChildrenType & {
+export type PType = ChildrenPropType & {
   className?: string;
 };
 
-export type FormType = ChildrenType & {
+export type FormType = ChildrenPropType & {
   onSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   className?: string;
 };
 
-export type DivPropType = ChildrenType & {
+export type DivPropType = ChildrenPropType & {
   className?: string;
 };
 
-export type FormDivLabelInputPropType = ChildrenType & {
+export type FormDivLabelInputPropType = ChildrenPropType & {
   labelMessage: string;
   labelClassName?: string;
   divClassName?: string;
@@ -626,7 +628,7 @@ export type LogoPropType = {
 
 export type ButtonTypeAttribType = "button" | "submit" | "reset";
 
-export type ButtonPropType = ChildrenType &
+export type ButtonPropType = ChildrenPropType &
   ButtonHTMLAttributes<HTMLButtonElement>;
 
 export type FormCancelSubmitButtonPropType = {
@@ -643,16 +645,14 @@ export type FormCancelSubmitButtonPropType = {
 };
 
 export type ModalNoticePropType = {
-  logo?: "warning" | "error";
-  modalTitle: string;
-  closeModal: () => void;
-  modalMessage: ReactNode;
-  procceedButton?: {
-    label: string;
-    onClick: () => void;
-    classsName?: string;
-  };
-  cancelButton?: { label: string; classsName?: string };
+  type: "error" | "warning";
+  title: string;
+  message: ChildrenType;
+  onClose: () => void;
+  onProceed?: () => void;
+  showCancelButton: boolean;
+  cancel?: { label: string; className?: string };
+  proceed?: { label: string; className?: string };
 };
 
 export type NewOrgType = {
@@ -692,32 +692,32 @@ export type ViewAllValidatedFarmerUserReturnType =
     }
   | ServerActionFailBaseType;
 
-export type TablePropType = ChildrenType & {
+export type TablePropType = ChildrenPropType & {
   className?: string;
 };
 
-export type CaptionPropType = ChildrenType & {
+export type CaptionPropType = ChildrenPropType & {
   className?: string;
 };
 
-export type TableHeaderPropType = ChildrenType & {
+export type TableHeaderPropType = ChildrenPropType & {
   className?: string;
 };
 
-export type TableBodyPropType = ChildrenType & {
+export type TableBodyPropType = ChildrenPropType & {
   className?: string;
 };
 
-export type TableRowPropType = ChildrenType & {
+export type TableRowPropType = ChildrenPropType & {
   className?: string;
 };
 
-export type TableHeaderCellPropType = ChildrenType & {
+export type TableHeaderCellPropType = ChildrenPropType & {
   className?: string;
   scope?: string;
 };
 
-export type TableCellPropType = ChildrenType & {
+export type TableCellPropType = ChildrenPropType & {
   className?: string;
 };
 
@@ -849,7 +849,7 @@ export type polygonCoordinatesType = Record<
   number[][][]
 >;
 
-export type MapComponentPropType = ChildrenType &
+export type MapComponentPropType = ChildrenPropType &
   MapProps & {
     cityToHighlight?:
       | FeatureCollection<Geometry, GeoJsonProperties>
@@ -884,6 +884,25 @@ export type FarmerCropPagePropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType[];
 };
 
+export type FarmerCropPageShowModalStateType = {
+  addModal: boolean;
+  editModal: boolean;
+  deleteModal: boolean;
+  cropHasReportModal: boolean;
+};
+
+export type FarmerCropPageHandleOpenModalParamType =
+  | {
+      modalName: "cropHasReportModal";
+    }
+  | {
+      modalName: Exclude<
+        keyof FarmerCropPageShowModalStateType,
+        "cropHasReportModal"
+      >;
+      cropId: string;
+    };
+
 export type intoFeatureCollectionDataParam =
   | { type: "polygon"; coordinates: number[][][]; name: string }
   | { type: "point"; coordinates: { lng: number; lat: number }; name: string };
@@ -897,12 +916,6 @@ export type MapSourceComponentPropType = {
 export type MapMarkerComponentPropType = {
   markerLng: number;
   markerLat: number;
-};
-
-export type FarmerCropPageShowModalStateType = {
-  addModal: boolean;
-  editModal: boolean;
-  deleteModal: boolean;
 };
 
 export type EditCropModalPropType = {
@@ -942,5 +955,17 @@ export type UpdateUserCropInfoReturnType = {
       success: false;
       formError?: FormErrorType<FarmerSecondDetailFormType>;
       closeModal?: true;
+    }
+);
+
+export type DeleteUserCropInfoReturnType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      openNotifModal?: true;
     }
 );

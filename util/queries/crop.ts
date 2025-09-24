@@ -81,6 +81,12 @@ export const GetMyCropInfoQuery = async (
   }
 };
 
+/**
+ * server action that checkes if the pass cropId is the userId's crop
+ * @param userId of the current user
+ * @param cropId that will be deleted
+ * @returns boolean
+ */
 export const checkIfFarmerCrop = async (
   userId: string,
   cropId: string
@@ -128,6 +134,48 @@ export const UpdateUserCropInfoQuery = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag babago ng impormasyong ng iyong pananim`
+    );
+  }
+};
+
+/**
+ * check if the crop that will be deleted has a report reference in the database
+ * @param cropId of the crop that will be check
+ * @returns boolean
+ */
+export const CheckCropIfHasReport = async (
+  cropId: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.report where "cropIdReported" = $1)`,
+        [cropId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong pananim bago tanggalin: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong pananim bago tanggalin`
+    );
+  }
+};
+
+export const DeleteUserCropInfoQuery = async (cropId: string) => {
+  try {
+    await pool.query(`delete from capstone.crop where "cropId" = $1`, [cropId]);
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng iyong pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng iyong pananim`
     );
   }
 };

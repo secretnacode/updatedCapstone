@@ -1,13 +1,16 @@
 "use server";
 
 import {
+  CheckCropIfHasReport,
   checkIfFarmerCrop,
+  DeleteUserCropInfoQuery,
   GetFarmerCropInfoQuery,
   GetMyCropInfoQuery,
   UpdateUserCropInfoQuery,
 } from "@/util/queries/crop";
 import { ProtectedAction } from "../protectedActions";
 import {
+  DeleteUserCropInfoReturnType,
   FarmerSecondDetailFormType,
   GetFarmerCropInfoReturnType,
   GetMyCropInfoReturnType,
@@ -120,6 +123,63 @@ export const UpdateUserCropInfo = async (
       userId,
       farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
     });
+
+    revalidatePath("/farmer/crop");
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay na nabago ang impormasyong ng iyong pananim",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag uupdate ng impormasyon sa iyong pananim: ${err.message}`
+    );
+    return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const DeleteUserCropInfo = async (
+  cropId: string
+): Promise<DeleteUserCropInfoReturnType> => {
+  try {
+    const userId = await ProtectedAction("delete:crop");
+
+    if (!(await checkIfFarmerCrop(userId, cropId))) {
+      return {
+        success: false,
+        notifMessage: [
+          { message: "Bawal mo burahin ang impormasyon na ito", type: "error" },
+        ],
+      };
+    }
+
+    if (await CheckCropIfHasReport(cropId))
+      return {
+        success: false,
+        openNotifModal: true,
+        notifMessage: [
+          {
+            message: "Ang pananim na ito ay nagamit mona sa pag papasa ng ulat",
+            type: "warning",
+          },
+        ],
+      };
+
+    await DeleteUserCropInfoQuery(cropId);
 
     revalidatePath("/farmer/crop");
 

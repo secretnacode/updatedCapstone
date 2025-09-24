@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  DeleteUserCropInfo,
   GetFarmerCropInfo,
   UpdateUserCropInfo,
 } from "@/lib/server_action/crop";
@@ -27,6 +28,8 @@ import {
   FormErrorType,
   barangayType,
   intoFeatureCollectionDataParam,
+  DeleteUserCropInfoReturnType,
+  FarmerCropPageHandleOpenModalParamType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
@@ -211,11 +214,14 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   myCropInfoList,
 }) => {
   const mapRef = useRef<MapRef>(null);
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
   const [cropIdToModify, setCropIdToModify] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<FarmerCropPageShowModalStateType>({
     addModal: false,
     editModal: false,
     deleteModal: false,
+    cropHasReportModal: false,
   });
 
   const handleViewCrop = (lng: number, lat: number) => {
@@ -227,11 +233,11 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   };
 
   const handleOpenModal = (
-    modalName: keyof FarmerCropPageShowModalStateType,
-    cropId: string
+    openModal: FarmerCropPageHandleOpenModalParamType
   ) => {
-    setShowModal((prev) => ({ ...prev, [modalName]: true }));
-    setCropIdToModify(cropId);
+    setShowModal((prev) => ({ ...prev, [openModal.modalName]: true }));
+
+    if ("cropId" in openModal) setCropIdToModify(openModal.cropId);
   };
 
   const handleCloseModal = (modal: keyof FarmerCropPageShowModalStateType) => {
@@ -260,10 +266,28 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     );
   };
 
-  const handleDeleteCrop = () => {
-    console.log(
-      myCropInfoList.find((cropVal) => cropVal.cropId === cropIdToModify)
-    );
+  const handleDeleteCrop = async () => {
+    try {
+      handleCloseModal("deleteModal");
+      handleIsLoading("Tinatanggal na ang iyong pananim");
+
+      let deleteCrop: DeleteUserCropInfoReturnType;
+
+      if (cropIdToModify) deleteCrop = await DeleteUserCropInfo(cropIdToModify);
+      else throw new Error("No cropId was passed in the server action");
+
+      if (!deleteCrop.success && deleteCrop.openNotifModal)
+        handleOpenModal({ modalName: "cropHasReportModal" });
+
+      handleSetNotification(deleteCrop.notifMessage);
+    } catch (error) {
+      console.log((error as Error).message);
+      handleSetNotification([
+        { message: UnexpectedErrorMessage(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
   };
 
   return (
@@ -336,14 +360,24 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   <SubmitButton
                     type="button"
                     className="slimer-button blue-button"
-                    onClick={() => handleOpenModal("editModal", crop.cropId)}
+                    onClick={() =>
+                      handleOpenModal({
+                        modalName: "editModal",
+                        cropId: crop.cropId,
+                      })
+                    }
                   >
                     Baguhin
                   </SubmitButton>
 
                   <CancelButton
                     className="slimer-button"
-                    onClick={() => handleOpenModal("deleteModal", crop.cropId)}
+                    onClick={() =>
+                      handleOpenModal({
+                        modalName: "deleteModal",
+                        cropId: crop.cropId,
+                      })
+                    }
                   >
                     Tanggalin
                   </CancelButton>
@@ -353,6 +387,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           ))}
         />
       </div>
+
       {showModal.editModal ? (
         <EditCropModal
           myCropInfoList={myCropInfoList.find(
@@ -363,14 +398,25 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
         />
       ) : showModal.deleteModal ? (
         <ModalNotice
-          logo="warning"
-          modalTitle={"Tanggalin ang pananim?"}
-          closeModal={() => handleCloseModal("deleteModal")}
-          procceedButton={{ label: "Tanggalin", onClick: handleDeleteCrop }}
-          cancelButton={{ label: "Kanselahin" }}
-          modalMessage={
-            "Sigurado ka bang tatanggalin mo ang impormasyon na ito? Pag ito ay tinaggal, hindi na ito maibabalik."
+          type="warning"
+          title="Tanggalin ang pananim?"
+          message={
+            <>
+              Sigurado ka bang tatanggalin mo ang pananim{" "}
+              <span className="font-bold">
+                {
+                  myCropInfoList.find((crop) => crop.cropId === cropIdToModify)!
+                    .cropName
+                }
+              </span>
+              ? Pag ito ay tinaggal, hindi na ito maibabalik.
+            </>
           }
+          onClose={() => handleCloseModal("deleteModal")}
+          onProceed={handleDeleteCrop}
+          showCancelButton={true}
+          proceed={{ label: "Tanggalin" }}
+          cancel={{ label: "Kanselahin" }}
         />
       ) : undefined}
     </div>
@@ -397,7 +443,6 @@ const EditCropModal: FC<EditCropModalPropType> = ({
       lng: myCropInfoList?.cropLng ?? 0,
     },
   });
-  console.log(cropVal);
 
   // check if the myCropInfoList exist, if not it will hide the modal because .find() also return undefined
   useEffect(() => {

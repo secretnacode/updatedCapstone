@@ -164,14 +164,17 @@ body {
   .logo {
     @apply size-6;
   }
+  .logo-light {
+    @apply stroke-1;
+  }
   .logo-mild-color {
     @apply text-gray-500;
   }
   .button {
-    @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-xl text-nowrap;
+    @apply cursor-pointer flex items-center justify-center gap-3 py-2 px-6 rounded-xl text-nowrap capitalize tracking-wider;
   }
   .slimer-button {
-    @apply !px-3 !py-1 !rounded-lg;
+    @apply !px-3 !py-1 !rounded-lg tracking-normal;
   }
   .submit-button {
     @apply bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50;

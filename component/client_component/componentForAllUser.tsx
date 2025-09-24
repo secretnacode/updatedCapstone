@@ -228,28 +228,27 @@ export const ClientUserOrganizationInfoForm: FC<
 
       {showModal && (
         <ModalNotice
-          logo={"warning"}
-          modalTitle={"Mag babago ng organisasyon?"}
-          closeModal={() => setShowModal(false)}
-          modalMessage={
+          type={"warning"}
+          title="Mag babago ng organisasyon?"
+          showCancelButton={true}
+          onClose={() => setShowModal(false)}
+          onProceed={() => {
+            formRef.current?.requestSubmit();
+            setShowModal(false);
+          }}
+          message={
             <>
-              <p className="p font-bold !text-lg mb-4">
-                Kapag nagpalit ka ng organisasyon, kailangan maaprubahan muna
+              <span className="p block font-bold !text-lg mb-4">
+                Kapag nagpalit ka ng organisasyon, kailangang maaprubahan muna
                 ang iyong account bago ulit ka makapagsumite ng ulat.
-              </p>
-              <p className="p !text-[17px] tracking-wide">
+              </span>
+              <span className="p block !text-[17px] tracking-wide">
                 Magpatuloy sa pagpapalit ng organisasyon?
-              </p>
+              </span>
             </>
           }
-          procceedButton={{
-            label: "Mag Patuloy",
-            onClick: () => {
-              formRef.current?.requestSubmit();
-              setShowModal(false);
-            },
-          }}
-          cancelButton={{ label: "Bumalik" }}
+          proceed={{ label: "Mag Patuloy" }}
+          cancel={{ label: "Bumalik" }}
         />
       )}
     </form>
@@ -293,6 +292,11 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
   );
 };
 
+/**
+ * component modal for deleting a user that adopts
+ * @param param0
+ * @returns
+ */
 export const DeleteUser: FC<DeleteUserPropType> = ({
   farmerId,
   farmerName,
@@ -351,18 +355,19 @@ export const DeleteUser: FC<DeleteUserPropType> = ({
 
       {showModal && (
         <ModalNotice
-          logo={"warning"}
-          modalTitle={modalTitle}
-          closeModal={() => setShowModal(false)}
-          modalMessage={modalMessage}
-          procceedButton={{
-            label: proceedButtonLabel,
-            onClick: () => {
-              submitButtonRef.current?.click();
-              setShowModal(false);
-            },
+          type="warning"
+          title={modalTitle}
+          message={modalMessage}
+          onClose={() => setShowModal(false)}
+          showCancelButton={true}
+          onProceed={() => {
+            submitButtonRef.current?.click();
+            setShowModal(false);
           }}
-          cancelButton={{ label: cancelButtonLabel }}
+          proceed={{
+            label: proceedButtonLabel,
+          }}
+          cancel={{ label: cancelButtonLabel }}
         />
       )}
     </>
