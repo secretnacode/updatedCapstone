@@ -43,7 +43,7 @@ export default async function Page() {
             <>
               {farmerReport.validatedReport.map((report) => (
                 <tr key={report.reportId}>
-                  <td className=" text-gray-900 font-medium">
+                  <td className=" text-gray-900 font-medium ">
                     {report.farmerName}
                   </td>
 

@@ -73,6 +73,7 @@ export const AddFirstFarmerDetails = async (
       mobileNumber: Number(newUserVal.mobileNumber),
       farmerId: userId,
       verified: false,
+      isDeleted: false,
       dateCreated: new Date(),
     });
 

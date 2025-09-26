@@ -8,6 +8,7 @@ import {
   ValidateAuthValType,
 } from "@/types";
 import {
+  ChangeEvent,
   Dispatch,
   FC,
   FormEvent,
@@ -18,11 +19,7 @@ import {
 } from "react";
 import { Eye, EyeClosed, TriangleAlert, X } from "lucide-react";
 import { useNotification } from "./provider/notificationProvider";
-import {
-  ValidateLoginVal,
-  ValidateSingupVal,
-} from "@/util/helper_function/validation/frontendValidation/authvalidation";
-import { useRouter } from "next/navigation";
+import { ValidateSingupVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
 import { useLoading } from "./provider/loadingProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -59,7 +56,6 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const [isHiddenPass, setIsHiddenPass] = useState<boolean>(true);
   const [isHiddenConPass, setIsHiddenConPass] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
-  const router = useRouter();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
 
   const handleFormSubmit = async (
@@ -88,11 +84,10 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
       const req = await SignUpAuth(authVal);
 
       if (!req.success) throw req;
-
-      router.push(`${req.url}`);
     } catch (error) {
       const err = error as ErrorResponseType;
       handleSetNotification(err.errors);
+    } finally {
       handleDoneLoading();
     }
   };
@@ -169,25 +164,20 @@ const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   setIsSignUp,
 }): ReactElement => {
-  const [isHidden, setIsHidden] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
+  const [isHidden, setIsHidden] = useState<boolean>(true);
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
+  const [authVal, setAuthVal] = useState<AuthLoginType>({
+    username: "",
+    password: "",
+  });
+
+  const handleChangeVal = (e: ChangeEvent<HTMLInputElement>) => {
+    setAuthVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const formDate = new FormData(e.currentTarget);
-
-    const authVal: AuthLoginType = {
-      username: formDate.get("username") as string,
-      password: formDate.get("password") as string,
-    };
-
-    const checkVal: ValidateAuthValType<NotificationBaseType[]> =
-      ValidateLoginVal(authVal);
-
-    if (!checkVal.valid) return handleSetNotification(checkVal.errors);
-
     handleIsLoading("Sinusuri lang ang iyong username at password");
 
     try {
@@ -216,7 +206,13 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
       <form onSubmit={handleFormSubmit}>
         <div className="space-y-2">
           <label>Username:</label>
-          <input type="text" name="username" placeholder="Farmer1" />
+          <input
+            type="text"
+            name="username"
+            placeholder="Farmer1"
+            onChange={handleChangeVal}
+            value={authVal.username}
+          />
         </div>
 
         <div className="space-y-2">
@@ -225,8 +221,10 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
             <input
               type={isHidden ? "password" : "text"}
               name="password"
+              value={authVal.password}
               placeholder="FarmerPass1"
               className=" pr-10"
+              onChange={handleChangeVal}
             />
             <button type="button" onClick={() => setIsHidden((prev) => !prev)}>
               <EyeLogo isHidden={isHidden} />

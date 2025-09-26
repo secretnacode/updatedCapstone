@@ -60,7 +60,7 @@ import { Feature, Polygon } from "geojson";
 export const FarmerDetailForm: FC<{
   orgList: QueryAvailableOrgReturnType[];
 }> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(true);
+  const [nextStep, setNextStep] = useState<boolean>(false);
 
   return (
     <div>
@@ -782,19 +782,16 @@ export const FarmerDetailSecondStep: FC = () => {
         handleSetNotification(res.notifError);
 
         if (res.formList) handleBackendValidateFormError(res.formList);
-
-        handleDoneLoading();
-        return;
       }
     } catch (error) {
       if (!isRedirectError(error)) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
       }
+    } finally {
+      handleDoneLoading();
     }
   };
-
-  console.log(formErrorList);
 
   return (
     <div>

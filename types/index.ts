@@ -153,6 +153,7 @@ export type FarmerFirstDetailType = {
   farmerBarangay: string;
   birthdate: Date;
   verified: boolean;
+  isDeleted: boolean;
   organization: string | null;
   orgRole: string | null;
   dateCreated: Date;

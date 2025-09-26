@@ -172,8 +172,10 @@ export async function SignUpAuth(
 
     await CreateSession(newUserId, newUserRole);
 
-    return { success: true, url: `/farmerDetails` };
+    redirect("/farmerDetails");
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     const err = error as Error;
     console.log(`Error making a new user: ${err}`);
     return {
