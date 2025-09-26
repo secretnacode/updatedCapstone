@@ -101,7 +101,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELET_CROP,
     Actions.DELETE_FARMER_ORG_MEMBER_USER,
     Actions.READ_CROP,
-    Actions.READ_FARMER_CROP,
     Actions.READ_ALL_FARMER_ORG_MEMBER_USER,
     Actions.READ_FARMER_MEMBER_REPORT,
     Actions.READ_FARMER_ORG_MEMBER_USER,

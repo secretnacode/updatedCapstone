@@ -65,19 +65,18 @@ export default async function Page() {
                         baseLink="farmerUser"
                         dynamicId={farmVal.farmerId}
                         label="Profile"
-                        className="profile-link-button-design"
                       />
 
                       <Link
                         href="/"
-                        className="table-link bg-blue-300 hover:bg-blue-400 active:ring-blue-800"
+                        className="button blue-button slimer-button text-white"
                       >
                         Reports
                       </Link>
 
                       <Link
                         href="/"
-                        className="table-link bg-green-300 hover:bg-green-400 active:ring-green-800"
+                        className="button submit-button slimer-button"
                       >
                         Crops
                       </Link>

@@ -308,7 +308,7 @@ export const FarmereDetailFirstStep: FC<{
 export const FarmerDetailSecondStep: FC = () => {
   const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
-  const { handleDoneLoading, handleIsLoading, isLoading } = useLoading();
+  const { handleDoneLoading, handleIsLoading } = useLoading();
   const [resubmit, setResubmit] = useState(false);
   const [cropList, setCropList] = useState<FarmerSecondDetailFormType[]>([]);
   const [geoJson, setGeoJson] = useState<Feature<Polygon> | undefined>(
@@ -331,8 +331,6 @@ export const FarmerDetailSecondStep: FC = () => {
     cropBaranggay: "",
     cropCoor: { lng: Number(""), lat: Number("") },
   });
-
-  console.log(isLoading);
 
   /**
    * use effect for only resubmiting()

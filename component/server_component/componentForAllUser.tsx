@@ -127,12 +127,8 @@ export const FarmerOrgMemberAction: FC<{
   farmerName: string;
 }> = ({ farmerId, verificationStatus, farmerName }) => {
   return (
-    <div>
-      <DynamicLink
-        baseLink="farmerUser"
-        dynamicId={farmerId}
-        className="profile-link-button-design"
-      />
+    <div className="flex flex-row justify-center items-center gap-2">
+      <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
 
       <ApprovedButton
         farmerId={farmerId}
@@ -144,14 +140,24 @@ export const FarmerOrgMemberAction: FC<{
   );
 };
 
+/**
+ * dynamic button component for farmer leader and agriculturist only
+ * this button can take the user to profile of the farmer(agriculturist and leader) and agriculturist/organization/[orgId](agriculturist only)
+ * @param param0
+ * @returns
+ */
 export const DynamicLink: FC<DynamicLinkPropType> = ({
   baseLink,
   dynamicId,
   label = "Tingnan",
   className = "",
 }) => {
+  const style = baseLink === "farmerUser" ? "profile-link-button-design" : "";
   return (
-    <Link className={`button ${className}`} href={`/${baseLink}/${dynamicId}`}>
+    <Link
+      className={`button slimer-button ${style} ${className}`}
+      href={`/${baseLink}/${dynamicId}`}
+    >
       {label}
     </Link>
   );
@@ -200,7 +206,6 @@ export const OrganizationMemberList: FC<{
                     baseLink="farmerUser"
                     dynamicId={member.farmerId}
                     label="View Profile"
-                    className="profile-link-button-design"
                   />
                 </div>
               </td>

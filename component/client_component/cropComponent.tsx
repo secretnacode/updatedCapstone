@@ -32,17 +32,17 @@ import {
   FarmerCropPageHandleOpenModalParamType,
   FormCropModalPropType,
   AddCropModalPropType,
+  AllFarmerCropPropType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
 import {
-  getBrgyCoordinate,
   intoFeatureCollection,
-  mapZoomValByBarangay,
   pickBrgyFirst,
   pointIsInsidePolygon,
   ReadableDateFomat,
   UnexpectedErrorMessage,
+  ViewCrop,
 } from "@/util/helper_function/reusableFunction";
 import {
   CancelButton,
@@ -53,8 +53,12 @@ import {
   TableComponent,
 } from "../server_component/customComponent";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
-import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
+import {
+  pointCoordinates,
+  polygonCoordinates,
+} from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
+import { DynamicLink } from "../server_component/componentForAllUser";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -226,14 +230,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     cropHasReportModal: false,
   });
 
-  const handleViewCrop = (lng: number, lat: number) => {
-    mapRef.current?.flyTo({ center: [lng, lat], duration: 2000, zoom: 15 });
-
-    document
-      .getElementById("Map")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const handleOpenModal = (
     openModal: FarmerCropPageHandleOpenModalParamType
   ) => {
@@ -296,7 +292,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     <div className="flex flex-col gap-4">
       <div>
         <MapComponent
-          id="Map"
           mapHeight={400}
           ref={mapRef}
           cityToHighlight={intoFeatureCollection(handleCityToLight())}
@@ -355,7 +350,14 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   <SubmitButton
                     type="button"
                     className="slimer-button"
-                    onClick={() => handleViewCrop(crop.cropLng, crop.cropLat)}
+                    onClick={() =>
+                      ViewCrop(
+                        crop.cropLng,
+                        crop.cropLat,
+                        crop.cropLocation,
+                        mapRef
+                      )
+                    }
                   >
                     Tingnan
                   </SubmitButton>
@@ -454,122 +456,109 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
  * component for editing and adding crop
  * @returns form components
  */
-const FormCropModal = memo(
-  ({
-    hideCropModal,
-    formSubmit,
-    formTitle,
-    cropVal,
-    error,
-  }: FormCropModalPropType) => {
-    const mapRef = useRef<MapRef>(null);
-    const [formError, setFormError] = useState<
-      FormErrorType<FarmerSecondDetailFormType>
-    >(error ? { ...error } : null);
-    const [crop, setCropVal] = useState<FarmerSecondDetailFormType>({
-      cropId: cropVal?.cropId ?? "",
-      cropName: cropVal?.cropName ?? "",
-      cropFarmArea: cropVal?.farmAreaMeasurement ?? "",
-      farmAreaMeasurement: cropVal?.farmAreaMeasurement ? "ha" : "",
-      cropBaranggay: cropVal?.cropLocation ?? "",
-      cropCoor: {
-        lat: cropVal?.cropLat ?? 0,
-        lng: cropVal?.cropLng ?? 0,
-      },
-    });
+const FormCropModal: FC<FormCropModalPropType> = ({
+  hideCropModal,
+  formSubmit,
+  formTitle,
+  cropVal,
+  error,
+}) => {
+  const mapRef = useRef<MapRef>(null);
+  const [formError, setFormError] = useState<
+    FormErrorType<FarmerSecondDetailFormType>
+  >(error ? { ...error } : null);
+  const [crop, setCropVal] = useState<FarmerSecondDetailFormType>({
+    cropId: cropVal?.cropId ?? "",
+    cropName: cropVal?.cropName ?? "",
+    cropFarmArea: cropVal?.farmAreaMeasurement ?? "",
+    farmAreaMeasurement: cropVal?.farmAreaMeasurement ? "ha" : "",
+    cropBaranggay: cropVal?.cropLocation ?? "",
+    cropCoor: {
+      lat: cropVal?.cropLat ?? 0,
+      lng: cropVal?.cropLng ?? 0,
+    },
+  });
 
-    useEffect(() => {
-      if (error) setFormError(error);
-    }, [error]);
+  useEffect(() => {
+    if (error) setFormError(error);
+  }, [error]);
 
-    const handleChangeVal = (
-      e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-      setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChangeVal = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-      if (e.target.name === "cropBaranggay") {
-        mapRef.current?.flyTo({
-          center: getBrgyCoordinate(e.target.value as barangayType),
-          duration: 2000,
-          zoom: mapZoomValByBarangay(e.target.value as barangayType),
-        });
+    if (e.target.name === "cropBaranggay") {
+      const coor = pointCoordinates[e.target.value as barangayType];
 
-        document
-          .getElementById("mapCanvas")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ViewCrop(coor[0], coor[1], e.target.value as barangayType, mapRef);
 
-        // restart the coordinates(no mark in the map yet)
-        setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
-      }
-    };
+      // restart the coordinates(no mark in the map yet)
+      setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
+    }
+  };
 
-    const handleSetLngLat = useCallback(
-      (e: MapMouseEvent) => {
-        const { lng, lat } = e.lngLat;
+  const handleSetLngLat = useCallback(
+    (e: MapMouseEvent) => {
+      const { lng, lat } = e.lngLat;
 
-        if (
-          pointIsInsidePolygon(lng, lat, crop.cropBaranggay as barangayType)
-        ) {
-          setCropVal((prev) => ({
-            ...prev,
-            cropCoor: { lng: lng, lat: lat },
-          }));
+      if (pointIsInsidePolygon(lng, lat, crop.cropBaranggay as barangayType)) {
+        setCropVal((prev) => ({
+          ...prev,
+          cropCoor: { lng: lng, lat: lat },
+        }));
 
-          if (formError?.cropCoor)
-            setFormError((prev) => ({ ...prev, cropCoor: [] }));
-        } else
-          setFormError((prev) => ({
-            ...prev,
-            cropCoor: [
-              "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
-            ],
-          }));
-      },
-      [crop.cropBaranggay, formError?.cropCoor]
-    );
+        if (formError?.cropCoor)
+          setFormError((prev) => ({ ...prev, cropCoor: [] }));
+      } else
+        setFormError((prev) => ({
+          ...prev,
+          cropCoor: [
+            "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+          ],
+        }));
+    },
+    [crop.cropBaranggay, formError?.cropCoor]
+  );
 
-    const handleSetBrgyFirst = () => {
-      setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
-    };
+  const handleSetBrgyFirst = () => {
+    setFormError((prev) => ({ ...prev, cropBaranggay: [pickBrgyFirst()] }));
+  };
 
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40">
-        <div className="absolute inset-0 " onClick={hideCropModal} />
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40">
+      <div className="absolute inset-0 " onClick={hideCropModal} />
 
-        <div className="relative bg-white rounded-lg w-1/2">
-          <form
-            onSubmit={(e: FormEvent<HTMLFormElement>) => formSubmit(e, crop)}
-          >
-            <h1 className="title p-5 !m-0 font-bold">{formTitle}</h1>
+      <div className="relative bg-white rounded-lg w-1/2">
+        <form onSubmit={(e: FormEvent<HTMLFormElement>) => formSubmit(e, crop)}>
+          <h1 className="title p-5 !m-0 font-bold">{formTitle}</h1>
 
-            <div className="max-h-[500px] overflow-y-auto border-2 border-gray-400 border-x-0 p-4">
-              <CropForm
-                currentCrops={crop}
-                handleChangeVal={handleChangeVal}
-                mapOnClick={
-                  crop.cropBaranggay ? handleSetLngLat : handleSetBrgyFirst
-                }
-                mapRef={mapRef}
-                mapHeight={"300px"}
-                formError={formError}
-              />
-            </div>
-
-            <FormCancelSubmitButton
-              submitButtonLabel="Baguhin"
-              cancelButtonLabel="Kanselahin"
-              cancelOnClick={hideCropModal}
-              divClassName="p-4 pt-0"
-              submitClassName="slimer-button"
-              cancelClassName="slimer-button"
+          <div className="max-h-[500px] overflow-y-auto border-2 border-gray-400 border-x-0 p-4">
+            <CropForm
+              currentCrops={crop}
+              handleChangeVal={handleChangeVal}
+              mapOnClick={
+                crop.cropBaranggay ? handleSetLngLat : handleSetBrgyFirst
+              }
+              mapRef={mapRef}
+              mapHeight={"300px"}
+              formError={formError}
             />
-          </form>
-        </div>
+          </div>
+
+          <FormCancelSubmitButton
+            submitButtonLabel="Baguhin"
+            cancelButtonLabel="Kanselahin"
+            cancelOnClick={hideCropModal}
+            divClassName="p-4 pt-0"
+            submitClassName="slimer-button"
+            cancelClassName="slimer-button"
+          />
+        </form>
       </div>
-    );
-  }
-);
-FormCropModal.displayName = "FormCropModal";
+    </div>
+  );
+};
 
 const AddCropModal: FC<AddCropModalPropType> = ({ hideAddCropModal }) => {
   const { handleIsLoading, handleDoneLoading } = useLoading();
@@ -674,5 +663,86 @@ const EditCropModal: FC<EditCropModalPropType> = ({
       cropVal={myCropInfoList}
       error={formError}
     />
+  );
+};
+
+export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
+  const mapRef = useRef<MapRef>(null);
+  const cityToHighlight = (): intoFeatureCollectionDataParam[] => {
+    return cropInfo.reduce((acc: intoFeatureCollectionDataParam[], crop) => {
+      if (acc.some((cropVal) => cropVal.name === crop.cropLocation)) return acc;
+
+      return [
+        ...acc,
+        {
+          type: "polygon",
+          name: crop.cropLocation,
+          coordinates: polygonCoordinates[crop.cropLocation as barangayType],
+        },
+      ] as intoFeatureCollectionDataParam[];
+    }, []);
+  };
+  return (
+    <div className="flex flex-col gap-5">
+      <MapComponent
+        mapHeight={400}
+        cityToHighlight={intoFeatureCollection(cityToHighlight())}
+        ref={mapRef}
+      >
+        {cropInfo.map((crop) => (
+          <MapMarkerComponent
+            key={crop.cropId}
+            markerLng={crop.cropLng}
+            markerLat={crop.cropLat}
+          />
+        ))}
+      </MapComponent>
+      <TableComponent
+        noContentMessage="There's no farmer user that list their farmer info"
+        listCount={cropInfo.length}
+        tableHeaderCell={
+          <>
+            <th>Farmer</th>
+            <th>Alias</th>
+            <th>Crop Name</th>
+            <th>Location</th>
+            <th>Area(Ha)</th>
+            <th></th>
+          </>
+        }
+        tableCell={cropInfo.map((crop) => (
+          <tr key={crop.cropId}>
+            <td className="straight-text">{crop.farmerName}</td>
+            <td>{crop.farmerAlias}</td>
+            <td>{crop.cropName}</td>
+            <td>{crop.cropLocation}</td>
+            <td>{crop.farmAreaMeasurement}</td>
+            <td>
+              <div className="flex flex-row justify-center items-centers gap-2">
+                <SubmitButton
+                  type="button"
+                  className="slimer-button"
+                  onClick={() =>
+                    ViewCrop(
+                      crop.cropLng,
+                      crop.cropLat,
+                      crop.cropLocation as barangayType,
+                      mapRef
+                    )
+                  }
+                >
+                  View
+                </SubmitButton>
+                <DynamicLink
+                  baseLink="farmerUser"
+                  dynamicId={crop.farmerId}
+                  label="Profile"
+                />
+              </div>
+            </td>
+          </tr>
+        ))}
+      />
+    </div>
   );
 };

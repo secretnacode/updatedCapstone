@@ -1,4 +1,5 @@
 import {
+  GetAllCropInfoQueryReturnType,
   GetFarmerCropInfoQueryReturnType,
   GetMyCropInfoQueryRetrunType,
   HandleInsertCropType,
@@ -176,6 +177,27 @@ export const DeleteUserCropInfoQuery = async (cropId: string) => {
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng iyong pananim`
+    );
+  }
+};
+
+export const GetAllCropInfoQuery = async (): Promise<
+  GetAllCropInfoQueryReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select c."cropId", c."cropLocation", c."farmerId", c."farmAreaMeasurement", c."cropName", c."cropLng", c."cropLat", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias" from capstone.crop c join capstone.farmer f on c."farmerId" = f."farmerId"`
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `Unexpected error was encountered while getting all the crop information: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `Unexpected error was encountered while getting all the crop information`
     );
   }
 };

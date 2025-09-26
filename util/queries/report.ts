@@ -141,7 +141,7 @@ export const GetAllFarmerReportQuery =
     try {
       return (
         await pool.query(
-          `select r."reportId", r."cropIdReported", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."verifiedByOrgId" = o."orgId" where r."verificationStatus" = $1 or f."orgId" is null`,
+          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."verifiedByOrgId" = o."orgId" left join capstone.crop c on r."cropIdReported" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null`,
           ["pending"]
         )
       ).rows;

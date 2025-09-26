@@ -66,7 +66,6 @@ export default async function Page() {
                       <DynamicLink
                         baseLink="farmerUser"
                         dynamicId={farmVal.farmerId}
-                        className="profile-link-button-design"
                       />
 
                       <ApprovedButton

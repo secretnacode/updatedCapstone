@@ -16,6 +16,8 @@ import {
 } from "@turf/turf";
 import { Feature } from "geojson";
 import { LngLatLike } from "maplibre-gl";
+import { RefObject } from "react";
+import { MapRef } from "@vis.gl/react-maplibre";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -91,7 +93,7 @@ export function Date10YearsAgo() {
 export function ReadableDateFomat(date: Date) {
   return date.toLocaleDateString("en-PH", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
 }
@@ -146,6 +148,13 @@ export const LogInAgainMessage = (): string => {
  */
 export const UnexpectedErrorMessage = (): string => {
   return "May hindi inaasahang pag kakamali ang nangyari";
+};
+
+/**
+ * @returns a value mesage for the unexpected error message in english version
+ */
+export const UnexpectedErrorMessageEnglish = (): string => {
+  return "Unexpected has occured";
 };
 
 export const FormErrorMessage = (): string => {
@@ -303,4 +312,31 @@ export function farmAreaMeasurementValue(): {
 
 export function pickBrgyFirst(): string {
   return "Pumili muna ng barangay na pinag tataniman";
+}
+
+/**
+ * function for viewing the crop in the map component
+ * @param lng coordinates of the crop
+ * @param lat coordinates of the crop
+ * @param brgy barangay where the crop located
+ * @param mapRef useRef value of the map
+ */
+export function ViewCrop(
+  lng: number,
+  lat: number,
+  brgy: barangayType,
+  mapRef: RefObject<MapRef | null>
+) {
+  mapRef.current?.flyTo({
+    center: [
+      lng ? lng : pointCoordinates.calauan[0],
+      lat ? lat : pointCoordinates.calauan[1],
+    ],
+    duration: 2000,
+    zoom: mapZoomValByBarangay(brgy),
+  });
+
+  document
+    .getElementById("mapCanvas")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }

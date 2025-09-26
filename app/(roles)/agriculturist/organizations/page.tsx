@@ -48,7 +48,6 @@ export default async function Page() {
                         baseLink="farmerUser"
                         dynamicId={orgVal.farmerId}
                         label="View Leader"
-                        className="profile-link-button-design"
                       />
                       <DynamicLink
                         baseLink="agriculturist/organizations"

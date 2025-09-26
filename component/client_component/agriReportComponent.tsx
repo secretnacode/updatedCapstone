@@ -8,7 +8,11 @@ export const AgriFarmerReportAction: FC<{ reportId: string }> = ({
 }) => {
   return (
     <>
-      <ViewUserReportTableData reportId={reportId} />
+      <ViewUserReportTableData
+        reportId={reportId}
+        className="slimer-button"
+        label="View Report"
+      />
     </>
   );
 };

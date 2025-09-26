@@ -5,6 +5,7 @@ import {
   checkIfFarmerCrop,
   CreateNewCropAfterSignUp,
   DeleteUserCropInfoQuery,
+  GetAllCropInfoQuery,
   GetFarmerCropInfoQuery,
   GetMyCropInfoQuery,
   UpdateUserCropInfoQuery,
@@ -14,6 +15,7 @@ import {
   AddUserCropInfoReturnType,
   DeleteUserCropInfoReturnType,
   FarmerSecondDetailFormType,
+  GetAllCropInfoReturnType,
   GetFarmerCropInfoReturnType,
   GetMyCropInfoReturnType,
   UpdateUserCropInfoReturnType,
@@ -259,6 +261,28 @@ export const AddUserCropInfo = async (
     return {
       success: false,
       notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const GetAllCropInfo = async (): Promise<GetAllCropInfoReturnType> => {
+  try {
+    await ProtectedAction("read:farmer:crop");
+
+    return { success: true, allCropInfo: await GetAllCropInfoQuery() };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag kuha lahat ng impormasyon ng lahat ng taniman: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
         {
           message: err.message,
           type: "error",

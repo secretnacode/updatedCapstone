@@ -283,7 +283,7 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
 
   return (
     <button
-      className="button submit-button"
+      className="button submit-button slimer-button"
       disabled={verificationStatus}
       onClick={handleApproveFarmerAcc}
     >
@@ -341,7 +341,7 @@ export const DeleteUser: FC<DeleteUserPropType> = ({
   return (
     <>
       <button
-        className="button cancel-button"
+        className="button cancel-button slimer-button"
         onClick={() => setShowModal(true)}
       >
         {buttonLabel}

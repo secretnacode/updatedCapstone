@@ -183,7 +183,7 @@ body {
     @apply bg-red-500 hover:bg-red-600 text-white flex items-center justify-center gap-3 transition-colors disabled:opacity-50;
   }
   .blue-button {
-    @apply !bg-blue-500 hover:!bg-blue-700;
+    @apply !bg-blue-600 hover:!bg-blue-700;
   }
   .table-style {
     @apply w-full divide-y divide-gray-200;
@@ -228,7 +228,7 @@ body {
     @apply px-4 py-2 rounded-full bg-red-300 text-red-900;
   }
   .profile-link-button-design {
-    @apply bg-orange-300 hover:bg-orange-400 active:ring-orange-500;
+    @apply bg-orange-400 hover:bg-orange-500 active:ring-orange-600 text-white;
   }
   .text-color {
     @apply text-gray-900;
@@ -241,5 +241,8 @@ body {
   }
   .modal-red-button {
     @apply !bg-red-700 hover:!bg-red-500;
+  }
+  td {
+    @apply text-nowrap;
   }
 }

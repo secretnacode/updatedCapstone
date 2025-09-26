@@ -3,7 +3,7 @@ import { RenderNotification } from "@/component/client_component/fallbackCompone
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllFarmerReport } from "@/lib/server_action/report";
 import { GetAllFarmerReportReturnType } from "@/types";
-import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
+import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,6 @@ export default async function Page() {
           tableTitle="Farmer Reports"
           tableHeaderCell={
             <>
-              <th scope="col">#</th>
               <th scope="col">Farmer Name</th>
               <th scope="col">Crop location</th>
               <th scope="col">Verified</th>
@@ -42,15 +41,13 @@ export default async function Page() {
           }
           tableCell={
             <>
-              {farmerReport.validatedReport.map((report, index) => (
+              {farmerReport.validatedReport.map((report) => (
                 <tr key={report.reportId}>
-                  <td className="text-gray-500">{index + 1}</td>
-
                   <td className=" text-gray-900 font-medium">
                     {report.farmerName}
                   </td>
 
-                  <td className="text-gray-500">{report.cropIdReported}</td>
+                  <td className="text-gray-500">{report.cropLocation}</td>
 
                   <td>
                     <span
@@ -67,15 +64,15 @@ export default async function Page() {
                   </td>
 
                   <td className="text-gray-500">
-                    {report.orgName ? report.orgName : "Not in a Organization"}
+                    {report.orgName ? report.orgName : "No organization"}
                   </td>
 
                   <td className="text-gray-500">
-                    {DateToYYMMDD(new Date(report.dayReported))}
+                    {ReadableDateFomat(new Date(report.dayReported))}
                   </td>
 
                   <td className="text-gray-500">
-                    {DateToYYMMDD(new Date(report.dayHappen))}
+                    {ReadableDateFomat(new Date(report.dayHappen))}
                   </td>
 
                   <td className="text-center">

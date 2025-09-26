@@ -320,7 +320,7 @@ export type ApprovedOrgMemberReturnType =
 
 export type GetAllFarmerReportQueryReturnType = {
   reportId: string;
-  cropIdReported: string;
+  cropLocation: string;
   verificationStatus: string;
   farmerName: string;
   dayReported: Date;
@@ -988,3 +988,32 @@ export type AddUserCropInfoReturnType = {
   | { success: true }
   | { success: false; formError?: FormErrorType<FarmerSecondDetailFormType> }
 );
+
+export type GetAllCropInfoQueryReturnType = {
+  cropId: string;
+  cropLocation: string;
+  farmerId: string;
+  farmAreaMeasurement: string;
+  cropName: string;
+  cropLng: number;
+  cropLat: number;
+  farmerName: string;
+  farmerAlias: string;
+};
+
+export type GetAllCropInfoReturnType =
+  | ServerActionFailBaseType
+  | {
+      success: true;
+      allCropInfo: GetAllCropInfoQueryReturnType[];
+    };
+
+export type AllFarmerCropPropType = {
+  cropInfo: GetAllCropInfoQueryReturnType[];
+};
+
+export type ViewUserReportTableDataPropType = {
+  reportId: string;
+  label?: string;
+  className?: string;
+};

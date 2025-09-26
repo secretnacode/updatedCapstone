@@ -29,10 +29,12 @@ import {
   AddReportPictureType,
   GetFarmerReportDetailReturnType,
   ReportDetailType,
+  ViewUserReportTableDataPropType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { SubmitButton } from "../server_component/customComponent";
 
 export const AddReportComponent: FC = () => {
   const [addReport, setAddReport] = useState<boolean>(false);
@@ -457,15 +459,21 @@ const AddingReport: FC<{
   );
 };
 
-export const ViewUserReportTableData: FC<{ reportId: string }> = ({
+export const ViewUserReportTableData: FC<ViewUserReportTableDataPropType> = ({
+  label = "Tingnan ang ulat",
+  className = "",
   reportId,
 }) => {
   const [viewReport, setViewReport] = useState<boolean>(false);
   return (
     <>
-      <button onClick={() => setViewReport(true)} className="cursor-pointer">
-        Tingnan ang ulat
-      </button>
+      <SubmitButton
+        type="button"
+        onClick={() => setViewReport(true)}
+        className={className}
+      >
+        {label}
+      </SubmitButton>
 
       {viewReport &&
         createPortal(
@@ -509,8 +517,9 @@ export const UserReportDetails: FC<{
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0" onClick={() => setViewReport(false)} />
       {userReport && (
-        <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
             <h2 className="text-lg font-semibold">{userReport.title}</h2>
             <button
