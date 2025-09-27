@@ -9,7 +9,10 @@ import {
   AuthSignUpType,
   NewUserType,
 } from "@/types";
-import { CreateUUID } from "@/util/helper_function/reusableFunction";
+import {
+  CreateUUID,
+  UnexpectedErrorMessage,
+} from "@/util/helper_function/reusableFunction";
 import { CreateSession } from "@/lib/session";
 import {
   ValidateLoginVal,
@@ -160,17 +163,16 @@ export async function SignUpAuth(
         ],
       };
 
-    const newUserId = CreateUUID();
-    const newUserRole = `farmer`;
+    const userId = CreateUUID();
 
     await InsertNewUser({
-      userId: newUserId,
+      userId: userId,
       username: data.username,
       password: await Hash(data.password),
-      role: newUserRole,
+      role: `farmer`,
     } as NewUserType);
 
-    await CreateSession(newUserId, newUserRole);
+    await CreateSession(userId, "newUser");
 
     redirect("/farmerDetails");
   } catch (error) {
@@ -180,7 +182,7 @@ export async function SignUpAuth(
     console.log(`Error making a new user: ${err}`);
     return {
       success: false,
-      errors: [{ message: `Error making a new user: ${err}`, type: "error" }],
+      errors: [{ message: UnexpectedErrorMessage(), type: "error" }],
     };
   }
 }

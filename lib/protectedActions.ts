@@ -96,7 +96,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   leader: [
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
-    Actions.CREATE_USER,
     Actions.CREATE_REPORT,
     Actions.DELET_CROP,
     Actions.DELETE_FARMER_ORG_MEMBER_USER,
@@ -117,7 +116,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   farmer: [
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
-    Actions.CREATE_USER,
     Actions.CREATE_REPORT,
     Actions.DELET_CROP,
     Actions.READ_CROP,
@@ -128,6 +126,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_MY_ORG,
     Actions.UPDATE_USER,
   ],
+  newUser: [Actions.CREATE_CROP, Actions.CREATE_USER, Actions.READ_ORG],
 };
 
 /**

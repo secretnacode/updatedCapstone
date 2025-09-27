@@ -37,7 +37,7 @@ export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May Hindi inaasahang pag kakamali abang kinukuha ang : ${err.message}`
+      `May Hindi inaasahang pag kakamali habang kinukuha ang mga organisasyon: ${err.message}`
     );
     return {
       success: false,

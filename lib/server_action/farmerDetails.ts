@@ -12,13 +12,14 @@ import {
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { FarmerFirstDetailQuery } from "@/util/queries/user";
+import { FarmerFirstDetailQuery, GetFarmerRole } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
-import { CreateNewOrg } from "@/util/queries/org";
+import { CreateNewOrg, UpdateUserOrg } from "@/util/queries/org";
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { ConvertMeassurement } from "@/util/helper_function/reusableFunction";
+import { UpdateSessionRole } from "../session";
 
 /**
  * server action that partners with the actionState hook
@@ -36,7 +37,6 @@ export const AddFirstFarmerDetails = async (
       newUserVal,
       farmerFirstDetailFormSchema
     );
-    console.log(validateVal);
     if (!validateVal.valid) {
       return {
         success: false,
@@ -50,6 +50,16 @@ export const AddFirstFarmerDetails = async (
         formError: validateVal.formError,
       };
     }
+
+    await FarmerFirstDetailQuery({
+      ...newUserVal,
+      countFamilyMember: Number(newUserVal.countFamilyMember),
+      mobileNumber: Number(newUserVal.mobileNumber),
+      farmerId: userId,
+      verified: false,
+      isDeleted: false,
+      dateCreated: new Date(),
+    });
 
     const org =
       newUserVal.organization === "other" && newUserVal.newOrganization
@@ -65,16 +75,10 @@ export const AddFirstFarmerDetails = async (
         ? null
         : "member";
 
-    await FarmerFirstDetailQuery({
-      ...newUserVal,
-      countFamilyMember: Number(newUserVal.countFamilyMember),
-      organization: org,
+    await UpdateUserOrg({
+      orgId: org,
       orgRole: orgRole,
-      mobileNumber: Number(newUserVal.mobileNumber),
       farmerId: userId,
-      verified: false,
-      isDeleted: false,
-      dateCreated: new Date(),
     });
 
     return {
@@ -136,15 +140,21 @@ export const AddSecondFarmerDetails = async (
       };
 
     // one by one inserting the crop information in the database
-    cropList.forEach(async (crop) => {
-      const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
+    await Promise.all(
+      cropList.map(async (crop) => {
+        const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
 
-      await CreateNewCropAfterSignUp({
-        farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
-        userId,
-        ...cropVal,
-      });
-    });
+        return CreateNewCropAfterSignUp({
+          farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+          userId,
+          ...cropVal,
+        });
+      })
+    );
+
+    await UpdateSessionRole(
+      (await GetFarmerRole(userId)).orgRole === "member" ? "farmer" : "leader"
+    );
 
     redirect("/farmer");
   } catch (error) {

@@ -7,6 +7,8 @@ import { TableComponent } from "@/component/server_component/customComponent";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
 import { GetFarmerOrgMemberReturnType, NotificationBaseType } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page({
   searchParams,
 }: {

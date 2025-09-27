@@ -4,6 +4,8 @@ import { GetAllOrgMemberList } from "@/lib/server_action/org";
 import { GetAllOrgMemberListReturnType } from "@/types";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page({
   params,
 }: {

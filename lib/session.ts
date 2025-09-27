@@ -1,7 +1,10 @@
 "use server";
 
 import { Redis } from "@upstash/redis";
-import { CreateUUID } from "../util/helper_function/reusableFunction";
+import {
+  CreateUUID,
+  UnexpectedErrorMessageEnglish,
+} from "../util/helper_function/reusableFunction";
 import { cookies } from "next/headers";
 import { SessionValueType } from "@/types";
 
@@ -16,6 +19,23 @@ const redis = new Redis({
 });
 
 /**
+ * getting the cookie id
+ * @returns value of the cookie
+ */
+const GetCookieId = async (): Promise<string | undefined> => {
+  return (await cookies()).get(`sessionId`)?.value;
+};
+
+/**
+ * returning the session name together with its structure
+ * @param cookieId of the cookie
+ * @returns key of the session
+ */
+const SessionName = (cookieId: string) => {
+  return `session: ${cookieId}`;
+};
+
+/**
  * Creates a new session in Redis and sets the session cookie.
  * @param userId The ID of the authenticated user.
  * @param work The role of the user (optional).
@@ -24,32 +44,36 @@ const redis = new Redis({
 export const CreateSession = async (
   userId: string,
   work: string
-): Promise<string> => {
-  const sessionId = CreateUUID();
+): Promise<boolean> => {
+  try {
+    const sessionId = CreateUUID();
 
-  // setting the value in the redis, it will set the session id and
-  // stringify the objects that will be used for authentication,
-  // also adding "ex" object, it will define the expiration of the session
-  await redis.set(
-    `session: ${sessionId}`,
-    JSON.stringify({
-      userId: userId,
-      work: work,
-    }),
-    { ex: sessionDuration }
-  );
+    // setting the value in the redis, it will set the session id and
+    // stringify the objects that will be used for authentication,
+    // also adding "ex" object, it will define the expiration of the session
+    await redis.set(
+      SessionName(sessionId),
+      JSON.stringify({
+        userId: userId,
+        work: work,
+      }),
+      { ex: sessionDuration }
+    );
 
-  // setting the cookie in the header together its session id
-  // this will be passed in the browser in the header response
-  (await cookies()).set("sessionId", sessionId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: sessionDuration,
-  });
+    // setting the cookie in the header together its session id
+    // this will be passed in the browser in the header response
+    (await cookies()).set("sessionId", sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: sessionDuration,
+    });
 
-  return sessionId;
+    return true;
+  } catch (error) {
+    throw new Error(`Failed to create session: ${(error as Error).message}`);
+  }
 };
 
 /**
@@ -57,18 +81,50 @@ export const CreateSession = async (
  * @returns sessionVal object that contains all the in the session storage
  */
 export const GetSession = async (): Promise<SessionValueType | null> => {
-  // getting the cookie that was stored in the browser
-  const sessionId = (await cookies()).get(`sessionId`)?.value;
+  try {
+    // getting the cookie that was stored in the browser
 
-  if (!sessionId) return null;
+    const cookie = await GetCookieId();
 
-  const sessionWord = `session: ${sessionId}`;
+    if (!cookie) return null;
 
-  const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
+    const sessionWord = SessionName(cookie);
 
-  if (!sessionVal) return null;
+    const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
 
-  await redis.expire(sessionWord, sessionDuration);
+    if (!sessionVal) return null;
 
-  return sessionVal;
+    return sessionVal;
+  } catch (error) {
+    throw new Error(
+      `Error in getting the current sesion: ${(error as Error).message}`
+    );
+  }
+};
+
+/**
+ * function for updating the role of the session val
+ * @param role value of the role you want to chang into
+ */
+export const UpdateSessionRole = async (role: "leader" | "farmer") => {
+  try {
+    const cookie = await GetCookieId();
+
+    if (!cookie) return null;
+
+    const sessionWord = SessionName(cookie);
+
+    const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
+
+    if (!sessionVal) return null;
+
+    await redis.set(
+      SessionName(cookie),
+      JSON.stringify({ ...sessionVal, work: role })
+    );
+  } catch (error) {
+    throw new Error(
+      `${UnexpectedErrorMessageEnglish()}: ${(error as Error).message}`
+    );
+  }
 };

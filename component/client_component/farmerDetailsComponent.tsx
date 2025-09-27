@@ -6,6 +6,7 @@ import {
   CheckCropListReturnType,
   CropFormErrorsType,
   EditCropListType,
+  FarmerDetailFormPropType,
   FarmerFirstDetailFormType,
   FarmerSecondDetailFormType,
   FormErrorType,
@@ -57,10 +58,15 @@ import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import { Feature, Polygon } from "geojson";
 
-export const FarmerDetailForm: FC<{
-  orgList: QueryAvailableOrgReturnType[];
-}> = ({ orgList }) => {
-  const [nextStep, setNextStep] = useState<boolean>(false);
+export const FarmerDetailForm: FC<FarmerDetailFormPropType> = ({
+  orgList,
+  farmerInfoExist,
+}) => {
+  const [nextStep, setNextStep] = useState<boolean>(farmerInfoExist);
+
+  useEffect(() => {
+    setNextStep(farmerInfoExist);
+  }, [farmerInfoExist]);
 
   return (
     <div>
@@ -198,7 +204,6 @@ export const FarmereDetailFirstStep: FC<{
           inputValue={newUserVal.extensionName ?? ""}
           onChange={handleChangeVal}
           inputPlaceholder="Hal. Jr."
-          inputRequired={true}
           formError={formError?.extensionName}
         />
 
@@ -208,7 +213,6 @@ export const FarmereDetailFirstStep: FC<{
           inputValue={newUserVal.alias ?? ""}
           onChange={handleChangeVal}
           inputPlaceholder="Hal. Mang. Kanor"
-          inputRequired={true}
           formError={formError?.alias}
         />
 
@@ -228,6 +232,8 @@ export const FarmereDetailFirstStep: FC<{
           inputValue={
             newUserVal.birthdate instanceof Date
               ? DateToYYMMDD(newUserVal.birthdate)
+              : newUserVal.birthdate === Date.now()
+              ? ""
               : newUserVal.birthdate
           }
           onChange={handleChangeVal}
@@ -939,12 +945,14 @@ export const FarmerDetailSecondStep: FC = () => {
         </div>
       )}
 
-      <MemoizedCropsValComponent
-        cropList={cropList}
-        cropErrors={formErrorList?.map((error) => error.cropId)}
-        handleEditCrop={handleEditCrop}
-        handleRemoveCropFromList={handleRemoveCropFromList}
-      />
+      {cropList.length > 0 && (
+        <MemoizedCropsValComponent
+          cropList={cropList}
+          cropErrors={formErrorList?.map((error) => error.cropId)}
+          handleEditCrop={handleEditCrop}
+          handleRemoveCropFromList={handleRemoveCropFromList}
+        />
+      )}
     </div>
   );
 };

@@ -80,15 +80,10 @@ export type QueryUserLoginReturnType =
       data: { authId: string; password: string; work: string };
     };
 
-export type AuthResponseType =
-  | {
-      success: false;
-      errors: NotificationBaseType[];
-    }
-  | {
-      success: true;
-      url: string;
-    };
+export type AuthResponseType = {
+  success: false;
+  errors: NotificationBaseType[];
+};
 
 export type ErrorResponseType = {
   errors: NotificationBaseType[];
@@ -154,8 +149,6 @@ export type FarmerFirstDetailType = {
   birthdate: Date;
   verified: boolean;
   isDeleted: boolean;
-  organization: string | null;
-  orgRole: string | null;
   dateCreated: Date;
   countFamilyMember: number;
 };
@@ -657,8 +650,8 @@ export type ModalNoticePropType = {
 };
 
 export type NewOrgType = {
-  orgId: string;
-  orgRole: string;
+  orgId: string | null;
+  orgRole: string | null;
   farmerId: string;
 };
 
@@ -1017,4 +1010,17 @@ export type ViewUserReportTableDataPropType = {
   reportId: string;
   label?: string;
   className?: string;
+};
+
+export type newUserValNeedInfoReturnType =
+  | {
+      success: true;
+      isExist: boolean;
+      orgList: QueryAvailableOrgReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type FarmerDetailFormPropType = {
+  orgList: QueryAvailableOrgReturnType[];
+  farmerInfoExist: boolean;
 };

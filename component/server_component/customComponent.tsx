@@ -124,6 +124,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         onClick={labelOnClick}
       >
         {labelMessage}
+        {inputRequired && <span className="text-red-500">*</span>}
       </label>
       <input
         type={inputType}

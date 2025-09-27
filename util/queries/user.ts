@@ -103,13 +103,14 @@ export const UserLogin = async (
 /**
  * inserting the value of the new user
  * @param data of the new user that is signing up
+ * @returns the farmerId that was inserted
  */
 export const FarmerFirstDetailQuery = async (
   data: FarmerFirstDetailType
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "orgId", "orgRole", "dateCreated", "familyMemberCount", "isDeleted") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated", "familyMemberCount", "isDeleted") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       [
         data.farmerId,
         data.firstName,
@@ -121,8 +122,6 @@ export const FarmerFirstDetailQuery = async (
         data.farmerBarangay,
         data.birthdate,
         data.verified,
-        data.organization,
-        data.orgRole,
         data.dateCreated,
         data.countFamilyMember,
         data.isDeleted,
@@ -146,27 +145,27 @@ export const FarmerFirstDetailQuery = async (
  * @param userRole is the role of the user in their organization, the letter should start in small letter (e.g. "member")
  * @param userId is the id of the current user
  */
-export const UpdateUserOrgAndRoleAfterSignUp = async (
-  orgId: string | null,
-  userRole: string | null,
-  userId: string
-): Promise<void> => {
-  try {
-    await pool.query(
-      `update capstone.farmer set "orgId"= $1, "orgRole"= $2 where "farmerId"= $3`,
-      [orgId, userRole, userId]
-    );
-  } catch (error) {
-    console.error(
-      `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon`
-    );
-  }
-};
+// export const UpdateUserOrgAndRoleAfterSignUp = async (
+//   orgId: string | null,
+//   userRole: string | null,
+//   userId: string
+// ): Promise<void> => {
+//   try {
+//     await pool.query(
+//       `update capstone.farmer set "orgId"= $1, "orgRole"= $2 where "farmerId"= $3`,
+//       [orgId, userRole, userId]
+//     );
+//   } catch (error) {
+//     console.error(
+//       `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon: ${
+//         (error as Error).message
+//       }`
+//     );
+//     throw new Error(
+//       `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon`
+//     );
+//   }
+// };
 
 /**
  * query to get the role of the farmer (e.g. member or leader)
@@ -499,7 +498,13 @@ export const farmerIsExist = async (farmerId: string): Promise<boolean> => {
       )
     ).rows[0].exists;
   } catch (error) {
-    console.log((error as Error).message);
-    return false;
+    console.log(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka`
+    );
   }
 };
