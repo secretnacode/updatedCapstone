@@ -73,7 +73,7 @@ export const GetFarmerCropInfo = async (
 
 export const GetMyCropInfo = async (): Promise<GetMyCropInfoReturnType> => {
   try {
-    const userId = await ProtectedAction("read:crop");
+    const userId = (await ProtectedAction("read:crop")).userId;
 
     return { success: true, myCropInfoList: await GetMyCropInfoQuery(userId) };
   } catch (error) {
@@ -97,7 +97,7 @@ export const UpdateUserCropInfo = async (
   cropVal: FarmerSecondDetailFormType
 ): Promise<UpdateUserCropInfoReturnType> => {
   try {
-    const userId = await ProtectedAction("update:crop");
+    const userId = (await ProtectedAction("update:crop")).userId;
 
     const validate = ZodValidateForm<FarmerSecondDetailFormType>(
       cropVal,
@@ -160,7 +160,7 @@ export const DeleteUserCropInfo = async (
   cropId: string
 ): Promise<DeleteUserCropInfoReturnType> => {
   try {
-    const userId = await ProtectedAction("delete:crop");
+    const userId = (await ProtectedAction("delete:crop")).userId;
 
     if (!(await checkIfFarmerCrop(userId, cropId))) {
       return {
@@ -217,7 +217,7 @@ export const AddUserCropInfo = async (
   cropVal: FarmerSecondDetailFormType
 ): Promise<AddUserCropInfoReturnType> => {
   try {
-    const userId = await ProtectedAction("create:crop");
+    const userId = (await ProtectedAction("create:crop")).userId;
 
     // eslint-disable-next-line prefer-const
     let { cropId, farmAreaMeasurement, cropFarmArea, ...otherCropInfo } =

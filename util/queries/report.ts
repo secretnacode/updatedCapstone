@@ -156,3 +156,84 @@ export const GetAllFarmerReportQuery =
       );
     }
   };
+
+/**
+ * function for getting all the report count that was passed to the farmer leader today
+ * @param farmerLeadId id of the farmer leader that wants to see the total count of report that was made today
+ * @returns count of reports
+ */
+export const getCountReportToday = async (
+  farmerLeadId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where fl."farmerId" = $1 and date(r."dayReported") = current_date`,
+        [farmerLeadId]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
+    );
+  }
+};
+
+/**
+ * query for getting the count of unvalidated report
+ * @param farmerLeadId id of the farmerLeader that wants to know the count of unvalidated report
+ * @returns number of unvalidated report
+ */
+export const getCountUnvalidatedReport = async (
+  farmerLeadId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where fl."farmerId" = $1 and r."verificationStatus" = $2`,
+        [farmerLeadId, "false"]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng unvalidated na ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng unvalidated na ulat`
+    );
+  }
+};
+
+/**
+ * query for getting the count that the user made today
+ * @param userId id of the user that wants to know the report it made today
+ * @returns number
+ */
+export const getCountMadeReportToday = async (
+  userId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count("reportId") from capstone.report where "farmerId" = $1`,
+        [userId]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo`
+    );
+  }
+};

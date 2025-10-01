@@ -4,11 +4,20 @@ import {
   CheckMyMemberquery,
   DelteUserAccountQuery,
   farmerIsExist,
+  GetFarmerRole,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
-import { newUserValNeedInfoReturnType, NotificationBaseType } from "@/types";
+import {
+  checkFarmerRoleReturnType,
+  newUserValNeedInfoReturnType,
+  NotificationBaseType,
+} from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
+import {
+  getCountReportToday,
+  getCountUnvalidatedReport,
+} from "@/util/queries/report";
 
 /**
  * server action for deleting a user account
@@ -82,7 +91,7 @@ export const DelteUserAccount = async (
 export const newUserValNeedInfo =
   async (): Promise<newUserValNeedInfoReturnType> => {
     try {
-      const userId = await ProtectedAction("create:user");
+      const userId = (await ProtectedAction("create:user")).userId;
 
       if (await farmerIsExist(userId))
         return {
@@ -112,3 +121,56 @@ export const newUserValNeedInfo =
       };
     }
   };
+
+export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
+  try {
+    const work = (await ProtectedAction("read:user")).work;
+
+    return { success: true, role: work };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang chinecheck and farmer user: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const getFarmerLeadDashboardData = async () => {
+  try {
+    // const userId = (await ProtectedAction("read:all:farmer:org:member:user"))
+    //   .userId;
+
+    // const { countReportToday, countUnvalidatedReport } = await Promise.all([
+    //   getCountReportToday(userId),
+    //   getCountUnvalidatedReport(userId),
+    // ]);
+
+    // console.log(allData);
+    // // console.log(await );
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon para sa farmer leader: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

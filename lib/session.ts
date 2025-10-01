@@ -103,7 +103,7 @@ export const GetSession = async (): Promise<SessionValueType | null> => {
 };
 
 /**
- * function for updating the role of the session val
+ * function for updating the role of the session val, used after the sign up
  * @param role value of the role you want to chang into
  */
 export const UpdateSessionRole = async (role: "leader" | "farmer") => {
@@ -120,7 +120,8 @@ export const UpdateSessionRole = async (role: "leader" | "farmer") => {
 
     await redis.set(
       SessionName(cookie),
-      JSON.stringify({ ...sessionVal, work: role })
+      JSON.stringify({ ...sessionVal, work: role }),
+      { ex: sessionDuration }
     );
   } catch (error) {
     throw new Error(

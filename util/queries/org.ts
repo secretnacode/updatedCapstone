@@ -174,6 +174,31 @@ export const organizationIsExist = async (orgId: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
-    return false;
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng organisasyon`
+    );
+  }
+};
+
+/**
+ * query to check if the organization name is already existing
+ * @param orgName org name of the org that you want to check
+ * @returns boolean
+ */
+export const organizationNameIsExist = async (
+  orgName: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.org where "orgName" = $1)`,
+        [orgName]
+      )
+    ).rows[0].exist;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng organisasyon`
+    );
   }
 };

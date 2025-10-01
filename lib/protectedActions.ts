@@ -1,4 +1,5 @@
 import { GetSession } from "@/lib/session";
+import { SessionValueType } from "@/types";
 
 const Actions = {
   // admin creation action
@@ -137,7 +138,9 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
  * and if the user role cant access the action that was passed in this function
  * @returns the userId of the current logged in user
  */
-export const ProtectedAction = async (action: string): Promise<string> => {
+export const ProtectedAction = async (
+  action: string
+): Promise<SessionValueType> => {
   const session = await GetSession();
 
   if (!session) throw new Error("You need to log in first");
@@ -145,5 +148,5 @@ export const ProtectedAction = async (action: string): Promise<string> => {
   if (!ROLE_ACTION_PERMISION[session.work].includes(action))
     throw new Error("You are not allowed to execute this action");
 
-  return session.userId;
+  return { userId: session.userId, work: session.work };
 };

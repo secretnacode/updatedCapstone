@@ -60,7 +60,6 @@ export const MapComponent: FC<MapComponentPropType> = ({
         cursor="pointer"
         doubleClickZoom={false}
         ref={ref}
-        id="mapCanvas"
         {...mapProp}
       >
         <MapSourceComponent data={cityToHighlight} />

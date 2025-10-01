@@ -338,5 +338,5 @@ export function ViewCrop(
 
   document
     .getElementById("mapCanvas")
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }

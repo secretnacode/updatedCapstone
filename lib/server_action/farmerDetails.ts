@@ -14,7 +14,11 @@ import {
 } from "@/util/helper_function/validation/validationSchema";
 import { FarmerFirstDetailQuery, GetFarmerRole } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
-import { CreateNewOrg, UpdateUserOrg } from "@/util/queries/org";
+import {
+  CreateNewOrg,
+  organizationNameIsExist,
+  UpdateUserOrg,
+} from "@/util/queries/org";
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -31,7 +35,7 @@ export const AddFirstFarmerDetails = async (
   newUserVal: FarmerFirstDetailFormType
 ): Promise<FarmerFirstDetailActionReturnType<FarmerFirstDetailFormType>> => {
   try {
-    const userId = await ProtectedAction("create:user");
+    const userId = (await ProtectedAction("create:user")).userId;
 
     const validateVal = ZodValidateForm(
       newUserVal,
@@ -50,6 +54,25 @@ export const AddFirstFarmerDetails = async (
         formError: validateVal.formError,
       };
     }
+
+    // check if the new organization name is already existing or not
+    if (newUserVal.organization === "other" && newUserVal.newOrganization)
+      if (await organizationNameIsExist(newUserVal.newOrganization))
+        return {
+          success: false,
+          notifError: [
+            {
+              message:
+                "Paltan ang pangalan ng organisasyon na iyong inilagay sapagkat may gumagamit na nito",
+              type: "warning",
+            },
+          ],
+          formError: {
+            newOrganization: [
+              "May gumagamit na ng panglan na ito, ito ay paltan!",
+            ],
+          },
+        };
 
     await FarmerFirstDetailQuery({
       ...newUserVal,
@@ -108,7 +131,7 @@ export const AddSecondFarmerDetails = async (
   cropList: FarmerSecondDetailFormType[]
 ): Promise<FarmerSecondDetailActionReturnType> => {
   try {
-    const userId = await ProtectedAction("create:crop");
+    const userId = (await ProtectedAction("create:crop")).userId;
 
     const validateCropList: CropFormErrorsType[] = cropList.reduce(
       (acc: CropFormErrorsType[] | [], crop: FarmerSecondDetailFormType) => {

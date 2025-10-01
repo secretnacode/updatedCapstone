@@ -35,7 +35,9 @@ import { ZodValidateForm } from "../validation/authValidation";
 export const GetFarmerOrgMember =
   async (): Promise<GetFarmerOrgMemberReturnType> => {
     try {
-      const farmerId = await ProtectedAction("read:all:farmer:org:member:user");
+      const farmerId = (
+        await ProtectedAction("read:all:farmer:org:member:user")
+      ).userId;
 
       return {
         success: true,
@@ -187,7 +189,7 @@ export const UpdateUserProfileInfo = async (
   userProfileInfo: GetFarmerProfilePersonalInfoQueryReturnType
 ): Promise<UpdateUserProfileInfoReturnType> => {
   try {
-    const userId = await ProtectedAction("update:user");
+    const userId = (await ProtectedAction("update:user")).userId;
 
     const validateVal = ZodValidateForm(
       userProfileInfo,

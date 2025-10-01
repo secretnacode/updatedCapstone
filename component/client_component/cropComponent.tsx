@@ -488,6 +488,8 @@ const FormCropModal: FC<FormCropModalPropType> = ({
   ) => {
     setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
+    console.log(document.getElementById("mapCanvas"));
+
     if (e.target.name === "cropBaranggay") {
       const coor = pointCoordinates[e.target.value as barangayType];
 

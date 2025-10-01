@@ -55,7 +55,7 @@ export const UpdateUserProfileOrg = async (
   orgInfo: OrgInfoType
 ): Promise<UpdateUserProfileOrgReturnType> => {
   try {
-    const userId = await ProtectedAction("update:org");
+    const userId = (await ProtectedAction("update:org")).userId;
 
     const validate = ZodValidateForm(orgInfo, userProfileOrgUpdateSchema);
     if (!validate.valid)

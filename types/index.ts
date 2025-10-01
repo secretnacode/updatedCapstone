@@ -1024,3 +1024,10 @@ export type FarmerDetailFormPropType = {
   orgList: QueryAvailableOrgReturnType[];
   farmerInfoExist: boolean;
 };
+
+export type checkFarmerRoleReturnType =
+  | {
+      success: true;
+      role: string;
+    }
+  | ServerActionFailBaseType;

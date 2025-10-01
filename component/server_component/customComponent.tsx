@@ -412,7 +412,7 @@ export const FormMapComponent: FC<FormMapComponentPropType> = ({
   formError,
 }) => {
   return (
-    <div>
+    <div id="mapCanvas">
       <label className="label">{label}</label>
 
       {formError &&

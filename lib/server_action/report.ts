@@ -37,7 +37,7 @@ import { GetUserOrgId } from "@/util/queries/org";
  */
 export const GetFarmerReport = async (): Promise<GetFarmerReportReturnType> => {
   try {
-    const userId = await ProtectedAction("read:report");
+    const userId = (await ProtectedAction("read:report")).userId;
 
     return {
       success: true,
@@ -76,7 +76,7 @@ export const PostFarmerReport = async (
   };
 
   try {
-    const userId = await ProtectedAction("create:report");
+    const userId = (await ProtectedAction("create:report")).userId;
 
     const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
     if (!validateVal.valid)
@@ -176,7 +176,8 @@ export const GetFarmerReportDetail = async (
 export const GetOrgMemberReport =
   async (): Promise<GetOrgMemberReportReturnType> => {
     try {
-      const farmerId = await ProtectedAction("read:farmer:member:report");
+      const farmerId = (await ProtectedAction("read:farmer:member:report"))
+        .userId;
 
       return {
         success: true,
