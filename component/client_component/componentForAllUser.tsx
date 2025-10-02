@@ -18,6 +18,7 @@ import {
   ClientOrganizationInfoFormPropType,
   OrgInfoType,
   ClientUserProfileFormPropType,
+  LineChartComponentPropType,
 } from "@/types";
 import {
   ApprovedOrgFarmerAcc,
@@ -34,6 +35,7 @@ import {
   UserOrganizationInfoForm,
   UserProfileForm,
 } from "../server_component/componentForAllUser";
+import { BarChart } from "@mui/x-charts";
 export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   isViewing,
   userFarmerInfo,
@@ -371,5 +373,30 @@ export const DeleteUser: FC<DeleteUserPropType> = ({
         />
       )}
     </>
+  );
+};
+
+export const LineChartComponent: FC<LineChartComponentPropType> = ({
+  title,
+  description,
+  barLabel,
+  barData,
+}) => {
+  return (
+    <div className="bg-white rounded-2xl">
+      <div className="px-4 pt-4">
+        <h1 className="font-semibold">{title}</h1>
+        <p>{description}</p>
+      </div>
+      <BarChart
+        xAxis={[
+          {
+            data: barLabel,
+          },
+        ]}
+        series={[{ data: barData }]}
+        height={300}
+      />
+    </div>
   );
 };

@@ -2,6 +2,7 @@ import {
   barangayType,
   ButtonPropType,
   CropFormPropType,
+  DashboardCardPropType,
   FormCancelSubmitButtonPropType,
   FormDivInputRadioPropType,
   FormDivLabelInputPropType,
@@ -28,6 +29,7 @@ import {
   MapMarkerComponent,
 } from "../client_component/mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
+import Link from "next/link";
 
 export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
@@ -522,6 +524,29 @@ export const LoadingScreen: FC = () => {
       <div className="square" id="sq7"></div>
       <div className="square" id="sq8"></div>
       <div className="square" id="sq9"></div>
+    </div>
+  );
+};
+
+export const DashboardCard: FC<DashboardCardPropType> = ({
+  title,
+  logo: Logo,
+  content,
+  linkLabel,
+  link,
+}) => {
+  return (
+    <div className="rounded-xl p-4">
+      <div className="rounded-xl p-4">
+        <div>
+          <h1>{title}</h1>
+          <Logo className="logo" />
+        </div>
+        <div>
+          {content}
+          <Link href={link}>{linkLabel}</Link>
+        </div>
+      </div>
     </div>
   );
 };

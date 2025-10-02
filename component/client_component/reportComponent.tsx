@@ -8,6 +8,7 @@ import {
   CreateUUID,
   FourDaysBefore,
   MaxDateToday,
+  UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import {
   ChangeEvent,
@@ -27,14 +28,15 @@ import Image from "next/image";
 import { Camera, Plus, Upload, X } from "lucide-react";
 import {
   AddReportPictureType,
+  getFarmerCropNameQueryReturnType,
   GetFarmerReportDetailReturnType,
   ReportDetailType,
   ViewUserReportTableDataPropType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { SubmitButton } from "../server_component/customComponent";
+import { getFarmerCropName } from "@/lib/server_action/crop";
 
 export const AddReportComponent: FC = () => {
   const [addReport, setAddReport] = useState<boolean>(false);
@@ -51,9 +53,15 @@ export const AddReportComponent: FC = () => {
 
       {addReport && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div
+            className="absolute inset-0"
+            onClick={() => setAddReport(false)}
+          />
+          <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Bagong Ulat</h2>
+              <h2 className="text-lg font-semibold">
+                Mag sagawa ng panibagong ulat
+              </h2>
               <button
                 onClick={() => setAddReport(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
@@ -72,7 +80,6 @@ export const AddReportComponent: FC = () => {
 const AddingReport: FC<{
   setAddReport: Dispatch<SetStateAction<boolean>>;
 }> = ({ setAddReport }) => {
-  const router = useRouter();
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -82,6 +89,10 @@ const AddingReport: FC<{
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [cropList, setCropList] = useState<getFarmerCropNameQueryReturnType[]>(
+    []
+  );
+  const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
   const [state, formAction] = useActionState(PostFarmerReport, {
     success: null,
     notifError: null,
@@ -98,9 +109,8 @@ const AddingReport: FC<{
   useEffect(() => {
     if (state.success) {
       setAddReport(false);
-      router.refresh();
     }
-  }, [state.success, router, setAddReport]);
+  }, [state.success, setAddReport]);
 
   useEffect(() => {
     if (state.notifError) handleSetNotification(state.notifError);
@@ -109,6 +119,29 @@ const AddingReport: FC<{
   useEffect(() => {
     if (!isPassing) handleDoneLoading();
   }, [isPassing, handleDoneLoading]);
+
+  useEffect(() => {
+    const getCropInfo = async () => {
+      try {
+        const cropName = await getFarmerCropName();
+        if (cropName.success) {
+          setCropList(cropName.cropList);
+          setSelectedCrop(cropName.cropList[0].cropId);
+        } else handleSetNotification(cropName.notifError);
+      } catch (error) {
+        console.log((error as Error).message);
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      }
+    };
+
+    getCropInfo();
+  }, [handleSetNotification]);
+
+  const handleSetSelectedCrop = (cropId: string) => {
+    setSelectedCrop(cropList.find((crop) => crop.cropId === cropId)!.cropId);
+  };
 
   const handleStartCamera = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
@@ -243,6 +276,8 @@ const AddingReport: FC<{
 
     const formData = new FormData(e.currentTarget);
 
+    if (selectedCrop) formData.append("cropId", selectedCrop);
+
     selectedFile.forEach((image) => {
       formData.append("file", image.file);
     });
@@ -258,6 +293,48 @@ const AddingReport: FC<{
 
   return (
     <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+      <div className="h-auto">
+        <label htmlFor="" className="label">
+          Pangalan ng pananim mo:
+        </label>
+        <div className="w-full grid grid-cols-4 gap-4">
+          {cropList.length > 0 ? (
+            cropList.map((list) => (
+              <div key={list.cropId}>
+                <label
+                  htmlFor={list.cropId}
+                  className={`button !rounded-lg border ${
+                    selectedCrop === list.cropId
+                      ? "bg-green-200 border-green-700"
+                      : "bg-green-50 border-green-500"
+                  }`}
+                  onClick={() => handleSetSelectedCrop(list.cropId)}
+                >
+                  <h4>{list.cropName}</h4>
+                </label>
+                <input
+                  name="cropList"
+                  defaultValue={list.cropId}
+                  className="hidden"
+                />
+
+                {!state.success &&
+                  state.formError?.cropId?.map((err, index) => (
+                    <p key={err + index} className="mt-1 text-sm text-red-600">
+                      {err}
+                    </p>
+                  ))}
+              </div>
+            ))
+          ) : (
+            <div className="bg-gray-100 rounded-lg p-4 w-[150px] ">
+              <div className="animate-pulse grid grid-cols-1">
+                <div className="h-4 rounded bg-gray-300 w-full" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="space-y-4">
         <div>
           <label

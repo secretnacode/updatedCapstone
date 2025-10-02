@@ -7,6 +7,7 @@ import {
   DeleteUserCropInfoQuery,
   GetAllCropInfoQuery,
   GetFarmerCropInfoQuery,
+  getFarmerCropNameQuery,
   GetMyCropInfoQuery,
   UpdateUserCropInfoQuery,
 } from "@/util/queries/crop";
@@ -17,6 +18,7 @@ import {
   FarmerSecondDetailFormType,
   GetAllCropInfoReturnType,
   GetFarmerCropInfoReturnType,
+  getFarmerCropNameReturnType,
   GetMyCropInfoReturnType,
   UpdateUserCropInfoReturnType,
 } from "@/types";
@@ -29,23 +31,23 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
 
-export const GetFarmerNameCrop = async () => {
-  try {
-    return { success: true };
-  } catch (error) {
-    const err = error as Error;
-    console.log(`Error in getting the farmer crop: ${err.message}`);
-    return {
-      success: false,
-      notifError: [
-        {
-          message: `Error in getting the farmer crop: ${err.message}`,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
+// export const GetFarmerNameCrop = async () => {
+//   try {
+//     return { success: true };
+//   } catch (error) {
+//     const err = error as Error;
+//     console.log(`Error in getting the farmer crop: ${err.message}`);
+//     return {
+//       success: false,
+//       notifError: [
+//         {
+//           message: `Error in getting the farmer crop: ${err.message}`,
+//           type: "error",
+//         },
+//       ],
+//     };
+//   }
+// };
 
 export const GetFarmerCropInfo = async (
   cropId: string,
@@ -291,3 +293,26 @@ export const GetAllCropInfo = async (): Promise<GetAllCropInfoReturnType> => {
     };
   }
 };
+
+export const getFarmerCropName =
+  async (): Promise<getFarmerCropNameReturnType> => {
+    try {
+      const userId = (await ProtectedAction("read:crop")).userId;
+
+      return { success: true, cropList: await getFarmerCropNameQuery(userId) };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May pagkakamali sa pag kuha ng pangalan ng iyong taniman: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

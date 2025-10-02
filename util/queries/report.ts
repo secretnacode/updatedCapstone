@@ -38,7 +38,7 @@ export const AddNewFarmerReport = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description") values ($1, $2, $3, $4, $5, $6, $7)`,
+      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropIdReported", "verifiedByOrgId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         data.reportId,
         data.farmerId,
@@ -47,6 +47,8 @@ export const AddNewFarmerReport = async (
         data.dayHappen,
         data.reportTitle,
         data.reportDescription,
+        data.cropId,
+        data.orgLeadId,
       ]
     );
   } catch (error) {
@@ -226,6 +228,23 @@ export const getCountMadeReportToday = async (
         [userId]
       )
     ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo`
+    );
+  }
+};
+
+export const getReportCountThisWeek = async () => {
+  try {
+    await pool.query(
+      `select to_char("dayReported", 'FMDay') as dayOfWeek, count(select 1 from capstone.report where )`
+    );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo: ${

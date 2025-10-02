@@ -30,6 +30,7 @@ import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
 import { AddNewFarmerReportImage } from "@/util/queries/image";
 import { GetUserOrgId } from "@/util/queries/org";
+import { revalidatePath } from "next/cache";
 
 /**
  * server action to get the farmer report
@@ -63,11 +64,14 @@ export const PostFarmerReport = async (
   formData: FormData
 ): Promise<AddReportActionFormType> => {
   const reportVal: AddReportValType = {
+    cropId: formData.get("cropId") as string,
     reportTitle: formData.get("reportTitle") as string,
     reportDescription: formData.get("reportDescription") as string,
     dateHappen: new Date(formData.get("dateHappen") as string),
     reportPicture: formData.getAll("file") as File[],
   };
+
+  console.log(reportVal);
 
   const returnVal = {
     success: null,
@@ -90,6 +94,8 @@ export const PostFarmerReport = async (
 
     await AddNewFarmerReport({
       reportId: reportId,
+      cropId: reportVal.cropId,
+      orgLeadId: (await GetUserOrgId(userId)).orgId,
       farmerId: userId,
       reportTitle: reportVal.reportTitle,
       reportDescription: reportVal.reportDescription,
@@ -120,6 +126,8 @@ export const PostFarmerReport = async (
           pictureUrl: uploadResult.secure_url,
         });
     });
+
+    revalidatePath(`/farmer/report`);
 
     return {
       ...returnVal,

@@ -240,6 +240,7 @@ export const farmerSecondDetailFormSchema = z
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];
 export const addFarmerReportSchema = z.object({
+  cropId: z.string().min(1, { error: "Pumili ng pananim na iuulat" }),
   reportTitle: z
     .string()
     .min(1, { error: "Mag lagay ng pamagat ng iyong iuulat" })

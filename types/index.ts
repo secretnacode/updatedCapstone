@@ -249,6 +249,8 @@ export type AddReportPictureType = {
 
 export type AddNewFarmerReportQueryType = {
   reportId: string;
+  cropId: string;
+  orgLeadId: string;
   farmerId: string;
   reportTitle: string;
   reportDescription: string;
@@ -609,7 +611,7 @@ export type FormDivInputRadioPropType = {
   radioList: { radioValue: string; radioLabel: string }[];
   inputName: string;
   inputVal: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   divClassName?: string;
   inputClassName?: string;
   formError?: string[];
@@ -1029,5 +1031,32 @@ export type checkFarmerRoleReturnType =
   | {
       success: true;
       role: string;
+    }
+  | ServerActionFailBaseType;
+
+export type DashboardCardPropType = {
+  title: string;
+  logo: LucideIcon;
+  content: ChildrenType;
+  linkLabel: string;
+  link: string;
+};
+
+export type LineChartComponentPropType = {
+  title: string;
+  description: string;
+  barLabel?: string[];
+  barData?: number[];
+};
+
+export type getFarmerCropNameQueryReturnType = {
+  cropName: string;
+  cropId: string;
+};
+
+export type getFarmerCropNameReturnType =
+  | {
+      success: true;
+      cropList: getFarmerCropNameQueryReturnType[];
     }
   | ServerActionFailBaseType;

@@ -146,16 +146,15 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
 
 export const getFarmerLeadDashboardData = async () => {
   try {
-    // const userId = (await ProtectedAction("read:all:farmer:org:member:user"))
-    //   .userId;
+    const userId = (await ProtectedAction("read:all:farmer:org:member:user"))
+      .userId;
 
-    // const { countReportToday, countUnvalidatedReport } = await Promise.all([
-    //   getCountReportToday(userId),
-    //   getCountUnvalidatedReport(userId),
-    // ]);
+    const { countReportToday, countUnvalidatedReport } = await Promise.all([
+      getCountReportToday(userId),
+      getCountUnvalidatedReport(userId),
+    ]);
 
-    // console.log(allData);
-    // // console.log(await );
+    // console.log(await )
 
     return { success: true };
   } catch (error) {

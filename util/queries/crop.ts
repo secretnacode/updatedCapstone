@@ -1,6 +1,7 @@
 import {
   GetAllCropInfoQueryReturnType,
   GetFarmerCropInfoQueryReturnType,
+  getFarmerCropNameQueryReturnType,
   GetMyCropInfoQueryRetrunType,
   HandleInsertCropType,
 } from "@/types";
@@ -198,6 +199,28 @@ export const GetAllCropInfoQuery = async (): Promise<
     );
     throw new Error(
       `Unexpected error was encountered while getting all the crop information`
+    );
+  }
+};
+
+export const getFarmerCropNameQuery = async (
+  farmerId: string
+): Promise<getFarmerCropNameQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropName", "cropId" from capstone.crop where "farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim`
     );
   }
 };
