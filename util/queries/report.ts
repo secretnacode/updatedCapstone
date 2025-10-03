@@ -13,7 +13,7 @@ export const GetUserReport = async (
   try {
     return (
       await pool.query(
-        `select "reportId", "cropIdReported", "verificationStatus",  "dayReported", "dayHappen",  "title" from capstone.report where "farmerId" = $1`,
+        `select r."reportId", r."verificationStatus",  r."dayReported", r."dayHappen",  r."title", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1`,
         [userId]
       )
     ).rows;
@@ -38,7 +38,7 @@ export const AddNewFarmerReport = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropIdReported", "verifiedByOrgId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropId", "orgId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         data.reportId,
         data.farmerId,
@@ -48,7 +48,7 @@ export const AddNewFarmerReport = async (
         data.reportTitle,
         data.reportDescription,
         data.cropId,
-        data.orgLeadId,
+        data.orgId,
       ]
     );
   } catch (error) {
@@ -69,7 +69,7 @@ export const GetFarmerReportDetailQuery = async (
   try {
     return (
       await pool.query(
-        `SELECT r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r left join capstone.image i ON r."reportId" = i."reportId" WHERE r."reportId" = $1 GROUP BY r."reportId", r."cropIdReported", r."verificationStatus", r."dayReported", r."dayHappen", r."title"`,
+        `SELECT r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r left join capstone.image i ON r."reportId" = i."reportId" WHERE r."reportId" = $1 GROUP BY r."reportId", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title"`,
         [reportId]
       )
     ).rows[0];
@@ -119,7 +119,7 @@ export const GetOrgMemberReportQuery = async (
 export const ApprovedOrgMemberQuery = async (reportId: string) => {
   try {
     await pool.query(
-      `update capstone.report set "verificationStatus" = $1, "verifiedByOrgId" = (select f."orgId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" where r."reportId" = $2), "dayVerified" = $3 where "reportId" = $4`,
+      `update capstone.report set "verificationStatus" = $1, "orgId" = (select f."orgId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" where r."reportId" = $2), "dayVerified" = $3 where "reportId" = $4`,
       ["pending", reportId, new Date(), reportId]
     );
   } catch (error) {
@@ -143,7 +143,7 @@ export const GetAllFarmerReportQuery =
     try {
       return (
         await pool.query(
-          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."verifiedByOrgId" = o."orgId" left join capstone.crop c on r."cropIdReported" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null`,
+          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null`,
           ["pending"]
         )
       ).rows;
@@ -170,7 +170,7 @@ export const getCountReportToday = async (
   try {
     return (
       await pool.query(
-        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where fl."farmerId" = $1 and date(r."dayReported") = current_date`,
+        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where fl."farmerId" = $1 and date(r."dayReported") = current_date`,
         [farmerLeadId]
       )
     ).rows[0].count;
@@ -197,7 +197,7 @@ export const getCountUnvalidatedReport = async (
   try {
     return (
       await pool.query(
-        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where fl."farmerId" = $1 and r."verificationStatus" = $2`,
+        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where fl."farmerId" = $1 and r."verificationStatus" = $2`,
         [farmerLeadId, "false"]
       )
     ).rows[0].count;

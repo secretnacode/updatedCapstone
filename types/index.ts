@@ -219,7 +219,7 @@ export type NavbarType =
 export type GetUserReportReturnType =
   | {
       reportId: string;
-      cropIdReported: string;
+      cropName: string;
       verificationStatus: string;
       dayReported: string;
       dayHappen: string;
@@ -250,7 +250,7 @@ export type AddReportPictureType = {
 export type AddNewFarmerReportQueryType = {
   reportId: string;
   cropId: string;
-  orgLeadId: string;
+  orgId: string;
   farmerId: string;
   reportTitle: string;
   reportDescription: string;
@@ -266,7 +266,7 @@ export type AddNewFarmerReportImageType = {
 };
 
 type GetFarmerReportDetailBaseType = {
-  cropIdReported: string;
+  cropId: string;
   verificationStatus: string;
   dayReported: Date;
   dayHappen: Date;

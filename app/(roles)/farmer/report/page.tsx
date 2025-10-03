@@ -60,9 +60,7 @@ export default async function Page() {
                           {report.title}
                         </td>
 
-                        <td className="text-gray-500">
-                          {report.cropIdReported}
-                        </td>
+                        <td className="text-gray-500">{report.cropName}</td>
 
                         <td>
                           <span

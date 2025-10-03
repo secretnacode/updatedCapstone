@@ -284,7 +284,7 @@ export const CheckMyMemberquery = async (
   try {
     return (
       await pool.query(
-        `select exists(select 1 from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where f."farmerId" = $1 and o."orgLeadFarmerId" = $2)`,
+        `select exists(select 1 from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where f."farmerId" = $1 and o."farmerLeadId" = $2)`,
         [farmerId, leaderId]
       )
     ).rows[0].exists;
@@ -365,7 +365,7 @@ export const GetFarmerProfileOrgInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select f."orgId", f."orgRole", o."orgName", concat(fl."farmerFirstName", ' ', fl."farmerLastName") as "farmerLeader" from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."orgLeadFarmerId" = fl."farmerId" where f."farmerId" = $1`,
+        `select f."orgId", f."orgRole", o."orgName", concat(fl."farmerFirstName", ' ', fl."farmerLastName") as "farmerLeader" from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where f."farmerId" = $1`,
         [farmerId]
       )
     ).rows[0];
@@ -505,6 +505,25 @@ export const farmerIsExist = async (farmerId: string): Promise<boolean> => {
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka`
+    );
+  }
+};
+
+/**
+ * query for getting the farmer id of the farmer leader base on the farmer id
+ * @param userId farmer that wants to see the id of the farmer leader
+ * @returns org of the farmer
+ */
+export const getFarmerLeadId = async (userId: string) => {
+  try {
+    return await pool.query(
+      `select c."cropName" from capstone.crop c join capstone.farmer f on c."farmerId" = f."farmerId" where f."farmerId" = $1`,
+      [userId]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa iyong leader`
     );
   }
 };

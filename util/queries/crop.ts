@@ -151,7 +151,7 @@ export const CheckCropIfHasReport = async (
   try {
     return (
       await pool.query(
-        `select exists(select 1 from capstone.report where "cropIdReported" = $1)`,
+        `select exists(select 1 from capstone.report where "cropId" = $1)`,
         [cropId]
       )
     ).rows[0].exists;

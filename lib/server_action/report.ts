@@ -46,12 +46,14 @@ export const GetFarmerReport = async (): Promise<GetFarmerReportReturnType> => {
     };
   } catch (error) {
     const err = error as Error;
-    console.log(`Error in getting the farmer reports: ${err}`);
+    console.log(
+      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng iyong mga ulat: ${err}`
+    );
     return {
       success: false,
       notifError: [
         {
-          message: `Error in getting the farmer reports: ${err}`,
+          message: `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng iyong mga ulat`,
           type: "error",
         },
       ],
@@ -70,8 +72,6 @@ export const PostFarmerReport = async (
     dateHappen: new Date(formData.get("dateHappen") as string),
     reportPicture: formData.getAll("file") as File[],
   };
-
-  console.log(reportVal);
 
   const returnVal = {
     success: null,
@@ -95,7 +95,7 @@ export const PostFarmerReport = async (
     await AddNewFarmerReport({
       reportId: reportId,
       cropId: reportVal.cropId,
-      orgLeadId: (await GetUserOrgId(userId)).orgId,
+      orgId: (await GetUserOrgId(userId)).orgId,
       farmerId: userId,
       reportTitle: reportVal.reportTitle,
       reportDescription: reportVal.reportDescription,

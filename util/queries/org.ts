@@ -42,7 +42,7 @@ export const CreateNewOrg = async (
   try {
     return (
       await pool.query(
-        `insert into capstone.org ("orgId", "orgName", "orgLeadFarmerId") values ($1, $2, $3) returning "orgId"`,
+        `insert into capstone.org ("orgId", "orgName", "farmerLeadId") values ($1, $2, $3) returning "orgId"`,
         [CreateUUID(), orgName, userId]
       )
     ).rows[0];
@@ -117,7 +117,7 @@ export const GetAllOrganizationQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerLeaderName", f."farmerId", count(m."orgId") as "totalMember" from capstone.org o join capstone.farmer f on o."orgLeadFarmerId" = f."farmerId" join capstone.farmer m on o."orgId" = m."orgId" group by o."orgId", o."orgName", f."farmerFirstName", f."farmerLastName", f."farmerId"`
+        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerLeaderName", f."farmerId", count(m."orgId") as "totalMember" from capstone.org o join capstone.farmer f on o."farmerLeadId" = f."farmerId" join capstone.farmer m on o."orgId" = m."orgId" group by o."orgId", o."orgName", f."farmerFirstName", f."farmerLastName", f."farmerId"`
       )
     ).rows;
   } catch (error) {
@@ -199,6 +199,25 @@ export const organizationNameIsExist = async (
     console.log((error as Error).message);
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng organisasyon`
+    );
+  }
+};
+
+/**
+ * query for getting the farmer lead id in the org table
+ * @param userId farmer user that wants to get their farmerLeader id
+ * @returns id of the leader
+ */
+export const getFarmerLeaderId = async (userId: string) => {
+  try {
+    return await pool.query(
+      `select o."farmerLeadId" from capstone.org o join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1`,
+      [userId]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng importmasyon`
     );
   }
 };

@@ -1,7 +1,6 @@
 import { getFarmerLeadDashboardData } from "@/lib/server_action/user";
 import { DashboardCard } from "./customComponent";
 import { Clipboard } from "lucide-react";
-import { LineChartComponent } from "../client_component/componentForAllUser";
 
 export const FarmerLeadDashBoard = async () => {
   await getFarmerLeadDashboardData();

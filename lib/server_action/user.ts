@@ -4,7 +4,6 @@ import {
   CheckMyMemberquery,
   DelteUserAccountQuery,
   farmerIsExist,
-  GetFarmerRole,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
@@ -15,6 +14,7 @@ import {
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
+  getCountMadeReportToday,
   getCountReportToday,
   getCountUnvalidatedReport,
 } from "@/util/queries/report";
@@ -149,14 +149,23 @@ export const getFarmerLeadDashboardData = async () => {
     const userId = (await ProtectedAction("read:all:farmer:org:member:user"))
       .userId;
 
-    const { countReportToday, countUnvalidatedReport } = await Promise.all([
-      getCountReportToday(userId),
-      getCountUnvalidatedReport(userId),
-    ]);
+    const [countReportToday, countUnvalidatedReport, countMadeReportToday] =
+      await Promise.all([
+        getCountReportToday(userId),
+        getCountUnvalidatedReport(userId),
+        getCountMadeReportToday(userId),
+      ]);
 
     // console.log(await )
 
-    return { success: true };
+    return {
+      success: true,
+      cardValue: {
+        orgMemberTotalReportToday: countReportToday,
+        totalUnvalidatedReport: countUnvalidatedReport,
+        totalReportMake: countMadeReportToday,
+      },
+    };
   } catch (error) {
     const err = error as Error;
     console.log(
