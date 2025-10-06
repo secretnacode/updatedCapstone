@@ -13,17 +13,15 @@ import {
   Geometry,
   Polygon,
 } from "geojson";
-import { LucideIcon, LucideProps } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { MapMouseEvent } from "maplibre-gl";
 import {
   ButtonHTMLAttributes,
   ChangeEvent,
   Dispatch,
   FormEvent,
-  ForwardRefExoticComponent,
   ReactNode,
   Ref,
-  RefAttributes,
   SetStateAction,
 } from "react";
 import z from "zod/v4";
@@ -211,9 +209,7 @@ export type NavbarType =
   | {
       page: string;
       pageLabel: string;
-      logo: ForwardRefExoticComponent<
-        Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
-      >;
+      logo: LucideIcon;
     }[];
 
 export type GetUserReportReturnType =
@@ -255,7 +251,7 @@ export type AddNewFarmerReportQueryType = {
   reportTitle: string;
   reportDescription: string;
   dayHappen: Date;
-  dayReported: Date;
+  dayReported: string;
   verificationStatus: boolean;
 };
 
@@ -1035,9 +1031,9 @@ export type checkFarmerRoleReturnType =
   | ServerActionFailBaseType;
 
 export type DashboardCardPropType = {
-  logo: ChildrenType;
+  logo: { icon: LucideIcon; iconStyle?: string; iconWrapperStyle?: string };
   link: string;
-  cardLabel: ChildrenType;
+  cardLabel: { label: string; className?: string };
   cardContent: string;
   contentLabel: string;
 };
@@ -1083,16 +1079,32 @@ export type getFarmerLeadDashboardDataReturnType =
       cardValue: {
         orgMemberTotalReportToday: number;
         totalUnvalidatedReport: number;
-        totalReportMake: number;
+        totalUnverfiedUser: number;
       };
       lineChartValue: {
         week: getReportCountThisWeekReturnType[];
         month: getReportCountThisAndPrevMonthReturnType[];
         year: getReportCountThisYearReturnType[];
       };
+      recentReport: getRecentReportReturnType[];
     };
 
 export type barDataStateType = {
   label: string[];
   data: number[];
+};
+
+type timeStampzType = {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+};
+
+export type getRecentReportReturnType = {
+  farmerFirstName: string;
+  farmerLastName: string;
+  pastTime: timeStampzType;
+  reportId: string;
+  barangay: string;
 };

@@ -499,3 +499,26 @@ export const getFarmerLeadId = async (userId: string) => {
     );
   }
 };
+
+/**
+ * query for geting all the new user and is not verified yet
+ * @param leadId id of the leader that wants to see it
+ * @returns count
+ */
+export const getCountNotVerifiedFarmer = async (
+  leadId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and f."verified" = $2`,
+        [leadId, false]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong user na hindi pa naaprubahan`
+    );
+  }
+};

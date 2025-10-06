@@ -245,11 +245,11 @@ body {
   td {
     @apply text-nowrap;
   }
-  .card-logo-wrapper {
-    @apply p-2 inline-block rounded-md shadow-md [&>svg]:!size-8;
-  }
   .very-small-text {
     @apply text-[14px];
+  }
+  .very-very-small-text {
+    @apply text-[12px];
   }
 }
 

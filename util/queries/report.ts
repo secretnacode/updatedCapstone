@@ -4,6 +4,7 @@ import {
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   GetOrgMemberReportQueryType,
+  getRecentReportReturnType,
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisWeekReturnType,
   getReportCountThisYearReturnType,
@@ -329,6 +330,33 @@ export const getReportCountThisYear = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa ngayung taon`
+    );
+  }
+};
+
+/**
+ * query for getting all the recent submitter report
+ * @param leadId id of the leader that wanst to see it
+ * @returns records of the report
+ */
+export const getRecentReport = async (
+  leadId: string
+): Promise<getRecentReportReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select f."farmerFirstName", f."farmerLastName", f."barangay", current_timestamp - r."dayReported" as "pastTime", r."reportId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" join capstone.org o on r."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2 order by current_timestamp - r."dayReported" limit 4`,
+        [leadId, "false"]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong pasang ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong pasang ulat`
     );
   }
 };

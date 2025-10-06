@@ -541,18 +541,24 @@ export const LoadingScreen: FC = () => {
 };
 
 export const DashboardCard: FC<DashboardCardPropType> = ({
-  cardLabel,
-  logo,
+  cardLabel = { className: "", label: "" },
+  logo = { icon: "", iconStyle: "", iconWrapperStyle: "" },
   cardContent,
   contentLabel,
   link,
 }) => {
   return (
-    <div className="rounded-xl p-4 bg-white space-y-2">
+    <div className="rounded-xl p-4 bg-white space-y-2 ">
       <div className="flex justify-between items-start [&>svg]:!size-8 mb-3">
-        {logo}
-        <p className="very-small-text [&>span]:px-3 [&>span]:py-1 [&>span]:rounded-2xl [&>span]:tracking-wide opacity-90">
-          {cardLabel}
+        <div
+          className={`p-2 inline-block rounded-md shadow-md ${logo.iconWrapperStyle}`}
+        >
+          <logo.icon className={`logo ${logo.iconStyle}`} />
+        </div>
+        <p
+          className={`very-small-text px-3 py-1 rounded-2xl tracking-wide opacity-90  ${cardLabel.className}`}
+        >
+          {cardLabel.label}
         </p>
       </div>
 
@@ -563,7 +569,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
           <p className="text-gray-600 text-[14px]">{contentLabel}</p>
           <Link
             href={link}
-            className="tracking-wider bg-gray-100 text-gray-500 font-bold text-[12px] px-3 rounded-2xl"
+            className="tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-3 rounded-2xl hover:shadow-md transition-shadow"
           >
             Tingnan
           </Link>

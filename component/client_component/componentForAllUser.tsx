@@ -454,9 +454,10 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
     }
   };
 
-  const buttonStyle = `!text-white !bg-green-500 shadow-lg`;
+  const buttonStyle = `!text-white !bg-green-500 shadow-md`;
+
   return (
-    <div className="bg-white rounded-2xl p-4">
+    <div className="bg-white rounded-2xl p-4 shadow-sm">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="font-semibold">{title}</h1>

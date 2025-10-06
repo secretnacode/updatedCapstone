@@ -4,6 +4,7 @@ import {
   CheckMyMemberquery,
   DelteUserAccountQuery,
   farmerIsExist,
+  getCountNotVerifiedFarmer,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
@@ -15,9 +16,9 @@ import {
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
-  getCountMadeReportToday,
   getCountReportToday,
   getCountUnvalidatedReport,
+  getRecentReport,
   getReportCountThisAndPrevMonth,
   getReportCountThisWeek,
   getReportCountThisYear,
@@ -158,33 +159,34 @@ export const getFarmerLeadDashboardData =
       const [
         countReportToday,
         countUnvalidatedReport,
-        countMadeReportToday,
+        countNotVerifiedFarmer,
         reportCountThisWeek,
         reportCountThisAndPrevMonth,
         reportCountThisYear,
+        recentReport,
       ] = await Promise.all([
         getCountReportToday(userId),
         getCountUnvalidatedReport(userId),
-        getCountMadeReportToday(userId),
+        getCountNotVerifiedFarmer(userId),
         getReportCountThisWeek(userId, work),
         getReportCountThisAndPrevMonth(userId, work),
         getReportCountThisYear(userId, work),
+        getRecentReport(userId),
       ]);
-
-      // console.log(await )
 
       return {
         success: true,
         cardValue: {
           orgMemberTotalReportToday: countReportToday,
           totalUnvalidatedReport: countUnvalidatedReport,
-          totalReportMake: countMadeReportToday,
+          totalUnverfiedUser: countNotVerifiedFarmer,
         },
         lineChartValue: {
           week: reportCountThisWeek,
           month: reportCountThisAndPrevMonth,
           year: reportCountThisYear,
         },
+        recentReport: recentReport,
       };
     } catch (error) {
       const err = error as Error;

@@ -100,7 +100,7 @@ export const PostFarmerReport = async (
       reportTitle: reportVal.reportTitle,
       reportDescription: reportVal.reportDescription,
       dayHappen: reportVal.dateHappen,
-      dayReported: new Date(),
+      dayReported: new Date().toISOString(),
       verificationStatus: false,
     });
 
