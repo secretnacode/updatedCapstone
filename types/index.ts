@@ -91,7 +91,7 @@ export type ErrorResponseType = {
 
 export type SessionValueType = {
   userId: string;
-  work: string;
+  work: farmerRole;
 };
 
 export type LoadingContextType = {
@@ -362,7 +362,7 @@ export type GetFarmerProfilePersonalInfoQueryReturnType = {
   familyMemberCount: number;
 };
 
-export type GetFarmerProfileCropInfoQueryReturnType = {
+export type getFarmerCropNameQueryReturnType = {
   cropId: string;
   cropName: string;
 };
@@ -492,7 +492,7 @@ export type GetFarmerCropInfoReturnType =
   | ServerActionFailBaseType;
 
 export type ProfileInfoReturnType = {
-  cropInfo: GetFarmerProfileCropInfoQueryReturnType[];
+  cropInfo: getFarmerCropNameQueryReturnType[];
   farmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
   orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
 };
@@ -806,7 +806,7 @@ export type FarmerUserProfilePropType = {
 };
 
 export type ViewCropModalButtonPropType = {
-  cropInfo: GetFarmerProfileCropInfoQueryReturnType[];
+  cropInfo: getFarmerCropNameQueryReturnType[];
   isViewing: boolean;
 };
 
@@ -1035,23 +1035,21 @@ export type checkFarmerRoleReturnType =
   | ServerActionFailBaseType;
 
 export type DashboardCardPropType = {
-  title: string;
-  logo: LucideIcon;
-  content: ChildrenType;
-  linkLabel: string;
+  logo: ChildrenType;
   link: string;
+  cardLabel: ChildrenType;
+  cardContent: string;
+  contentLabel: string;
 };
 
 export type LineChartComponentPropType = {
   title: string;
-  description: string;
-  barLabel?: string[];
-  barData?: number[];
-};
-
-export type getFarmerCropNameQueryReturnType = {
-  cropName: string;
-  cropId: string;
+  user: "farmer" | "agriculturist";
+  data: {
+    week: getReportCountThisWeekReturnType[];
+    month: getReportCountThisAndPrevMonthReturnType[];
+    year: getReportCountThisYearReturnType[];
+  };
 };
 
 export type getFarmerCropNameReturnType =
@@ -1060,3 +1058,41 @@ export type getFarmerCropNameReturnType =
       cropList: getFarmerCropNameQueryReturnType[];
     }
   | ServerActionFailBaseType;
+
+export type getReportCountThisWeekReturnType = {
+  dayOfWeek: string;
+  reportCount: number;
+};
+
+export type getReportCountThisAndPrevMonthReturnType = {
+  weekLabel: string;
+  reportCount: number;
+};
+
+export type getReportCountThisYearReturnType = {
+  month: string;
+  reportCount: number;
+};
+
+export type farmerRole = "leader" | "farmer";
+
+export type getFarmerLeadDashboardDataReturnType =
+  | ServerActionFailBaseType
+  | {
+      success: true;
+      cardValue: {
+        orgMemberTotalReportToday: number;
+        totalUnvalidatedReport: number;
+        totalReportMake: number;
+      };
+      lineChartValue: {
+        week: getReportCountThisWeekReturnType[];
+        month: getReportCountThisAndPrevMonthReturnType[];
+        year: getReportCountThisYearReturnType[];
+      };
+    };
+
+export type barDataStateType = {
+  label: string[];
+  data: number[];
+};

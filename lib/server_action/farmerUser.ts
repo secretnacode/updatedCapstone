@@ -5,7 +5,6 @@ import {
   CheckMyMemberquery,
   farmerIsExist,
   GetFarmerOrgMemberQuery,
-  GetFarmerProfileCropInfoQuery,
   GetFarmerProfileOrgInfoQuery,
   GetFarmerProfilePersonalInfoQuery,
   UpdateUserProfileInfoQuery,
@@ -27,6 +26,7 @@ import {
 import { GetSession } from "../session";
 import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
+import { getFarmerCropNameQuery } from "@/util/queries/crop";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -168,7 +168,7 @@ const userFarmerProfileInfo = async (
 ): Promise<SuccessGetMyProfileInfoReturnType> => {
   const [farmerInfo, cropInfo, orgInfo] = await Promise.all([
     GetFarmerProfilePersonalInfoQuery(userId),
-    GetFarmerProfileCropInfoQuery(userId),
+    getFarmerCropNameQuery(userId),
     GetFarmerProfileOrgInfoQuery(userId),
   ]);
 

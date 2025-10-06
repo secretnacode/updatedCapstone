@@ -1,11 +1,21 @@
 import {
   AddNewFarmerReportQueryType,
+  farmerRole,
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   GetOrgMemberReportQueryType,
+  getReportCountThisAndPrevMonthReturnType,
+  getReportCountThisWeekReturnType,
+  getReportCountThisYearReturnType,
   GetUserReportReturnType,
 } from "@/types";
 import { pool } from "../configuration";
+import {
+  cteDaySeries,
+  cteMonthSeries,
+  cteWeekSeries,
+  dateFilter,
+} from "./reausableQuery";
 
 export const GetUserReport = async (
   userId: string
@@ -224,7 +234,7 @@ export const getCountMadeReportToday = async (
   try {
     return (
       await pool.query(
-        `select count("reportId") from capstone.report where "farmerId" = $1`,
+        `select count("reportId") from capstone.report where "farmerId" = $1 and date("dayHappen") = current_date`,
         [userId]
       )
     ).rows[0].count;
@@ -240,19 +250,85 @@ export const getCountMadeReportToday = async (
   }
 };
 
-export const getReportCountThisWeek = async () => {
+/**
+ * query to get all the report within this week for the leader
+ * @param leadId id of the farmer leader that wants to get the report that was passed
+ * @returns
+ */
+export const getReportCountThisWeek = async (
+  userId: string,
+  role: farmerRole
+): Promise<getReportCountThisWeekReturnType[]> => {
   try {
-    await pool.query(
-      `select to_char("dayReported", 'FMDay') as dayOfWeek, count(select 1 from capstone.report where )`
-    );
+    const cte = await cteDaySeries();
+    const filter = await dateFilter(role);
+    return (
+      await pool.query(
+        `${cte}
+      select to_char(ds.date, 'FMDay') as "dayOfWeek", coalesce(count(r."reportId"), 0) as "reportCount" from day_series ds left join capstone.report r on date(r."dayReported") = ds.date and ${filter} group by ds.date, to_char(ds.date, 'FMDay') order by ds.date`,
+        [userId]
+      )
+    ).rows;
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa sa linggo na ito: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng ulat na isinagawa mo`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa sa linggo na ito`
+    );
+  }
+};
+
+export const getReportCountThisAndPrevMonth = async (
+  userId: string,
+  role: farmerRole
+): Promise<getReportCountThisAndPrevMonthReturnType[]> => {
+  try {
+    const cte = await cteWeekSeries();
+    const filter = await dateFilter(role);
+    return (
+      await pool.query(
+        `${cte}
+      select concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')) as "weekLabel", coalesce(count(r."reportId"), 0) as "reportCount" from week_series ws left join capstone.report r on ws.date <= date(r."dayReported") and (ws.date + interval '6 days')::date >= date(r."dayReported") and ${filter} group by concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')), extract(week from date) order by extract(week from date)`,
+        [userId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa sa mga nakaraang buwan: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa sa mga nakaraang buwan`
+    );
+  }
+};
+
+export const getReportCountThisYear = async (
+  userId: string,
+  role: farmerRole
+): Promise<getReportCountThisYearReturnType[]> => {
+  try {
+    const cte = await cteMonthSeries();
+    const filter = await dateFilter(role);
+    return (
+      await pool.query(
+        `${cte}
+      select to_char(ms.date, 'Mon') as month, coalesce(count(r."reportId"), 0) as "reportCount" from month_series ms left join capstone.report r on ms.date <= date(r."dayReported") and (ms.date + interval '1 month' - interval '1 day')::date >= date(r."dayReported") and ${filter} group by to_char(ms.date, 'Mon'), extract(month from ms.date) order by extract(month from ms.date)`,
+        [userId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa ngayung taon: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa mga ulat na naipasa ngayung taon`
     );
   }
 };

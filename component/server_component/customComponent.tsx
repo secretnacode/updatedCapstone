@@ -31,6 +31,18 @@ import {
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import Link from "next/link";
 
+export const Button: FC<ButtonPropType> = ({
+  children,
+  className = "",
+  ...buttonProp
+}) => {
+  return (
+    <button {...buttonProp} className={`button ${className}`}>
+      {children}
+    </button>
+  );
+};
+
 export const SubmitButton: FC<ButtonPropType> = ({
   type = "submit",
   onClick,
@@ -39,14 +51,14 @@ export const SubmitButton: FC<ButtonPropType> = ({
   children,
 }) => {
   return (
-    <button
+    <Button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`button submit-button ${className}`}
+      className={`submit-button ${className}`}
     >
       {children}
-    </button>
+    </Button>
   );
 };
 
@@ -57,13 +69,13 @@ export const CancelButton: FC<ButtonPropType> = ({
   ...buttonProp
 }) => {
   return (
-    <button
+    <Button
       type={type}
-      className={`button cancel-button ${className}`}
+      className={`cancel-button ${className}`}
       {...buttonProp}
     >
       {children}
-    </button>
+    </Button>
   );
 };
 
@@ -375,7 +387,7 @@ export const TableComponent: FC<TableComponentPropType> = ({
       {listCount === 0 ? (
         <div className="div text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
           <div className="div space-y-3">
-            <ClipboardX className="logo table-no-content" />
+            <ClipboardX className="logo !size-20 stroke-1 table-no-content" />
             <p className="p text-gray-500 !text-xl">{noContentMessage}</p>
           </div>
         </div>
@@ -529,22 +541,32 @@ export const LoadingScreen: FC = () => {
 };
 
 export const DashboardCard: FC<DashboardCardPropType> = ({
-  title,
-  logo: Logo,
-  content,
-  linkLabel,
+  cardLabel,
+  logo,
+  cardContent,
+  contentLabel,
   link,
 }) => {
   return (
-    <div className="rounded-xl p-4">
-      <div className="rounded-xl p-4">
-        <div>
-          <h1>{title}</h1>
-          <Logo className="logo" />
-        </div>
-        <div>
-          {content}
-          <Link href={link}>{linkLabel}</Link>
+    <div className="rounded-xl p-4 bg-white space-y-2">
+      <div className="flex justify-between items-start [&>svg]:!size-8 mb-3">
+        {logo}
+        <p className="very-small-text [&>span]:px-3 [&>span]:py-1 [&>span]:rounded-2xl [&>span]:tracking-wide opacity-90">
+          {cardLabel}
+        </p>
+      </div>
+
+      <p className="font-bold text-4xl">{cardContent}</p>
+
+      <div>
+        <div className="flex justify-between items-center">
+          <p className="text-gray-600 text-[14px]">{contentLabel}</p>
+          <Link
+            href={link}
+            className="tracking-wider bg-gray-100 text-gray-500 font-bold text-[12px] px-3 rounded-2xl"
+          >
+            Tingnan
+          </Link>
         </div>
       </div>
     </div>

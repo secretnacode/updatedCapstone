@@ -9,6 +9,7 @@ import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
 import {
   checkFarmerRoleReturnType,
+  getFarmerLeadDashboardDataReturnType,
   newUserValNeedInfoReturnType,
   NotificationBaseType,
 } from "@/types";
@@ -17,6 +18,9 @@ import {
   getCountMadeReportToday,
   getCountReportToday,
   getCountUnvalidatedReport,
+  getReportCountThisAndPrevMonth,
+  getReportCountThisWeek,
+  getReportCountThisYear,
 } from "@/util/queries/report";
 
 /**
@@ -144,41 +148,57 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
   }
 };
 
-export const getFarmerLeadDashboardData = async () => {
-  try {
-    const userId = (await ProtectedAction("read:all:farmer:org:member:user"))
-      .userId;
+export const getFarmerLeadDashboardData =
+  async (): Promise<getFarmerLeadDashboardDataReturnType> => {
+    try {
+      const { userId, work } = await ProtectedAction(
+        "read:all:farmer:org:member:user"
+      );
 
-    const [countReportToday, countUnvalidatedReport, countMadeReportToday] =
-      await Promise.all([
+      const [
+        countReportToday,
+        countUnvalidatedReport,
+        countMadeReportToday,
+        reportCountThisWeek,
+        reportCountThisAndPrevMonth,
+        reportCountThisYear,
+      ] = await Promise.all([
         getCountReportToday(userId),
         getCountUnvalidatedReport(userId),
         getCountMadeReportToday(userId),
+        getReportCountThisWeek(userId, work),
+        getReportCountThisAndPrevMonth(userId, work),
+        getReportCountThisYear(userId, work),
       ]);
 
-    // console.log(await )
+      // console.log(await )
 
-    return {
-      success: true,
-      cardValue: {
-        orgMemberTotalReportToday: countReportToday,
-        totalUnvalidatedReport: countUnvalidatedReport,
-        totalReportMake: countMadeReportToday,
-      },
-    };
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon para sa farmer leader: ${err.message}`
-    );
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
+      return {
+        success: true,
+        cardValue: {
+          orgMemberTotalReportToday: countReportToday,
+          totalUnvalidatedReport: countUnvalidatedReport,
+          totalReportMake: countMadeReportToday,
         },
-      ],
-    };
-  }
-};
+        lineChartValue: {
+          week: reportCountThisWeek,
+          month: reportCountThisAndPrevMonth,
+          year: reportCountThisYear,
+        },
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon para sa farmer leader: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

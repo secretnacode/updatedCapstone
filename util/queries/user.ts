@@ -1,7 +1,6 @@
 import {
   FarmerFirstDetailType,
   GetFarmerOrgMemberQueryReturnType,
-  GetFarmerProfileCropInfoQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
   GetFarmerProfilePersonalInfoQueryReturnType,
   NewUserType,
@@ -323,33 +322,6 @@ export const GetFarmerProfilePersonalInfoQuery = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personaol na impormasyon`
-    );
-  }
-};
-
-/**
- * getting the necesarry information about the farmer CROPS
- * @param farmerId id of the farmer you want to get the info
- * @returns crop info of the farmer
- */
-export const GetFarmerProfileCropInfoQuery = async (
-  farmerId: string
-): Promise<GetFarmerProfileCropInfoQueryReturnType[]> => {
-  try {
-    return (
-      await pool.query(
-        `select "cropId", "cropName" from capstone.crop where "farmerId" = $1`,
-        [farmerId]
-      )
-    ).rows;
-  } catch (error) {
-    console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng pananim: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng pananim`
     );
   }
 };

@@ -19,6 +19,10 @@ import {
   OrgInfoType,
   ClientUserProfileFormPropType,
   LineChartComponentPropType,
+  barDataStateType,
+  getReportCountThisWeekReturnType,
+  getReportCountThisAndPrevMonthReturnType,
+  getReportCountThisYearReturnType,
 } from "@/types";
 import {
   ApprovedOrgFarmerAcc,
@@ -27,6 +31,7 @@ import {
 import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
+  Button,
   FormCancelSubmitButton,
   ModalNotice,
 } from "../server_component/customComponent";
@@ -35,7 +40,7 @@ import {
   UserOrganizationInfoForm,
   UserProfileForm,
 } from "../server_component/componentForAllUser";
-import { BarChart } from "@mui/x-charts";
+import { LineChart } from "@mui/x-charts";
 export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   isViewing,
   userFarmerInfo,
@@ -378,25 +383,127 @@ export const DeleteUser: FC<DeleteUserPropType> = ({
 
 export const LineChartComponent: FC<LineChartComponentPropType> = ({
   title,
-  description,
-  barLabel,
-  barData,
+  user,
+  data,
 }) => {
+  const [formatChart, setFormatChart] = useState<"week" | "month" | "year">(
+    "week"
+  );
+
+  const week = data.week.reduce(
+    (acc: barDataStateType, curVal: getReportCountThisWeekReturnType) => ({
+      data: [...acc.data, Number(curVal.reportCount)],
+      label: [
+        ...acc.label,
+        curVal.dayOfWeek ===
+        new Date().toLocaleDateString("en-US", { weekday: "long" })
+          ? "NGAYON"
+          : curVal.dayOfWeek,
+      ],
+    }),
+    { data: [], label: [] }
+  );
+
+  const month = data.month.reduce(
+    (
+      acc: barDataStateType,
+      curVal: getReportCountThisAndPrevMonthReturnType
+    ) => ({
+      data: [...acc.data, Number(curVal.reportCount)],
+      label: [...acc.label, curVal.weekLabel],
+    }),
+    { data: [], label: [] }
+  );
+
+  const year = data.year.reduce(
+    (acc: barDataStateType, curVal: getReportCountThisYearReturnType) => ({
+      data: [...acc.data, Number(curVal.reportCount)],
+      label: [...acc.label, curVal.month],
+    }),
+    { data: [], label: [] }
+  );
+
+  const [barData, setBarData] = useState<barDataStateType>(week);
+
+  const handleChangChartData = (val: "week" | "month" | "year") => {
+    switch (val) {
+      case "week":
+        setFormatChart("week");
+        return setBarData(week);
+      case "month":
+        setFormatChart("month");
+        return setBarData(month);
+      case "year":
+        setFormatChart("year");
+        return setBarData(year);
+    }
+  };
+
+  const desc = () => {
+    if (user === "farmer") {
+      const word = `Mga nag pasa ng ulat ngayong`;
+
+      switch (formatChart) {
+        case "week":
+          return `${word} lingo`;
+        case "month":
+          return `${word} buwan`;
+        case "year":
+          return `${word} taon`;
+      }
+    }
+  };
+
+  const buttonStyle = `!text-white !bg-green-500 shadow-lg`;
   return (
-    <div className="bg-white rounded-2xl">
-      <div className="px-4 pt-4">
-        <h1 className="font-semibold">{title}</h1>
-        <p>{description}</p>
+    <div className="bg-white rounded-2xl p-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="font-semibold">{title}</h1>
+          <p className="text-gray-600">{desc()}</p>
+        </div>
+
+        <div className="flex justify-center items-center gap-2 [&>button]:text-green-700 [&>button]:bg-green-100 [&>button]:!rounded-lg [&>button]:px-4 [&>button]:py-2 [&>button]:font-semibold">
+          <Button
+            className={`${formatChart === "week" ? buttonStyle : ""}`}
+            onClick={() => handleChangChartData("week")}
+          >
+            Lingo
+          </Button>
+          <Button
+            className={`${formatChart === "month" ? buttonStyle : ""}`}
+            onClick={() => handleChangChartData("month")}
+          >
+            Buwan
+          </Button>
+          <Button
+            className={`${formatChart === "year" ? buttonStyle : ""}`}
+            onClick={() => handleChangChartData("year")}
+          >
+            Taon
+          </Button>
+        </div>
       </div>
-      <BarChart
-        xAxis={[
+
+      <LineChart
+        xAxis={[{ scaleType: "point", data: barData.label }]}
+        yAxis={[{ min: 0, max: 20 }]}
+        margin={{ right: 30, left: 0, bottom: 0 }}
+        series={[
           {
-            data: barLabel,
+            data: barData.data,
+            label: "report",
+            color: "oklch(72.3% 0.219 149.579)",
           },
         ]}
-        series={[{ data: barData }]}
         height={300}
+        grid={{ horizontal: true, vertical: true }}
       />
+
+      <div className="mt-3 flex justify-start items-center gap-1">
+        <p className="bg-green-500 rounded-full size-3" />
+        <p className="text-gray-500 text-sm">Bilang ng mga ulat</p>
+      </div>
     </div>
   );
 };
