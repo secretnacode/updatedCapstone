@@ -251,6 +251,21 @@ body {
   .very-very-small-text {
     @apply text-[12px];
   }
+  .card-value {
+    @apply font-bold text-4xl;
+  }
+  .card-label {
+    @apply text-gray-600 text-[14px];
+  }
+  .card-link {
+    @apply tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-3 rounded-2xl hover:shadow-md transition-shadow;
+  }
+  .card-title-wrapper {
+    @apply mb-6;
+  }
+  .card-title-wrapper p {
+    @apply font-semibold;
+  }
 }
 
 /* loading style */

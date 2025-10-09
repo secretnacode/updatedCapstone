@@ -18,6 +18,23 @@ import { Feature } from "geojson";
 import { LngLatLike } from "maplibre-gl";
 import { RefObject } from "react";
 import { MapRef } from "@vis.gl/react-maplibre";
+import {
+  Cloud,
+  CloudDrizzle,
+  CloudHail,
+  CloudLightning,
+  CloudMoon,
+  CloudMoonRain,
+  CloudRain,
+  CloudRainWind,
+  CloudSun,
+  CloudSunRain,
+  Cloudy,
+  HelpCircle,
+  LucideIcon,
+  Moon,
+  Sun,
+} from "lucide-react";
 
 /**
  * Generates a new UUID (Universally Unique Identifier).
@@ -340,3 +357,187 @@ export function ViewCrop(
     .getElementById("mapCanvas")
     ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
+
+/**
+ * function to transform or to make a logo base on the state of the weather in day
+ * @param code state of the weather that comes from weatherApi
+ * @return icon
+ */
+export const makeWeatherIcon = ({
+  code,
+  isDay,
+}: {
+  code: number;
+  isDay: 1 | 0;
+}): LucideIcon => {
+  // ☀️ CLEAR CONDITIONS
+  if (code === 1000) {
+    if (isDay === 1) return Sun; // Sunny
+    else return Moon; // Clear
+  }
+
+  // 🌤️ PARTLY CLOUDY DAY / NIGHT
+  if (code === 1003) {
+    if (isDay === 1) return CloudSun;
+    else return CloudMoon;
+  }
+
+  // ☔ CLOUDY AND  MIGHT RAIN WHILE IN DAY / NIGHT
+  if (code === 1063) {
+    if (isDay === 1) return CloudSunRain; // IN DAY
+    else return CloudMoonRain; // IN NIGHT
+  }
+
+  // ☁️ CLOUDY / OVERCAST / FOG  CONDITIONS
+  if (code === 1006 || code === 1009) return Cloud;
+
+  // MIST
+  if (code === 1030 || code === 1135 || code === 1147) return Cloudy;
+
+  // ⛈️ THUNDER CONDITIONS
+  if (code === 1087 || code === 1273 || code === 1276) return CloudLightning;
+
+  // 🌧️ DRIZZLE / LIGHT RAIN CONDITIONS
+  if (
+    code === 1072 ||
+    code === 1150 ||
+    code === 1153 ||
+    code === 1168 ||
+    // 🌨️ SLEET / ICE PELLETS CONDITIONS
+    code === 1069 ||
+    code === 1204 ||
+    code === 1207 ||
+    code === 1237 ||
+    code === 1249 ||
+    code === 1252 ||
+    code === 1261 ||
+    code === 1264
+  )
+    return CloudDrizzle;
+
+  // LIGHT RAIN CONDITIONS
+  if (code === 1180 || code === 1183 || code === 1198 || code === 1240)
+    return CloudHail;
+
+  // 💧 MODERATE RAIN CONDITIONS
+  if (code === 1186 || code === 1189) return CloudRain;
+
+  //  HEAVY RAIN CONDITIONS
+  if (
+    code === 1171 ||
+    code === 1192 ||
+    code === 1195 ||
+    code === 1201 ||
+    code === 1243 ||
+    code === 1246
+  )
+    return CloudRainWind;
+
+  return HelpCircle; // Fallback for unknown codes
+};
+
+/**
+ * Translates the WeatherAPI condition text into Tagalog.
+ * @param englishText The English weather condition text (e.g., "Sunny").
+ * @returns The Tagalog translation string.
+ */
+export const translateWeatherConditionToTagalog = (
+  englishText: string
+): string => {
+  // Normalize the input text for consistent matching (e.g., trim whitespace)
+  const normalizedText = englishText.trim();
+
+  switch (normalizedText.toLowerCase()) {
+    // CLEAR / SUNNY
+    case "sunny":
+    case "clear":
+      return "Hindi Maulap";
+
+    // PARTLY CLOUDY
+    case "partly cloudy":
+      return "Bahagyang Maulap";
+
+    // CLOUDLY
+    case "cloudy":
+    case "overcast":
+      return "Maulap";
+
+    // FOG / MIST
+    case "mist":
+    case "fog":
+    case "freezing fog":
+      return "Mahamog";
+
+    // DRIZZLE / RAIN
+    case "patchy light drizzle":
+    case "light drizzle":
+    case "freezing drizzle":
+    case "heavy freezing drizzle":
+    case "patchy sleet possible":
+    case "patchy rain nearby":
+    case "light sleet":
+    case "moderate or heavy sleet":
+    case "light sleet showers":
+    case "moderate or heavy sleet showers":
+    case "patchy freezing drizzle possible":
+      return "Mahina o Patak-patak na Ambon";
+
+    // MIGHT RAIN
+    case "patchy rain possible":
+    case "patchy light rain":
+      return "Posibleng May Bahagyang Ulan";
+
+    // SLIGHT RAIN
+    case "light rain":
+    case "light freezing rain":
+    case "light rain shower":
+      return "Mahina o Bahagyang Ulan";
+
+    // MODERATE OR HEAVY RAIN FALL
+    case "moderate rain at times":
+    case "moderate rain":
+    case "moderate or heavy rain shower":
+    case "moderate or heavy freezing rain":
+    case "light showers of ice pellets":
+      return "Katamtaman o Malakas na Pag-ulan";
+
+    // HEAVY RAIN FALL
+    case "heavy rain at times":
+    case "heavy rain":
+    case "torrential rain shower":
+    case "moderate or heavy showers of ice pellets":
+      return "Malakas na Pag-ulan";
+
+    // THUNDER
+    case "thundery outbreaks possible":
+    case "patchy light rain with thunder":
+    case "moderate or heavy rain with thunder":
+      return "Posibleng May Pagkidlat at Pagkulog";
+
+    // DEFAULT
+    default:
+      return "Hindi Matukoy Ang Panahon";
+  }
+};
+
+/**
+ * function for converting the military time to readable time that uses pm and am
+ * @param time military time that you want to convert
+ * @returns the time
+ *
+ * @example
+ * const time = converTimeToAMPM("20:45")
+ *
+ * console.log(time) // 10:45 pm
+ *
+ *
+ */
+export const converTimeToAMPM = (time: string) =>
+  new Date(`2001-01-01T${time}:00`)
+    .toLocaleDateString("fil-PH", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .split(",")[1]
+    .trim();

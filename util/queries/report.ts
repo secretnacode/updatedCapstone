@@ -1,6 +1,6 @@
 import {
   AddNewFarmerReportQueryType,
-  farmerRole,
+  farmerRoleType,
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   GetOrgMemberReportQueryType,
@@ -173,9 +173,9 @@ export const GetAllFarmerReportQuery =
 /**
  * function for getting all the report count that was passed to the farmer leader today
  * @param farmerLeadId id of the farmer leader that wants to see the total count of report that was made today
- * @returns count of reports
+ * @returns count of farmer member report that was passed today
  */
-export const getCountReportToday = async (
+export const getCountFarmerMemReportToday = async (
   farmerLeadId: string
 ): Promise<number> => {
   try {
@@ -258,7 +258,7 @@ export const getCountMadeReportToday = async (
  */
 export const getReportCountThisWeek = async (
   userId: string,
-  role: farmerRole
+  role: farmerRoleType
 ): Promise<getReportCountThisWeekReturnType[]> => {
   try {
     const cte = await cteDaySeries();
@@ -284,7 +284,7 @@ export const getReportCountThisWeek = async (
 
 export const getReportCountThisAndPrevMonth = async (
   userId: string,
-  role: farmerRole
+  role: farmerRoleType
 ): Promise<getReportCountThisAndPrevMonthReturnType[]> => {
   try {
     const cte = await cteWeekSeries();
@@ -310,7 +310,7 @@ export const getReportCountThisAndPrevMonth = async (
 
 export const getReportCountThisYear = async (
   userId: string,
-  role: farmerRole
+  role: farmerRoleType
 ): Promise<getReportCountThisYearReturnType[]> => {
   try {
     const cte = await cteMonthSeries();
@@ -357,6 +357,60 @@ export const getRecentReport = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong pasang ulat`
+    );
+  }
+};
+
+/**
+ * query that gets the count pending report of the farmer
+ * @param farmerId id of the farmer
+ * @returns number of pending report
+ */
+export const getCountPendingReport = async (
+  farmerId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count("reportId") from capstone.report where "farmerId" = $1 and "verificationStatus" = $2`,
+        [farmerId, "false"]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga pending na ulat mong ipinasa: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga pending na ulat mong ipinasa`
+    );
+  }
+};
+
+/**
+ * query for getting the total report of the farmer that was made
+ * @param farmerId
+ * @returns
+ */
+export const getCountTotalReportMade = async (
+  farmerId: string
+): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count("reportId") from capstone.report where "farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga naipasa mong ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga naipasa mong ulat`
     );
   }
 };

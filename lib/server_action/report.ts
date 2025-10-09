@@ -6,6 +6,9 @@ import {
   GetAllFarmerReportQuery,
   GetFarmerReportDetailQuery,
   GetOrgMemberReportQuery,
+  getReportCountThisAndPrevMonth,
+  getReportCountThisWeek,
+  getReportCountThisYear,
   GetUserReport,
 } from "@/util/queries/report";
 import { ProtectedAction } from "../protectedActions";
@@ -13,10 +16,12 @@ import {
   AddReportActionFormType,
   AddReportValType,
   ApprovedOrgMemberReturnType,
+  farmerRoleType,
   GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
   GetOrgMemberReportReturnType,
+  reportPerDayWeekAndMonthReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import { addFarmerReportSchema } from "@/util/helper_function/validation/validationSchema";
@@ -256,3 +261,48 @@ export const GetAllFarmerReport =
       };
     }
   };
+
+// YOU CAN MAKE THIS DYNAMIC SO THAT THE AGRICULTURIST OR THE ADMIN CAN GET THE DATA, JUST REMOVE THE FILTER IF ITS THE AGRICULTURIST AND ADMIN
+/**
+ * server action for getting the report base on the sequence(per day in a week, per week in 2 months, per month in a year)
+ * @param userId farmerId that wants to get it
+ * @param work role of the farmer
+ * @returns
+ */
+export const reportPerDayWeekAndMonth = async (
+  userId: string,
+  work: farmerRoleType
+): Promise<reportPerDayWeekAndMonthReturnType> => {
+  try {
+    const [
+      reportCountThisWeek,
+      reportCountThisAndPrevMonth,
+      reportCountThisYear,
+    ] = await Promise.all([
+      getReportCountThisWeek(userId, work),
+      getReportCountThisAndPrevMonth(userId, work),
+      getReportCountThisYear(userId, work),
+    ]);
+
+    return {
+      success: true,
+      reportCountThisWeek,
+      reportCountThisAndPrevMonth,
+      reportCountThisYear,
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang kinukuha ang mga bilang ng ulat: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

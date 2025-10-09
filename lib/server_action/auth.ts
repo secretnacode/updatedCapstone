@@ -91,12 +91,12 @@ export async function LoginAuth(
   } catch (error) {
     if (isRedirectError(error)) throw error;
 
-    const err = error as Error;
+    console.log(`May pagkakamali na hindi inaasahan sa pag lologin${(error as Error).message}`,)
     return {
       success: false,
       errors: [
         {
-          message: `May pagkakamali na hindi inaasahan sa : ${err}`,
+          message: `May pagkakamali na hindi inaasahan sa pag lologin`,
           type: "error",
         },
       ],

@@ -37,7 +37,11 @@ export default async function Page({
   return (
     <div>
       {message && <RedirectManager data={message} paramName="success" />}
-      {!userRole.success && <RenderNotification notif={userRole.notifError} />}
+      {userRole.success ? (
+        <div className="grid grid-cols-4 gap-4"></div>
+      ) : (
+        <RenderNotification notif={userRole.notifError} />
+      )}
       {userRole.success && userRole.role === "leader" ? (
         <FarmerLeadDashBoard />
       ) : (

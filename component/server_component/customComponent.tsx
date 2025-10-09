@@ -562,15 +562,12 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
         </p>
       </div>
 
-      <p className="font-bold text-4xl">{cardContent}</p>
+      <p className="card-value">{cardContent}</p>
 
       <div>
         <div className="flex justify-between items-center">
-          <p className="text-gray-600 text-[14px]">{contentLabel}</p>
-          <Link
-            href={link}
-            className="tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-3 rounded-2xl hover:shadow-md transition-shadow"
-          >
+          <p className="card-label">{contentLabel}</p>
+          <Link href={link} className="card-link">
             Tingnan
           </Link>
         </div>

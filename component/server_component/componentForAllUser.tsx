@@ -7,8 +7,10 @@ import {
   UserProfileFormPropType,
   InputComponentPropType,
   UserOrganizationInfoFormPropType,
+  WeatherComponentPropType,
+  getWeatherTodayReturnType,
 } from "@/types";
-import { MapPinHouse } from "lucide-react";
+import { ClipboardPlus, LucideIcon, MapPinHouse, Wheat } from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
@@ -27,8 +29,15 @@ import {
 } from "./customComponent";
 import {
   baranggayList,
+  converTimeToAMPM,
   DateToYYMMDD,
+  makeWeatherIcon,
+  ReadableDateFomat,
+  translateWeatherConditionToTagalog,
+  UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
+import { getWeatherToday } from "@/lib/server_action/weather";
+import Image from "next/image";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -447,5 +456,102 @@ export const UserOrganizationInfoForm: FC<UserOrganizationInfoFormPropType> = (
         />
       </div>
     </>
+  );
+};
+
+export const WeatherComponent: FC<WeatherComponentPropType> = async ({
+  userLocation,
+}) => {
+  let currentWeather: getWeatherTodayReturnType;
+
+  try {
+    currentWeather = await getWeatherToday(userLocation);
+  } catch (error) {
+    console.log(error as Error);
+    currentWeather = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  let WeatherIcon: LucideIcon | undefined = undefined;
+
+  if (currentWeather.success)
+    WeatherIcon = makeWeatherIcon({
+      code: currentWeather.weatherData.condition.code,
+      isDay: currentWeather.weatherData.is_day,
+    });
+
+  return (
+    <>
+      {currentWeather.success ? (
+        <div className=" bg-gray-500">
+          <div className="card-title-wrapper flex justify-start items-center gap-2">
+            {WeatherIcon && <WeatherIcon />}
+            <p>Panahon ngayon</p>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="card-value">
+                {currentWeather.weatherData.temp_c}°C
+              </p>
+              <p className="card-label">
+                {translateWeatherConditionToTagalog(
+                  currentWeather.weatherData.condition.text
+                )}
+              </p>
+            </div>
+
+            <Image
+              src={`https:${currentWeather.weatherData.condition.icon}`}
+              alt="weather image"
+              width={50}
+              height={50}
+              className="[image-rendering:crisp-edges]"
+            />
+          </div>
+
+          <div className="mt-4 very-small-text text-gray-600 flex justify-between items-center">
+            <p>
+              <span className="">Ngayong:</span>{" "}
+              {ReadableDateFomat(
+                new Date(currentWeather.weatherData.last_updated.split(" ")[0])
+              )}
+            </p>
+
+            <p>
+              {converTimeToAMPM(
+                currentWeather.weatherData.last_updated.split(" ")[1]
+              )}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <RenderNotification notif={currentWeather.notifError} />
+      )}
+    </>
+  );
+};
+
+export const FarmerQuickActionComponent: FC = () => {
+  return (
+    <div>
+      <div className="card-title-wrapper">
+        <p>Mabilisang Pag gawa</p>
+      </div>
+
+      <div className="flex flex-col space-y-4 [&>a]:flex [&>a]:items-center [&>a]:gap-2 [&>a]:border [&>a]:border-gray-300 [&>a]:hover:bg-gray-100 [&>a]:rounded-md [&>a]:p-2">
+        <Link href={`/farmer/report`}>
+          <ClipboardPlus className="logo !size-5" />
+          <span>Mag gawa ng ulat</span>
+        </Link>
+
+        <Link href={"/farmer/crop"}>
+          <Wheat className="logo !size-5" />
+          <span>Mag dagdag ng pananim</span>
+        </Link>
+      </div>
+    </div>
   );
 };

@@ -89,7 +89,7 @@ export type ErrorResponseType = {
 
 export type SessionValueType = {
   userId: string;
-  work: farmerRole;
+  work: farmerRoleType;
 };
 
 export type LoadingContextType = {
@@ -1031,21 +1031,25 @@ export type checkFarmerRoleReturnType =
   | ServerActionFailBaseType;
 
 export type DashboardCardPropType = {
-  logo: { icon: LucideIcon; iconStyle?: string; iconWrapperStyle?: string };
+  logo: { label: string; className?: string };
   link: string;
   cardLabel: { label: string; className?: string };
   cardContent: string;
   contentLabel: string;
 };
 
+type lineChartDataType = {
+  week: getReportCountThisWeekReturnType[];
+  month: getReportCountThisAndPrevMonthReturnType[];
+  year: getReportCountThisYearReturnType[];
+};
+
+type userRoleType = "farmer" | "agriculturist";
+
 export type LineChartComponentPropType = {
   title: string;
-  user: "farmer" | "agriculturist";
-  data: {
-    week: getReportCountThisWeekReturnType[];
-    month: getReportCountThisAndPrevMonthReturnType[];
-    year: getReportCountThisYearReturnType[];
-  };
+  user: userRoleType;
+  data: lineChartDataType;
 };
 
 export type getFarmerCropNameReturnType =
@@ -1070,24 +1074,7 @@ export type getReportCountThisYearReturnType = {
   reportCount: number;
 };
 
-export type farmerRole = "leader" | "farmer";
-
-export type getFarmerLeadDashboardDataReturnType =
-  | ServerActionFailBaseType
-  | {
-      success: true;
-      cardValue: {
-        orgMemberTotalReportToday: number;
-        totalUnvalidatedReport: number;
-        totalUnverfiedUser: number;
-      };
-      lineChartValue: {
-        week: getReportCountThisWeekReturnType[];
-        month: getReportCountThisAndPrevMonthReturnType[];
-        year: getReportCountThisYearReturnType[];
-      };
-      recentReport: getRecentReportReturnType[];
-    };
+export type farmerRoleType = "leader" | "farmer";
 
 export type barDataStateType = {
   label: string[];
@@ -1107,4 +1094,126 @@ export type getRecentReportReturnType = {
   pastTime: timeStampzType;
   reportId: string;
   barangay: string;
+};
+
+export type WeatherComponentPropType = {
+  userLocation: barangayType;
+};
+
+export type weatherBaseLinkParameterType = {
+  lat: number;
+  lng: number;
+};
+
+export type weatherLocationObjectType = {
+  name: string;
+  region: string;
+  country: string;
+  lat: number;
+  lon: number;
+  tz_id: string;
+  localtime_epoch: number;
+  localtime: string; // 2025-10-07 22:45
+};
+
+export type weatherCurrentObjectType = {
+  last_updated: string; // 2025-10-07 22:45
+  temp_c: number;
+  is_day: 1 | 0;
+  condition: {
+    text: string;
+    icon: string;
+    code: number;
+  };
+  humidity: number;
+  heatindex_c: number;
+};
+
+export type weatherForecastObjectType = {
+  forecastday: {
+    date: string;
+    day: {
+      maxtemp_c: number;
+      mintemp_c: number;
+      avgtemp_c: number;
+      daily_will_it_rain: 1 | 0;
+      daily_chance_of_rain: number;
+    };
+    hour: {
+      time: string;
+      temp_c: number;
+      is_day: 1 | 0;
+      condition: {
+        text: string;
+        icon: string;
+        code: number;
+      };
+      heatindex_f: number;
+      chance_of_rain: number;
+    }[];
+  }[];
+};
+
+export type currentWeatherType = {
+  location: weatherLocationObjectType;
+  current: weatherCurrentObjectType;
+};
+
+export type forecastWeatherType = currentWeatherType & {
+  forecast: weatherForecastObjectType;
+};
+
+export type getWeatherTodayReturnType =
+  | {
+      success: true;
+      weatherData: weatherCurrentObjectType;
+    }
+  | ServerActionFailBaseType;
+
+export type reportPerDayWeekAndMonthReturnType =
+  | {
+      success: true;
+      reportCountThisWeek: getReportCountThisWeekReturnType[];
+      reportCountThisAndPrevMonth: getReportCountThisAndPrevMonthReturnType[];
+      reportCountThisYear: getReportCountThisYearReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type getFarmerDashboardDataReturnType =
+  | ServerActionFailBaseType
+  | ({
+      success: true;
+      lineChartValue: {
+        week: getReportCountThisWeekReturnType[];
+        month: getReportCountThisAndPrevMonthReturnType[];
+        year: getReportCountThisYearReturnType[];
+      };
+      userLocation: barangayType;
+    } & (
+      | {
+          work: "leader";
+          cardValue: {
+            orgMemberTotalReportToday: number;
+            totalUnvalidatedReport: number;
+            totalUnverfiedUser: number;
+          };
+          recentReport: getRecentReportReturnType[];
+        }
+      | {
+          work: "farmer";
+          cardValue: {
+            countMadeReportToday: number;
+            countTotalReportMade: number;
+            countPendingReport: number;
+          };
+        }
+    ));
+
+export type DashboardComponentPropType = {
+  card1: DashboardCardPropType;
+  card2: DashboardCardPropType;
+  card3: DashboardCardPropType;
+  lineChart: { title: string; user: userRoleType; data: lineChartDataType };
+  userLocation: barangayType;
+  widget: ChildrenType;
 };

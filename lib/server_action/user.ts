@@ -5,24 +5,27 @@ import {
   DelteUserAccountQuery,
   farmerIsExist,
   getCountNotVerifiedFarmer,
+  getUserLocation,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
 import {
   checkFarmerRoleReturnType,
+  getFarmerDashboardDataReturnType,
   getFarmerLeadDashboardDataReturnType,
   newUserValNeedInfoReturnType,
   NotificationBaseType,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
-  getCountReportToday,
+  getCountMadeReportToday,
+  getCountPendingReport,
+  getCountFarmerMemReportToday,
   getCountUnvalidatedReport,
   getRecentReport,
-  getReportCountThisAndPrevMonth,
-  getReportCountThisWeek,
-  getReportCountThisYear,
+  getCountTotalReportMade,
 } from "@/util/queries/report";
+import { reportPerDayWeekAndMonth } from "./report";
 
 /**
  * server action for deleting a user account
@@ -93,6 +96,9 @@ export const DelteUserAccount = async (
 //   }
 // };
 
+/**
+ * server action that checks if the new use already fill up the first part of the sign up
+ */
 export const newUserValNeedInfo =
   async (): Promise<newUserValNeedInfoReturnType> => {
     try {
@@ -127,6 +133,10 @@ export const newUserValNeedInfo =
     }
   };
 
+/**
+ * server action that checks the role of the farmerUser (e.g. "farmer" / "leader")
+ * @returns role of the farmer
+ */
 export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
   try {
     const work = (await ProtectedAction("read:user")).work;
@@ -149,49 +159,81 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
   }
 };
 
-export const getFarmerLeadDashboardData =
-  async (): Promise<getFarmerLeadDashboardDataReturnType> => {
+/**
+ * sersver action for geting the data for the dashboard base on the user role
+ * @returns
+ */
+export const getFarmerDashboardData =
+  async (): Promise<getFarmerDashboardDataReturnType> => {
     try {
-      const { userId, work } = await ProtectedAction(
-        "read:all:farmer:org:member:user"
-      );
+      const { userId, work } = await ProtectedAction("read:user");
 
-      const [
-        countReportToday,
-        countUnvalidatedReport,
-        countNotVerifiedFarmer,
-        reportCountThisWeek,
-        reportCountThisAndPrevMonth,
-        reportCountThisYear,
-        recentReport,
-      ] = await Promise.all([
-        getCountReportToday(userId),
-        getCountUnvalidatedReport(userId),
-        getCountNotVerifiedFarmer(userId),
-        getReportCountThisWeek(userId, work),
-        getReportCountThisAndPrevMonth(userId, work),
-        getReportCountThisYear(userId, work),
-        getRecentReport(userId),
+      const [reportSequence, userLocation] = await Promise.all([
+        reportPerDayWeekAndMonth(userId, work),
+        getUserLocation(userId),
       ]);
+
+      if (!reportSequence.success)
+        return { success: false, notifError: reportSequence.notifError };
+
+      // if a farmer leader, it will return this instead
+      if (work === "leader") {
+        const [
+          countFarmerMemReportToday,
+          countUnvalidatedReport,
+          countNotVerifiedFarmer,
+          recentReport,
+        ] = await Promise.all([
+          getCountFarmerMemReportToday(userId),
+          getCountUnvalidatedReport(userId),
+          getCountNotVerifiedFarmer(userId),
+          getRecentReport(userId),
+        ]);
+
+        return {
+          success: true,
+          work,
+          cardValue: {
+            orgMemberTotalReportToday: countFarmerMemReportToday,
+            totalUnvalidatedReport: countUnvalidatedReport,
+            totalUnverfiedUser: countNotVerifiedFarmer,
+          },
+          lineChartValue: {
+            week: reportSequence.reportCountThisWeek,
+            month: reportSequence.reportCountThisAndPrevMonth,
+            year: reportSequence.reportCountThisYear,
+          },
+          recentReport: recentReport,
+          userLocation: userLocation,
+        };
+      }
+
+      const [countMadeReportToday, countTotalReportMade, countPendingReport] =
+        await Promise.all([
+          getCountMadeReportToday(userId),
+          getCountTotalReportMade(userId),
+          getCountPendingReport(userId),
+        ]);
 
       return {
         success: true,
+        work,
         cardValue: {
-          orgMemberTotalReportToday: countReportToday,
-          totalUnvalidatedReport: countUnvalidatedReport,
-          totalUnverfiedUser: countNotVerifiedFarmer,
+          countMadeReportToday: countMadeReportToday,
+          countTotalReportMade: countTotalReportMade,
+          countPendingReport: countPendingReport,
         },
         lineChartValue: {
-          week: reportCountThisWeek,
-          month: reportCountThisAndPrevMonth,
-          year: reportCountThisYear,
+          week: reportSequence.reportCountThisWeek,
+          month: reportSequence.reportCountThisAndPrevMonth,
+          year: reportSequence.reportCountThisYear,
         },
-        recentReport: recentReport,
+        userLocation: userLocation,
       };
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon para sa farmer leader: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
       );
       return {
         success: false,

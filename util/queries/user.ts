@@ -1,4 +1,5 @@
 import {
+  barangayType,
   FarmerFirstDetailType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
@@ -519,6 +520,29 @@ export const getCountNotVerifiedFarmer = async (
     console.log((error as Error).message);
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong user na hindi pa naaprubahan`
+    );
+  }
+};
+
+/**
+ * qurty for getting the location of the user
+ * @param userId user id that you want to get the location
+ * @returns location
+ */
+export const getUserLocation = async (
+  userId: string
+): Promise<barangayType> => {
+  try {
+    return (
+      await pool.query(
+        `select "barangay" from capstone.farmer where "farmerId" = $1`,
+        [userId]
+      )
+    ).rows[0].barangay;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng barangay na iyong tinitirhan`
     );
   }
 };
