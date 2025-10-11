@@ -1,141 +1,93 @@
 import {
+  getFamerLeaderDashboardData,
   getFarmerDashboardData,
-  getFarmerLeadDashboardData,
 } from "@/lib/server_action/user";
-import { DashboardCard } from "./customComponent";
+import {
+  DashboardCard,
+  LoadingCard,
+  RecentReportWidget,
+} from "./customComponent";
 import {
   Archive,
-  ClipboardPlus,
+  ClipboardPen,
   Clock,
   FileText,
   UserRound,
-  Wheat,
 } from "lucide-react";
 import { LineChartComponent } from "../client_component/componentForAllUser";
 import { RenderNotification } from "../client_component/fallbackComponent";
-import Link from "next/link";
 import {
   FarmerQuickActionComponent,
   WeatherComponent,
 } from "./componentForAllUser";
 import { DashboardComponentPropType } from "@/types";
-import { FC } from "react";
+import { FC, Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
 export const FarmerLeadDashBoard = async () => {
-  const data = await getFarmerLeadDashboardData();
+  const data = await getFamerLeaderDashboardData();
 
   return (
     <>
       {!data.success ? (
         <RenderNotification notif={data.notifError} />
       ) : (
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-3 flex flex-col gap-4">
-            <div className="grid grid-cols-3 gap-4 [&>div]:shadow-sm">
-              <DashboardCard
-                logo={{
-                  icon: FileText,
-                  iconStyle: "text-blue-700",
-                  iconWrapperStyle: "bg-blue-200",
-                }}
-                cardLabel={{
-                  label: "Ulat ng miyembro",
-                  className: "text-blue-700 bg-blue-100",
-                }}
-                cardContent={String(data.cardValue.orgMemberTotalReportToday)}
-                contentLabel="Ulat ng miyembro ngayon"
-                link={`/farmer/validateReport`}
-              />
-
-              <DashboardCard
-                logo={{
-                  icon: Clock,
-                  iconStyle: " text-orange-700",
-                  iconWrapperStyle: "bg-orange-200",
-                }}
-                cardLabel={{
-                  label: "Unvalidated",
-                  className: "text-orange-700 bg-orange-100",
-                }}
-                contentLabel={"Hindi kumpirmadong ulat"}
-                cardContent={String(data.cardValue.totalUnvalidatedReport)}
-                link={`/farmer/validateReport`}
-              />
-
-              <DashboardCard
-                logo={{
-                  icon: UserRound,
-                  iconStyle: " text-red-700",
-                  iconWrapperStyle: "bg-red-200",
-                }}
-                cardLabel={{
-                  label: "Ipinasang ulat ngayon",
-                  className: "text-red-700 bg-red-100",
-                }}
-                contentLabel={"Hindi beripikadong user"}
-                cardContent={String(data.cardValue.totalUnverfiedUser)}
-                link={`/farmer/validateReport`}
-              />
-            </div>
-
-            <LineChartComponent
-              title="Bilang ng mga ulat"
-              user={"farmer"}
-              data={data.lineChartValue}
-            />
-          </div>
-          <div className="flex flex-col gap-4 [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm ">
-            <WeatherComponent userLocation={data.userLocation} />
-            <div>
-              <div className="card-title-wrapper">
-                <p className="font-semibold">Bagong pasa ng report</p>
-              </div>
-
-              <div className="grid gap-1 [&>div]:not-last:pb-1 [&>div]:not-last:border-b [&>div]:not-last:border-gray-300">
-                {data.recentReport.map((val) => {
-                  const timePass = () => {
-                    if (val.pastTime.days ?? 0 > 0)
-                      return `${val.pastTime.days} day/s`;
-                    else if (val.pastTime.hours ?? 0 > 0)
-                      return `${val.pastTime.hours} hr/s`;
-                    else if (val.pastTime.minutes ?? 0 > 0)
-                      return `${val.pastTime.minutes} min/s`;
-                    else return `0min`;
-                  };
-
-                  return (
-                    <div key={val.reportId} className="grid grid-cols-4">
-                      <div className="flex items-center justify-center">
-                        <p className="text-gray-700 size-9 rounded-full bg-gray-100 grid place-items-center">
-                          {val.farmerFirstName.charAt(0) +
-                            val.farmerLastName.charAt(0)}
-                        </p>
-                      </div>
-
-                      <div className="col-span-2 flex flex-col justify-center items-start leading-4">
-                        <p className="">
-                          {val.farmerFirstName + " " + val.farmerLastName}
-                        </p>
-                        <p className="very-small-text text-gray-400 tracking-wide">
-                          {val.barangay.charAt(0).toUpperCase() +
-                            val.barangay.slice(1)}
-                        </p>
-                      </div>
-
-                      <p className="text-gray-500 very-very-small-text grid place-items-center">
-                        {timePass()}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <FarmerQuickActionComponent />
-          </div>
-        </div>
+        <DashboardComponent
+          card1={{
+            logo: {
+              icon: FileText,
+              iconStyle: "text-blue-700",
+              iconWrapperStyle: "bg-blue-200",
+            },
+            cardLabel: {
+              label: "Ulat ng miyembro",
+              className: "text-blue-700 bg-blue-100",
+            },
+            cardContent: String(data.cardValue.orgMemberTotalReportToday),
+            contentLabel: "Ulat ng miyembro ngayon",
+            link: "/farmer/validateReport",
+          }}
+          card2={{
+            logo: {
+              icon: Clock,
+              iconStyle: "text-orange-700",
+              iconWrapperStyle: "bg-orange-200",
+            },
+            cardLabel: {
+              label: "Hindi kumpirmado",
+              className: "text-orange-700 bg-orange-100",
+            },
+            cardContent: String(data.cardValue.totalUnvalidatedReport),
+            contentLabel: "Hindi kumpirmadong ulat",
+            link: "/farmer/validateReport",
+          }}
+          card3={{
+            logo: {
+              icon: UserRound,
+              iconStyle: "text-red-700",
+              iconWrapperStyle: "bg-red-200",
+            },
+            cardLabel: {
+              label: "Mga hindi beripikado",
+              className: "text-red-700 bg-red-100",
+            },
+            cardContent: String(data.cardValue.totalUnverfiedUser),
+            contentLabel: "Hindi beripikadong mga user",
+            link: "/farmer/validateReport",
+          }}
+          lineChart={{
+            title: "Bilang ng mga ulat sa organisasyon",
+            user: "farmer",
+            data: data.reportSequence,
+          }}
+          userLocation={data.userLocation}
+          widget={
+            <>
+              <RecentReportWidget recentReport={data.recentReport} />
+            </>
+          }
+        />
       )}
     </>
   );
@@ -149,155 +101,56 @@ export const FarmerDashBoard = async () => {
       {!data.success ? (
         <RenderNotification notif={data.notifError} />
       ) : (
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-3 flex flex-col gap-4">
-            <div className="grid grid-cols-3 gap-4 [&>div]:shadow-sm">
-              <DashboardCard
-                logo={{
-                  icon: FileText,
-                  iconStyle:
-                    data.work === "leader" ? "text-blue-700" : "text-green-700",
-                  iconWrapperStyle:
-                    data.work === "leader" ? "bg-blue-200" : "bg-green-200",
-                }}
-                cardLabel={{
-                  label:
-                    data.work === "leader" ? "Ulat ng miyembro" : "Ulat mo",
-                  className:
-                    data.work === "leader"
-                      ? "text-blue-700 bg-blue-100 "
-                      : "text-green-700 bg-green-100",
-                }}
-                cardContent={String(
-                  data.work === "leader"
-                    ? data.cardValue.orgMemberTotalReportToday
-                    : data.cardValue.countMadeReportToday
-                )}
-                contentLabel={`${
-                  data.work === "leader"
-                    ? "Ulat ng miyembro ngayon"
-                    : "Mga Ulat mo ngayon"
-                }`}
-                link={`${
-                  data.work === "leader"
-                    ? "/farmer/validateReport"
-                    : "farmer/report"
-                }`}
-              />
-
-              <DashboardCard
-                logo={{
-                  icon: data.work === "leader" ? Clock : Archive,
-                  iconStyle:
-                    data.work === "leader"
-                      ? "text-orange-700"
-                      : "text-blue-700",
-                  iconWrapperStyle:
-                    data.work === "leader" ? "bg-orange-200" : "bg-blue-200",
-                }}
-                cardLabel={{
-                  label: "Unvalidated",
-                  className:
-                    data.work === "leader"
-                      ? "text-orange-700 bg-orange-100"
-                      : "text-blue-700 bg-blue-100",
-                }}
-                contentLabel={`${
-                  data.work === "leader"
-                    ? "Hindi kumpirmadong ulat"
-                    : "Lahat ng iyong ulat"
-                }`}
-                cardContent={String(
-                  data.work === "leader"
-                    ? data.cardValue.totalUnvalidatedReport
-                    : data.cardValue.countTotalReportMade
-                )}
-                link={`${
-                  data.work === "leader"
-                    ? "/farmer/validateReport"
-                    : "farmer/report"
-                }`}
-              />
-
-              <DashboardCard
-                logo={{
-                  icon: UserRound,
-                  iconStyle: " text-red-700",
-                  iconWrapperStyle: "bg-red-200",
-                }}
-                cardLabel={{
-                  label: "Ipinasang ulat ngayon",
-                  className: "text-red-700 bg-red-100",
-                }}
-                contentLabel={"Hindi beripikadong user"}
-                cardContent={String(
-                  data.work === "leader"
-                    ? data.cardValue.totalUnverfiedUser
-                    : data.cardValue.countPendingReport
-                )}
-                link={`/farmer/validateReport`}
-              />
-            </div>
-
-            <LineChartComponent
-              title="Bilang ng mga ulat"
-              user={"farmer"}
-              data={data.lineChartValue}
-            />
-          </div>
-          <div className="flex flex-col gap-4 [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm ">
-            <WeatherComponent userLocation={data.userLocation} />
-
-            {data.work === "leader" && data.recentReport && (
-              <div>
-                <div className="card-title-wrapper">
-                  <p className="font-semibold">Bagong pasa ng report</p>
-                </div>
-
-                <div className="grid gap-1 [&>div]:not-last:pb-1 [&>div]:not-last:border-b [&>div]:not-last:border-gray-300">
-                  {data.recentReport.map((val) => {
-                    const timePass = () => {
-                      if (val.pastTime.days ?? 0 > 0)
-                        return `${val.pastTime.days} day/s`;
-                      else if (val.pastTime.hours ?? 0 > 0)
-                        return `${val.pastTime.hours} hr/s`;
-                      else if (val.pastTime.minutes ?? 0 > 0)
-                        return `${val.pastTime.minutes} min/s`;
-                      else return `0min`;
-                    };
-
-                    return (
-                      <div key={val.reportId} className="grid grid-cols-4">
-                        <div className="flex items-center justify-center">
-                          <p className="text-gray-700 size-9 rounded-full bg-gray-100 grid place-items-center">
-                            {val.farmerFirstName.charAt(0) +
-                              val.farmerLastName.charAt(0)}
-                          </p>
-                        </div>
-
-                        <div className="col-span-2 flex flex-col justify-center items-start leading-4">
-                          <p className="">
-                            {val.farmerFirstName + " " + val.farmerLastName}
-                          </p>
-                          <p className="very-small-text text-gray-400 tracking-wide">
-                            {val.barangay.charAt(0).toUpperCase() +
-                              val.barangay.slice(1)}
-                          </p>
-                        </div>
-
-                        <p className="text-gray-500 very-very-small-text grid place-items-center">
-                          {timePass()}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <FarmerQuickActionComponent />
-          </div>
-        </div>
+        <DashboardComponent
+          card1={{
+            logo: {
+              icon: ClipboardPen,
+              iconStyle: "text-green-700",
+              iconWrapperStyle: "bg-green-200",
+            },
+            cardLabel: {
+              label: "Ulat mo",
+              className: "text-green-700 bg-green-100",
+            },
+            cardContent: String(data.cardValue.countMadeReportToday),
+            contentLabel: "Mga Ulat mo ngayon",
+            link: "/farmer/report",
+          }}
+          card2={{
+            logo: {
+              icon: Archive,
+              iconStyle: "text-blue-700",
+              iconWrapperStyle: "bg-blue-200",
+            },
+            cardLabel: {
+              label: "Iyong mga ulat",
+              className: "text-blue-700 bg-blue-100",
+            },
+            cardContent: String(data.cardValue.countTotalReportMade),
+            contentLabel: "Lahat ng iyong ulat",
+            link: "/farmer/report",
+          }}
+          card3={{
+            logo: {
+              icon: FileText,
+              iconStyle: "text-orange-700",
+              iconWrapperStyle: "bg-orange-200",
+            },
+            cardLabel: {
+              label: "Mga hindi pa nakukumpirma",
+              className: "text-orange-700 bg-orange-100",
+            },
+            cardContent: String(data.cardValue.countPendingReport),
+            contentLabel: "Hindi kumpirmadong mga ulat",
+            link: "/farmer/report",
+          }}
+          lineChart={{
+            title: "Bilang ng aking mga ulat",
+            user: "farmer",
+            data: data.reportSequence,
+          }}
+          userLocation={data.userLocation}
+        />
       )}
     </>
   );
@@ -310,6 +163,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   lineChart,
   userLocation,
   widget,
+  showQuickAction = true,
 }) => {
   return (
     <div className="grid grid-cols-4 gap-4">
@@ -325,55 +179,13 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
         <LineChartComponent {...lineChart} />
       </div>
       <div className="flex flex-col gap-4 [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm ">
-        <WeatherComponent userLocation={userLocation} />
+        <Suspense fallback={<LoadingCard />}>
+          <WeatherComponent userLocation={userLocation} />
+        </Suspense>
 
         {widget}
-        {/* <div>
-          <div className="card-title-wrapper">
-            <p className="font-semibold">Bagong pasa ng report</p>
-          </div>
 
-          <div className="grid gap-1 [&>div]:not-last:pb-1 [&>div]:not-last:border-b [&>div]:not-last:border-gray-300">
-            {data.recentReport.map((val) => {
-              const timePass = () => {
-                if (val.pastTime.days ?? 0 > 0)
-                  return `${val.pastTime.days} day/s`;
-                else if (val.pastTime.hours ?? 0 > 0)
-                  return `${val.pastTime.hours} hr/s`;
-                else if (val.pastTime.minutes ?? 0 > 0)
-                  return `${val.pastTime.minutes} min/s`;
-                else return `0min`;
-              };
-
-              return (
-                <div key={val.reportId} className="grid grid-cols-4">
-                  <div className="flex items-center justify-center">
-                    <p className="text-gray-700 size-9 rounded-full bg-gray-100 grid place-items-center">
-                      {val.farmerFirstName.charAt(0) +
-                        val.farmerLastName.charAt(0)}
-                    </p>
-                  </div>
-
-                  <div className="col-span-2 flex flex-col justify-center items-start leading-4">
-                    <p className="">
-                      {val.farmerFirstName + " " + val.farmerLastName}
-                    </p>
-                    <p className="very-small-text text-gray-400 tracking-wide">
-                      {val.barangay.charAt(0).toUpperCase() +
-                        val.barangay.slice(1)}
-                    </p>
-                  </div>
-
-                  <p className="text-gray-500 very-very-small-text grid place-items-center">
-                    {timePass()}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div> */}
-
-        <FarmerQuickActionComponent />
+        {showQuickAction && <FarmerQuickActionComponent />}
       </div>
     </div>
   );

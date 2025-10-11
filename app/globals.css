@@ -258,7 +258,7 @@ body {
     @apply text-gray-600 text-[14px];
   }
   .card-link {
-    @apply tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-3 rounded-2xl hover:shadow-md transition-shadow;
+    @apply tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-2 rounded-2xl hover:shadow-md transition-shadow;
   }
   .card-title-wrapper {
     @apply mb-6;
@@ -336,10 +336,4 @@ body {
   margin-top: 15px;
   margin-left: 15px;
   animation: loader_5191 675ms ease-in-out 600ms infinite;
-}
-
-#mapCanvas {
-  height: 500px; /* Give it a clear height */
-  margin-top: 1000px; /* Push it far down the page */
-  background-color: red;
 }

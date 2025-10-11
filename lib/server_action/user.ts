@@ -11,10 +11,12 @@ import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
 import {
   checkFarmerRoleReturnType,
+  farmerRoleType,
+  getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
-  getFarmerLeadDashboardDataReturnType,
   newUserValNeedInfoReturnType,
   NotificationBaseType,
+  reportSequenceAndUserLocReturnType,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
@@ -160,80 +162,94 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
 };
 
 /**
- * sersver action for geting the data for the dashboard base on the user role
+ * server action for ONLY getting the farmer loc and report sequence that will be use for the line chart,
+ * was seperated because farmer and leader uses this query
+ * @param userId id of the current user
+ * @param work (e.g. leader / farmer)
  * @returns
  */
-export const getFarmerDashboardData =
-  async (): Promise<getFarmerDashboardDataReturnType> => {
-    try {
-      const { userId, work } = await ProtectedAction("read:user");
+const reportSequenceAndUserLoc = async (
+  userId: string,
+  work: farmerRoleType
+): Promise<reportSequenceAndUserLocReturnType> => {
+  try {
+    const [reportSequence, userLocation] = await Promise.all([
+      reportPerDayWeekAndMonth(userId, work),
+      getUserLocation(userId),
+    ]);
 
-      const [reportSequence, userLocation] = await Promise.all([
-        reportPerDayWeekAndMonth(userId, work),
-        getUserLocation(userId),
+    if (!reportSequence.success)
+      return { success: false, notifError: reportSequence.notifError };
+
+    return {
+      success: true,
+      reportSequence: {
+        week: reportSequence.reportCountThisWeek,
+        month: reportSequence.reportCountThisAndPrevMonth,
+        year: reportSequence.reportCountThisYear,
+      },
+      userLocation,
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * server action for getting the farmer lead dashboard data
+ * @returns
+ */
+export const getFamerLeaderDashboardData =
+  async (): Promise<getFamerLeaderDashboardDataReturnType> => {
+    try {
+      const { userId, work } = await ProtectedAction(
+        "read:farmer:member:report"
+      );
+
+      const [
+        countFarmerMemReportToday,
+        countUnvalidatedReport,
+        countNotVerifiedFarmer,
+        recentReport,
+        reportAndLoc,
+      ] = await Promise.all([
+        getCountFarmerMemReportToday(userId),
+        getCountUnvalidatedReport(userId),
+        getCountNotVerifiedFarmer(userId),
+        getRecentReport(userId),
+        reportSequenceAndUserLoc(userId, work),
       ]);
 
-      if (!reportSequence.success)
-        return { success: false, notifError: reportSequence.notifError };
-
-      // if a farmer leader, it will return this instead
-      if (work === "leader") {
-        const [
-          countFarmerMemReportToday,
-          countUnvalidatedReport,
-          countNotVerifiedFarmer,
-          recentReport,
-        ] = await Promise.all([
-          getCountFarmerMemReportToday(userId),
-          getCountUnvalidatedReport(userId),
-          getCountNotVerifiedFarmer(userId),
-          getRecentReport(userId),
-        ]);
-
-        return {
-          success: true,
-          work,
-          cardValue: {
-            orgMemberTotalReportToday: countFarmerMemReportToday,
-            totalUnvalidatedReport: countUnvalidatedReport,
-            totalUnverfiedUser: countNotVerifiedFarmer,
-          },
-          lineChartValue: {
-            week: reportSequence.reportCountThisWeek,
-            month: reportSequence.reportCountThisAndPrevMonth,
-            year: reportSequence.reportCountThisYear,
-          },
-          recentReport: recentReport,
-          userLocation: userLocation,
-        };
-      }
-
-      const [countMadeReportToday, countTotalReportMade, countPendingReport] =
-        await Promise.all([
-          getCountMadeReportToday(userId),
-          getCountTotalReportMade(userId),
-          getCountPendingReport(userId),
-        ]);
+      if (!reportAndLoc.success)
+        return { success: false, notifError: reportAndLoc.notifError };
 
       return {
         success: true,
-        work,
         cardValue: {
-          countMadeReportToday: countMadeReportToday,
-          countTotalReportMade: countTotalReportMade,
-          countPendingReport: countPendingReport,
+          orgMemberTotalReportToday: countFarmerMemReportToday,
+          totalUnvalidatedReport: countUnvalidatedReport,
+          totalUnverfiedUser: countNotVerifiedFarmer,
         },
-        lineChartValue: {
-          week: reportSequence.reportCountThisWeek,
-          month: reportSequence.reportCountThisAndPrevMonth,
-          year: reportSequence.reportCountThisYear,
-        },
-        userLocation: userLocation,
+        recentReport: recentReport,
+        reportSequence: reportAndLoc.reportSequence,
+        userLocation: reportAndLoc.userLocation,
       };
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`
       );
       return {
         success: false,
@@ -246,3 +262,76 @@ export const getFarmerDashboardData =
       };
     }
   };
+
+/**
+ * server action for getting the farmer dashboard data
+ * @returns
+ */
+export const getFarmerDashboardData =
+  async (): Promise<getFarmerDashboardDataReturnType> => {
+    try {
+      const { userId, work } = await ProtectedAction("read:report");
+
+      const [
+        countMadeReportToday,
+        countTotalReportMade,
+        countPendingReport,
+        reportAndLoc,
+      ] = await Promise.all([
+        getCountMadeReportToday(userId),
+        getCountTotalReportMade(userId),
+        getCountPendingReport(userId),
+        reportSequenceAndUserLoc(userId, work),
+      ]);
+
+      if (!reportAndLoc.success)
+        return { success: false, notifError: reportAndLoc.notifError };
+
+      return {
+        success: true,
+        cardValue: {
+          countMadeReportToday: countMadeReportToday,
+          countTotalReportMade: countTotalReportMade,
+          countPendingReport: countPendingReport,
+        },
+        reportSequence: reportAndLoc.reportSequence,
+        userLocation: reportAndLoc.userLocation,
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng iyong mga ulat: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getAgriculturistDashboardData = async () => {
+  try {
+    ProtectedAction("read:farmer:crop");
+
+    const [] = await Promise.all([]);
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

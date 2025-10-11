@@ -3,7 +3,7 @@ import { weatherBaseLinkParameterType } from "@/types";
 /**
  * base link of the weatherApi
  */
-export const weatherApiBaseLink = `https://api.weatherapi.com/v1/`;
+export const weatherApiBaseLink = `https://api.weatherapi.com/v1`;
 
 export const weatherApiKey = (requestUrl: "current" | "forecast") =>
   `${weatherApiBaseLink}/${requestUrl}.json?key=${process.env.WEATHER_API_KEY}&`;

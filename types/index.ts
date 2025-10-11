@@ -252,7 +252,7 @@ export type AddNewFarmerReportQueryType = {
   reportDescription: string;
   dayHappen: Date;
   dayReported: string;
-  verificationStatus: boolean;
+  verificationStatus: verificationStatusType;
 };
 
 export type AddNewFarmerReportImageType = {
@@ -1031,9 +1031,9 @@ export type checkFarmerRoleReturnType =
   | ServerActionFailBaseType;
 
 export type DashboardCardPropType = {
-  logo: { label: string; className?: string };
-  link: string;
+  logo: { icon: LucideIcon; iconStyle: string; iconWrapperStyle: string };
   cardLabel: { label: string; className?: string };
+  link: string;
   cardContent: string;
   contentLabel: string;
 };
@@ -1179,35 +1179,39 @@ export type reportPerDayWeekAndMonthReturnType =
     }
   | ServerActionFailBaseType;
 
+export type reportAndLocType = {
+  reportSequence: lineChartDataType;
+  userLocation: barangayType;
+};
+
+export type reportSequenceAndUserLocReturnType =
+  | ServerActionFailBaseType
+  | ({
+      success: true;
+    } & reportAndLocType);
+
+export type getFamerLeaderDashboardDataReturnType =
+  | ServerActionFailBaseType
+  | ({
+      success: true;
+      cardValue: {
+        orgMemberTotalReportToday: number;
+        totalUnvalidatedReport: number;
+        totalUnverfiedUser: number;
+      };
+      recentReport: getRecentReportReturnType[];
+    } & reportAndLocType);
+
 export type getFarmerDashboardDataReturnType =
   | ServerActionFailBaseType
   | ({
       success: true;
-      lineChartValue: {
-        week: getReportCountThisWeekReturnType[];
-        month: getReportCountThisAndPrevMonthReturnType[];
-        year: getReportCountThisYearReturnType[];
+      cardValue: {
+        countMadeReportToday: number;
+        countTotalReportMade: number;
+        countPendingReport: number;
       };
-      userLocation: barangayType;
-    } & (
-      | {
-          work: "leader";
-          cardValue: {
-            orgMemberTotalReportToday: number;
-            totalUnvalidatedReport: number;
-            totalUnverfiedUser: number;
-          };
-          recentReport: getRecentReportReturnType[];
-        }
-      | {
-          work: "farmer";
-          cardValue: {
-            countMadeReportToday: number;
-            countTotalReportMade: number;
-            countPendingReport: number;
-          };
-        }
-    ));
+    } & reportAndLocType);
 
 export type DashboardComponentPropType = {
   card1: DashboardCardPropType;
@@ -1215,5 +1219,17 @@ export type DashboardComponentPropType = {
   card3: DashboardCardPropType;
   lineChart: { title: string; user: userRoleType; data: lineChartDataType };
   userLocation: barangayType;
-  widget: ChildrenType;
+  widget?: ChildrenType;
+  showQuickAction?: boolean;
+};
+
+export type RecentReportWidgetReturnType = {
+  recentReport: getRecentReportReturnType[];
+};
+
+export type verificationStatusType = "false" | "pending" | "approved";
+
+export type getTotalFarmerStatusType = {
+  pending: verificationStatusType;
+  false: verificationStatusType;
 };

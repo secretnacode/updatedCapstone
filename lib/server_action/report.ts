@@ -106,7 +106,7 @@ export const PostFarmerReport = async (
       reportDescription: reportVal.reportDescription,
       dayHappen: reportVal.dateHappen,
       dayReported: new Date().toISOString(),
-      verificationStatus: false,
+      verificationStatus: "false",
     });
 
     reportVal.reportPicture.map(async (file) => {
@@ -221,7 +221,7 @@ export const ApprovedOrgMember = async (
   try {
     await ProtectedAction("read:farmer:member:report");
 
-    await ApprovedOrgMemberQuery(reportId);
+    await ApprovedOrgMemberQuery(reportId, "pending");
 
     redirect(
       `/farmerLeader/validateReport/?success=${NotifToUriComponent([

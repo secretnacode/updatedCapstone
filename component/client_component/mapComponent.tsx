@@ -49,7 +49,7 @@ export const MapComponent: FC<MapComponentPropType> = ({
   ...mapProp
 }) => {
   return (
-    <div className="rounded-xl overflow-hidden input !p-0">
+    <div className="rounded-xl overflow-hidden input !p-0" id="mapCanvas">
       <Map
         initialViewState={calauanViewState}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"

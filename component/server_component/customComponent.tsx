@@ -9,6 +9,7 @@ import {
   FormDivLabelSelectType,
   FormMapComponentPropType,
   ModalNoticePropType,
+  RecentReportWidgetReturnType,
   TableComponentPropType,
 } from "@/types";
 import { FC } from "react";
@@ -556,7 +557,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
           <logo.icon className={`logo ${logo.iconStyle}`} />
         </div>
         <p
-          className={`very-small-text px-3 py-1 rounded-2xl tracking-wide opacity-90  ${cardLabel.className}`}
+          className={`very-small-text px-3 py-1 rounded-2xl tracking-wide opacity-90   ${cardLabel.className}`}
         >
           {cardLabel.label}
         </p>
@@ -571,6 +572,76 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
             Tingnan
           </Link>
         </div>
+      </div>
+    </div>
+  );
+};
+
+export const LoadingCard = () => {
+  return (
+    <div className="bg-white animate-pulse w-full aspect-square">
+      <div className="bg-gray-400 p-1 rounded-xl w-1/3" />
+      <div className="grid grid-rows-4 space-y-2 mt-2 [&>div]:bg-gray-400 [&>div]:p-1 [&>div]:rounded-xl">
+        <div />
+        <div />
+        <div />
+        <div />
+      </div>
+    </div>
+  );
+};
+
+export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
+  recentReport,
+}) => {
+  return (
+    <div>
+      <div className="card-title-wrapper">
+        <p className="font-semibold">Bagong pasa ng report</p>
+      </div>
+
+      <div className=" [&>a]:not-last:border-b [&>a]:not-last:border-gray-300">
+        {recentReport.map((val) => {
+          const timePass = () => {
+            if (val.pastTime.days ?? 0 > 0) return `${val.pastTime.days} day/s`;
+            else if (val.pastTime.hours ?? 0 > 0)
+              return `${val.pastTime.hours} hr/s`;
+            else if (val.pastTime.minutes ?? 0 > 0)
+              return `${val.pastTime.minutes} min/s`;
+            else return `0min`;
+          };
+
+          return (
+            <Link
+              href={`/farmer/validateReport?reportId=${val.reportId}`}
+              key={val.reportId}
+              className="block"
+            >
+              <div className="rounded-md hover:bg-gray-200 transition-colors grid grid-cols-4 py-1.5">
+                <div className="flex items-center justify-center">
+                  <p className="text-gray-700 size-9 text-sm rounded-full bg-gray-100 grid place-items-center">
+                    {val.farmerFirstName.charAt(0) +
+                      val.farmerLastName.charAt(0)}
+                  </p>
+                </div>
+
+                <div className="col-span-2 flex flex-col justify-center items-start leading-4">
+                  <p className="">
+                    {val.farmerFirstName + " " + val.farmerLastName}
+                  </p>
+                  <p className="very-small-text text-gray-400 tracking-wide">
+                    {val.barangay.charAt(0).toUpperCase() +
+                      val.barangay.slice(1)}
+                  </p>
+                </div>
+
+                <p className="text-gray-500 very-very-small-text grid place-items-center">
+                  {timePass()}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

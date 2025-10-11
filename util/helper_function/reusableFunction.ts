@@ -353,6 +353,8 @@ export function ViewCrop(
     zoom: mapZoomValByBarangay(brgy),
   });
 
+  console.log(document.getElementById("mapCanvas"));
+
   document
     .getElementById("mapCanvas")
     ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
