@@ -440,17 +440,28 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
   };
 
   const desc = () => {
-    if (user === "farmer") {
-      const word = `Mga nag pasa ng ulat ngayong`;
+    if (user === "agriculturist") {
+      const word = `All passed report this`;
 
       switch (formatChart) {
         case "week":
-          return `${word} lingo`;
+          return `${word} ${formatChart}`;
         case "month":
-          return `${word} buwan`;
+          return `${word} ${formatChart}`;
         case "year":
-          return `${word} taon`;
+          return `${word} ${formatChart}`;
       }
+    }
+
+    const word = `Mga nag pasa ng ulat ngayong`;
+
+    switch (formatChart) {
+      case "week":
+        return `${word} lingo`;
+      case "month":
+        return `${word} buwan`;
+      case "year":
+        return `${word} taon`;
     }
   };
 
@@ -488,7 +499,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
 
       <LineChart
         xAxis={[{ scaleType: "point", data: barData.label }]}
-        yAxis={[{ min: 0, max: 20 }]}
+        yAxis={[{ min: 0, max: Math.max(...barData.data) + 5 }]}
         margin={{ right: 30, left: 0, bottom: 0 }}
         series={[
           {

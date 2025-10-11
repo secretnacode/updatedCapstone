@@ -59,8 +59,16 @@ export default async function Page() {
                   <td>
                     <span className="table-notice">Not verified</span>
                   </td>
-                  <td>{farmVal.orgName}</td>
-                  <td>{farmVal.orgRole}</td>
+                  <td>
+                    <span className="text-gray-600">
+                      {farmVal.orgName ?? "Not in org"}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="text-gray-600">
+                      {farmVal.orgRole ?? "Not in org"}
+                    </span>
+                  </td>
                   <td>
                     <div className="table-action">
                       <DynamicLink

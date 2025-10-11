@@ -593,14 +593,15 @@ export const LoadingCard = () => {
 
 export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
   recentReport,
+  widgetTitle,
 }) => {
   return (
     <div>
       <div className="card-title-wrapper">
-        <p className="font-semibold">Bagong pasa ng report</p>
+        <p className="font-semibold">{widgetTitle}</p>
       </div>
 
-      <div className=" [&>a]:not-last:border-b [&>a]:not-last:border-gray-300">
+      <div className=" [&>a]:not-last:border-b [&>a]:first:border-t  [&>a]:not-last:border-gray-300">
         {recentReport.map((val) => {
           const timePass = () => {
             if (val.pastTime.days ?? 0 > 0) return `${val.pastTime.days} day/s`;

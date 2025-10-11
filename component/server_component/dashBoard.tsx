@@ -28,6 +28,8 @@ export const dynamic = "force-dynamic";
 export const FarmerLeadDashBoard = async () => {
   const data = await getFamerLeaderDashboardData();
 
+  if (data.success) console.log(data.recentReport[0].pastTime);
+
   return (
     <>
       {!data.success ? (
@@ -84,7 +86,10 @@ export const FarmerLeadDashBoard = async () => {
           userLocation={data.userLocation}
           widget={
             <>
-              <RecentReportWidget recentReport={data.recentReport} />
+              <RecentReportWidget
+                recentReport={data.recentReport}
+                widgetTitle={"Mga nag pasa ng ulat"}
+              />
             </>
           }
         />

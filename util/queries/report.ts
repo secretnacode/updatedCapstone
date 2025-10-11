@@ -1,9 +1,10 @@
 import {
   AddNewFarmerReportQueryType,
-  farmerRoleType,
+  allUserRoleType,
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   GetOrgMemberReportQueryType,
+  getRecentReportParamType,
   getRecentReportReturnType,
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisWeekReturnType,
@@ -51,7 +52,7 @@ export const AddNewFarmerReport = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropId", "orgId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropId", "orgId", "isSeenByAgri") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
         data.reportId,
         data.farmerId,
@@ -62,6 +63,7 @@ export const AddNewFarmerReport = async (
         data.reportDescription,
         data.cropId,
         data.orgId,
+        data.isSeenByAgri,
       ]
     );
   } catch (error) {
@@ -110,7 +112,7 @@ export const GetOrgMemberReportQuery = async (
     return (
       await pool.query(
         `select r."reportId", r."verificationStatus", r."dayReported", r."title", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 order by case when r."verificationStatus" = $2 then $3 else $4 end asc`,
-        [orgId, "false", 1, 2]
+        [orgId, reportStatus.false, 1, 2]
       )
     ).rows;
   } catch (error) {
@@ -159,8 +161,17 @@ export const GetAllFarmerReportQuery =
     try {
       return (
         await pool.query(
-          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null`,
-          ["pending"]
+          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null order by case when r."isSeenByAgri" = $2 and r."verificationStatus" = $3 then $4 when r."isSeenByAgri" = $5 and r."verificationStatus" = $6 then $7 else $8 end`,
+          [
+            reportStatus.pending,
+            false,
+            reportStatus.pending,
+            1,
+            false,
+            reportStatus.false,
+            2,
+            3,
+          ]
         )
       ).rows;
     } catch (error) {
@@ -257,22 +268,27 @@ export const getCountMadeReportToday = async (
 };
 
 /**
- * query to get all the report within this week for the leader
+ * query to get all the report within this week per day
+ *
+ * IF THIS WILL USE BY THE AGRI OR THE ADMIN, JUST PASS ANY RANDOM IN THE USERID JUST FOR IT TO WORK
+ *
  * @param leadId id of the farmer leader that wants to get the report that was passed
  * @returns
  */
 export const getReportCountThisWeek = async (
   userId: string,
-  role: farmerRoleType
+  role: allUserRoleType
 ): Promise<getReportCountThisWeekReturnType[]> => {
   try {
     const cte = await cteDaySeries();
     const filter = await dateFilter(role);
+    const paramVal = role === "agriculturist" ? [] : [userId];
+
     return (
       await pool.query(
         `${cte}
-      select to_char(ds.date, 'FMDay') as "dayOfWeek", coalesce(count(r."reportId"), 0) as "reportCount" from day_series ds left join capstone.report r on date(r."dayReported") = ds.date and ${filter} group by ds.date, to_char(ds.date, 'FMDay') order by ds.date`,
-        [userId]
+      select to_char(ds.date, 'FMDay') as "dayOfWeek", coalesce(count(r."reportId"), 0) as "reportCount" from day_series ds left join capstone.report r on date(r."dayReported") = ds.date ${filter} group by ds.date, to_char(ds.date, 'FMDay') order by ds.date`,
+        paramVal
       )
     ).rows;
   } catch (error) {
@@ -287,18 +303,28 @@ export const getReportCountThisWeek = async (
   }
 };
 
+/**
+ * query to get all the report within this past month and this month per week
+ *
+ * IF THIS WILL USE BY THE AGRI OR THE ADMIN, JUST PASS ANY RANDOM IN THE USERID JUST FOR IT TO WORK
+ *
+ * @param leadId id of the farmer leader that wants to get the report that was passed
+ * @returns
+ */
 export const getReportCountThisAndPrevMonth = async (
   userId: string,
-  role: farmerRoleType
+  role: allUserRoleType
 ): Promise<getReportCountThisAndPrevMonthReturnType[]> => {
   try {
     const cte = await cteWeekSeries();
     const filter = await dateFilter(role);
+    const paramVal = role === "agriculturist" ? [] : [userId];
+
     return (
       await pool.query(
         `${cte}
-      select concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')) as "weekLabel", coalesce(count(r."reportId"), 0) as "reportCount" from week_series ws left join capstone.report r on ws.date <= date(r."dayReported") and (ws.date + interval '6 days')::date >= date(r."dayReported") and ${filter} group by concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')), extract(week from date) order by extract(week from date)`,
-        [userId]
+      select concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')) as "weekLabel", coalesce(count(r."reportId"), 0) as "reportCount" from week_series ws left join capstone.report r on ws.date <= date(r."dayReported") and (ws.date + interval '6 days')::date >= date(r."dayReported") ${filter} group by concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')), extract(week from date) order by extract(week from date)`,
+        paramVal
       )
     ).rows;
   } catch (error) {
@@ -313,18 +339,28 @@ export const getReportCountThisAndPrevMonth = async (
   }
 };
 
+/**
+ * query to get all the report within this year per month
+ *
+ * IF THIS WILL USE BY THE AGRI OR THE ADMIN, JUST PASS ANY RANDOM IN THE USERID JUST FOR IT TO WORK
+ *
+ * @param leadId id of the farmer leader that wants to get the report that was passed
+ * @returns
+ */
 export const getReportCountThisYear = async (
   userId: string,
-  role: farmerRoleType
+  role: allUserRoleType
 ): Promise<getReportCountThisYearReturnType[]> => {
   try {
     const cte = await cteMonthSeries();
     const filter = await dateFilter(role);
+    const paramVal = role === "agriculturist" ? [] : [userId];
+
     return (
       await pool.query(
         `${cte}
-      select to_char(ms.date, 'Mon') as month, coalesce(count(r."reportId"), 0) as "reportCount" from month_series ms left join capstone.report r on ms.date <= date(r."dayReported") and (ms.date + interval '1 month' - interval '1 day')::date >= date(r."dayReported") and ${filter} group by to_char(ms.date, 'Mon'), extract(month from ms.date) order by extract(month from ms.date)`,
-        [userId]
+      select to_char(ms.date, 'Mon') as month, coalesce(count(r."reportId"), 0) as "reportCount" from month_series ms left join capstone.report r on ms.date <= date(r."dayReported") and (ms.date + interval '1 month' - interval '1 day')::date >= date(r."dayReported") ${filter} group by to_char(ms.date, 'Mon'), extract(month from ms.date) order by extract(month from ms.date)`,
+        paramVal
       )
     ).rows;
   } catch (error) {
@@ -341,17 +377,36 @@ export const getReportCountThisYear = async (
 
 /**
  * query for getting all the recent submitter report
+ *
+ * IF THIS WILL BE USED BY THE AGRICULTURIST OR THE ADMIN, JUST PASS A EMPTY ARRAY IN THE "leadId" ARGS
+ *
+ * THE DEFAULT VALUE OF WORK IS "leader" SO IF ITS FOR FARMER LEADER, YOU DONT NEED TO PASS THE VALUE "leader" FOR WORK ARGS
+ *
  * @param leadId id of the leader that wanst to see it
  * @returns records of the report
  */
 export const getRecentReport = async (
-  leadId: string
+  param: getRecentReportParamType
 ): Promise<getRecentReportReturnType[]> => {
   try {
+    const dynamicFilterAndParam: {
+      filter: string;
+      param: [string, boolean | string];
+    } =
+      param.userRole === "agriculturist"
+        ? {
+            filter: `r."verificationStatus" = $1 or r."isSeenByAgri" = $2`,
+            param: [reportStatus.pending, false],
+          }
+        : {
+            filter: `o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
+            param: [param.leaderId, reportStatus.false],
+          };
+
     return (
       await pool.query(
-        `select f."farmerFirstName", f."farmerLastName", f."barangay", current_timestamp - r."dayReported" as "pastTime", r."reportId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" join capstone.org o on r."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2 order by current_timestamp - r."dayReported" limit 4`,
-        [leadId, "false"]
+        `select f."farmerFirstName", f."farmerLastName", f."barangay", current_timestamp - r."dayReported" as "pastTime", r."reportId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" join capstone.org o on r."orgId" = o."orgId" where ${dynamicFilterAndParam.filter} order by current_timestamp - r."dayReported" limit 4`,
+        dynamicFilterAndParam.param
       )
     ).rows;
   } catch (error) {
@@ -420,31 +475,55 @@ export const getCountTotalReportMade = async (
   }
 };
 
+const reportStatus: getTotalFarmerStatusType = {
+  pending: "pending",
+  false: "false",
+};
+
 /**
  * query for geting the total of report that was approved by the farmer leader and the farmer who dont have a organization
  * @returns
  */
 export const getTotalFarmerReport = async (): Promise<number> => {
   try {
-    const status: getTotalFarmerStatusType = {
-      pending: "pending",
-      false: "false",
-    };
-
     return (
       await pool.query(
-        `select count("reportId") from capstone.report where "verificationStatus" = $1 or ("verificationStatus" = $2 and "orgId" is $3)`,
-        [status.pending, status.false, "null"]
+        `select count("reportId") from capstone.report where "verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null`,
+        [reportStatus.pending, reportStatus.false]
       )
     ).rows[0].count;
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng mga ulat: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng mga ulat`
+    );
+  }
+};
+
+/**
+ *
+ * @returns
+ */
+export const getTotalNewFarmerReportToday = async (): Promise<number> => {
+  try {
+    return (
+      await pool.query(
+        `select count("reportId") from capstone.report where ("verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null) and date("dayReported") = current_date and "isSeenByAgri" = $3`,
+        [reportStatus.pending, reportStatus.false, false]
+      )
+    ).rows[0].count;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng mga ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng mga ulat`
     );
   }
 };

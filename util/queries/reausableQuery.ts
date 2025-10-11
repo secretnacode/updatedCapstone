@@ -1,6 +1,6 @@
 "use server";
 
-import { farmerRoleType } from "@/types";
+import { allUserRoleType } from "@/types";
 
 /**
  * return a date value, from this week(sunday - saturday)
@@ -57,9 +57,11 @@ export const cteMonthSeries = async () =>
  * @param role role of the user
  * @returns string query with parameter
  */
-export const dateFilter = async (role: farmerRoleType) => {
+export const dateFilter = async (role: allUserRoleType) => {
   if (role === "leader")
-    return `r."orgId" in (select "orgId" from capstone.org where "farmerLeadId" = $1)`;
+    return `and r."orgId" in (select "orgId" from capstone.org where "farmerLeadId" = $1)`;
 
-  return `r."farmerId" = $1`;
+  if (role === "agriculturist" || role === "admin") return "";
+
+  return `and r."farmerId" = $1`;
 };

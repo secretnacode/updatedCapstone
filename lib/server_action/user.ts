@@ -12,6 +12,7 @@ import { GetSession } from "../session";
 import {
   checkFarmerRoleReturnType,
   farmerRoleType,
+  getAgriculturistDashboardDataReturnType,
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
   newUserValNeedInfoReturnType,
@@ -26,6 +27,8 @@ import {
   getCountUnvalidatedReport,
   getRecentReport,
   getCountTotalReportMade,
+  getTotalFarmerReport,
+  getTotalNewFarmerReportToday,
 } from "@/util/queries/report";
 import { reportPerDayWeekAndMonth } from "./report";
 
@@ -227,8 +230,8 @@ export const getFamerLeaderDashboardData =
       ] = await Promise.all([
         getCountFarmerMemReportToday(userId),
         getCountUnvalidatedReport(userId),
-        getCountNotVerifiedFarmer(userId),
-        getRecentReport(userId),
+        getCountNotVerifiedFarmer({ userRole: "leader", leaderId: userId }),
+        getRecentReport({ userRole: "leader", leaderId: userId }),
         reportSequenceAndUserLoc(userId, work),
       ]);
 
@@ -314,24 +317,55 @@ export const getFarmerDashboardData =
     }
   };
 
-export const getAgriculturistDashboardData = async () => {
-  try {
-    ProtectedAction("read:farmer:crop");
+export const getAgriculturistDashboardData =
+  async (): Promise<getAgriculturistDashboardDataReturnType> => {
+    try {
+      ProtectedAction("read:farmer:report");
 
-    const [] = await Promise.all([]);
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
-    );
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
+      const [
+        totalFarmerReport,
+        toalNewFarmerReportToday,
+        totalNotVerifiedFarmer,
+        sequenceReport,
+        recentReport,
+      ] = await Promise.all([
+        getTotalFarmerReport(),
+        getTotalNewFarmerReportToday(),
+        getCountNotVerifiedFarmer({ userRole: "agriculturist" }),
+        reportPerDayWeekAndMonth("", "agriculturist"),
+        getRecentReport({ userRole: "agriculturist" }),
+      ]);
+
+      if (!sequenceReport.success)
+        return { success: false, notifError: sequenceReport.notifError };
+
+      return {
+        success: true,
+        cardValue: {
+          totalFarmerReport,
+          toalNewFarmerReportToday,
+          totalNotVerifiedFarmer,
         },
-      ],
-    };
-  }
-};
+        reportSequence: {
+          week: sequenceReport.reportCountThisWeek,
+          month: sequenceReport.reportCountThisAndPrevMonth,
+          year: sequenceReport.reportCountThisYear,
+        },
+        recentReport,
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

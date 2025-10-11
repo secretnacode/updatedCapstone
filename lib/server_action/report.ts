@@ -15,8 +15,8 @@ import { ProtectedAction } from "../protectedActions";
 import {
   AddReportActionFormType,
   AddReportValType,
+  allUserRoleType,
   ApprovedOrgMemberReturnType,
-  farmerRoleType,
   GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
@@ -107,6 +107,7 @@ export const PostFarmerReport = async (
       dayHappen: reportVal.dateHappen,
       dayReported: new Date().toISOString(),
       verificationStatus: "false",
+      isSeenByAgri: false,
     });
 
     reportVal.reportPicture.map(async (file) => {
@@ -248,9 +249,11 @@ export const GetAllFarmerReport =
     try {
       await ProtectedAction("read:farmer:report:list");
 
+      const val = await GetAllFarmerReportQuery();
+
       return {
         success: true,
-        validatedReport: await GetAllFarmerReportQuery(),
+        validatedReport: val,
       };
     } catch (error) {
       const err = error as Error;
@@ -262,16 +265,18 @@ export const GetAllFarmerReport =
     }
   };
 
-// YOU CAN MAKE THIS DYNAMIC SO THAT THE AGRICULTURIST OR THE ADMIN CAN GET THE DATA, JUST REMOVE THE FILTER IF ITS THE AGRICULTURIST AND ADMIN
 /**
  * server action for getting the report base on the sequence(per day in a week, per week in 2 months, per month in a year)
+ *
+ * IF THIS WILL USE BY THE AGRI OR THE ADMIN, JUST PASS ANY RANDOM IN THE USERID JUST FOR IT TO WORK
+ *
  * @param userId farmerId that wants to get it
  * @param work role of the farmer
  * @returns
  */
 export const reportPerDayWeekAndMonth = async (
   userId: string,
-  work: farmerRoleType
+  work: allUserRoleType
 ): Promise<reportPerDayWeekAndMonthReturnType> => {
   try {
     const [

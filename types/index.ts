@@ -253,6 +253,7 @@ export type AddNewFarmerReportQueryType = {
   dayHappen: Date;
   dayReported: string;
   verificationStatus: verificationStatusType;
+  isSeenByAgri: boolean;
 };
 
 export type AddNewFarmerReportImageType = {
@@ -1044,11 +1045,11 @@ type lineChartDataType = {
   year: getReportCountThisYearReturnType[];
 };
 
-type userRoleType = "farmer" | "agriculturist";
+type workRoleType = "farmer" | "agriculturist";
 
 export type LineChartComponentPropType = {
   title: string;
-  user: userRoleType;
+  user: workRoleType;
   data: lineChartDataType;
 };
 
@@ -1075,6 +1076,10 @@ export type getReportCountThisYearReturnType = {
 };
 
 export type farmerRoleType = "leader" | "farmer";
+
+export type agriRoleType = "agriculturist" | "admin";
+
+export type allUserRoleType = farmerRoleType | agriRoleType;
 
 export type barDataStateType = {
   label: string[];
@@ -1217,7 +1222,7 @@ export type DashboardComponentPropType = {
   card1: DashboardCardPropType;
   card2: DashboardCardPropType;
   card3: DashboardCardPropType;
-  lineChart: { title: string; user: userRoleType; data: lineChartDataType };
+  lineChart: { title: string; user: workRoleType; data: lineChartDataType };
   userLocation: barangayType;
   widget?: ChildrenType;
   showQuickAction?: boolean;
@@ -1225,11 +1230,33 @@ export type DashboardComponentPropType = {
 
 export type RecentReportWidgetReturnType = {
   recentReport: getRecentReportReturnType[];
+  widgetTitle: string;
 };
 
-export type verificationStatusType = "false" | "pending" | "approved";
+export type verificationStatusType = "false" | "pending";
 
 export type getTotalFarmerStatusType = {
   pending: verificationStatusType;
   false: verificationStatusType;
 };
+
+export type getRecentReportParamType =
+  | { userRole: "leader"; leaderId: string }
+  | { userRole: "agriculturist" };
+
+export type getAgriculturistDashboardDataReturnType =
+  | {
+      success: true;
+      cardValue: {
+        totalFarmerReport: number;
+        toalNewFarmerReportToday: number;
+        totalNotVerifiedFarmer: number;
+      };
+      reportSequence: lineChartDataType;
+      recentReport: getRecentReportReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type getCountNotVerifiedFarmerParamType =
+  | { userRole: "leader"; leaderId: string }
+  | { userRole: "agriculturist" };

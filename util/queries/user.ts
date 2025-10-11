@@ -1,6 +1,7 @@
 import {
   barangayType,
   FarmerFirstDetailType,
+  getCountNotVerifiedFarmerParamType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
   GetFarmerProfilePersonalInfoQueryReturnType,
@@ -507,13 +508,27 @@ export const getFarmerLeadId = async (userId: string) => {
  * @returns count
  */
 export const getCountNotVerifiedFarmer = async (
-  leadId: string
+  param: getCountNotVerifiedFarmerParamType
 ): Promise<number> => {
   try {
+    const dynamicVal: {
+      filter: string;
+      param: (string | boolean)[];
+    } =
+      param.userRole === "agriculturist"
+        ? {
+            filter: `f."verified" = $1 or f."verified" and f."orgId" is null`,
+            param: [false],
+          }
+        : {
+            filter: `f."verified" = $1 and o."farmerLeadId" = $2`,
+            param: [false, param.leaderId],
+          };
+
     return (
       await pool.query(
-        `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and f."verified" = $2`,
-        [leadId, false]
+        `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where ${dynamicVal.filter}`,
+        dynamicVal.param
       )
     ).rows[0].count;
   } catch (error) {
