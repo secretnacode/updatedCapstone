@@ -263,7 +263,7 @@ export type AddNewFarmerReportImageType = {
 };
 
 type GetFarmerReportDetailBaseType = {
-  cropId: string;
+  cropName: string;
   verificationStatus: string;
   dayReported: Date;
   dayHappen: Date;

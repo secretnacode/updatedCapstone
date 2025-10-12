@@ -28,8 +28,6 @@ export const dynamic = "force-dynamic";
 export const FarmerLeadDashBoard = async () => {
   const data = await getFamerLeaderDashboardData();
 
-  if (data.success) console.log(data.recentReport[0].pastTime);
-
   return (
     <>
       {!data.success ? (
@@ -48,7 +46,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.orgMemberTotalReportToday),
             contentLabel: "Ulat ng miyembro ngayon",
-            link: "/farmer/validateReport",
+            link: "/farmerLeader/validateReport",
           }}
           card2={{
             logo: {
@@ -62,7 +60,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.totalUnvalidatedReport),
             contentLabel: "Hindi kumpirmadong ulat",
-            link: "/farmer/validateReport",
+            link: "/farmerLeader/validateReport",
           }}
           card3={{
             logo: {
@@ -76,7 +74,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.totalUnverfiedUser),
             contentLabel: "Hindi beripikadong mga user",
-            link: "/farmer/validateReport",
+            link: "/farmerLeader/orgMember",
           }}
           lineChart={{
             title: "Bilang ng mga ulat sa organisasyon",

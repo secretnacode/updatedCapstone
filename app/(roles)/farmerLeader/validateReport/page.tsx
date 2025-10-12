@@ -35,7 +35,6 @@ export default async function Page() {
           listCount={orgReport.memberReport.length}
           tableHeaderCell={
             <>
-              <th scope="col">#</th>
               <th scope="col">Unang pangalan</th>
               <th scope="col">Apelyido</th>
               <th scope="col">Alyas</th>
@@ -48,10 +47,8 @@ export default async function Page() {
           tableCell={
             <>
               {orgReport.success &&
-                orgReport.memberReport.map((report, index) => (
+                orgReport.memberReport.map((report) => (
                   <tr key={report.reportId}>
-                    <td className="text-gray-500">{index + 1}</td>
-
                     <td className=" text-gray-900 font-medium">
                       {report.farmerFirstName}
                     </td>

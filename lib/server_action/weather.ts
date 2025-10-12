@@ -21,7 +21,6 @@ export const getWeatherToday = async (
     const data: currentWeatherType = await weatherRes.json();
 
     if (!weatherRes.ok) {
-      console.log(data);
       return {
         success: false,
         notifError: [

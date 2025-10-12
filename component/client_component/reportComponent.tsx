@@ -635,7 +635,7 @@ export const UserReportDetails: FC<{
 
                 <div className="space-y-1">
                   <p className="text-sm text-gray-500">Pananim</p>
-                  <p className="font-medium">{userReport.cropId}</p>
+                  <p className="font-medium">{userReport.cropName}</p>
                 </div>
 
                 <div
