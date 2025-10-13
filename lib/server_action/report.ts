@@ -3,7 +3,9 @@
 import {
   AddNewFarmerReport,
   ApprovedOrgMemberQuery,
+  changeTheReportDescription,
   GetAllFarmerReportQuery,
+  getFarmerIdOfReport,
   GetFarmerReportDetailQuery,
   GetOrgMemberReportQuery,
   getReportCountThisAndPrevMonth,
@@ -17,6 +19,7 @@ import {
   AddReportValType,
   allUserRoleType,
   ApprovedOrgMemberReturnType,
+  changeAndApprovedReportReturnType,
   GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
@@ -25,17 +28,13 @@ import {
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import { addFarmerReportSchema } from "@/util/helper_function/validation/validationSchema";
-import { redirect } from "next/navigation";
-import {
-  CreateUUID,
-  NotifToUriComponent,
-} from "@/util/helper_function/reusableFunction";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { CreateUUID } from "@/util/helper_function/reusableFunction";
 import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
 import { AddNewFarmerReportImage } from "@/util/queries/image";
 import { GetUserOrgId } from "@/util/queries/org";
 import { revalidatePath } from "next/cache";
+import { CheckMyMemberquery } from "@/util/queries/user";
 
 /**
  * server action to get the farmer report
@@ -162,12 +161,13 @@ export const GetFarmerReportDetail = async (
   reportId: string
 ): Promise<GetFarmerReportDetailReturnType> => {
   try {
-    await ProtectedAction("read:report");
+    const { work } = await ProtectedAction("read:report");
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
-    console.log(reportDetail);
+
     return {
       success: true,
+      work,
       reportDetail: {
         ...reportDetail,
         pictures: reportDetail.pictures.split(","),
@@ -210,39 +210,6 @@ export const GetOrgMemberReport =
       };
     }
   };
-
-/**
- * for approving/validating the farmer report
- * @param reportId id of the report you want to approved
- * @returns
- */
-export const ApprovedOrgMember = async (
-  reportId: string
-): Promise<ApprovedOrgMemberReturnType> => {
-  try {
-    await ProtectedAction("read:farmer:member:report");
-
-    await ApprovedOrgMemberQuery(reportId, "pending");
-
-    redirect(
-      `/farmerLeader/validateReport/?success=${NotifToUriComponent([
-        {
-          message: "Matagumpay ang iyong pag aapruba ng ulat",
-          type: "success",
-        },
-      ])}`
-    );
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-
-    const err = error as Error;
-    console.log(`Error in server action approving farmer report: ${err}`);
-    return {
-      success: false,
-      notifError: [{ message: err.message, type: "error" }],
-    };
-  }
-};
 
 export const GetAllFarmerReport =
   async (): Promise<GetAllFarmerReportReturnType> => {
@@ -308,6 +275,150 @@ export const reportPerDayWeekAndMonth = async (
           type: "error",
         },
       ],
+    };
+  }
+};
+
+/**
+ * SEPERATED BECAUSE WILL BE USED BY LEADER ID(CHANGING DESC AND APPROVING OR JUST APPROVING)
+ *
+ * for approving/validating the farmer report
+ * @param reportId id of the report you want to approved
+ * @returns
+ */
+const ApprovedOrgMember = async (
+  reportId: string
+): Promise<ApprovedOrgMemberReturnType> => {
+  try {
+    await ApprovedOrgMemberQuery(reportId, "pending");
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang inaaprubahan ang ulat: ${err}`
+    );
+    return {
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * SEPERATED BECAUSE WILL BE USED BY LEADER (CHANGING DESC AND APPROVING OR JUST APPROVING) AND BOTH NEED VALIDATION
+ *
+ * server action for checking if the reportId that will be mutated was from the member of the leader
+ * @param reportId report id that will be checked
+ * @returns boolean type if the reportId was a report from the member of the leader
+ */
+const validateReportIfMyOrgMember = async (reportId: string) => {
+  try {
+    const { userId } = await ProtectedAction("update:farmer:member:report");
+
+    return await CheckMyMemberquery(
+      await getFarmerIdOfReport(reportId),
+      userId
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang chinecheck and ulat kung ito ba ay miyembro user(leader): ${err}`
+    );
+    return {
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * server action for approving the farmer report and changing its description
+ * @param desc new description of the user
+ * @param reportId id of the report the will be change and approved
+ * @returns response of action
+ */
+export const changeAndApprovedMyMemberReport = async (
+  desc: string,
+  reportId: string
+): Promise<changeAndApprovedReportReturnType> => {
+  try {
+    if (await validateReportIfMyOrgMember(reportId))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message:
+              "Ikinansela sapagkat hindi mo kamiyembro and nag pasa nito!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    const [approvedOrgMember] = await Promise.all([
+      ApprovedOrgMember(reportId),
+      changeTheReportDescription(desc, reportId),
+    ]);
+
+    if (!approvedOrgMember.success)
+      return { success: false, notifMessage: approvedOrgMember.notifError };
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay and pag babago at pag aapruba ng ulat",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang binabago at inaaprubahan ang ulat: ${err}`
+    );
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+export const approveMyMemberReport = async (
+  reportId: string
+): Promise<changeAndApprovedReportReturnType> => {
+  try {
+    if (await validateReportIfMyOrgMember(reportId))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message:
+              "Ikinansela sapagkat hindi mo kamiyembro and nag pasa nito!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    const approved = await ApprovedOrgMember(reportId);
+
+    if (!approved.success)
+      return { success: false, notifMessage: approved.notifError };
+
+    return {
+      success: false,
+      notifMessage: [
+        { message: "Matagumpay and pag aapruba ng ulat!!!", type: "success" },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang inaaprubahan ang ulat: ${err}`
+    );
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
     };
   }
 };

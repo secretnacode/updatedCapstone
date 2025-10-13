@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { ViewUserReportTableData } from "./reportComponent";
+import { ViewUserReportButton } from "./reportComponent";
 import { useLoading } from "./provider/loadingProvider";
 import { ApprovedOrgMember } from "@/lib/server_action/report";
 import { useNotification } from "./provider/notificationProvider";
@@ -32,7 +32,7 @@ export const ViewMemberReport: FC<{
       <button className="cursor-pointer" onClick={handleApprovedMember}>
         Apprubahan
       </button>
-      <ViewUserReportTableData reportId={reportId} />
+      <ViewUserReportButton reportId={reportId} />
     </>
   );
 };

@@ -7,6 +7,7 @@ import {
   FormDivInputRadioPropType,
   FormDivLabelInputPropType,
   FormDivLabelSelectType,
+  FormDivLabelTextAreaPropType,
   FormMapComponentPropType,
   ModalNoticePropType,
   RecentReportWidgetReturnType,
@@ -163,6 +164,34 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
             {message}
           </p>
         ))}
+    </div>
+  );
+};
+
+export const FormDivLabelTextArea: FC<FormDivLabelTextAreaPropType> = ({
+  textAreaName,
+  labelClassName = "",
+  labelOnClick,
+  labelMessage,
+  textAreaRequired,
+  ...textAreaProp
+}) => {
+  return (
+    <div>
+      <label
+        htmlFor={textAreaName}
+        className={`label ${labelClassName}`}
+        onClick={labelOnClick}
+      >
+        {labelMessage}
+        {textAreaRequired && <span className="text-red-500">*</span>}
+      </label>
+
+      <textarea
+        name={textAreaName}
+        className="w-full h-[150px] resize-none input"
+        {...textAreaProp}
+      ></textarea>
     </div>
   );
 };
@@ -643,6 +672,42 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
             </Link>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+export const ModalLoading: FC = () => {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+        <div className="mb-6">
+          <div className="h-6 bg-gray-300 rounded animate-pulse w-3/4 mb-2"></div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+          <div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
+          <div className="h-4 bg-gray-300 rounded animate-pulse w-4/6"></div>
+        </div>
+
+        <div className="mt-8">
+          <div className="h-10 bg-gray-300 rounded animate-pulse"></div>
+        </div>
+
+        <div className="flex justify-center mt-6">
+          <div className="flex gap-1">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div
+              className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+              style={{ animationDelay: "0.4s" }}
+            ></div>
+          </div>
+        </div>
       </div>
     </div>
   );

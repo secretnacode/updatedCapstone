@@ -1,12 +1,16 @@
 "use client";
 
 import {
+  approveMyMemberReport,
+  changeAndApprovedMyMemberReport,
   GetFarmerReportDetail,
   PostFarmerReport,
 } from "@/lib/server_action/report";
 import {
   CreateUUID,
   FourDaysBefore,
+  intoFeaturePolygon,
+  mapZoomValByBarangay,
   MaxDateToday,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
@@ -16,6 +20,7 @@ import {
   FC,
   FormEvent,
   SetStateAction,
+  Suspense,
   useActionState,
   useCallback,
   useEffect,
@@ -25,18 +30,39 @@ import {
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import Image from "next/image";
-import { Camera, Plus, Upload, X } from "lucide-react";
+import {
+  Calendar,
+  CalendarArrowUp,
+  Camera,
+  FileText,
+  Info,
+  Plus,
+  Upload,
+  X,
+} from "lucide-react";
 import {
   AddReportPictureType,
+  allUserRoleType,
+  EditableUserReportDetailsPropType,
   getFarmerCropNameQueryReturnType,
   GetFarmerReportDetailReturnType,
   ReportDetailType,
+  UserReportDetailsPropType,
+  UserReportModalPropType,
   ViewUserReportTableDataPropType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
-import { SubmitButton } from "../server_component/customComponent";
+import {
+  CancelButton,
+  FormCancelSubmitButton,
+  FormDivLabelTextArea,
+  ModalLoading,
+  SubmitButton,
+} from "../server_component/customComponent";
 import { getFarmerCropName } from "@/lib/server_action/crop";
+import { MapComponent, MapMarkerComponent } from "./mapComponent";
+import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 
 export const AddReportComponent: FC = () => {
   const [addReport, setAddReport] = useState<boolean>(false);
@@ -536,7 +562,7 @@ const AddingReport: FC<{
   );
 };
 
-export const ViewUserReportTableData: FC<ViewUserReportTableDataPropType> = ({
+export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
   label = "Tingnan ang ulat",
   className = "",
   reportId,
@@ -554,22 +580,34 @@ export const ViewUserReportTableData: FC<ViewUserReportTableDataPropType> = ({
 
       {viewReport &&
         createPortal(
-          <UserReportDetails
-            reportId={reportId}
-            setViewReport={setViewReport}
-          />,
+          <Suspense fallback={<ModalLoading />}>
+            <UserReportModal
+              reportId={reportId}
+              closeModal={() => setViewReport(false)}
+            />
+          </Suspense>,
+
           document.body
         )}
     </>
   );
 };
 
-export const UserReportDetails: FC<{
-  reportId: string;
-  setViewReport: Dispatch<SetStateAction<boolean>>;
-}> = ({ reportId, setViewReport }) => {
+export const UserReportModal: FC<UserReportModalPropType> = ({
+  reportId,
+  closeModal,
+}) => {
   const { handleSetNotification } = useNotification();
   const [userReport, setUserReport] = useState<ReportDetailType>();
+  const [userWork, setUserWork] = useState<allUserRoleType>("farmer");
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  });
 
   useEffect(() => {
     const report = async () => {
@@ -578,10 +616,12 @@ export const UserReportDetails: FC<{
       try {
         report = await GetFarmerReportDetail(reportId);
 
-        if (report.success) setUserReport(report.reportDetail);
-        else {
+        if (report.success) {
+          setUserReport(report.reportDetail);
+          setUserWork(report.work);
+        } else {
           handleSetNotification(report.notifError);
-          setViewReport(false);
+          closeModal();
         }
       } catch (error) {
         const err = error as Error;
@@ -590,89 +630,338 @@ export const UserReportDetails: FC<{
     };
 
     report();
-  }, [reportId, handleSetNotification, setViewReport]);
+  }, [reportId, handleSetNotification, closeModal]);
+
+  const ComponentToRender = () => {
+    if (!userReport) return <ModalLoading />;
+
+    if (userWork === "leader")
+      return (
+        <EditableUserReportDetails
+          closeModal={closeModal}
+          userReport={userReport}
+          reportId={reportId}
+        />
+      );
+    else
+      return (
+        <UserReportDetails
+          closeModal={closeModal}
+          userReport={userReport}
+          isView={true}
+          work={userWork}
+        />
+      );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0" onClick={() => setViewReport(false)} />
-      {userReport && (
-        <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-            <h2 className="text-lg font-semibold">{userReport.title}</h2>
-            <button
-              onClick={() => setViewReport(false)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+      <ComponentToRender />
+    </div>
+  );
+};
+
+export const EditableUserReportDetails: FC<
+  EditableUserReportDetailsPropType
+> = ({ userReport, reportId, closeModal }) => {
+  const { handleIsLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+  const [newDesc, setNewDesc] = useState<string>(userReport.description);
+  const [isChange, setIsChanged] = useState<boolean>(false);
+
+  const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setNewDesc(e.target.value);
+    setIsChanged(true);
+  };
+
+  const backDefault = () => {
+    setNewDesc(userReport.description);
+    setIsChanged(false);
+  };
+
+  // const handleChangeAndApprove = async () => {
+  //   try {
+  //     handleIsLoading("Binabago at inaaprubahan na ang ulat...");
+
+  //     const res = await changeAndApprovedMyMemberReport(newDesc, reportId);
+  //   } catch (error) {
+  //     console.error((error as Error).message);
+  //     handleSetNotification([
+  //       { message: UnexpectedErrorMessage(), type: "error" },
+  //     ]);
+  //   }
+  // };
+
+  // const handleApprove = async () => {
+  //   try {
+  //     handleIsLoading("Inaaprubahan na ang ulat...");
+
+  //     const res = await approveMyMemberReport(reportId);
+  //   } catch (error) {
+  //     console.error((error as Error).message);
+  //     handleSetNotification([
+  //       { message: UnexpectedErrorMessage(), type: "error" },
+  //     ]);
+  //   }
+  // };
+
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+
+  return (
+    <UserReportDetails
+      userReport={userReport}
+      closeModal={closeModal}
+      isView={false}
+      work="leader"
+      textAreaOnChange={onChange}
+      textAreaValue={newDesc}
+      isChange={isChange}
+      backDefault={backDefault}
+    />
+  );
+};
+
+export const UserReportDetails: FC<UserReportDetailsPropType> = ({
+  userReport,
+  closeModal,
+  isView,
+  work,
+  textAreaOnChange = () => {},
+  proceedOnClick = () => {},
+  backDefault = () => {},
+  textAreaValue,
+  isChange,
+}) => {
+  const isEnglish: boolean = work === "admin" || work === "agriculturist";
+
+  const reportStatus = () => {
+    if (work === "leader" || work === "farmer") {
+      return userReport.verificationStatus === "false"
+        ? "Kinukumpirma pa"
+        : "Ipinasa na";
+    }
+
+    // work is admin or agriculturist
+    return userReport.verificationStatus === "false"
+      ? "Not yet validated"
+      : "Validated";
+  };
+
+  return (
+    <>
+      <div className="absolute inset-0" onClick={closeModal} />
+
+      <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className=" border-b border-gray-200 p-4 flex justify-between items-center">
+          <div className="flex flex-row items-center gap-4">
+            <FileText className="logo !size-8" />
+            <div>
+              <h2 className="text-lg font-semibold">{userReport.title}</h2>
+              <p className="very-small-text text-gray-500 tracking-wide font-medium">
+                Pananim: {userReport.cropName}
+              </p>
+            </div>
           </div>
 
-          <div className="p-6 space-y-6">
-            <div className="grid gap-4">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">Pamgat ng ulat</p>
-                  <p className="font-medium">{userReport.title}</p>
-                </div>
+          <button
+            onClick={closeModal}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="logo text-gray-500" />
+          </button>
+        </div>
 
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">
-                    Nang yari ang kaganapan
-                  </p>
-                  <p className="font-medium">
-                    {userReport.dayHappen.toDateString()}
-                  </p>
-                </div>
+        <div className="p-6">
+          <div className="mb-8">
+            <label htmlFor="" className="label">
+              {isEnglish ? "Location of the crop:" : "Lokasyon ng taniman:"}
+            </label>
+            <MapComponent
+              mapHeight={200}
+              cityToHighlight={intoFeaturePolygon(
+                polygonCoordinates[userReport.cropLocation]
+              )}
+              initialViewState={{
+                longitude: userReport.cropLng,
+                latitude: userReport.cropLat,
+                zoom: mapZoomValByBarangay(userReport.cropLocation),
+              }}
+            >
+              {userReport.cropLat && userReport.cropLng && (
+                <MapMarkerComponent
+                  markerLng={userReport.cropLng}
+                  markerLat={userReport.cropLat}
+                />
+              )}
+            </MapComponent>
+          </div>
 
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">
-                    Araw na ipinasa ang ulat:{" "}
-                  </p>
-                  <p className="font-medium">
-                    {userReport.dayReported.toDateString()}
-                  </p>
-                </div>
+          <div className="space-y-4">
+            <div
+              className={`px-3 py-1 w-fit rounded-full text-sm tracking-wide  ${
+                userReport.verificationStatus === "false"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-green-100 text-green-800"
+              }`}
+            >
+              {reportStatus()}
+            </div>
 
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">Pananim</p>
-                  <p className="font-medium">{userReport.cropName}</p>
+            <div className="grid grid-cols-2 gap-6 [&_.date-report]:flex [&_.date-report]:flex-row [&_.date-report]:justify-start [&_.date-report]:items-center [&_.date-report]:gap-2 [&_.date-report]:[&>svg]:text-gray-500 [&_.date-report]:[&>p]:text-sm [&_.date-report]:[&>p]:text-gray-600 [&_.date-report]:[&>p]:tracking-wide [&>div]:p-3 [&>div]:bg-gray-100 [&>div]:rounded-lg [&>div]:[&>p]:font-semibold">
+              <div className="space-y-1">
+                <div className="date-report">
+                  <Calendar className="logo" />
+                  <p>{isEnglish ? "Day it happen" : "Araw ng kaganapan"}</p>
                 </div>
+                <p className="font-medium">
+                  {userReport.dayHappen.toDateString()}
+                </p>
+              </div>
 
-                <div
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    userReport.verificationStatus === "false"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-green-100 text-green-700"
+              <div className="space-y-1">
+                <div className="date-report">
+                  <CalendarArrowUp className="logo" />
+                  <p>{isEnglish ? "Day it was reported" : "Araw na ipinasa"}</p>
+                </div>
+                <p className="font-medium">
+                  {userReport.dayReported.toDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              {isView ? (
+                <FormDivLabelTextArea
+                  labelMessage={`${
+                    isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
                   }`}
-                >
-                  {userReport.verificationStatus === "false"
-                    ? "kinukumpirma pa"
-                    : "Ipinasa na"}
-                </div>
-              </div>
+                  textAreaName="reportDescription"
+                  defaultValue={userReport.description}
+                  disabled={isView}
+                />
+              ) : (
+                <FormDivLabelTextArea
+                  labelMessage={`${
+                    isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
+                  }`}
+                  textAreaName="reportDescription"
+                  value={textAreaValue}
+                  onChange={textAreaOnChange}
+                  disabled={isView}
+                />
+              )}
+              {isChange && (
+                <div className="flex justify-between items-center">
+                  <div className="flex justify-start items-center gap-2 py-1 px-2 bg-blue-100 rounded-md">
+                    <span>
+                      <Info className="logo !size-5 text-blue-600" />
+                    </span>
+                    <p className="text-blue-800 font-medium very-small-text">
+                      Binago mo ang ulat na ginawa ng iba
+                    </p>
+                  </div>
 
-              <div className="prose max-w-none">
-                <p>{userReport.description}</p>
+                  <CancelButton
+                    className="slimer-button !bg-red-100 !text-black outline outline-red-800 hover:!bg-red-600 hover:!text-white hover:outline-none hover:shadow-md "
+                    onClick={backDefault}
+                  >
+                    Ibalik sa dati
+                  </CancelButton>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="" className="label">
+                {isEnglish ? "Evidence Photo:" : "Larawan ng ebidensya:"}
+              </label>
+
+              <div className="grid grid-cols-2 gap-4">
+                {userReport.pictures.map((pic, index) => (
+                  <div key={pic + index} className="relative aspect-video">
+                    -
+                    <Image
+                      src={pic}
+                      alt={`Larawan ${index + 1} ng gagawing ulat`}
+                      fill
+                      unoptimized
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {userReport.pictures.map((pic, index) => (
-                <div key={pic + index} className="relative aspect-video">
-                  -
-                  <Image
-                    src={pic}
-                    alt={`Larawan ${index + 1} ng gagawing ulat`}
-                    fill
-                    unoptimized
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-              ))}
-            </div>
+            {/* ADDING A FUNCTION WHERE IF THE DESCRIPTION WAS CHANGED A BUTTON WILL APPEAR TO NOTIFY THE LEADER THAT IT WAS CHANGED AND THE BUTTON WILL SERVE AS A RETURN TO MAKE THE VALUE OF THE DESCRIPTION GO BACK TO ITS ORIGINAL. NOW IN THE ONCLICK BUTTON, IS SUPPOSED TO BE ITENERARY OPERATOR OF 2 FUNCTION, 1 IS FOR APPROVING THE REPORT AND 2 IS FOR APPROVING THE REPORT AND UPDATING THE DESCRIPTION */}
+            {isView ? (
+              <CancelButton>{isEnglish ? "Close" : "Bumalik"}</CancelButton>
+            ) : (
+              <FormCancelSubmitButton
+                submitButtonLabel={"Aprubahan"}
+                submitOnClick={proceedOnClick}
+                cancelButtonLabel={"Bumalik"}
+                cancelOnClick={closeModal}
+              />
+            )}
           </div>
         </div>
-      )}
-    </div>
+
+        {/* <div className="p-6 space-y-6">
+          <div className="grid gap-4">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">Nang yari ang kaganapan</p>
+                <p className="font-medium">
+                  {userReport.dayHappen.toDateString()}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">
+                  Araw na ipinasa ang ulat:{" "}
+                </p>
+                <p className="font-medium">
+                  {userReport.dayReported.toDateString()}
+                </p>
+              </div>
+
+              <div
+                className={`px-3 py-1 rounded-full text-sm ${
+                  userReport.verificationStatus === "false"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-green-100 text-green-700"
+                }`}
+              >
+                {reportStatus()}
+              </div>
+            </div>
+
+            <div className="prose max-w-none">
+              <p>{userReport.description}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {userReport.pictures.map((pic, index) => (
+              <div key={pic + index} className="relative aspect-video">
+                -
+                <Image
+                  src={pic}
+                  alt={`Larawan ${index + 1} ng gagawing ulat`}
+                  fill
+                  unoptimized
+                  className="object-cover rounded-lg"
+                />
+              </div>
+            ))}
+          </div>
+        </div> */}
+      </div>
+    </>
   );
 };

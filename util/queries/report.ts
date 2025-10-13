@@ -84,7 +84,7 @@ export const GetFarmerReportDetailQuery = async (
   try {
     return (
       await pool.query(
-        `select c."cropName", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description"`,
+        `select c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description"`,
         [reportId]
       )
     ).rows[0];
@@ -505,7 +505,7 @@ export const getTotalFarmerReport = async (): Promise<number> => {
 };
 
 /**
- *
+ * get all the count of the new farmer today
  * @returns
  */
 export const getTotalNewFarmerReportToday = async (): Promise<number> => {
@@ -524,6 +524,59 @@ export const getTotalNewFarmerReportToday = async (): Promise<number> => {
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng mga ulat`
+    );
+  }
+};
+
+/**
+ * query for getting the famerId of the farmer base on the report id that was given
+ * @param reportId id of the report
+ * @return the farmerid value
+ */
+export const getFarmerIdOfReport = async (
+  reportId: string
+): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "farmerId" from capstone.report where "reportId" = $1`,
+        [reportId]
+      )
+    ).rows[0].farmerId;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng ulat`
+    );
+  }
+};
+
+/**
+ * query for changing the report description
+ * @param desc change the current description value into this value
+ * @param reportId report id that will be changed
+ */
+export const changeTheReportDescription = async (
+  desc: string,
+  reportId: string
+): Promise<void> => {
+  try {
+    await pool.query(
+      `update capstone.report set "description" = $1 where "reportId" = $2`,
+      [desc, reportId]
+    );
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng impormasyon ng ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng impormasyon ng ulat`
     );
   }
 };

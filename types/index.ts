@@ -23,6 +23,7 @@ import {
   ReactNode,
   Ref,
   SetStateAction,
+  TextareaHTMLAttributes,
 } from "react";
 import z from "zod/v4";
 
@@ -89,7 +90,7 @@ export type ErrorResponseType = {
 
 export type SessionValueType = {
   userId: string;
-  work: farmerRoleType;
+  work: allUserRoleType;
 };
 
 export type LoadingContextType = {
@@ -269,6 +270,9 @@ type GetFarmerReportDetailBaseType = {
   dayHappen: Date;
   title: string;
   description: string;
+  cropLat: number;
+  cropLng: number;
+  cropLocation: barangayType;
 };
 
 export type GetFarmerReportDetailQueryReturnType =
@@ -284,6 +288,7 @@ export type GetFarmerReportDetailReturnType =
   | {
       success: true;
       reportDetail: ReportDetailType;
+      work: allUserRoleType;
     }
   | ServerActionFailBaseType;
 
@@ -307,7 +312,6 @@ export type GetOrgMemberReportReturnType =
 export type ApprovedOrgMemberReturnType =
   | {
       success: true;
-      notifMessage: NotificationBaseType[];
     }
   | ServerActionFailBaseType;
 
@@ -588,6 +592,15 @@ export type FormDivLabelInputPropType = ChildrenPropType & {
   inputRequired?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
+
+export type FormDivLabelTextAreaPropType =
+  TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    textAreaName: string;
+    labelMessage: string;
+    labelClassName?: string;
+    labelOnClick?: () => void;
+    textAreaRequired?: string;
+  };
 
 export type FormDivLabelSelectType = {
   labelMessage: string;
@@ -1260,3 +1273,31 @@ export type getAgriculturistDashboardDataReturnType =
 export type getCountNotVerifiedFarmerParamType =
   | { userRole: "leader"; leaderId: string }
   | { userRole: "agriculturist" };
+
+export type EditableUserReportDetailsPropType = {
+  userReport: ReportDetailType;
+  reportId?: string;
+  closeModal: () => void;
+};
+
+export type UserReportDetailsPropType = EditableUserReportDetailsPropType & {
+  isView: boolean;
+  work: allUserRoleType;
+
+  // props for changing the value of the description(for farmer leader only)
+  textAreaOnChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  proceedOnClick?: () => void;
+  backDefault?: () => void;
+  textAreaValue?: string;
+  isChange?: boolean;
+};
+
+export type UserReportModalPropType = {
+  reportId: string;
+  closeModal: () => void;
+};
+
+export type changeAndApprovedReportReturnType = {
+  notifMessage: NotificationBaseType[];
+  success: boolean;
+};

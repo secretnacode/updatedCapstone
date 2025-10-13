@@ -1,7 +1,7 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import {
   AddReportComponent,
-  ViewUserReportTableData,
+  ViewUserReportButton,
 } from "@/component/client_component/reportComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
@@ -85,7 +85,7 @@ export default async function Page() {
                         </td>
 
                         <td className="text-center">
-                          <ViewUserReportTableData reportId={report.reportId} />
+                          <ViewUserReportButton reportId={report.reportId} />
                         </td>
                       </tr>
                     ))}
