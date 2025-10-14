@@ -50,7 +50,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const [formError, setFormError] =
     useState<FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>>(null);
   const [userInfoState, setUserInfoState] =
-    useState<GetFarmerProfilePersonalInfoQueryReturnType>(userInfoState);
+    useState<GetFarmerProfilePersonalInfoQueryReturnType>(userInfo);
 
   const handleChangeState = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -65,8 +65,6 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
     console.log(e.target.name);
   };
 
-  console.log(userInfoState);
-
   const handleReset = () => {
     setIsChangingVal(false);
     setFormError(null);
@@ -76,7 +74,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
    * resets the value and its form val if not passed yet
    */
   const handleResetFormVal = () => {
-    setUserInfoState(userFarmerInfo);
+    setUserInfoState(userInfo);
     handleReset();
   };
 

@@ -382,7 +382,7 @@ export type UserFarmerInfoPropType = {
 };
 
 export type ViewUserProfileFormPropType = {
-  userInfoState: GetFarmerProfilePersonalInfoQueryReturnType;
+  userInfo: GetFarmerProfilePersonalInfoQueryReturnType;
 };
 
 export type MyProfileFormPropType = ViewUserProfileFormPropType;
