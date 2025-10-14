@@ -381,30 +381,34 @@ export type UserFarmerInfoPropType = {
   leaderName: string;
 };
 
-export type ClientUserProfileFormPropType = {
-  isViewing: false;
-  userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+export type ViewUserProfileFormPropType = {
+  userInfoState: GetFarmerProfilePersonalInfoQueryReturnType;
 };
 
-export type UserProfileFormPropType =
-  | {
-      isViewing: true;
-      userFarmerInfo?: GetFarmerProfilePersonalInfoQueryReturnType;
-    }
-  | {
-      isViewing: false;
-      userInfoState?: GetFarmerProfilePersonalInfoQueryReturnType;
-      formError?: FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>;
-      handleChangeState?: (
-        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      ) => void;
-    };
+export type MyProfileFormPropType = ViewUserProfileFormPropType;
+// & (
+//   | {
+//       isViewing: true;
+//     }
+//   | {
+//       isViewing: false;
+//       formError?: FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>;
+//       handleChangeState?: (
+//         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+//       ) => void;
+//     }
 
 export type InputComponentPropType = {
   labelMessage: string;
   inputType?: string;
   inputName: keyof GetFarmerProfilePersonalInfoQueryReturnType;
   inputPlaceholder?: string;
+  inputState: {
+    isViewing: boolean;
+    inputVal: string;
+    formError?: string[];
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  };
 };
 
 export type propValFunctionReturnType =
@@ -435,21 +439,17 @@ export type ClientOrganizationInfoFormPropType = {
 
 export type UserOrganizationInfoFormPropType = {
   userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
-} & (
-  | {
-      isViewing: true;
-    }
-  | {
-      isViewing: false;
-      orgInfo: OrgInfoType;
-      handleUserOrgChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      ) => void;
-      availOrgList: QueryAvailableOrgReturnType[];
-      formError: FormErrorType<OrgInfoType>;
-      otherOrg: boolean;
-    }
-);
+};
+// | {
+//     isViewing: false;
+//     orgInfo: OrgInfoType;
+//     handleUserOrgChange: (
+//       e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+//     ) => void;
+//     availOrgList: QueryAvailableOrgReturnType[];
+//     formError: FormErrorType<OrgInfoType>;
+//     otherOrg: boolean;
+//   }
 
 export type OrgInfoType = z.infer<typeof userProfileOrgUpdateSchema>;
 
@@ -814,7 +814,7 @@ export type ViewCropModalButtonPropType = {
   isViewing: boolean;
 };
 
-export type UserProFileComponentPropType = {
+export type UserProFilePropType = {
   userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
   orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
