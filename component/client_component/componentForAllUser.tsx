@@ -33,7 +33,6 @@ import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
   Button,
   FormCancelSubmitButton,
-  FormDivLabelInput,
   ModalNotice,
 } from "../server_component/customComponent";
 import { DelteUserAccount } from "@/lib/server_action/user";
@@ -110,98 +109,6 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
         userInfoState={userInfoState}
         formError={formError}
         handleChangeState={handleChangeState}
-      />
-      <FormDivLabelInput
-        labelMessage={labelMessage}
-        inputName={inputName}
-        inputType={inputType}
-        inputPlaceholder={inputPlaceholder}
-        inputDisable={inputState.isViewing}
-        inputValue={
-          inputName !== "birthdate"
-            ? String(inputState.inputVal)
-            : inputState.inputVal instanceof Date
-            ? DateToYYMMDD(inputState.inputVal)
-            : String(inputState.inputVal)
-        }
-        formError={inputState.formError}
-        onChange={inputState.onChange}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Unang Pangalan"}
-        inputName={"farmerFirstName"}
-        inputPlaceholder={"Hal. Jose"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.farmerFirstName}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Gitnang Pangalan"}
-        inputName={"farmerMiddleName"}
-        inputPlaceholder={"Hal. Luzviminda"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.farmerMiddleName}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Apelyido"}
-        inputName={"farmerLastName"}
-        inputPlaceholder={"Hal. Juan Delacruz"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.farmerLastName}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Palayaw na pagdugtong"}
-        inputName={"farmerExtensionName"}
-        inputPlaceholder={"Hal. Jr"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.farmerExtensionName}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Alyas"}
-        inputName={"farmerAlias"}
-        inputPlaceholder={"Hal. Mang Kanor"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.farmerAlias}
-      />
-
-      {/* WALA PA NITO SA DATABASE */}
-      <FormDivLabelInput
-        labelMessage="Kasarian"
-        inputDisable={true}
-        inputName={"farmerSex"}
-        inputDefaultValue={`wala pang nakalagay sa database`}
-        inputPlaceholder="Hal. lalaki"
-      />
-
-      <FormDivLabelSelect
-        labelMessage="Baranggay na tinitirhan"
-        selectName={"barangay"}
-        childrenOption={<></>}
-        selectDisable={true}
-        selectDefaultValue={userInfo.barangay}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Numero ng Telepono"}
-        inputName={"mobileNumber"}
-        inputPlaceholder={"Hal. 09** *** ****"}
-        inputDisable={true}
-        inputDefaultValue={userInfo.mobileNumber}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Kapanganakan"}
-        inputName={"birthdate"}
-        inputDisable={true}
-        inputDefaultValue={
-          userInfo.birthdate instanceof Date
-            ? DateToYYMMDD(userInfo.birthdate)
-            : String(userInfo.birthdate)
-        }
       />
 
       {isChangingVal && !isViewing && (
