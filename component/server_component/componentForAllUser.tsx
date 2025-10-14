@@ -3,8 +3,8 @@ import {
   DynamicLinkPropType,
   GetAllOrgMemberListQueryReturnType,
   FarmerUserProfilePropType,
-  UserProFileComponentPropType,
-  UserProfileFormPropType,
+  UserProFilePropType,
+  ViewUserProfileFormPropType,
   InputComponentPropType,
   UserOrganizationInfoFormPropType,
   WeatherComponentPropType,
@@ -16,7 +16,7 @@ import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
   ApprovedButton,
   ClientUserOrganizationInfoForm,
-  ClientUserProfileForm,
+  MyProfileForm,
   DeleteUser,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
@@ -38,6 +38,7 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import { getWeatherToday } from "@/lib/server_action/weather";
 import Image from "next/image";
+import { string } from "zod/v4";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -118,7 +119,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
       {/* Right Column - Detailed Info */}
       <div className="md:col-span-3 bg-white rounded-lg shadow-sm p-6">
         {AvailOrg.success && (
-          <UserProFileComponent
+          <UserProFile
             userFarmerInfo={userFarmerInfo.farmerInfo}
             orgInfo={userFarmerInfo.orgInfo}
             orgList={AvailOrg.orgList}
@@ -227,7 +228,7 @@ export const OrganizationMemberList: FC<{
 };
 
 //FIX: add sexual of the user
-export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
+export const UserProFile: FC<UserProFilePropType> = ({
   userFarmerInfo,
   orgInfo,
   orgList,
@@ -236,199 +237,208 @@ export const UserProFileComponent: FC<UserProFileComponentPropType> = ({
   return (
     <div className="div">
       <div className="div grid gap-6">
-        {isViewing ? (
-          <>
-            <UserProfileForm
-              isViewing={isViewing}
-              userFarmerInfo={userFarmerInfo}
-            />
+        <h1 className="title form-title">Personal na impormasyon</h1>
 
-            <UserOrganizationInfoForm
-              isViewing={isViewing}
-              userOrgInfo={orgInfo}
-            />
-          </>
-        ) : (
-          <>
-            <ClientUserProfileForm
-              isViewing={isViewing}
-              userFarmerInfo={userFarmerInfo}
-            />
+        <div className="user-profile-form">
+          {isViewing ? (
+            <ViewUserProfileInfo userInfo={userFarmerInfo} />
+          ) : (
+            <MyProfileForm userInfo={userFarmerInfo} />
+          )}
+        </div>
 
+        <h1 className="title text-lg font-semibold text-gray-900 mb-4">
+          Organisasyon na kasali
+        </h1>
+
+        <div className="form-div grid sm:grid-cols-2 gap-4">
+          {isViewing ? (
+            <ViewUserOrganizationInfo userOrgInfo={orgInfo} />
+          ) : (
             <ClientUserOrganizationInfoForm
               isViewing={isViewing}
               availOrgList={orgList}
               userOrgInfo={orgInfo}
             />
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export const UserProfileForm: FC<UserProfileFormPropType> = (
-  profileFormProp
-) => {
-  const InputComponent: FC<InputComponentPropType> = ({
-    inputType = "text",
-    labelMessage,
-    inputName,
-    inputPlaceholder,
-  }) =>
-    profileFormProp.isViewing ? (
-      <FormDivLabelInput
-        labelMessage={labelMessage}
-        inputName={inputName}
-        inputType={inputType}
-        inputPlaceholder={inputPlaceholder}
-        inputDisable={profileFormProp.isViewing}
-        inputDefaultValue={String(profileFormProp.userFarmerInfo?.[inputName])}
-      />
-    ) : (
-      <FormDivLabelInput
-        labelMessage={labelMessage}
-        inputName={inputName}
-        inputType={inputType}
-        inputPlaceholder={inputPlaceholder}
-        inputDisable={profileFormProp.isViewing}
-        inputValue={
-          inputName !== "birthdate"
-            ? String(profileFormProp.userInfoState?.[inputName])
-            : profileFormProp.userInfoState?.[inputName] instanceof Date &&
-              profileFormProp.userInfoState?.[inputName]
-            ? DateToYYMMDD(profileFormProp.userInfoState?.[inputName])
-            : String(profileFormProp.userInfoState?.[inputName])
-        }
-        formError={profileFormProp.formError?.[inputName]}
-        onChange={profileFormProp.handleChangeState}
-      />
-    );
+// const InputComponent: FC<InputComponentPropType> = ({
+//   inputType = "text",
+//   labelMessage,
+//   inputName,
+//   inputPlaceholder,
+//   inputState,
+// }) =>
+//   inputState.isViewing ? (
+//     <FormDivLabelInput
+//       labelMessage={labelMessage}
+//       inputName={inputName}
+//       inputType={inputType}
+//       inputPlaceholder={inputPlaceholder}
+//       inputDisable={inputState.isViewing}
+//       inputDefaultValue={String(inputState.inputVal)}
+//     />
+//   ) : (
+//     <FormDivLabelInput
+//       labelMessage={labelMessage}
+//       inputName={inputName}
+//       inputType={inputType}
+//       inputPlaceholder={inputPlaceholder}
+//       inputDisable={inputState.isViewing}
+//       inputValue={
+//         inputName !== "birthdate"
+//           ? String(inputState.inputVal)
+//           : inputState.inputVal instanceof Date
+//           ? DateToYYMMDD(inputState.inputVal)
+//           : String(inputState.inputVal)
+//       }
+//       formError={inputState.formError}
+//       onChange={inputState.onChange}
+//     />
+//   );
 
-  const SelectComponent: FC = () =>
-    profileFormProp.isViewing ? (
+// const SelectComponent: FC = () =>
+//   profileFormProp.isViewing ? (
+//     <FormDivLabelSelect
+//       labelMessage="Baranggay na tinitirhan"
+//       selectName={"barangay"}
+//       childrenOption={<></>}
+//       selectDisable={profileFormProp.isViewing}
+//       selectDefaultValue={profileFormProp.userFarmerInfo.barangay}
+//     />
+//   ) : (
+//     <FormDivLabelSelect
+//       labelMessage="Baranggay na tinitirhan"
+//       selectName={"barangay"}
+//       childrenOption={baranggayList.map((brgy) => (
+//         <option key={brgy} value={brgy}>
+//           {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+//         </option>
+//       ))}
+//       selectValue={profileFormProp.userInfoState.barangay}
+//       formError={profileFormProp.formError?.barangay}
+//       onChange={profileFormProp.handleChangeState}
+//     />
+//   );
+
+export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
+  userInfo,
+}) => {
+  return (
+    <>
+      <FormDivLabelInput
+        labelMessage={"Unang Pangalan"}
+        inputName={"farmerFirstName"}
+        inputPlaceholder={"Hal. Jose"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.farmerFirstName}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Gitnang Pangalan"}
+        inputName={"farmerMiddleName"}
+        inputPlaceholder={"Hal. Luzviminda"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.farmerMiddleName}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Apelyido"}
+        inputName={"farmerLastName"}
+        inputPlaceholder={"Hal. Juan Delacruz"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.farmerLastName}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Palayaw na pagdugtong"}
+        inputName={"farmerExtensionName"}
+        inputPlaceholder={"Hal. Jr"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.farmerExtensionName}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Alyas"}
+        inputName={"farmerAlias"}
+        inputPlaceholder={"Hal. Mang Kanor"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.farmerAlias}
+      />
+
+      {/* WALA PA NITO SA DATABASE */}
+      <FormDivLabelInput
+        labelMessage="Kasarian"
+        inputDisable={true}
+        inputName={"farmerSex"}
+        inputDefaultValue={`wala pang nakalagay sa database`}
+        inputPlaceholder="Hal. lalaki"
+      />
+
       <FormDivLabelSelect
         labelMessage="Baranggay na tinitirhan"
         selectName={"barangay"}
         childrenOption={<></>}
-        selectDisable={profileFormProp.isViewing}
-        selectDefaultValue={profileFormProp.userFarmerInfo?.barangay}
+        selectDisable={true}
+        selectDefaultValue={userInfo.barangay}
       />
-    ) : (
-      <FormDivLabelSelect
-        labelMessage="Baranggay na tinitirhan"
-        selectName={"barangay"}
-        childrenOption={baranggayList.map((brgy) => (
-          <option key={brgy} value={brgy}>
-            {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
-          </option>
-        ))}
-        selectValue={profileFormProp.userInfoState?.barangay}
-        formError={profileFormProp.formError?.barangay}
-        onChange={profileFormProp.handleChangeState}
+
+      <FormDivLabelInput
+        labelMessage={"Numero ng Telepono"}
+        inputName={"mobileNumber"}
+        inputPlaceholder={"Hal. 09** *** ****"}
+        inputDisable={true}
+        inputDefaultValue={userInfo.mobileNumber}
       />
-    );
 
-  return (
-    <>
-      <h1 className="title form-title">Pangalan</h1>
-
-      <div className="form-div grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <InputComponent
-          labelMessage="Unang Pangalan"
-          inputName={"farmerFirstName"}
-          inputPlaceholder="e.g. Jose"
-        />
-
-        <InputComponent
-          labelMessage="Gitnang Pangalan"
-          inputName={"farmerMiddleName"}
-          inputPlaceholder="e.g. Luzviminda"
-        />
-
-        <InputComponent
-          inputName={"farmerLastName"}
-          inputPlaceholder="e.g. Juan Delacruz"
-          labelMessage="Apelyido"
-        />
-
-        <InputComponent
-          labelMessage="Palayaw na pagdugtong"
-          inputName={"farmerExtensionName"}
-          inputPlaceholder="e.g. Jr."
-        />
-
-        <InputComponent
-          labelMessage="Alyas"
-          inputName={"farmerAlias"}
-          inputPlaceholder="e.g. Mang Kanor"
-        />
-
-        {/* WALA PA NITO SA DATABASE */}
-        <FormDivLabelInput
-          labelMessage="Kasarian"
-          inputDisable={profileFormProp.isViewing}
-          inputName={"farmerSex"}
-          inputDefaultValue={`wala pang nakalagay sa database`}
-          inputPlaceholder="e.g. lalaki"
-        />
-
-        <SelectComponent />
-
-        <InputComponent
-          labelMessage="Numero ng Telepono"
-          inputName={"mobileNumber"}
-          inputPlaceholder="09** *** ****"
-        />
-
-        <InputComponent
-          labelMessage="Kapanganakan"
-          inputType="date"
-          inputName={"birthdate"}
-        />
-      </div>
+      <FormDivLabelInput
+        labelMessage={"Kapanganakan"}
+        inputName={"birthdate"}
+        inputDisable={true}
+        inputDefaultValue={
+          userInfo.birthdate instanceof Date
+            ? DateToYYMMDD(userInfo.birthdate)
+            : String(userInfo.birthdate)
+        }
+      />
     </>
   );
 };
 
-export const UserOrganizationInfoForm: FC<UserOrganizationInfoFormPropType> = (
-  orgFormProp
-) => {
-  const SelectComponent: FC = () =>
-    orgFormProp.isViewing ? (
-      <FormDivLabelSelect
-        labelMessage={"Pangalan ng Organisasyon"}
-        selectName={"orgId"}
-        selectDisable={orgFormProp.isViewing}
-        selectDefaultValue={orgFormProp.userOrgInfo.orgId}
-        childrenOption={<></>}
-      />
-    ) : (
-      <FormDivLabelSelect
-        labelMessage={"Pangalan ng Organisasyon"}
-        selectName={"orgId"}
-        selectOrganization={true}
-        selectValue={orgFormProp.orgInfo.orgId ?? ""}
-        onChange={orgFormProp.handleUserOrgChange}
-        selectDisable={orgFormProp.isViewing}
-        childrenOption={orgFormProp.availOrgList.map((org) => (
-          <option key={org.orgId} value={org.orgId}>
-            {org.orgName.charAt(0).toUpperCase() + org.orgName.slice(1)}
-          </option>
-        ))}
-        formError={orgFormProp.formError?.orgId}
-      />
-    );
+export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
+  userOrgInfo,
+}) => {
+  // <FormDivLabelSelect
+  //   labelMessage={"Pangalan ng Organisasyon"}
+  //   selectName={"orgId"}
+  //   selectOrganization={true}
+  //   selectValue={orgFormProp.orgInfo.orgId ?? ""}
+  //   onChange={orgFormProp.handleUserOrgChange}
+  //   selectDisable={orgFormProp.isViewing}
+  //   childrenOption={orgFormProp.availOrgList.map((org) => (
+  //     <option key={org.orgId} value={org.orgId}>
+  //       {org.orgName.charAt(0).toUpperCase() + org.orgName.slice(1)}
+  //     </option>
+  //   ))}
+  //   formError={orgFormProp.formError?.orgId}
+  // />
 
   return (
     <>
-      <h1 className="title text-lg font-semibold text-gray-900 mb-4">
-        Organisasyon na kasali
-      </h1>
-      <div className="form-div grid sm:grid-cols-2 gap-4">
-        <SelectComponent />
+      <FormDivLabelSelect
+        labelMessage={"Pangalan ng Organisasyon"}
+        selectName={"orgId"}
+        selectDisable={true}
+        selectDefaultValue={userOrgInfo.orgId}
+        childrenOption={<></>}
+      />
 
-        {!orgFormProp.isViewing && orgFormProp.otherOrg && (
+      {/* {!orgFormProp.isViewing && orgFormProp.otherOrg && (
           <FormDivLabelInput
             labelMessage="Mag lagay ng panibagong organisasyon"
             inputName={"otherOrgName"}
@@ -437,24 +447,23 @@ export const UserOrganizationInfoForm: FC<UserOrganizationInfoFormPropType> = (
             onChange={orgFormProp.handleUserOrgChange}
             formError={orgFormProp.formError?.otherOrgName}
           />
-        )}
+        )} */}
 
-        <FormDivLabelInput
-          labelMessage="Leader ng Organisasyon"
-          inputDisable={true}
-          inputName={"leaderName"}
-          inputDefaultValue={orgFormProp.userOrgInfo.farmerLeader}
-          inputPlaceholder="Miyembro"
-        />
+      <FormDivLabelInput
+        labelMessage="Leader ng Organisasyon"
+        inputDisable={true}
+        inputName={"leaderName"}
+        inputDefaultValue={userOrgInfo.farmerLeader}
+        inputPlaceholder="Miyembro"
+      />
 
-        <FormDivLabelInput
-          labelMessage="Posisyon"
-          inputDisable={true}
-          inputName={"orgRole"}
-          inputDefaultValue={orgFormProp.userOrgInfo.orgRole}
-          inputPlaceholder="Miyembro"
-        />
-      </div>
+      <FormDivLabelInput
+        labelMessage="Posisyon"
+        inputDisable={true}
+        inputName={"orgRole"}
+        inputDefaultValue={userOrgInfo.orgRole}
+        inputPlaceholder="Miyembro"
+      />
     </>
   );
 };

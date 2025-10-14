@@ -17,7 +17,7 @@ import {
   GetFarmerProfilePersonalInfoQueryReturnType,
   ClientOrganizationInfoFormPropType,
   OrgInfoType,
-  ClientUserProfileFormPropType,
+  MyProfileFormPropType,
   LineChartComponentPropType,
   barDataStateType,
   getReportCountThisWeekReturnType,
@@ -42,10 +42,7 @@ import {
 } from "../server_component/componentForAllUser";
 import { LineChart } from "@mui/x-charts";
 
-export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
-  isViewing,
-  userFarmerInfo,
-}) => {
+export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
@@ -53,66 +50,57 @@ export const ClientUserProfileForm: FC<ClientUserProfileFormPropType> = ({
   const [formError, setFormError] =
     useState<FormErrorType<GetFarmerProfilePersonalInfoQueryReturnType>>(null);
   const [userInfoState, setUserInfoState] =
-    useState<GetFarmerProfilePersonalInfoQueryReturnType>(userFarmerInfo);
+    useState<GetFarmerProfilePersonalInfoQueryReturnType>(userInfo);
 
-  const handleChangeState = useCallback(
-    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setUserInfoState((prev) => ({
-        ...prev,
-        [e.target.name]: e.target.value,
-      }));
+  const handleChangeState = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setUserInfoState((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
 
-      if (!isChangingVal) setIsChangingVal(true);
-    },
-    [isChangingVal]
-  );
+    setIsChangingVal(true);
 
-  const handleReset = useCallback(() => {
+    console.log(e.target.name);
+  };
+
+  const handleReset = () => {
     setIsChangingVal(false);
     setFormError(null);
-  }, []);
+  };
 
   /**
    * resets the value and its form val if not passed yet
    */
-  const handleResetFormVal = useCallback(() => {
-    setUserInfoState(userFarmerInfo);
+  const handleResetFormVal = () => {
+    setUserInfoState(userInfo);
     handleReset();
-  }, [userFarmerInfo, handleReset]);
+  };
 
-  const handleFormSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      try {
-        handleIsLoading("Ina-update na ang iyong impormasyon...");
-        e.preventDefault();
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    try {
+      handleIsLoading("Ina-update na ang iyong impormasyon...");
+      e.preventDefault();
 
-        const updateAction = await UpdateUserProfileInfo(userInfoState);
+      const updateAction = await UpdateUserProfileInfo(userInfoState);
 
-        if (updateAction.success) {
-          router.refresh();
-          handleReset();
-        } else {
-          if (updateAction.formError) setFormError(updateAction.formError);
-        }
-
-        handleSetNotification(updateAction.notifMessage);
-      } catch (error) {
-        handleSetNotification([
-          { message: (error as Error).message, type: "error" },
-        ]);
-      } finally {
-        handleDoneLoading();
+      if (updateAction.success) {
+        router.refresh();
+        handleReset();
+      } else {
+        if (updateAction.formError) setFormError(updateAction.formError);
       }
-    },
-    [
-      handleIsLoading,
-      handleSetNotification,
-      handleDoneLoading,
-      handleReset,
-      userInfoState,
-      router,
-    ]
-  );
+
+      handleSetNotification(updateAction.notifMessage);
+    } catch (error) {
+      handleSetNotification([
+        { message: (error as Error).message, type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
 
   return (
     <form onSubmit={handleFormSubmit}>

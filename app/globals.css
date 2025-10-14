@@ -266,6 +266,9 @@ body {
   .card-title-wrapper p {
     @apply font-semibold;
   }
+  .user-profile-form {
+    @apply form-div grid sm:grid-cols-2 md:grid-cols-4 gap-4;
+  }
 }
 
 /* loading style */
