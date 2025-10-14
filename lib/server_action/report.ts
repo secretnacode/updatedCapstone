@@ -18,8 +18,8 @@ import {
   AddReportActionFormType,
   AddReportValType,
   allUserRoleType,
-  ApprovedOrgMemberReturnType,
-  changeAndApprovedReportReturnType,
+  changeApproveOrJustApproveReportParamType,
+  changeApproveOrJustApproveReportReturnType,
   GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
@@ -280,72 +280,25 @@ export const reportPerDayWeekAndMonth = async (
 };
 
 /**
- * SEPERATED BECAUSE WILL BE USED BY LEADER ID(CHANGING DESC AND APPROVING OR JUST APPROVING)
- *
- * for approving/validating the farmer report
- * @param reportId id of the report you want to approved
- * @returns
+ * server action for approving the farmer report and changing the content of the report if changed
+ * @param reportId id of the report that will be approved or validated
+ * @param param1 {isChange, newDesc} is change is boolean type if the description was changed or not,
+ * newDesc is the value of the new description
+ * @returns notifmessage if successful or not
  */
-const ApprovedOrgMember = async (
-  reportId: string
-): Promise<ApprovedOrgMemberReturnType> => {
-  try {
-    await ApprovedOrgMemberQuery(reportId, "pending");
-
-    return { success: true };
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang inaaprubahan ang ulat: ${err}`
-    );
-    return {
-      success: false,
-      notifError: [{ message: err.message, type: "error" }],
-    };
-  }
-};
-
-/**
- * SEPERATED BECAUSE WILL BE USED BY LEADER (CHANGING DESC AND APPROVING OR JUST APPROVING) AND BOTH NEED VALIDATION
- *
- * server action for checking if the reportId that will be mutated was from the member of the leader
- * @param reportId report id that will be checked
- * @returns boolean type if the reportId was a report from the member of the leader
- */
-const validateReportIfMyOrgMember = async (reportId: string) => {
+export const changeApproveOrJustApproveReport = async ({
+  reportId,
+  isChange,
+  newDesc,
+}: changeApproveOrJustApproveReportParamType): Promise<changeApproveOrJustApproveReportReturnType> => {
   try {
     const { userId } = await ProtectedAction("update:farmer:member:report");
 
-    return await CheckMyMemberquery(
-      await getFarmerIdOfReport(reportId),
-      userId
-    );
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang chinecheck and ulat kung ito ba ay miyembro user(leader): ${err}`
-    );
-    return {
-      success: false,
-      notifError: [{ message: err.message, type: "error" }],
-    };
-  }
-};
-
-/**
- * server action for approving the farmer report and changing its description
- * @param desc new description of the user
- * @param reportId id of the report the will be change and approved
- * @returns response of action
- */
-export const changeAndApprovedMyMemberReport = async (
-  desc: string,
-  reportId: string
-): Promise<changeAndApprovedReportReturnType> => {
-  try {
-    if (await validateReportIfMyOrgMember(reportId))
+    // if returns false it means the user that will approved is not the leader of the farmer who passed the report
+    if (
+      !(await CheckMyMemberquery(await getFarmerIdOfReport(reportId), userId))
+    )
       return {
-        success: false,
         notifMessage: [
           {
             message:
@@ -355,19 +308,21 @@ export const changeAndApprovedMyMemberReport = async (
         ],
       };
 
-    const [approvedOrgMember] = await Promise.all([
-      ApprovedOrgMember(reportId),
-      changeTheReportDescription(desc, reportId),
+    if (isChange) console.log("description changed");
+
+    await Promise.all([
+      ApprovedOrgMemberQuery(reportId, "pending"),
+      isChange ? changeTheReportDescription(newDesc, reportId) : undefined,
     ]);
 
-    if (!approvedOrgMember.success)
-      return { success: false, notifMessage: approvedOrgMember.notifError };
+    revalidatePath(`/farmerLeader/validateReport`);
 
     return {
-      success: true,
       notifMessage: [
         {
-          message: "Matagumpay and pag babago at pag aapruba ng ulat",
+          message: isChange
+            ? "Matagumpay and pag babago at pag aapruba ng ulat!!!"
+            : "Matagumpay and pag aapruba ng ulat!!!",
           type: "success",
         },
       ],
@@ -375,49 +330,13 @@ export const changeAndApprovedMyMemberReport = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May Hindi inaasahang pag kakamali habang binabago at inaaprubahan ang ulat: ${err}`
+      `${
+        isChange
+          ? "May Hindi inaasahang pag kakamali habang binabago at inaaprubahan ang ulat"
+          : "May Hindi inaasahang pag kakamali habang inaaprubahan ang ulat"
+      }: ${err}`
     );
     return {
-      success: false,
-      notifMessage: [{ message: err.message, type: "error" }],
-    };
-  }
-};
-
-export const approveMyMemberReport = async (
-  reportId: string
-): Promise<changeAndApprovedReportReturnType> => {
-  try {
-    if (await validateReportIfMyOrgMember(reportId))
-      return {
-        success: false,
-        notifMessage: [
-          {
-            message:
-              "Ikinansela sapagkat hindi mo kamiyembro and nag pasa nito!!!",
-            type: "warning",
-          },
-        ],
-      };
-
-    const approved = await ApprovedOrgMember(reportId);
-
-    if (!approved.success)
-      return { success: false, notifMessage: approved.notifError };
-
-    return {
-      success: false,
-      notifMessage: [
-        { message: "Matagumpay and pag aapruba ng ulat!!!", type: "success" },
-      ],
-    };
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang inaaprubahan ang ulat: ${err}`
-    );
-    return {
-      success: false,
       notifMessage: [{ message: err.message, type: "error" }],
     };
   }

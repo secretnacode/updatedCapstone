@@ -1,5 +1,5 @@
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
-import { ViewMemberReport } from "@/component/client_component/farmerLeaderComponent";
+import { ViewUserReportButton } from "@/component/client_component/reportComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
@@ -78,7 +78,12 @@ export default async function Page() {
                     </td>
 
                     <td>
-                      <ViewMemberReport reportId={report.reportId} />
+                      <ViewUserReportButton
+                        reportId={report.reportId}
+                        farmerName={
+                          report.farmerFirstName + " " + report.farmerLastName
+                        }
+                      />
                     </td>
                   </tr>
                 ))}

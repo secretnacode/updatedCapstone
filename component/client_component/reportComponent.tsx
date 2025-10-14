@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  approveMyMemberReport,
-  changeAndApprovedMyMemberReport,
+  changeApproveOrJustApproveReport,
   GetFarmerReportDetail,
   PostFarmerReport,
 } from "@/lib/server_action/report";
@@ -20,7 +19,6 @@ import {
   FC,
   FormEvent,
   SetStateAction,
-  Suspense,
   useActionState,
   useCallback,
   useEffect,
@@ -34,10 +32,12 @@ import {
   Calendar,
   CalendarArrowUp,
   Camera,
+  CircleUser,
   FileText,
   Info,
   Plus,
   Upload,
+  Wheat,
   X,
 } from "lucide-react";
 import {
@@ -58,6 +58,7 @@ import {
   FormCancelSubmitButton,
   FormDivLabelTextArea,
   ModalLoading,
+  ModalNotice,
   SubmitButton,
 } from "../server_component/customComponent";
 import { getFarmerCropName } from "@/lib/server_action/crop";
@@ -566,6 +567,8 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
   label = "Tingnan ang ulat",
   className = "",
   reportId,
+  farmerName,
+  myReport = false,
 }) => {
   const [viewReport, setViewReport] = useState<boolean>(false);
   return (
@@ -580,12 +583,12 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
 
       {viewReport &&
         createPortal(
-          <Suspense fallback={<ModalLoading />}>
-            <UserReportModal
-              reportId={reportId}
-              closeModal={() => setViewReport(false)}
-            />
-          </Suspense>,
+          <UserReportModal
+            reportId={reportId}
+            closeModal={() => setViewReport(false)}
+            farmerName={farmerName}
+            myReport={myReport}
+          />,
 
           document.body
         )}
@@ -596,6 +599,8 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
 export const UserReportModal: FC<UserReportModalPropType> = ({
   reportId,
   closeModal,
+  farmerName,
+  myReport = false,
 }) => {
   const { handleSetNotification } = useNotification();
   const [userReport, setUserReport] = useState<ReportDetailType>();
@@ -635,12 +640,13 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
   const ComponentToRender = () => {
     if (!userReport) return <ModalLoading />;
 
-    if (userWork === "leader")
+    if (userWork === "leader" && !myReport)
       return (
         <EditableUserReportDetails
           closeModal={closeModal}
           userReport={userReport}
           reportId={reportId}
+          farmerName={farmerName}
         />
       );
     else
@@ -650,12 +656,13 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
           userReport={userReport}
           isView={true}
           work={userWork}
+          farmerName={farmerName}
         />
       );
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 flex items-center justify-center p-4">
       <ComponentToRender />
     </div>
   );
@@ -663,11 +670,12 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
 
 export const EditableUserReportDetails: FC<
   EditableUserReportDetailsPropType
-> = ({ userReport, reportId, closeModal }) => {
-  const { handleIsLoading } = useLoading();
+> = ({ userReport, reportId, farmerName, closeModal }) => {
+  const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
   const [newDesc, setNewDesc] = useState<string>(userReport.description);
   const [isChange, setIsChanged] = useState<boolean>(false);
+  const [showNotifModal, setShowNotifModal] = useState<boolean>(false);
 
   const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setNewDesc(e.target.value);
@@ -679,55 +687,77 @@ export const EditableUserReportDetails: FC<
     setIsChanged(false);
   };
 
-  // const handleChangeAndApprove = async () => {
-  //   try {
-  //     handleIsLoading("Binabago at inaaprubahan na ang ulat...");
+  console.log(reportId);
 
-  //     const res = await changeAndApprovedMyMemberReport(newDesc, reportId);
-  //   } catch (error) {
-  //     console.error((error as Error).message);
-  //     handleSetNotification([
-  //       { message: UnexpectedErrorMessage(), type: "error" },
-  //     ]);
-  //   }
-  // };
+  const handleChangeApproveOrJustApprove = async () => {
+    try {
+      handleIsLoading(
+        isChange
+          ? "Binabago at inaaprubahan na ang ulat..."
+          : "Inaaprubahan na ang ulat..."
+      );
 
-  // const handleApprove = async () => {
-  //   try {
-  //     handleIsLoading("Inaaprubahan na ang ulat...");
+      const res = await changeApproveOrJustApproveReport({
+        isChange,
+        reportId,
+        newDesc,
+      });
 
-  //     const res = await approveMyMemberReport(reportId);
-  //   } catch (error) {
-  //     console.error((error as Error).message);
-  //     handleSetNotification([
-  //       { message: UnexpectedErrorMessage(), type: "error" },
-  //     ]);
-  //   }
-  // };
-
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
-  //DONE MAKING THE SERVER ACTION BUT STILL CHECK IF IT WORKS PERFECTLY FINE
+      handleSetNotification(res.notifMessage);
+    } catch (error) {
+      console.error((error as Error).message);
+      handleSetNotification([
+        { message: UnexpectedErrorMessage(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
 
   return (
-    <UserReportDetails
-      userReport={userReport}
-      closeModal={closeModal}
-      isView={false}
-      work="leader"
-      textAreaOnChange={onChange}
-      textAreaValue={newDesc}
-      isChange={isChange}
-      backDefault={backDefault}
-    />
+    <>
+      <UserReportDetails
+        userReport={userReport}
+        closeModal={closeModal}
+        isView={false}
+        work="leader"
+        textAreaOnChange={onChange}
+        textAreaValue={newDesc}
+        isChange={isChange}
+        backDefault={backDefault}
+        proceedOnClick={
+          isChange
+            ? () => setShowNotifModal(true)
+            : handleChangeApproveOrJustApprove
+        }
+        farmerName={farmerName}
+      />
+
+      {showNotifModal && (
+        <ModalNotice
+          type={"warning"}
+          title={`Baguhin ang ulat ni ${farmerName}?`}
+          message={
+            <>
+              Babaguhin mo ang deskripsyon na ipinasang ulat ni {farmerName}.
+              <br />
+              Pag ito ay iyong binago hindi na ito muling maibabalik
+            </>
+          }
+          onClose={() => setShowNotifModal(false)}
+          onProceed={handleChangeApproveOrJustApprove}
+          proceed={{ label: "Mag patuloy" }}
+          showCancelButton={true}
+          cancel={{ label: "Bumalik" }}
+        />
+      )}
+    </>
   );
 };
 
 export const UserReportDetails: FC<UserReportDetailsPropType> = ({
   userReport,
+  farmerName,
   closeModal,
   isView,
   work,
@@ -742,8 +772,8 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
   const reportStatus = () => {
     if (work === "leader" || work === "farmer") {
       return userReport.verificationStatus === "false"
-        ? "Kinukumpirma pa"
-        : "Ipinasa na";
+        ? "Hindi pa naaprubahan"
+        : "Naaprubahan na";
     }
 
     // work is admin or agriculturist
@@ -752,20 +782,17 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
       : "Validated";
   };
 
+  console.log(userReport.verificationStatus);
+
   return (
     <>
       <div className="absolute inset-0" onClick={closeModal} />
 
       <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className=" border-b border-gray-200 p-4 flex justify-between items-center">
-          <div className="flex flex-row items-center gap-4">
-            <FileText className="logo !size-8" />
-            <div>
-              <h2 className="text-lg font-semibold">{userReport.title}</h2>
-              <p className="very-small-text text-gray-500 tracking-wide font-medium">
-                Pananim: {userReport.cropName}
-              </p>
-            </div>
+          <div className="flex flex-row items-center gap-2">
+            <FileText className="logo" />
+            <h2 className="text-lg font-semibold">{userReport.title}</h2>
           </div>
 
           <button
@@ -801,18 +828,34 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
             </MapComponent>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div
-              className={`px-3 py-1 w-fit rounded-full text-sm tracking-wide  ${
+              className={`px-3 py-1 w-fit rounded-lg text-sm tracking-wide font-semibold ${
                 userReport.verificationStatus === "false"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-green-100 text-green-800"
+                  ? "bg-yellow-100 text-yellow-900"
+                  : "bg-green-100 text-green-900"
               }`}
             >
               {reportStatus()}
             </div>
 
             <div className="grid grid-cols-2 gap-6 [&_.date-report]:flex [&_.date-report]:flex-row [&_.date-report]:justify-start [&_.date-report]:items-center [&_.date-report]:gap-2 [&_.date-report]:[&>svg]:text-gray-500 [&_.date-report]:[&>p]:text-sm [&_.date-report]:[&>p]:text-gray-600 [&_.date-report]:[&>p]:tracking-wide [&>div]:p-3 [&>div]:bg-gray-100 [&>div]:rounded-lg [&>div]:[&>p]:font-semibold">
+              <div className="space-y-1">
+                <div className="date-report">
+                  <CircleUser className="logo" />
+                  <p>{isEnglish ? "Farmer name" : "Pangalan ng mag sasaka"}</p>
+                </div>
+                <p className="font-medium">{farmerName}</p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="date-report">
+                  <Wheat className="logo" />
+                  <p>{isEnglish ? "Crop name" : "Pangalang ng pananim"}</p>
+                </div>
+                <p className="font-medium">{userReport.cropName}</p>
+              </div>
+
               <div className="space-y-1">
                 <div className="date-report">
                   <Calendar className="logo" />
@@ -835,16 +878,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
             </div>
 
             <div>
-              {isView ? (
-                <FormDivLabelTextArea
-                  labelMessage={`${
-                    isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
-                  }`}
-                  textAreaName="reportDescription"
-                  defaultValue={userReport.description}
-                  disabled={isView}
-                />
-              ) : (
+              {!isView && userReport.verificationStatus !== "pending" ? (
                 <FormDivLabelTextArea
                   labelMessage={`${
                     isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
@@ -852,7 +886,16 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                   textAreaName="reportDescription"
                   value={textAreaValue}
                   onChange={textAreaOnChange}
-                  disabled={isView}
+                  disabled={false}
+                />
+              ) : (
+                <FormDivLabelTextArea
+                  labelMessage={`${
+                    isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
+                  }`}
+                  textAreaName="reportDescription"
+                  defaultValue={userReport.description}
+                  disabled={true}
                 />
               )}
               {isChange && (
@@ -896,19 +939,24 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                 ))}
               </div>
             </div>
-
-            {/* ADDING A FUNCTION WHERE IF THE DESCRIPTION WAS CHANGED A BUTTON WILL APPEAR TO NOTIFY THE LEADER THAT IT WAS CHANGED AND THE BUTTON WILL SERVE AS A RETURN TO MAKE THE VALUE OF THE DESCRIPTION GO BACK TO ITS ORIGINAL. NOW IN THE ONCLICK BUTTON, IS SUPPOSED TO BE ITENERARY OPERATOR OF 2 FUNCTION, 1 IS FOR APPROVING THE REPORT AND 2 IS FOR APPROVING THE REPORT AND UPDATING THE DESCRIPTION */}
-            {isView ? (
-              <CancelButton>{isEnglish ? "Close" : "Bumalik"}</CancelButton>
-            ) : (
-              <FormCancelSubmitButton
-                submitButtonLabel={"Aprubahan"}
-                submitOnClick={proceedOnClick}
-                cancelButtonLabel={"Bumalik"}
-                cancelOnClick={closeModal}
-              />
-            )}
           </div>
+        </div>
+
+        <div className="border-t border-gray-200 [&>div]:!p-4">
+          {!isView && userReport.verificationStatus !== "pending" ? (
+            <FormCancelSubmitButton
+              submitButtonLabel={"Aprubahan"}
+              submitOnClick={proceedOnClick}
+              cancelButtonLabel={"Bumalik"}
+              cancelOnClick={closeModal}
+            />
+          ) : (
+            <div className="flex justify-end items-center ">
+              <CancelButton onClick={closeModal}>
+                {isEnglish ? "Close" : "Bumalik"}
+              </CancelButton>
+            </div>
+          )}
         </div>
 
         {/* <div className="p-6 space-y-6">

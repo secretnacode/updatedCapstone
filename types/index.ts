@@ -265,7 +265,7 @@ export type AddNewFarmerReportImageType = {
 
 type GetFarmerReportDetailBaseType = {
   cropName: string;
-  verificationStatus: string;
+  verificationStatus: verificationStatusType;
   dayReported: Date;
   dayHappen: Date;
   title: string;
@@ -306,12 +306,6 @@ export type GetOrgMemberReportReturnType =
   | {
       success: true;
       memberReport: GetOrgMemberReportQueryType;
-    }
-  | ServerActionFailBaseType;
-
-export type ApprovedOrgMemberReturnType =
-  | {
-      success: true;
     }
   | ServerActionFailBaseType;
 
@@ -1020,8 +1014,10 @@ export type AllFarmerCropPropType = {
 
 export type ViewUserReportTableDataPropType = {
   reportId: string;
+  farmerName?: string;
   label?: string;
   className?: string;
+  myReport?: boolean;
 };
 
 export type newUserValNeedInfoReturnType =
@@ -1274,13 +1270,18 @@ export type getCountNotVerifiedFarmerParamType =
   | { userRole: "leader"; leaderId: string }
   | { userRole: "agriculturist" };
 
-export type EditableUserReportDetailsPropType = {
+type UserReportDetailsBasePropType = {
   userReport: ReportDetailType;
-  reportId?: string;
   closeModal: () => void;
+  farmerName?: string;
 };
 
-export type UserReportDetailsPropType = EditableUserReportDetailsPropType & {
+export type EditableUserReportDetailsPropType =
+  UserReportDetailsBasePropType & {
+    reportId: string;
+  };
+
+export type UserReportDetailsPropType = UserReportDetailsBasePropType & {
   isView: boolean;
   work: allUserRoleType;
 
@@ -1295,9 +1296,16 @@ export type UserReportDetailsPropType = EditableUserReportDetailsPropType & {
 export type UserReportModalPropType = {
   reportId: string;
   closeModal: () => void;
+  farmerName?: string;
+  myReport: boolean;
 };
 
-export type changeAndApprovedReportReturnType = {
+export type changeApproveOrJustApproveReportReturnType = {
   notifMessage: NotificationBaseType[];
-  success: boolean;
+};
+
+export type changeApproveOrJustApproveReportParamType = {
+  reportId: string;
+  isChange: boolean;
+  newDesc: string;
 };

@@ -85,7 +85,10 @@ export default async function Page() {
                         </td>
 
                         <td className="text-center">
-                          <ViewUserReportButton reportId={report.reportId} />
+                          <ViewUserReportButton
+                            reportId={report.reportId}
+                            myReport={true}
+                          />
                         </td>
                       </tr>
                     ))}

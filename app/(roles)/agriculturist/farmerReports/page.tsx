@@ -1,5 +1,5 @@
-import { AgriFarmerReportAction } from "@/component/client_component/agriReportComponent";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { ViewUserReportButton } from "@/component/client_component/reportComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllFarmerReport } from "@/lib/server_action/report";
 import { GetAllFarmerReportReturnType } from "@/types";
@@ -76,7 +76,11 @@ export default async function Page() {
                   </td>
 
                   <td className="text-center">
-                    <AgriFarmerReportAction reportId={report.reportId} />
+                    <ViewUserReportButton
+                      reportId={report.reportId}
+                      className="slimer-button"
+                      label="View Report"
+                    />
                   </td>
                 </tr>
               ))}

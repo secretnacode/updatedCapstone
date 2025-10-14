@@ -10,8 +10,8 @@ import {
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
 import {
+  allUserRoleType,
   checkFarmerRoleReturnType,
-  farmerRoleType,
   getAgriculturistDashboardDataReturnType,
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
@@ -173,7 +173,7 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
  */
 const reportSequenceAndUserLoc = async (
   userId: string,
-  work: farmerRoleType
+  work: allUserRoleType
 ): Promise<reportSequenceAndUserLocReturnType> => {
   try {
     const [reportSequence, userLocation] = await Promise.all([
