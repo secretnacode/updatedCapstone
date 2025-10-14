@@ -405,6 +405,7 @@ export type InputComponentPropType = {
   inputType?: string;
   inputName: keyof GetFarmerProfilePersonalInfoQueryReturnType;
   inputPlaceholder?: string;
+  inputVal: { isViewing: true } | { isViewing: false };
 };
 
 export type propValFunctionReturnType =
