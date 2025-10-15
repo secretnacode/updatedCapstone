@@ -15,7 +15,7 @@ import {
   DeleteUserPropType,
   FormErrorType,
   GetFarmerProfilePersonalInfoQueryReturnType,
-  ClientOrganizationInfoFormPropType,
+  MyOrganizationFormPropType,
   OrgInfoType,
   MyProfileFormPropType,
   LineChartComponentPropType,
@@ -33,17 +33,19 @@ import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
   Button,
   FormCancelSubmitButton,
+  FormDivLabelInput,
+  FormDivLabelSelect,
   ModalNotice,
 } from "../server_component/customComponent";
 import { DelteUserAccount } from "@/lib/server_action/user";
-import {
-  UserOrganizationInfoForm,
-  UserProfileForm,
-} from "../server_component/componentForAllUser";
 import { LineChart } from "@mui/x-charts";
+import {
+  baranggayList,
+  capitalizeFirstLetter,
+  DateToYYMMDD,
+} from "@/util/helper_function/reusableFunction";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
-  const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [isChangingVal, setIsChangingVal] = useState<boolean>(false);
@@ -61,8 +63,6 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
     }));
 
     setIsChangingVal(true);
-
-    console.log(e.target.name);
   };
 
   const handleReset = () => {
@@ -78,15 +78,13 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
     handleReset();
   };
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async () => {
     try {
       handleIsLoading("Ina-update na ang iyong impormasyon...");
-      e.preventDefault();
 
       const updateAction = await UpdateUserProfileInfo(userInfoState);
 
       if (updateAction.success) {
-        router.refresh();
         handleReset();
       } else {
         if (updateAction.formError) setFormError(updateAction.formError);
@@ -103,29 +101,138 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <UserProfileForm
-        isViewing={isViewing}
-        userInfoState={userInfoState}
-        formError={formError}
-        handleChangeState={handleChangeState}
+    <>
+      <FormDivLabelInput
+        labelMessage={"Unang Pangalan"}
+        inputName={"farmerFirstName"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. Jose"}
+        inputDisable={false}
+        inputValue={userInfoState.farmerFirstName}
+        formError={formError?.farmerFirstName}
+        onChange={handleChangeState}
       />
 
-      {isChangingVal && !isViewing && (
-        <FormCancelSubmitButton
-          submitButtonLabel="Ipasa"
-          cancelOnClick={handleResetFormVal}
-          cancelButtonLabel="Kanselahin"
-        />
+      <FormDivLabelInput
+        labelMessage={"Gitnang Pangalan"}
+        inputName={"farmerMiddleName"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. Luzviminda"}
+        inputDisable={false}
+        inputValue={userInfoState.farmerMiddleName}
+        formError={formError?.farmerMiddleName}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Apelyido"}
+        inputName={"farmerLastName"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. Juan Delacruz"}
+        inputDisable={false}
+        inputValue={userInfoState.farmerLastName}
+        formError={formError?.farmerLastName}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Palayaw na pagdugtong"}
+        inputName={"farmerExtensionName"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. Jr"}
+        inputDisable={false}
+        inputValue={userInfoState.farmerExtensionName}
+        formError={formError?.farmerExtensionName}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Alyas"}
+        inputName={"farmerAlias"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. Mang Kanor"}
+        inputDisable={false}
+        inputValue={userInfoState.farmerAlias}
+        formError={formError?.farmerAlias}
+        onChange={handleChangeState}
+      />
+
+      {/* WALA PA NITO SA DATABASE */}
+      <FormDivLabelInput
+        labelMessage="Kasarian"
+        inputDisable={true}
+        inputName={"farmerSex"}
+        inputDefaultValue={`wala pang nakalagay sa database`}
+        inputPlaceholder="Hal. lalaki"
+      />
+
+      <FormDivLabelSelect
+        labelMessage="Baranggay na tinitirhan"
+        selectName={"barangay"}
+        childrenOption={baranggayList.map((brgy) => (
+          <option key={brgy} value={brgy}>
+            {capitalizeFirstLetter(brgy)}
+          </option>
+        ))}
+        selectValue={userInfoState.barangay}
+        formError={formError?.barangay}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Numero ng Telepono"}
+        inputName={"mobileNumber"}
+        inputType={"text"}
+        inputPlaceholder={"Hal. 09** *** ****"}
+        inputDisable={false}
+        inputValue={userInfoState.mobileNumber}
+        formError={formError?.mobileNumber}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Kapanganakan"}
+        inputName={"birthdate"}
+        inputType={"date"}
+        inputDisable={false}
+        inputValue={
+          userInfoState.birthdate instanceof Date
+            ? DateToYYMMDD(userInfoState.birthdate)
+            : String(userInfoState.birthdate)
+        }
+        formError={formError?.birthdate}
+        onChange={handleChangeState}
+      />
+
+      <FormDivLabelInput
+        labelMessage={"Bilang ng pamilya"}
+        inputName={"familyMemberCount"}
+        inputType={"text"}
+        inputDisable={false}
+        inputValue={userInfoState.familyMemberCount}
+        formError={formError?.familyMemberCount}
+        onChange={handleChangeState}
+      />
+
+      {isChangingVal && (
+        <div className="col-span-full">
+          <FormCancelSubmitButton
+            submitType={"button"}
+            submitButtonLabel="Baguhin"
+            submitOnClick={handleFormSubmit}
+            cancelOnClick={handleResetFormVal}
+            cancelButtonLabel="Ibalik"
+          />
+        </div>
       )}
-    </form>
+    </>
   );
 };
 
-export const ClientUserOrganizationInfoForm: FC<
-  ClientOrganizationInfoFormPropType
-> = ({ isViewing, availOrgList, userOrgInfo }) => {
-  const formRef = useRef<HTMLFormElement>(null);
+export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
+  availOrgList,
+  userOrgInfo,
+}) => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [formError, setFormError] = useState<FormErrorType<OrgInfoType>>(null);
@@ -201,25 +308,59 @@ export const ClientUserOrganizationInfoForm: FC<
   );
 
   return (
-    <form onSubmit={handleFormSubmit} ref={formRef} className="border-t pt-6">
-      <UserOrganizationInfoForm
-        userOrgInfo={userOrgInfo}
-        isViewing={isViewing}
-        orgInfo={orgInfo}
-        handleUserOrgChange={handleUserOrgChange}
-        availOrgList={availOrgList}
-        formError={formError}
-        otherOrg={otherOrg}
+    <>
+      <FormDivLabelSelect
+        labelMessage={"Pangalan ng Organisasyon"}
+        selectName={"orgId"}
+        selectOrganization={true}
+        selectValue={orgInfo.orgId ?? ""}
+        onChange={handleUserOrgChange}
+        selectDisable={false}
+        childrenOption={availOrgList.map((org) => (
+          <option key={org.orgId} value={org.orgId}>
+            {org.orgName.charAt(0).toUpperCase() + org.orgName.slice(1)}
+          </option>
+        ))}
+        formError={formError?.orgId}
       />
 
-      {isChangingVal && !isViewing && (
-        <FormCancelSubmitButton
-          submitButtonLabel="Ipasa"
-          submitType="button"
-          submitOnClick={() => setShowModal(true)}
-          cancelButtonLabel="Kanselahin"
-          cancelOnClick={handleResetForm}
+      {otherOrg && (
+        <FormDivLabelInput
+          labelMessage="Mag lagay ng panibagong organisasyon"
+          inputName={"otherOrgName"}
+          inputValue={orgInfo.otherOrgName ?? ""}
+          inputPlaceholder="e.g. Kataniman"
+          onChange={handleUserOrgChange}
+          formError={formError?.otherOrgName}
         />
+      )}
+
+      <FormDivLabelInput
+        labelMessage="Leader ng Organisasyon"
+        inputDisable={true}
+        inputName={"leaderName"}
+        inputDefaultValue={userOrgInfo.farmerLeader}
+        inputPlaceholder="Miyembro"
+      />
+
+      <FormDivLabelInput
+        labelMessage="Posisyon"
+        inputDisable={true}
+        inputName={"orgRole"}
+        inputDefaultValue={userOrgInfo.orgRole}
+        inputPlaceholder="Miyembro"
+      />
+
+      {isChangingVal && (
+        <div className="col-span-full">
+          <FormCancelSubmitButton
+            submitButtonLabel="Ipasa"
+            submitType="button"
+            submitOnClick={() => setShowModal(true)}
+            cancelButtonLabel="Kanselahin"
+            cancelOnClick={handleResetForm}
+          />
+        </div>
       )}
 
       {showModal && (
@@ -228,10 +369,7 @@ export const ClientUserOrganizationInfoForm: FC<
           title="Mag babago ng organisasyon?"
           showCancelButton={true}
           onClose={() => setShowModal(false)}
-          onProceed={() => {
-            formRef.current?.requestSubmit();
-            setShowModal(false);
-          }}
+          onProceed={() => handleFormSubmit}
           message={
             <>
               <span className="p block font-bold !text-lg mb-4">
@@ -247,7 +385,7 @@ export const ClientUserOrganizationInfoForm: FC<
           cancel={{ label: "Bumalik" }}
         />
       )}
-    </form>
+    </>
   );
 };
 

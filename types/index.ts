@@ -3,6 +3,7 @@ import {
   authLogInSchema,
   authSignUpSchema,
   farmerSecondDetailFormSchema,
+  userProfileInfoUpdateSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import { MapProps, MapRef } from "@vis.gl/react-maplibre";
@@ -354,7 +355,7 @@ export type GetFarmerProfilePersonalInfoQueryReturnType = {
   farmerLastName: string;
   farmerMiddleName: string;
   farmerExtensionName?: string;
-  familyMemberCount: number;
+  familyMemberCount: string;
 };
 
 export type getFarmerCropNameQueryReturnType = {
@@ -425,8 +426,7 @@ export type selectElementReturnPropType =
       onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     };
 
-export type ClientOrganizationInfoFormPropType = {
-  isViewing: false;
+export type MyOrganizationFormPropType = {
   availOrgList: QueryAvailableOrgReturnType[];
   userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
 };
@@ -1303,3 +1303,5 @@ export type changeApproveOrJustApproveReportParamType = {
   isChange: boolean;
   newDesc: string;
 };
+
+export type userProfileInfoType = z.infer<typeof userProfileInfoUpdateSchema>;

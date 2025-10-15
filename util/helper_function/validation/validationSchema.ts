@@ -6,38 +6,6 @@ import {
   pointIsInsidePolygon,
 } from "../reusableFunction";
 import { barangayType } from "@/types";
-// /**
-//  * trasnforming the value data type that zod expects(string)
-//  */
-// const toString = z.string().pipe(
-//   z.preprocess((val) => {
-//     if (val === null || val === undefined) return "";
-//     if (val instanceof File) return undefined;
-//     return String(val).trim();
-//   }, z.string())
-// );
-
-// /**
-//  * trasnforming the value data type that zod expects(number)
-//  */
-// const toNumber = z.preprocess((val) => {
-//   if (typeof val === "string" && val.trim() === "") return undefined;
-//   else if (val === null || val === undefined) return undefined;
-//   else if (val instanceof File) return undefined;
-
-//   return isNaN(Number(val)) ? undefined : Number(val);
-// }, z.number());
-
-// /**
-//  * trasnforming the value data type that zod expects(date object)
-//  */
-// const toDateObj = z.preprocess((val) => {
-//   if (typeof val === "string" && val.trim() !== "") {
-//     const date = new Date(val);
-//     return isNaN(date.getTime()) ? undefined : date;
-//   }
-//   return undefined;
-// }, z.date());
 
 /**
  * Defining the object/shape of the auth sign up by adding its
@@ -271,6 +239,50 @@ export const addFarmerReportSchema = z.object({
     )
     .min(1, { error: "Mag lagay kahit isang imahe" })
     .max(5, { error: "Hanggang limang(5) imahe lang ang pede mong maipasa" }),
+});
+
+export const userProfileInfoUpdateSchema = z.object({
+  farmerId: z.string().min(1, { error: "Ilagay ang iyong unang pangalan" }),
+  farmerFirstName: z
+    .string()
+    .min(1, { error: "Ilagay ang iyong unang pangalan" }),
+  farmerLastName: z.string().min(1, { error: "Ilagay ang iyong apelyido" }),
+  farmerMiddleName: z
+    .string()
+    .min(1, { error: "Ilagay ang iyong gitnang pangalan" }),
+  farmerExtensionName: z.string().nullable(),
+  farmerAlias: z.string().nullable(),
+  mobileNumber: z
+    .string()
+    .trim()
+    .max(13, {
+      error: `Ang numero mo ay hindi dapat tataas sa labing tatlong(13) na numero`,
+    })
+    .refine(
+      (val) =>
+        /^\+?\d+$/.test(val) &&
+        ((val.startsWith("+639") && val.length === 13) ||
+          (val.startsWith("09") && val.length === 11)),
+      {
+        error: `Gumamit ng wastong Philippine mobile number format (hal. 09xxxxxxxxx/+639xxxxxxxxx)`,
+      }
+    ),
+  barangay: z
+    .string()
+    .min(1, { error: "Ilagay kung san ka nakatira, pumili sa pamimilian" }),
+  birthdate: z
+    .date({ error: `Ilagay ang araw ng iyong kapanganakan` })
+    .max(Date10YearsAgo(), {
+      error: `Dapat ang edad mo ay mas mahigit pa sa sampu(10)`,
+    }),
+  familyMemberCount: z
+    .string()
+    .trim()
+    .min(1, { error: "Mag lagay kung ilang ang bilang ng iyon pamilya" })
+    .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
+      error:
+        "Numero o mas ma-mataas sa zero(0) lang ang pwede mong ilagay dito",
+    }),
 });
 
 export const userProfileOrgUpdateSchema = z
