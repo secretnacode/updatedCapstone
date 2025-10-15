@@ -21,12 +21,9 @@ import {
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
+import { FormDivLabelInput, TableComponent } from "./customComponent";
 import {
-  FormDivLabelInput,
-  FormDivLabelSelect,
-  TableComponent,
-} from "./customComponent";
-import {
+  capitalizeFirstLetter,
   converTimeToAMPM,
   DateToYYMMDD,
   makeWeatherIcon,
@@ -270,6 +267,7 @@ export const UserProFile: FC<UserProFilePropType> = ({
 export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
   userInfo,
 }) => {
+  console.log(userInfo);
   return (
     <>
       <FormDivLabelInput
@@ -321,12 +319,12 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
         inputPlaceholder="Hal. lalaki"
       />
 
-      <FormDivLabelSelect
-        labelMessage="Baranggay na tinitirhan"
-        selectName={"barangay"}
-        childrenOption={<></>}
-        selectDisable={true}
-        selectDefaultValue={userInfo.barangay}
+      <FormDivLabelInput
+        labelMessage={"Baranggay na tinitirhan"}
+        inputName={"barangay"}
+        inputPlaceholder={"Hal. Silangan"}
+        inputDisable={true}
+        inputDefaultValue={capitalizeFirstLetter(userInfo.barangay)}
       />
 
       <FormDivLabelInput
@@ -356,12 +354,12 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
 }) => {
   return (
     <>
-      <FormDivLabelSelect
-        labelMessage={"Pangalan ng Organisasyon"}
-        selectName={"orgId"}
-        selectDisable={true}
-        selectDefaultValue={userOrgInfo.orgId}
-        childrenOption={<></>}
+      <FormDivLabelInput
+        labelMessage="Pangalan ng Organisasyon"
+        inputDisable={true}
+        inputName={"orgId"}
+        inputDefaultValue={userOrgInfo.orgName}
+        inputPlaceholder="Pangalan ng organisasyon"
       />
 
       <FormDivLabelInput

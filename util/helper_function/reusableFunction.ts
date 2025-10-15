@@ -543,3 +543,6 @@ export const converTimeToAMPM = (time: string) =>
     })
     .split(",")[1]
     .trim();
+
+export const capitalizeFirstLetter = (word: string) =>
+  word.charAt(0).toUpperCase() + word.slice(1);

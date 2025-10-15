@@ -41,6 +41,7 @@ import { DelteUserAccount } from "@/lib/server_action/user";
 import { LineChart } from "@mui/x-charts";
 import {
   baranggayList,
+  capitalizeFirstLetter,
   DateToYYMMDD,
 } from "@/util/helper_function/reusableFunction";
 
@@ -170,7 +171,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
         selectName={"barangay"}
         childrenOption={baranggayList.map((brgy) => (
           <option key={brgy} value={brgy}>
-            {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+            {capitalizeFirstLetter(brgy)}
           </option>
         ))}
         selectValue={userInfoState.barangay}
