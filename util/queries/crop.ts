@@ -45,7 +45,7 @@ export const GetFarmerCropInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "dayPlanted", "cropLocation", "farmAreaMeasurement" from capstone.crop where "cropId" = $1`,
+        `select "cropLocation", "farmAreaMeasurement" from capstone.crop where "cropId" = $1`,
         [cropId]
       )
     ).rows[0];

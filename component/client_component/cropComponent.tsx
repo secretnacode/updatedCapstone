@@ -48,6 +48,7 @@ import {
   CancelButton,
   CropForm,
   FormCancelSubmitButton,
+  ModalLoading,
   ModalNotice,
   SubmitButton,
   TableComponent,
@@ -97,7 +98,7 @@ export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
       {viewCrop &&
         cropIdToView &&
         createPortal(
-          <MemoViewCropModal
+          <ViewCropModal
             cropId={cropIdToView}
             removeModal={handleCancelViewCrop}
             isViewing={isViewing}
@@ -115,7 +116,6 @@ export const ViewCropModal: FC<{
 }> = ({ cropId, removeModal, isViewing }) => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [isDoneFetching, setIsDoneFetching] = useState<boolean>(false);
   const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>({
     dayPlanted: new Date(),
     cropLocation: "",
@@ -134,8 +134,6 @@ export const ViewCropModal: FC<{
         }
 
         if (res.success && res.cropData) setCropInfo(res.cropData);
-
-        setIsDoneFetching(true);
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
@@ -157,7 +155,7 @@ export const ViewCropModal: FC<{
 
   return (
     <>
-      {isDoneFetching && (
+      {cropInfo && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
             <div className="flex items-center justify-between p-4 border-b">
@@ -213,8 +211,6 @@ export const ViewCropModal: FC<{
     </>
   );
 };
-
-export const MemoViewCropModal = memo(ViewCropModal);
 
 export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   myCropInfoList,
