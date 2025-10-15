@@ -24,9 +24,10 @@ import {
   ViewAllValidatedFarmerUserReturnType,
 } from "@/types";
 import { GetSession } from "../session";
-import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
+import { userProfileInfoUpdateSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
 import { getFarmerCropNameQuery } from "@/util/queries/crop";
+import { revalidatePath } from "next/cache";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -193,8 +194,9 @@ export const UpdateUserProfileInfo = async (
 
     const validateVal = ZodValidateForm(
       userProfileInfo,
-      farmerFirstDetailFormSchema
+      userProfileInfoUpdateSchema
     );
+
     if (!validateVal.valid)
       return {
         success: false,
@@ -208,6 +210,8 @@ export const UpdateUserProfileInfo = async (
       };
 
     await UpdateUserProfileInfoQuery(userId, userProfileInfo);
+
+    revalidatePath(`/farmer/profile`);
 
     return {
       success: true,
