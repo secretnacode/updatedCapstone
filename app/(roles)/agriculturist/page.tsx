@@ -99,6 +99,7 @@ export default async function Page({
             </>
           }
           showQuickAction={false}
+          user="agriculturist"
         />
       ) : (
         <RenderNotification notif={data.notifError} />

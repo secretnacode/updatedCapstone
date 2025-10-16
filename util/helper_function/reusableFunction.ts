@@ -441,10 +441,12 @@ export const makeWeatherIcon = ({
 /**
  * Translates the WeatherAPI condition text into Tagalog.
  * @param englishText The English weather condition text (e.g., "Sunny").
+ * @param isEnglish returns a weather condition in english or tagalog
  * @returns The Tagalog translation string.
  */
 export const translateWeatherConditionToTagalog = (
-  englishText: string
+  englishText: string,
+  isEnglish: boolean
 ): string => {
   // Normalize the input text for consistent matching (e.g., trim whitespace)
   const normalizedText = englishText.trim();
@@ -453,22 +455,22 @@ export const translateWeatherConditionToTagalog = (
     // CLEAR / SUNNY
     case "sunny":
     case "clear":
-      return "Hindi Maulap";
+      return isEnglish ? "Clear Sky" : "Hindi Maulap";
 
     // PARTLY CLOUDY
     case "partly cloudy":
-      return "Bahagyang Maulap";
+      return isEnglish ? "Partly Cloudy" : "Bahagyang Maulap";
 
     // CLOUDLY
     case "cloudy":
     case "overcast":
-      return "Maulap";
+      return isEnglish ? "Cloudy" : "Maulap";
 
     // FOG / MIST
     case "mist":
     case "fog":
     case "freezing fog":
-      return "Mahamog";
+      return isEnglish ? "Foggy" : "Mahamog";
 
     // DRIZZLE / RAIN
     case "patchy light drizzle":
@@ -482,18 +484,20 @@ export const translateWeatherConditionToTagalog = (
     case "light sleet showers":
     case "moderate or heavy sleet showers":
     case "patchy freezing drizzle possible":
-      return "Mahina o Patak-patak na Ambon";
+      return isEnglish
+        ? "Drizzle or Light Rain"
+        : "Mahina o Patak-patak na Ambon";
 
     // MIGHT RAIN
     case "patchy rain possible":
     case "patchy light rain":
-      return "Posibleng May Bahagyang Ulan";
+      return isEnglish ? "Possible Light Rain" : "Posibleng May Bahagyang Ulan";
 
     // SLIGHT RAIN
     case "light rain":
     case "light freezing rain":
     case "light rain shower":
-      return "Mahina o Bahagyang Ulan";
+      return isEnglish ? "Light Rain" : "Mahina o Bahagyang Ulan";
 
     // MODERATE OR HEAVY RAIN FALL
     case "moderate rain at times":
@@ -501,24 +505,30 @@ export const translateWeatherConditionToTagalog = (
     case "moderate or heavy rain shower":
     case "moderate or heavy freezing rain":
     case "light showers of ice pellets":
-      return "Katamtaman o Malakas na Pag-ulan";
+      return isEnglish
+        ? "Moderate or Heavy Rain"
+        : "Katamtaman o Malakas na Pag-ulan";
 
     // HEAVY RAIN FALL
     case "heavy rain at times":
     case "heavy rain":
     case "torrential rain shower":
     case "moderate or heavy showers of ice pellets":
-      return "Malakas na Pag-ulan";
+      return isEnglish ? "Heavy Rain" : "Malakas na Pag-ulan";
 
     // THUNDER
     case "thundery outbreaks possible":
     case "patchy light rain with thunder":
     case "moderate or heavy rain with thunder":
-      return "Posibleng May Pagkidlat at Pagkulog";
+      return isEnglish
+        ? "Possible Heavy Rain With Thunder"
+        : "Posibleng May Pagkidlat at Pagkulog";
 
     // DEFAULT
     default:
-      return "Hindi Matukoy Ang Panahon";
+      return isEnglish
+        ? "Cannot Identify the Weather"
+        : "Hindi Matukoy Ang Panahon";
   }
 };
 

@@ -1105,6 +1105,7 @@ export type getRecentReportReturnType = {
 };
 
 export type WeatherComponentPropType = {
+  user: allUserRoleType;
   userLocation: barangayType;
 };
 
@@ -1222,6 +1223,7 @@ export type getFarmerDashboardDataReturnType =
     } & reportAndLocType);
 
 export type DashboardComponentPropType = {
+  user: allUserRoleType;
   card1: DashboardCardPropType;
   card2: DashboardCardPropType;
   card3: DashboardCardPropType;

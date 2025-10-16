@@ -7,7 +7,10 @@ import { DynamicLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ViewAllUnvalidatedFarmerReturnType } from "@/types";
-import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
+import {
+  capitalizeFirstLetter,
+  ReadableDateFomat,
+} from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +69,9 @@ export default async function Page() {
                   </td>
                   <td>
                     <span className="text-gray-600">
-                      {farmVal.orgRole ?? "Not in org"}
+                      {farmVal.orgRole
+                        ? capitalizeFirstLetter(farmVal.orgRole)
+                        : "Not in org"}
                     </span>
                   </td>
                   <td>

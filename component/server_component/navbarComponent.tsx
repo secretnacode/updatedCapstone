@@ -6,6 +6,7 @@ import {
   ContactRound,
   Home,
   Sprout,
+  UserCheck,
   UserPen,
 } from "lucide-react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -127,7 +128,7 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
     },
     {
       link: `${basePage}/validateFarmer`,
-      logo: ContactRound,
+      logo: UserCheck,
       linkName: "Validate Farmer",
     },
     {

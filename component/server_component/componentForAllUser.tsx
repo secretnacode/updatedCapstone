@@ -383,6 +383,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
 
 export const WeatherComponent: FC<WeatherComponentPropType> = async ({
   userLocation,
+  user,
 }) => {
   let currentWeather: getWeatherTodayReturnType;
 
@@ -395,6 +396,8 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
       notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
     };
   }
+
+  const isEnglish = user === "admin" || user === "agriculturist";
 
   let WeatherIcon: LucideIcon | undefined = undefined;
 
@@ -410,7 +413,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
         <div className=" bg-gray-500">
           <div className="card-title-wrapper flex justify-start items-center gap-2">
             {WeatherIcon && <WeatherIcon />}
-            <p>Panahon ngayon</p>
+            <p>{isEnglish ? "Weather Today" : "Panahon ngayon"}</p>
           </div>
 
           <div className="flex justify-between items-center">
@@ -420,7 +423,8 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
               </p>
               <p className="card-label">
                 {translateWeatherConditionToTagalog(
-                  currentWeather.weatherData.condition.text
+                  currentWeather.weatherData.condition.text,
+                  isEnglish
                 )}
               </p>
             </div>
@@ -436,7 +440,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
 
           <div className="mt-4 very-small-text text-gray-600 flex justify-between items-center">
             <p>
-              <span className="">Ngayong:</span>{" "}
+              <span className="">{isEnglish ? "Now" : "Ngayong"}: </span>
               {ReadableDateFomat(
                 new Date(currentWeather.weatherData.last_updated.split(" ")[0])
               )}

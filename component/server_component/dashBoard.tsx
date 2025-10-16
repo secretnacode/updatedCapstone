@@ -90,6 +90,7 @@ export const FarmerLeadDashBoard = async () => {
               />
             </>
           }
+          user="leader"
         />
       )}
     </>
@@ -153,6 +154,7 @@ export const FarmerDashBoard = async () => {
             data: data.reportSequence,
           }}
           userLocation={data.userLocation}
+          user="farmer"
         />
       )}
     </>
@@ -160,6 +162,7 @@ export const FarmerDashBoard = async () => {
 };
 
 export const DashboardComponent: FC<DashboardComponentPropType> = ({
+  user,
   card1,
   card2,
   card3,
@@ -183,7 +186,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
       </div>
       <div className="flex flex-col gap-4 [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm ">
         <Suspense fallback={<LoadingCard />}>
-          <WeatherComponent userLocation={userLocation} />
+          <WeatherComponent userLocation={userLocation} user={user} />
         </Suspense>
 
         {widget}
