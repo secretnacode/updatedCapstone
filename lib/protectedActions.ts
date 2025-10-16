@@ -2,6 +2,9 @@ import { GetSession } from "@/lib/session";
 import { SessionValueType } from "@/types";
 
 const Actions = {
+  CREATE_RESET_PASSWORD_LINK: "create:reset:password:link", // action for creating a link, that link will be use to renew or reset the password of the farmer
+  CREATE_AGRICULTURIST_LINK: "create:agriculturist:link", // action for creating a link where the agriculturist can sign up
+
   // admin creation action
   CREATE_USER_AGRI: "create:user:agri", // action to create a user role agriculture
 
@@ -60,7 +63,8 @@ const Actions = {
 
 const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   admin: [
-    Actions.CREATE_USER_AGRI,
+    Actions.CREATE_AGRICULTURIST_LINK,
+    Actions.CREATE_RESET_PASSWORD_LINK,
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
@@ -78,6 +82,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   agriculturist: [
+    Actions.CREATE_RESET_PASSWORD_LINK,
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,

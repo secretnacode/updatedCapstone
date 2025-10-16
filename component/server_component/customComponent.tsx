@@ -122,7 +122,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   inputValue,
   inputMax,
   inputMin,
-  inputClassName,
+  inputClassName = "",
   onChange,
   inputPlaceholder,
   formError,
@@ -343,7 +343,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
       : undefined;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex items-center justify-center">
+    <div className="modal-form">
       <div className="absolute inset-0" onClick={onClose} />
 
       <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
@@ -425,7 +425,7 @@ export const TableComponent: FC<TableComponentPropType> = ({
         <>
           {tableTitle && (
             <div className="flex justify-between items-center ">
-              <h1 className="title !text-2xl !font-bold ">{tableTitle}</h1>
+              <h1 className="title !text-2xl !font-bold">{tableTitle}</h1>
             </div>
           )}
           <div
@@ -679,7 +679,7 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
 
 export const ModalLoading: FC = () => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="modal-form">
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
         <div className="mb-6">
           <div className="h-6 bg-gray-300 rounded animate-pulse w-3/4 mb-2"></div>

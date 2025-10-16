@@ -5,6 +5,7 @@ import {
   FC,
   FormEvent,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -23,6 +24,8 @@ import {
   getReportCountThisWeekReturnType,
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisYearReturnType,
+  CreateResetPasswordButtonPropType,
+  getFarmerDataForResetingPassReturnType,
 } from "@/types";
 import {
   ApprovedOrgFarmerAcc,
@@ -32,18 +35,30 @@ import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
   Button,
+  CancelButton,
   FormCancelSubmitButton,
   FormDivLabelInput,
   FormDivLabelSelect,
   ModalNotice,
+  SubmitButton,
 } from "../server_component/customComponent";
-import { DelteUserAccount } from "@/lib/server_action/user";
+import {
+  DelteUserAccount,
+  getAllFarmerForResetPass,
+} from "@/lib/server_action/user";
 import { LineChart } from "@mui/x-charts";
 import {
   baranggayList,
   capitalizeFirstLetter,
   DateToYYMMDD,
+  UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
+import { ChevronDown, Frown, Key, Search, User, X } from "lucide-react";
+import { useDebounce } from "./customHook/debounceHook";
+import {
+  createResetPassWordLink,
+  createSignUpLinkForAgri,
+} from "@/lib/server_action/link";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -643,6 +658,257 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
         <p className="bg-green-500 rounded-full size-3" />
         <p className="text-gray-500 text-sm">Bilang ng mga ulat</p>
       </div>
+    </div>
+  );
+};
+
+export const CreateResetPasswordButton: FC<
+  CreateResetPasswordButtonPropType
+> = ({ label = "Create", labelClassName = "", resetStyle = false }) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [openModal, setOpenModal] = useState(false);
+  const [searchFarmerVal, setSearchFarmerVal] = useState<string>("");
+  const debounceVal = useDebounce(searchFarmerVal, 400);
+  const [farmerData, setFarmerData] = useState<
+    getFarmerDataForResetingPassReturnType[]
+  >([{ farmerId: "", username: "", farmerName: "" }]);
+
+  const closeModal = () => setOpenModal(false);
+
+  const handleCreateResetPassLink = async () => {
+    try {
+      handleIsLoading("Getting all the user data...");
+
+      const res = await getAllFarmerForResetPass();
+
+      if (res.success) {
+        setFarmerData(res.farmerData);
+        setOpenModal(true);
+      } else handleSetNotification(res.notifError);
+    } catch (error) {
+      console.error((error as Error).message);
+      handleSetNotification([
+        { message: UnexpectedErrorMessageEnglish(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  const serchFarmer = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchFarmerVal(e.target.value);
+  };
+
+  const farmerList = useMemo(() => {
+    if (!debounceVal) return farmerData;
+
+    const searchItem = debounceVal.toLowerCase();
+
+    return farmerData?.filter(
+      (item) =>
+        item.farmerName.toLowerCase().includes(searchItem) ||
+        item.username.toLowerCase().includes(searchItem)
+    );
+  }, [debounceVal, farmerData]);
+
+  const handleCreateLink = async (farmerId: string) => {
+    try {
+      handleIsLoading("Creating a link for the farmer...");
+
+      handleSetNotification(
+        (await createResetPassWordLink(farmerId)).notifMessage
+      );
+    } catch (error) {
+      console.error((error as Error).message);
+
+      handleSetNotification([
+        { message: UnexpectedErrorMessageEnglish(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+      setOpenModal(false);
+    }
+  };
+
+  return (
+    <>
+      {resetStyle ? (
+        <button
+          type="button"
+          className="create-link-userPass-agri-button"
+          onClick={handleCreateResetPassLink}
+        >
+          {label}
+        </button>
+      ) : (
+        <SubmitButton type="button" onClick={handleCreateResetPassLink}>
+          <span className={labelClassName}>{label}</span>
+        </SubmitButton>
+      )}
+
+      {openModal && (
+        <div className="modal-form">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            {/* header  */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg flex items-center justify-center">
+                  <User className="logo text-green-600" />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Farmer Data
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Select a farmer to reset their password
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={closeModal}
+                className="p-2 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="logo text-gray-500" />
+              </button>
+            </div>
+
+            {/* farmer list  */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="relative">
+                <Search className="absolute top-1/2 left-2 transform -translate-y-1/2 logo text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by username or farmer name..."
+                  value={searchFarmerVal}
+                  onChange={serchFarmer}
+                  className="w-full pl-10 p-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Farmer List */}
+            <div className={`grid grid-cols-1 gap-4 p-4 overflow-y-scroll`}>
+              {farmerList.length > 0 ? (
+                farmerList.map((farmer) => (
+                  <div
+                    key={farmer.farmerId}
+                    className="group bg-white border border-gray-300 rounded-xl p-4 hover:border-green-300 hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-lg">
+                            {farmer.farmerName.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900 truncate">
+                              {farmer.farmerName}
+                            </h3>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate">
+                            {farmer.username}
+                          </p>
+                        </div>
+                      </div>
+                      <SubmitButton
+                        onClick={() => handleCreateLink(farmer.farmerId)}
+                        className="slimer-button !gap-1"
+                      >
+                        <Key className="logo !size-5" />
+                        Reset Password
+                      </SubmitButton>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="div text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                  <div className="div space-y-3">
+                    <Frown className="logo !size-20 stroke-1 table-no-content" />
+                    <p className="p text-gray-500 !text-xl">No user found</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span className="text-gray-600">
+                  {farmerData.length} farmers found
+                </span>
+                <CancelButton onClick={closeModal} className="slimer-button">
+                  Close
+                </CancelButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export const CreateResetPassOrCreateAgriButton = () => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [option, setOption] = useState<boolean>(false);
+
+  const handleCreateAgriLink = async () => {
+    try {
+      handleIsLoading("Creating a link for agriculturist user!!!");
+
+      handleSetNotification((await createSignUpLinkForAgri()).notifMessage);
+    } catch (error) {
+      console.error((error as Error).message);
+
+      handleSetNotification([
+        { message: UnexpectedErrorMessageEnglish(), type: "error" },
+      ]);
+    } finally {
+      setOption(false);
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute inset-0" onClick={() => setOption(false)} />
+
+      <SubmitButton
+        type="button"
+        className="flex justify-between items-center gap-2 !px-4 relative"
+        onClick={() => setOption(!option)}
+      >
+        <span>Create</span>
+        <ChevronDown
+          className={`logo transition-transform duration-300 ${
+            option ? "rotate-180" : ""
+          }`}
+        />
+      </SubmitButton>
+
+      {option && (
+        <div className="absolute top-full right-0 mt-2 w-full min-w-fit bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 animate-in fade-in slide-in-from-top-2 duration-200">
+          <button
+            type="button"
+            className="create-link-userPass-agri-button"
+            onClick={handleCreateAgriLink}
+          >
+            Create Agriculturist
+          </button>
+
+          <CreateResetPasswordButton
+            label="Reset Password"
+            labelClassName="very-small-text"
+            resetStyle={true}
+          />
+        </div>
+      )}
     </div>
   );
 };

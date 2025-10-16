@@ -5,6 +5,7 @@ import {
   ClipboardPlus,
   ContactRound,
   Home,
+  LinkIcon,
   Sprout,
   UserCheck,
   UserPen,
@@ -44,7 +45,7 @@ export const NavbarComponent: FC = async () => {
     session?.work === "farmer" || session?.work === "leader" ? (
       <FarmerNav role={role} />
     ) : (
-      <AgriculturistNav role={role} />
+      <AgriculturistNav />
     );
 
   return (
@@ -106,7 +107,7 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
   return <Navbar>{Links}</Navbar>;
 };
 
-const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
+const AgriculturistNav: FC = () => {
   const basePage = "/agriculturist";
 
   const links: AgriculturistNavLinkType[] = [
@@ -136,15 +137,11 @@ const AgriculturistNav: FC<{ role: string }> = ({ role }) => {
       logo: Building2,
       linkName: "Organizations",
     },
-    ...(role === "admin"
-      ? [
-          {
-            link: `${basePage}/agriUsers`,
-            logo: ClipboardCheck,
-            linkName: "Agriculturist",
-          },
-        ]
-      : []),
+    {
+      link: `${basePage}/createLink`,
+      logo: LinkIcon,
+      linkName: "Create Link",
+    },
   ];
 
   return (

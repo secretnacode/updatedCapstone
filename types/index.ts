@@ -1307,3 +1307,40 @@ export type changeApproveOrJustApproveReportParamType = {
 };
 
 export type userProfileInfoType = z.infer<typeof userProfileInfoUpdateSchema>;
+
+export type CreateResetPasswordButtonPropType = {
+  label?: string;
+  labelClassName?: string;
+  resetStyle?: boolean;
+};
+
+export type getFarmerDataForResetingPassReturnType = {
+  farmerId: string;
+  username: string;
+  farmerName: string;
+};
+
+export type getAllFarmerForResetPassReturnType =
+  | {
+      success: true;
+      farmerData: getFarmerDataForResetingPassReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type createSignUpLinkForAgriQueryParamType = {
+  linkId: string;
+  dateCreated: Date;
+  dateExpired: Date;
+  link: string;
+  linkToken: string;
+};
+
+export type createResetPassWordLinkQueryParamType =
+  createSignUpLinkForAgriQueryParamType & {
+    farmerId: string;
+  };
+
+export type serverActionNormalReturnType = {
+  success: boolean;
+  notifMessage: NotificationBaseType[];
+};

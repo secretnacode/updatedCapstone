@@ -5,6 +5,7 @@ import {
   DelteUserAccountQuery,
   farmerIsExist,
   getCountNotVerifiedFarmer,
+  getFarmerDataForResetingPass,
   getUserLocation,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
@@ -13,6 +14,7 @@ import {
   allUserRoleType,
   checkFarmerRoleReturnType,
   getAgriculturistDashboardDataReturnType,
+  getAllFarmerForResetPassReturnType,
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
   newUserValNeedInfoReturnType,
@@ -317,6 +319,10 @@ export const getFarmerDashboardData =
     }
   };
 
+/**
+ * server action for getting all the necesarr data for the dashboard of agriculturist
+ * @returns
+ */
 export const getAgriculturistDashboardData =
   async (): Promise<getAgriculturistDashboardDataReturnType> => {
     try {
@@ -357,6 +363,32 @@ export const getAgriculturistDashboardData =
       const err = error as Error;
       console.log(
         `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getAllFarmerForResetPass =
+  async (): Promise<getAllFarmerForResetPassReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:user");
+
+      return {
+        success: true,
+        farmerData: await getFarmerDataForResetingPass(),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Error occured while fetching all the farmer's data for resetting password: ${err.message}`
       );
       return {
         success: false,

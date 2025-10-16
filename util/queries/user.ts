@@ -1,7 +1,10 @@
+"use server";
+
 import {
   barangayType,
   FarmerFirstDetailType,
   getCountNotVerifiedFarmerParamType,
+  getFarmerDataForResetingPassReturnType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
   GetFarmerProfilePersonalInfoQueryReturnType,
@@ -559,5 +562,23 @@ export const getUserLocation = async (
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng barangay na iyong tinitirhan`
     );
+  }
+};
+
+/**
+ * server action for agriculturist and admin to get the data of the farmer
+ */
+export const getFarmerDataForResetingPass = async (): Promise<
+  getFarmerDataForResetingPassReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a  on f."farmerId" = a."authId" order by a."username"`
+      )
+    ).rows;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while getting all the farmer's data`);
   }
 };

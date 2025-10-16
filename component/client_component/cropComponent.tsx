@@ -154,7 +154,7 @@ export const ViewCropModal: FC<{
   return (
     <>
       {cropInfo && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="modal-form">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -522,7 +522,7 @@ const FormCropModal: FC<FormCropModalPropType> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center  z-40">
+    <div className="modal-form">
       <div className="absolute inset-0 " onClick={hideCropModal} />
 
       <div className="relative bg-white rounded-lg w-1/2">

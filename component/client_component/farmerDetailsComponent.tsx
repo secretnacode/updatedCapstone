@@ -925,7 +925,7 @@ export const FarmerDetailSecondStep: FC = () => {
       </form>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-40">
+        <div className="modal-form">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">
               Mag patuloy padin sa pag papasa?

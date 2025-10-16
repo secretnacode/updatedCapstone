@@ -1,3 +1,5 @@
+"use server";
+
 import { AddNewFarmerReportImageType } from "@/types";
 import { pool } from "../configuration";
 

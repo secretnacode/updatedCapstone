@@ -79,7 +79,7 @@ export const AddReportComponent: FC = () => {
       </button>
 
       {addReport && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div className="modal-form">
           <div
             className="absolute inset-0"
             onClick={() => setAddReport(false)}
@@ -662,7 +662,7 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 flex items-center justify-center p-4">
+    <div className="modal-form">
       <ComponentToRender />
     </div>
   );

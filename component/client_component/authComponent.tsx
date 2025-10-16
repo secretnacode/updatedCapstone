@@ -258,10 +258,7 @@ const ModalNotif: FC<{
   return (
     <>
       {isSignUp && (
-        <div
-          className="absolute inset-0 z-30 flex justify-center items-center bg-black/50 backdrop-blur-sm overflow-hidden "
-          ref={modalRef}
-        >
+        <div className="modal-form" ref={modalRef}>
           <div className="bg-white border border-gray-800 rounded-lg shadow-xl w-[80%] max-w-[420px] transform transition-all overflow-hidden animate-toLeft">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b bg-yellow-50">
