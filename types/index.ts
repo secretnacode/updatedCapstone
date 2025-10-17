@@ -1344,3 +1344,43 @@ export type serverActionNormalReturnType = {
   success: boolean;
   notifMessage: NotificationBaseType[];
 };
+
+export type getLinkQueryReturnTyepe = {
+  linkId: string;
+  link: string;
+  dateCreated: Date;
+  dateExpired: Date;
+};
+
+export type getLinkResetPassQueryReturnType = getLinkQueryReturnTyepe & {
+  farmerName: string;
+  username: string;
+};
+
+export type getAllLinkDataReturnType =
+  | ({
+      success: true;
+      resetPassLink: getLinkResetPassQueryReturnType[];
+    } & (
+      | {
+          work: "admin";
+          createAgriLink: getLinkQueryReturnTyepe[];
+        }
+      | { work: "agriculturist" }
+    ))
+  | ServerActionFailBaseType;
+
+export type tableNoDataPropType = {
+  message: string;
+};
+
+export type ShowIsExpiredPropType = {
+  expiredAt: Date;
+};
+
+export type checkIsRestPassVarReturnType = {
+  isExist: boolean;
+  notFound?: true;
+};
+
+export type linkTableType = "signUpLinkForAgri" | "resetFarmerPassLink";

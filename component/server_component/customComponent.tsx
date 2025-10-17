@@ -12,10 +12,12 @@ import {
   ModalNoticePropType,
   RecentReportWidgetReturnType,
   TableComponentPropType,
+  tableNoDataPropType,
 } from "@/types";
 import { FC } from "react";
 import {
   ClipboardX,
+  Frown,
   LucideIcon,
   OctagonX,
   TriangleAlert,
@@ -443,6 +445,17 @@ export const TableComponent: FC<TableComponentPropType> = ({
         </>
       )}
     </>
+  );
+};
+
+export const TableNoData: FC<tableNoDataPropType> = ({ message }) => {
+  return (
+    <div className="div text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+      <div className="div space-y-3">
+        <Frown className="logo !size-20 stroke-1 table-no-content" />
+        <p className="p text-gray-500 !text-xl">{message}</p>
+      </div>
+    </div>
   );
 };
 

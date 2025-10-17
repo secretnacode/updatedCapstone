@@ -5,6 +5,7 @@ import {
   FC,
   FormEvent,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -26,6 +27,8 @@ import {
   getReportCountThisYearReturnType,
   CreateResetPasswordButtonPropType,
   getFarmerDataForResetingPassReturnType,
+  ShowIsExpiredPropType,
+  ButtonPropType,
 } from "@/types";
 import {
   ApprovedOrgFarmerAcc,
@@ -58,6 +61,7 @@ import { useDebounce } from "./customHook/debounceHook";
 import {
   createResetPassWordLink,
   createSignUpLinkForAgri,
+  deleteLink,
 } from "@/lib/server_action/link";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
@@ -682,12 +686,15 @@ export const CreateResetPasswordButton: FC<
 
       const res = await getAllFarmerForResetPass();
 
+      console.log("this works");
+
       if (res.success) {
         setFarmerData(res.farmerData);
         setOpenModal(true);
       } else handleSetNotification(res.notifError);
     } catch (error) {
       console.error((error as Error).message);
+
       handleSetNotification([
         { message: UnexpectedErrorMessageEnglish(), type: "error" },
       ]);
@@ -804,17 +811,20 @@ export const CreateResetPasswordButton: FC<
                             {farmer.farmerName.charAt(0)}
                           </span>
                         </div>
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold text-gray-900 truncate">
                               {farmer.farmerName}
                             </h3>
                           </div>
+
                           <p className="text-sm text-gray-500 truncate">
                             {farmer.username}
                           </p>
                         </div>
                       </div>
+
                       <SubmitButton
                         onClick={() => handleCreateLink(farmer.farmerId)}
                         className="slimer-button !gap-1"
@@ -856,7 +866,7 @@ export const CreateResetPasswordButton: FC<
 export const CreateResetPassOrCreateAgriButton = () => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [option, setOption] = useState<boolean>(false);
+  const [showOption, setShowOption] = useState<boolean>(false);
 
   const handleCreateAgriLink = async () => {
     try {
@@ -870,45 +880,147 @@ export const CreateResetPassOrCreateAgriButton = () => {
         { message: UnexpectedErrorMessageEnglish(), type: "error" },
       ]);
     } finally {
-      setOption(false);
+      handleDoneLoading();
+      setShowOption(false);
+    }
+  };
+
+  return (
+    <div>
+      {showOption && (
+        <div
+          className="absolute inset-0"
+          onClick={() => setShowOption(false)}
+        />
+      )}
+
+      <div className="relative">
+        <SubmitButton
+          type="button"
+          className="flex justify-between items-center gap-2 !px-4 relative"
+          onClick={() => setShowOption(!showOption)}
+        >
+          <span>Create</span>
+          <ChevronDown
+            className={`logo transition-transform duration-300 ${
+              showOption ? "rotate-180" : ""
+            }`}
+          />
+        </SubmitButton>
+
+        {showOption && (
+          <div className="absolute top-full right-0 mt-2 w-full min-w-fit bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 animate-in fade-in slide-in-from-top-2 duration-200">
+            <button
+              type="button"
+              className="create-link-userPass-agri-button"
+              onClick={handleCreateAgriLink}
+            >
+              Create Agriculturist
+            </button>
+
+            <CreateResetPasswordButton
+              label="Reset Password"
+              labelClassName="very-small-text"
+              resetStyle={true}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const ShowIsExpired: FC<ShowIsExpiredPropType> = ({ expiredAt }) => {
+  const [status, setStatus] = useState<"Expired" | "Active">("Active");
+
+  useEffect(() => {
+    const isExpired = () => {
+      if (Date.now() > new Date(expiredAt).getTime()) {
+        setStatus("Expired");
+        return true;
+      }
+
+      setStatus("Active");
+      return false;
+    };
+
+    if (isExpired()) return;
+
+    const interval = setInterval(() => {
+      if (isExpired()) clearInterval(interval);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expiredAt]);
+
+  return (
+    <div className="grid place-items-center">
+      <p
+        className={`py-1 px-3 rounded-md very-small-text ${
+          status === "Expired"
+            ? "text-red-900 bg-red-100"
+            : "text-green-900 bg-green-100"
+        }`}
+      >
+        {status}
+      </p>
+    </div>
+  );
+};
+
+export const CopyTextButton: FC<ButtonPropType & { textToCopy: string }> = ({
+  textToCopy,
+  children,
+  className = "",
+  ...buttonProps
+}) => {
+  const { handleSetNotification } = useNotification();
+
+  const copyLink = () => {
+    handleSetNotification([
+      { message: "Successfully copied the link", type: "success" },
+    ]);
+    navigator.clipboard.writeText(textToCopy);
+  };
+
+  return (
+    <button
+      className={`button ${className}`}
+      {...buttonProps}
+      onClick={copyLink}
+    >
+      {children}
+    </button>
+  );
+};
+
+export const DeleteLinkButton: FC<ButtonPropType & { linkId: string }> = ({
+  linkId,
+  children,
+  className = "",
+}) => {
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+
+  const handleDeleteLink = async () => {
+    try {
+      handleIsLoading("Deleting the link!!!");
+
+      handleSetNotification((await deleteLink(linkId)).notifMessage);
+    } catch (error) {
+      console.error((error as Error).message);
+
+      handleSetNotification([
+        { message: UnexpectedErrorMessageEnglish(), type: "error" },
+      ]);
+    } finally {
       handleDoneLoading();
     }
   };
 
   return (
-    <div className="relative">
-      <div className="absolute inset-0" onClick={() => setOption(false)} />
-
-      <SubmitButton
-        type="button"
-        className="flex justify-between items-center gap-2 !px-4 relative"
-        onClick={() => setOption(!option)}
-      >
-        <span>Create</span>
-        <ChevronDown
-          className={`logo transition-transform duration-300 ${
-            option ? "rotate-180" : ""
-          }`}
-        />
-      </SubmitButton>
-
-      {option && (
-        <div className="absolute top-full right-0 mt-2 w-full min-w-fit bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 animate-in fade-in slide-in-from-top-2 duration-200">
-          <button
-            type="button"
-            className="create-link-userPass-agri-button"
-            onClick={handleCreateAgriLink}
-          >
-            Create Agriculturist
-          </button>
-
-          <CreateResetPasswordButton
-            label="Reset Password"
-            labelClassName="very-small-text"
-            resetStyle={true}
-          />
-        </div>
-      )}
-    </div>
+    <button className={`button ${className}`} onClick={handleDeleteLink}>
+      {children}
+    </button>
   );
 };

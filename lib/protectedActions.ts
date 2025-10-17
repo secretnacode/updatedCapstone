@@ -4,6 +4,8 @@ import { SessionValueType } from "@/types";
 const Actions = {
   CREATE_RESET_PASSWORD_LINK: "create:reset:password:link", // action for creating a link, that link will be use to renew or reset the password of the farmer
   CREATE_AGRICULTURIST_LINK: "create:agriculturist:link", // action for creating a link where the agriculturist can sign up
+  READ_LINK: "read:link", // action for reading all the value in the link table
+  DELETE_LINK: "delete:link", // action for deleting link that was created by the admin or the agriculturist
 
   // admin creation action
   CREATE_USER_AGRI: "create:user:agri", // action to create a user role agriculture
@@ -65,6 +67,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   admin: [
     Actions.CREATE_AGRICULTURIST_LINK,
     Actions.CREATE_RESET_PASSWORD_LINK,
+    Actions.DELETE_LINK,
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
@@ -73,6 +76,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_REPORT,
+    Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
     Actions.READ_ORG_MEMBER_LIST,
@@ -83,6 +87,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   ],
   agriculturist: [
     Actions.CREATE_RESET_PASSWORD_LINK,
+    Actions.DELETE_LINK,
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
@@ -91,6 +96,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_REPORT,
+    Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
     Actions.READ_ORG_MEMBER_LIST,
