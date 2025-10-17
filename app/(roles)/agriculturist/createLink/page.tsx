@@ -16,6 +16,8 @@ import {
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let linkData: getAllLinkDataReturnType;
 
