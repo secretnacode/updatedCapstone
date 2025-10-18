@@ -1,5 +1,9 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
+import { NotifToUriComponent } from "./util/helper_function/reusableFunction";
+import { isFarmerVerified } from "./util/queries/user";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`farmer`, [`/farmer`]);
@@ -26,6 +30,23 @@ export default async function Middleware(req: NextRequest) {
     if (publicPath.includes(pathname)) return res;
 
     if (session) {
+      if (
+        !(await isFarmerVerified(session.userId)) &&
+        (session.work === "farmer" || session.work === "leader")
+      )
+        //will return if the farmer is not varified
+        return NextResponse.redirect(
+          new URL(
+            `/?error=${NotifToUriComponent([
+              {
+                message: "Ikaw ay hindi pa!",
+                type: "warning",
+              },
+            ])}`,
+            req.url
+          )
+        );
+
       const accessiblePath = authorizedPath.get(session.work);
       console.warn(`middleware: you have a session`);
 
@@ -33,19 +54,32 @@ export default async function Middleware(req: NextRequest) {
         accessiblePath &&
         accessiblePath.some((path) => `/${pathname.split("/")[1]}` === path)
       ) {
+        // will return if the user is authorized to go in the path
         console.warn(`middleware: you're authorized to go ${pathname}`);
+
         return res;
       } else {
+        // will return if the user in not unauthorized to go in the path
         console.warn(`middleware: you're unauthorized to go ${pathname}`);
+
         return NextResponse.redirect(new URL(`/unauthorized`, req.url));
       }
     } else {
+      // will return if the user is not logged in
       console.warn(`middleware: you're not logged in`);
-      return NextResponse.redirect(new URL(`/`, req.url));
+
+      return NextResponse.redirect(
+        new URL(
+          `/?error=${NotifToUriComponent([
+            { message: "Log in expired, log in again!", type: "warning" },
+          ])}`,
+          req.url
+        )
+      );
     }
   } catch (error) {
     console.log(`middleware error`);
-    console.log(error);
+    console.log((error as Error).message);
   }
 }
 

@@ -582,3 +582,22 @@ export const getFarmerDataForResetingPass = async (): Promise<
     throw new Error(`Error occured while getting all the farmer's data`);
   }
 };
+
+/**
+ * query for checking if the farmer was verfied or not
+ * @param farmerId id of the farmer that will be checked
+ * @returns boolean
+ */
+export const isFarmerVerified = async (farmerId: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select "verified" from capstone.farmer where "farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows[0].verified;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while getting all the farmer's data`);
+  }
+};
