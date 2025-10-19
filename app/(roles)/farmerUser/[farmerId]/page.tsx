@@ -1,8 +1,8 @@
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { GetViewingFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
-import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
-import { notFound, redirect } from "next/navigation";
+import { RedirectUnauthorizedWithError } from "@/util/helper_function/reusableFunction";
+import { notFound } from "next/navigation";
 import { GetFarmerUserProfileInfoReturnType } from "@/types";
 
 export default async function Page({
@@ -29,18 +29,14 @@ export default async function Page({
 
   if (!farmerData.success && !farmerData.isExist) notFound();
 
-  if (!farmerData.success && !farmerData.isMember)
-    redirect(
-      `/farmerLeader/orgMember?error=${NotifToUriComponent([
+  if (!farmerData.success && !farmerData.isNotValid)
+    RedirectUnauthorizedWithError(
+      farmerData.notifError ?? [
         {
-          message: "Hindi mo miyembro and user",
-          type: "error",
+          message: "The user is not authorized to view this page",
+          type: "warning",
         },
-        {
-          message: "Hindi mo pedeng makita ang impormasyon",
-          type: "error",
-        },
-      ])}`
+      ]
     );
 
   return (

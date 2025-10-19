@@ -584,6 +584,39 @@ export const getFarmerDataForResetingPass = async (): Promise<
 };
 
 /**
+ * query for checking if the pass id was a farmer or not be checking if it exist in the farmer table
+ * @param farmerId id that will be checked
+ * @returns boolean
+ */
+export const isFarmer = async (farmerId: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.farmer where "farmerId" = $1)`,
+        [farmerId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while if the user is a farmer`);
+  }
+};
+
+export const isFarmerLeader = async (userId: string) => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.farmer where "farmerId" = $1 and "orgRole" = $2)`,
+        [userId, "leader"]
+      )
+    ).rows[0].exist;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while if the user is a farmer`);
+  }
+};
+
+/**
  * query for checking if the farmer was verfied or not
  * @param farmerId id of the farmer that will be checked
  * @returns boolean
@@ -598,6 +631,39 @@ export const isFarmerVerified = async (farmerId: string): Promise<boolean> => {
     ).rows[0].verified;
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while getting all the farmer's data`);
+    throw new Error(`Error occured while checking the farmer's verification`);
+  }
+};
+
+/**
+ * query to check if the id that pass is an agriculturist by checking the agri table
+ * @param agriId id that will be checked
+ * @returns
+ */
+export const isAgriculturist = async (agriId: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.agriculturist where "agriId" = $1)`,
+        [agriId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while checking the farmer's verification`);
+  }
+};
+
+export const isAdminAgri = async (adminId: string) => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.agriculturist where "agriId" = $1 and "agriRole" = $2)`,
+        [adminId, "admin"]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while checking the farmer's verification`);
   }
 };

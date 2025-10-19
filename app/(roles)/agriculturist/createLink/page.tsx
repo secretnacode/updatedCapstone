@@ -10,15 +10,35 @@ import {
   TableNoData,
 } from "@/component/server_component/customComponent";
 import { getAllLinkData } from "@/lib/server_action/link";
-import { getAllLinkDataReturnType } from "@/types";
+import { adminAgriAuthorization } from "@/lib/server_action/user";
+import {
+  getAllLinkDataReturnType,
+  serverActionOptionalNotifMessage,
+} from "@/types";
 import {
   ReadableDateFomat,
+  RedirectUnauthorizedWithError,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
+  let adminAuth: serverActionOptionalNotifMessage;
+
+  try {
+    adminAuth = await adminAgriAuthorization();
+  } catch (error) {
+    console.error((error as Error).message);
+
+    adminAuth = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessageEnglish(), type: "error" }],
+    };
+  }
+
+  if (!adminAuth.success) RedirectUnauthorizedWithError(adminAuth.notifError);
+
   let linkData: getAllLinkDataReturnType;
 
   try {

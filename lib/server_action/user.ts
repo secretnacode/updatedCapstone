@@ -7,6 +7,11 @@ import {
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getUserLocation,
+  isAdminAgri,
+  isAgriculturist,
+  isFarmer,
+  isFarmerLeader,
+  isFarmerVerified,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import { GetSession } from "../session";
@@ -20,6 +25,7 @@ import {
   newUserValNeedInfoReturnType,
   NotificationBaseType,
   reportSequenceAndUserLocReturnType,
+  serverActionOptionalNotifMessage,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
@@ -376,6 +382,10 @@ export const getAgriculturistDashboardData =
     }
   };
 
+/**
+ * server action for getting all the link value that will be used for password reset
+ * @returns
+ */
 export const getAllFarmerForResetPass =
   async (): Promise<getAllFarmerForResetPassReturnType> => {
     try {
@@ -389,6 +399,219 @@ export const getAllFarmerForResetPass =
       const err = error as Error;
       console.log(
         `Error occured while fetching all the farmer's data for resetting password: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+/**
+ * WAS SEPERATED BECAUSE THE FARMER LEADER CAN ALSO USE THIS AUTHORIZATION
+ *
+ *  server action for validating the farmer user such us, role, validated acc, and if existing
+ * @param farmerId
+ * @param role
+ * @returns
+ */
+const farmerAndFarmerLeaderAuthorization = async (
+  farmerId: string,
+  role: allUserRoleType
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    if (!["farmer", "leader"].includes(role))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Farmer lang ang pede maka access nito!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    if (!(await isFarmer(farmerId)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Farmer lang ang pede maka access nito!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    if (!(await isFarmerVerified(farmerId)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Hindi pa beripikado ang iyong account!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * server action for farmer authorization
+ * @returns
+ */
+export const farmerAuthorization =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { work, userId } = await ProtectedAction("authorization:farmer");
+
+      const auth = await farmerAndFarmerLeaderAuthorization(userId, work);
+
+      if (!auth.success) return { success: false, notifError: auth.notifError };
+
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+/**
+ * server action for farmer leader authorization
+ * @returns
+ */
+export const farmerLeaderAuthorization =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { work, userId } = await ProtectedAction("authorization:farmer");
+
+      const auth = await farmerAndFarmerLeaderAuthorization(userId, work);
+      if (!auth.success) return { success: false, notifError: auth.notifError };
+
+      if (!(await isFarmerLeader(userId)))
+        return {
+          success: false,
+          notifError: [
+            {
+              message: "Farmer leader lang ang pede maka access nito!!!",
+              type: "warning",
+            },
+          ],
+        };
+
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+/**
+ * server action for agriculturist authorization
+ * @returns
+ */
+export const agriculturistAuthorization =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { work, userId } = await ProtectedAction("authorization:agri");
+
+      if (!["admin", "agriculturist"].includes(work))
+        return {
+          success: false,
+          notifError: [
+            { message: "Only farmer can access this!!", type: "warning" },
+          ],
+        };
+
+      if (!(await isAgriculturist(userId)))
+        return {
+          success: false,
+          notifError: [
+            { message: "You are still not verified!", type: "warning" },
+          ],
+        };
+
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Error occured while checking if the user is authorized: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const adminAgriAuthorization =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { userId } = await ProtectedAction("authorization:agri:admin");
+
+      if (!(await isAdminAgri(userId)))
+        return {
+          success: false,
+          notifError: [
+            {
+              message: "Only admin user can access this page",
+              type: "warning",
+            },
+          ],
+        };
+
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Error occured while checking if the user is authorized: ${err.message}`
       );
       return {
         success: false,

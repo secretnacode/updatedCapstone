@@ -1,5 +1,4 @@
-import { NavbarComponent } from "@/component/server_component/navbarComponent";
-import { farmerAuthorization } from "@/lib/server_action/user";
+import { farmerLeaderAuthorization } from "@/lib/server_action/user";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
   RedirectUnauthorizedWithError,
@@ -13,7 +12,7 @@ export default async function Layout({
   let authorization: serverActionOptionalNotifMessage;
 
   try {
-    authorization = await farmerAuthorization();
+    authorization = await farmerLeaderAuthorization();
   } catch (error) {
     console.error((error as Error).message);
     authorization = {
@@ -25,10 +24,5 @@ export default async function Layout({
   if (!authorization.success)
     RedirectUnauthorizedWithError(authorization.notifError);
 
-  return (
-    <div className="min-h-screen flex">
-      <NavbarComponent />
-      <main className="flex-1 p-8">{children}</main>
-    </div>
-  );
+  return <div>{children}</div>;
 }

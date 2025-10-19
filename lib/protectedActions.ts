@@ -7,6 +7,11 @@ const Actions = {
   READ_LINK: "read:link", // action for reading all the value in the link table
   DELETE_LINK: "delete:link", // action for deleting link that was created by the admin or the agriculturist
 
+  AUTHORIZATION_FARMER: "authorization:farmer", // action for authorization of farmer
+  AUTHORIZATION_FARMER_LEADER: "authorization:farmer:leader", // action for authorization of farmer leader
+  AUTHORIZATION_AGRI: "authorization:agri", // action for authorization of agri
+  AUTHORIZATION_AGRI_ADMIN: "authorization:agri:admin", // action for authorization of agri admin
+
   // admin creation action
   CREATE_USER_AGRI: "create:user:agri", // action to create a user role agriculture
 
@@ -20,6 +25,9 @@ const Actions = {
   READ_FARMER_ORG_MEMBER_USER: "read:farmer:org:member:user", // action to view the FARMER org member user
   UPDATE_FARMER_ORG_MEMBER_USER: "update:farmer:org:member:user", // action to update the FARMER USER (e.g. Validated)
   DELETE_FARMER_ORG_MEMBER_USER: "delete:farmer:org:member:user", // action for the farmer leader if the user is not active
+
+  // action for both farmer leader and agri to view the farmer profile
+  READ_FARMER_PROFILE: "read:farmer:profile",
 
   // action that wants to access the farmers info
   READ_FARMER_USER: "read:farmer:user", // action to view the FARMER USER
@@ -65,6 +73,8 @@ const Actions = {
 
 const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   admin: [
+    Actions.AUTHORIZATION_AGRI,
+    Actions.AUTHORIZATION_AGRI_ADMIN,
     Actions.CREATE_AGRICULTURIST_LINK,
     Actions.CREATE_RESET_PASSWORD_LINK,
     Actions.DELETE_LINK,
@@ -72,9 +82,10 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
     Actions.READ_FARMER_CROP,
-    Actions.READ_FARMER_USER,
+    Actions.READ_FARMER_PROFILE,
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
+    Actions.READ_FARMER_USER,
     Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
@@ -86,15 +97,17 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   agriculturist: [
+    Actions.AUTHORIZATION_AGRI,
     Actions.CREATE_RESET_PASSWORD_LINK,
     Actions.DELETE_LINK,
     Actions.DELETE_FARMER_USER,
     Actions.DELETE_FARMER_REPORT,
     Actions.DELETE_FARMER_REPORT_LIST,
     Actions.READ_FARMER_CROP,
-    Actions.READ_FARMER_USER,
+    Actions.READ_FARMER_PROFILE,
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
+    Actions.READ_FARMER_USER,
     Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
@@ -106,14 +119,15 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   leader: [
+    Actions.AUTHORIZATION_FARMER_LEADER,
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
     Actions.CREATE_REPORT,
     Actions.DELET_CROP,
     Actions.DELETE_FARMER_ORG_MEMBER_USER,
     Actions.READ_CROP,
-    Actions.READ_ALL_FARMER_ORG_MEMBER_USER,
     Actions.READ_FARMER_MEMBER_REPORT,
+    Actions.READ_FARMER_PROFILE,
     Actions.READ_FARMER_ORG_MEMBER_USER,
     Actions.READ_REPORT,
     Actions.READ_ORG,
@@ -126,6 +140,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   farmer: [
+    Actions.AUTHORIZATION_FARMER,
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
     Actions.CREATE_REPORT,

@@ -1,9 +1,6 @@
-"use server";
-
 import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
 import { NotifToUriComponent } from "./util/helper_function/reusableFunction";
-import { isFarmerVerified } from "./util/queries/user";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`farmer`, [`/farmer`]);
@@ -30,23 +27,6 @@ export default async function Middleware(req: NextRequest) {
     if (publicPath.includes(pathname)) return res;
 
     if (session) {
-      if (
-        !(await isFarmerVerified(session.userId)) &&
-        (session.work === "farmer" || session.work === "leader")
-      )
-        //will return if the farmer is not varified
-        return NextResponse.redirect(
-          new URL(
-            `/?error=${NotifToUriComponent([
-              {
-                message: "Ikaw ay hindi pa!",
-                type: "warning",
-              },
-            ])}`,
-            req.url
-          )
-        );
-
       const accessiblePath = authorizedPath.get(session.work);
       console.warn(`middleware: you have a session`);
 

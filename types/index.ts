@@ -462,7 +462,7 @@ export type GetFarmerUserProfileInfoReturnType =
   | SuccessGetMyProfileInfoReturnType
   | {
       success: false;
-      isMember?: false;
+      isNotValid?: true;
       notifError?: NotificationBaseType[];
       isExist?: false;
     };
@@ -1384,3 +1384,9 @@ export type checkIsRestPassVarReturnType = {
 };
 
 export type linkTableType = "signUpLinkForAgri" | "resetFarmerPassLink";
+
+export type serverActionOptionalNotifMessage =
+  | {
+      success: true;
+    }
+  | ServerActionFailBaseType;

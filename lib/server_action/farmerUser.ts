@@ -18,6 +18,7 @@ import {
   GetFarmerUserProfileInfoReturnType,
   GetMyProfileInfoReturnType,
   NotificationBaseType,
+  serverActionOptionalNotifMessage,
   SuccessGetMyProfileInfoReturnType,
   UpdateUserProfileInfoReturnType,
   ViewAllUnvalidatedFarmerReturnType,
@@ -28,6 +29,7 @@ import { userProfileInfoUpdateSchema } from "@/util/helper_function/validation/v
 import { ZodValidateForm } from "../validation/authValidation";
 import { getFarmerCropNameQuery } from "@/util/queries/crop";
 import { revalidatePath } from "next/cache";
+import { agriculturistAuthorization, farmerLeaderAuthorization } from "./user";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -103,23 +105,92 @@ export const GetViewingFarmerUserProfileInfo = async (
   farmerId: string
 ): Promise<GetFarmerUserProfileInfoReturnType> => {
   try {
-    const session = await GetSession();
-
-    if (session?.work === "leader") {
-      await ProtectedAction("read:farmer:org:member:user");
-      const myMember = await CheckMyMemberquery(farmerId, session.userId);
-
-      if (!myMember) return { success: false, isMember: false };
-    } else await ProtectedAction("read:farmer:user");
+    const { work, userId } = await ProtectedAction("read:farmer:profile");
 
     if (!(await farmerIsExist(farmerId)))
       return { success: false, isExist: false };
+
+    if (work === "leader") {
+      const leadAuth = await checkFarmerLeader(farmerId, userId);
+      if (!leadAuth.success)
+        return {
+          success: false,
+          isNotValid: true,
+          notifError: leadAuth.notifError,
+        };
+    } else {
+      const agriAuth = await checkAgri();
+
+      if (!agriAuth.success)
+        return {
+          success: false,
+          isNotValid: true,
+          notifError: agriAuth.notifError,
+        };
+    }
 
     return await userFarmerProfileInfo(farmerId);
   } catch (error) {
     const err = error as Error;
     console.log(
       `Nagka problema sa pag kuha ng impormasyon ng mag sasaka ${err}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+const checkFarmerLeader = async (
+  farmerId: string,
+  farmerLeadId: string
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    const auth = await farmerLeaderAuthorization();
+    if (!auth.success) return { success: false, notifError: auth.notifError };
+
+    const myMember = await CheckMyMemberquery(farmerId, farmerLeadId);
+    if (!myMember)
+      return {
+        success: false,
+        notifError: [
+          { message: "Hindi mo kagrupo and user na ito", type: "warning" },
+        ],
+      };
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Problem occured in viewing the farmer user profile ${err}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+const checkAgri = async (): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    const auth = await agriculturistAuthorization();
+    if (!auth.success) return { success: false, notifError: auth.notifError };
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `Error occured while checking if the user is authorized: ${err}`
     );
     return {
       success: false,
