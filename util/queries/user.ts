@@ -369,6 +369,8 @@ export const DelteUserAccountQuery = async (
     await pool.query(`delete from capstone.auth where "authId" = $1`, [
       farmerId,
     ]);
+
+    await pool.query(`update capstone.farmer set ""`);
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user: ${
