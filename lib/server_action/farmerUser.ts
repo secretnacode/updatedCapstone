@@ -1,7 +1,7 @@
 "use server";
 
 import {
-  ApprovedOrgFarmerAccQuery,
+  ApprovedOrgMemberAccQuery,
   CheckMyMemberquery,
   farmerIsExist,
   GetFarmerOrgMemberQuery,
@@ -17,7 +17,7 @@ import {
   GetFarmerProfilePersonalInfoQueryReturnType,
   GetFarmerUserProfileInfoReturnType,
   GetMyProfileInfoReturnType,
-  NotificationBaseType,
+  serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
   SuccessGetMyProfileInfoReturnType,
   UpdateUserProfileInfoReturnType,
@@ -30,6 +30,7 @@ import { ZodValidateForm } from "../validation/authValidation";
 import { getFarmerCropNameQuery } from "@/util/queries/crop";
 import { revalidatePath } from "next/cache";
 import { agriculturistAuthorization, farmerLeaderAuthorization } from "./user";
+import { NotAMemberErrorMessage } from "@/util/helper_function/reusableFunction";
 
 /**
  * fetch the farmer member within the organization to gether with its information
@@ -64,20 +65,74 @@ export const GetFarmerOrgMember =
   };
 
 /**
+ * server action for validating the farmer leader when the farmer leader do some important action such as deleting a user or validating a farmer
+ * @param farmerId id of the farmer that was targeted by the important action
+ * @param leaderId id of the leader
+ * @returns
+ */
+export const farmerLeaderValidationForImportantAction = async (
+  farmerId: string,
+  leaderId: string
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    if (!(await farmerIsExist(farmerId)))
+      return {
+        success: false,
+        notifError: [
+          { message: "Hindi nag eexist ang account", type: "warning" },
+        ],
+      };
+
+    const leadAuth = await farmerLeaderAuthorization();
+    if (!leadAuth.success)
+      return { success: false, notifError: leadAuth.notifError };
+
+    if (!(await CheckMyMemberquery(farmerId, leaderId)))
+      return {
+        success: false,
+        notifError: [{ message: NotAMemberErrorMessage(), type: "warning" }],
+      };
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Nagka problema habang chine-check and leader ${err}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
  * verifying the farmer account by updating its info in the db
  * @param farmerId id of the farmer you want to update
  * @returns a notifMessage object that can be consumed by the notif context, if the update was successful it will comes woth the refresh object
  */
-export const ApprovedOrgFarmerAcc = async (
+export const ApprovedOrgMemberAcc = async (
   farmerId: string
-): Promise<{ notifMessage: NotificationBaseType[]; refresh?: boolean }> => {
+): Promise<serverActionNormalReturnType> => {
   try {
-    await ProtectedAction("update:farmer:org:member:user");
+    const { userId } = await ProtectedAction("update:farmer:org:member:user");
 
-    await ApprovedOrgFarmerAccQuery(farmerId);
+    const checkAuthorization = await farmerLeaderValidationForImportantAction(
+      farmerId,
+      userId
+    );
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await ApprovedOrgMemberAccQuery(farmerId);
+
+    revalidatePath(`/farmerLeader/orgMember`);
 
     return {
-      refresh: true,
+      success: true,
       notifMessage: [
         { message: `Matagumpay ang iyong pag aapruba!!!`, type: "success" },
       ],
@@ -86,6 +141,85 @@ export const ApprovedOrgFarmerAcc = async (
     const err = error as Error;
     console.log(`Nagka problema sa pag aapruba ng account ${err}`);
     return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * server action for validating the agriculturist/admin when the agriculturist/admin do some important action such as deleting a user or validating a farmer
+ * @param farmerId id of the farmer that was targeted by the important action
+ * @param leaderId id of the leader
+ * @returns
+ */
+export const agriValidationForImportantAction = async (
+  farmerId: string
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    if (!(await farmerIsExist(farmerId)))
+      return {
+        success: false,
+        notifError: [
+          { message: "Hindi nag eexist ang account", type: "warning" },
+        ],
+      };
+
+    const agriAuth = await agriculturistAuthorization();
+    if (!agriAuth.success)
+      return { success: false, notifError: agriAuth.notifError };
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Nagka problema habang chine-check and leader ${err}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * verifying the farmer account by updating its info in the db
+ * @param farmerId id of the farmer you want to update
+ * @returns a notifMessage object that can be consumed by the notif context, if the update was successful it will comes woth the refresh object
+ */
+export const ApprovedFarmerAcc = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    await ProtectedAction("update:farmer:user");
+
+    const checkAuthorization = await agriValidationForImportantAction(farmerId);
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await ApprovedOrgMemberAccQuery(farmerId);
+
+    revalidatePath(`/agriculturist/validateFarmer`);
+
+    return {
+      success: true,
+      notifMessage: [
+        { message: `Matagumpay ang iyong pag aapruba!!!`, type: "success" },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Nagka problema sa pag aapruba ng account ${err}`);
+    return {
+      success: false,
       notifMessage: [
         {
           message: err.message,

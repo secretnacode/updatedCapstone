@@ -11,9 +11,8 @@ import {
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
-import { useRouter } from "next/navigation";
 import {
-  ApprovedButtonPropType,
+  ApprovedOrgMemberButtonPropType,
   DeleteUserPropType,
   FormErrorType,
   GetFarmerProfilePersonalInfoQueryReturnType,
@@ -29,9 +28,12 @@ import {
   getFarmerDataForResetingPassReturnType,
   ShowIsExpiredPropType,
   ButtonPropType,
+  approvedButtonProp,
+  deleteMyOrgMemberPropType,
 } from "@/types";
 import {
-  ApprovedOrgFarmerAcc,
+  ApprovedFarmerAcc,
+  ApprovedOrgMemberAcc,
   UpdateUserProfileInfo,
 } from "@/lib/server_action/farmerUser";
 import { useLoading } from "./provider/loadingProvider";
@@ -46,7 +48,8 @@ import {
   SubmitButton,
 } from "../server_component/customComponent";
 import {
-  DelteUserAccount,
+  DeleteFarmerUser,
+  DeleteMyOrgMember,
   getAllFarmerForResetPass,
 } from "@/lib/server_action/user";
 import { LineChart } from "@mui/x-charts";
@@ -408,12 +411,10 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
   );
 };
 
-export const ApprovedButton: FC<ApprovedButtonPropType> = ({
+export const ApprovedOrgMemberButton: FC<ApprovedOrgMemberButtonPropType> = ({
   farmerId,
   verificationStatus,
-  label = "Aprubahan",
 }) => {
-  const router = useRouter();
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
 
@@ -421,13 +422,12 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
     try {
       handleIsLoading(`Inaaprubahan na ang account!!!`);
 
-      const approveAcc = await ApprovedOrgFarmerAcc(farmerId);
+      const approveAcc = await ApprovedOrgMemberAcc(farmerId);
 
       handleSetNotification(approveAcc.notifMessage);
-      if (approveAcc.refresh) router.refresh();
     } catch (error) {
       const err = error as Error;
-      console.log(`Error in approving the farmer account: ${err.message}`);
+      console.log(`Nagka problema sa pag aapruba ng account: ${err.message}`);
       handleSetNotification([{ message: err.message, type: "error" }]);
     } finally {
       handleDoneLoading();
@@ -440,7 +440,37 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
       disabled={verificationStatus}
       onClick={handleApproveFarmerAcc}
     >
-      {label}
+      Aprubahan
+    </button>
+  );
+};
+
+export const ApprovedFarmerButton: FC<approvedButtonProp> = ({ farmerId }) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleApproveFarmerAcc = async () => {
+    try {
+      handleIsLoading(`Verifying the farmer!!!`);
+
+      const approveAcc = await ApprovedFarmerAcc(farmerId);
+
+      handleSetNotification(approveAcc.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      console.error(`Error occur while verifying the farmer: ${err.message}`);
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <button
+      className="button submit-button slimer-button"
+      onClick={handleApproveFarmerAcc}
+    >
+      Verify
     </button>
   );
 };
@@ -450,67 +480,55 @@ export const ApprovedButton: FC<ApprovedButtonPropType> = ({
  * @param param0
  * @returns
  */
-export const DeleteUser: FC<DeleteUserPropType> = ({
-  farmerId,
+const DeleteUser: FC<DeleteUserPropType> = ({
+  isEnglish,
   farmerName,
-  modalTitle = "Tatanggalin ang account?",
-  proceedButtonLabel = "Mag Patuloy",
-  cancelButtonLabel = "Bumalik",
-  buttonLabel = "Tanggalin",
-  modalMessage = (
-    <>
-      <p className="p font-bold !text-lg mb-4">
-        Burahin ang farmer user na si {farmerName}. Kapag ito ay binura mo, ito
-        ay mawawala na ng tuluyan at hindi na maibabalik
-      </p>
-      <p className="p !text-[17px] tracking-wide">
-        Magpatuloy sa pag tatanggal ng account ng mag sasaka?
-      </p>
-    </>
-  ),
+  deleteOnClick,
 }) => {
-  const router = useRouter();
-  const { handleSetNotification } = useNotification();
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const { handleIsLoading, handleDoneLoading } = useLoading();
 
-  const handleDeleteFarmerUser = async () => {
-    try {
-      handleIsLoading("Tinatanggal na ang account....");
-
-      const deleteUser = await DelteUserAccount(farmerId);
-
-      handleSetNotification(deleteUser.notifMessage);
-      router.refresh();
-    } catch (error) {
-      const err = error as Error;
-      handleSetNotification([{ message: err.message, type: "error" }]);
-    } finally {
-      handleDoneLoading();
-      setShowModal(false);
-    }
-  };
   return (
     <>
       <button
         className="button cancel-button slimer-button"
         onClick={() => setShowModal(true)}
       >
-        {buttonLabel}
+        {isEnglish ? "Delete" : "Tanggalin"}
       </button>
 
       <button
         className="hidden"
-        onClick={handleDeleteFarmerUser}
+        onClick={() => {
+          deleteOnClick();
+          setShowModal(false);
+        }}
         ref={submitButtonRef}
       />
 
       {showModal && (
         <ModalNotice
           type="warning"
-          title={modalTitle}
-          message={modalMessage}
+          title={isEnglish ? "Delete the account?" : "Tatanggalin ang account?"}
+          message={
+            <>
+              <p className="p font-bold !text-lg mb-4">
+                {isEnglish
+                  ? `Delete the farmer user `
+                  : `Burahin ang farmer user na si `}
+                <span className="italic">{farmerName}</span>
+                {isEnglish
+                  ? `?. If the user was deleted, it will deleted permanently`
+                  : `?. Kapag ito ay binura mo, ito
+        ay mawawala na ng tuluyan at hindi na maibabalik`}
+              </p>
+              <p className="p !text-[17px] tracking-wide">
+                {isEnglish
+                  ? "Proceed with the deletion of farmer's account?"
+                  : "Magpatuloy sa pag tatanggal ng account ng mag sasaka?"}
+              </p>
+            </>
+          }
           onClose={() => setShowModal(false)}
           showCancelButton={true}
           onProceed={() => {
@@ -518,12 +536,79 @@ export const DeleteUser: FC<DeleteUserPropType> = ({
             setShowModal(false);
           }}
           proceed={{
-            label: proceedButtonLabel,
+            label: isEnglish ? "Proceed" : "Mag Patuloy",
           }}
-          cancel={{ label: cancelButtonLabel }}
+          cancel={{ label: isEnglish ? "Back" : "Bumalik" }}
         />
       )}
     </>
+  );
+};
+
+export const DeleteMyOrgMemberButton: FC<deleteMyOrgMemberPropType> = ({
+  farmerId,
+  farmerName,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleDeleteFarmerUser = async () => {
+    try {
+      handleIsLoading("Tinatanggal na ang account....");
+
+      const deleteUser = await DeleteMyOrgMember(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <DeleteUser
+      farmerName={farmerName}
+      isEnglish={false}
+      deleteOnClick={handleDeleteFarmerUser}
+    />
+  );
+};
+
+/**
+ * button component for agriculturist only
+ * @param param0
+ * @returns
+ */
+export const DeleteFarmerButton: FC<deleteMyOrgMemberPropType> = ({
+  farmerId,
+  farmerName,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleDeleteFarmerUser = async () => {
+    try {
+      handleIsLoading("Deleting the farmer account....");
+
+      const deleteUser = await DeleteFarmerUser(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <DeleteUser
+      farmerName={farmerName}
+      isEnglish={true}
+      deleteOnClick={handleDeleteFarmerUser}
+    />
   );
 };
 

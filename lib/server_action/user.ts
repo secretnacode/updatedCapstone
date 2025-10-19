@@ -7,14 +7,12 @@ import {
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getUserLocation,
-  isAdminAgri,
   isAgriculturist,
   isFarmer,
   isFarmerLeader,
   isFarmerVerified,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
-import { GetSession } from "../session";
 import {
   allUserRoleType,
   checkFarmerRoleReturnType,
@@ -23,8 +21,8 @@ import {
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
   newUserValNeedInfoReturnType,
-  NotificationBaseType,
   reportSequenceAndUserLocReturnType,
+  serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
@@ -39,37 +37,47 @@ import {
   getTotalNewFarmerReportToday,
 } from "@/util/queries/report";
 import { reportPerDayWeekAndMonth } from "./report";
+import {
+  agriValidationForImportantAction,
+  farmerLeaderValidationForImportantAction,
+} from "./farmerUser";
+import { revalidatePath } from "next/cache";
 
 /**
- * server action for deleting a user account
+ * server action when the farmer leader want to delete a farmer account
  * @param farmerId id that you want to delete
  * @returns notifMessage that will be consumed by the notification provider
  */
-export const DelteUserAccount = async (
+export const DeleteMyOrgMember = async (
   farmerId: string
-): Promise<{ notifMessage: NotificationBaseType[] }> => {
+): Promise<serverActionNormalReturnType> => {
   try {
-    const session = await GetSession();
+    const { userId } = await ProtectedAction("delete:farmer:org:member:user");
 
-    if (session) {
-      if (session.work === "leader") {
-        await ProtectedAction("delete:farmer:org:member:user");
+    const checkAuthorization = await farmerLeaderValidationForImportantAction(
+      farmerId,
+      userId
+    );
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
 
-        if (!(await CheckMyMemberquery(farmerId, session.userId)))
-          return {
-            notifMessage: [
-              {
-                message: "Ang user na tatanggalin mo ay hindi mo kamiyembro!!!",
-                type: "warning",
-              },
-            ],
-          };
-      } else await ProtectedAction("delete:farmer:user");
-    }
+    if (!(await CheckMyMemberquery(farmerId, userId)))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "Ang user na tatanggalin mo ay hindi mo kamiyembro!!!",
+            type: "warning",
+          },
+        ],
+      };
 
     await DelteUserAccountQuery(farmerId);
 
+    revalidatePath(`/farmerLeader/orgMember`);
+
     return {
+      success: true,
       notifMessage: [
         {
           message: "Matagumpay na natanggal ang account ng farmer",
@@ -81,6 +89,45 @@ export const DelteUserAccount = async (
     const err = error as Error;
     console.log(`Error in getting the farmer reports: ${err}`);
     return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * server action when the agriculturist want to delete a farmer account
+ * @param farmerId id that you want to delete
+ * @returns notifMessage that will be consumed by the notification provider
+ */
+export const DeleteFarmerUser = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    await ProtectedAction("delete:farmer:org:member:user");
+
+    const checkAuthorization = await agriValidationForImportantAction(farmerId);
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await DelteUserAccountQuery(farmerId);
+
+    revalidatePath(`/agriculturist/validateFarmer`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Successfully deleted the farmer account",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Error in getting the farmer reports: ${err}`);
+    return {
+      success: false,
       notifMessage: [{ message: err.message, type: "error" }],
     };
   }
@@ -561,7 +608,10 @@ export const agriculturistAuthorization =
         return {
           success: false,
           notifError: [
-            { message: "Only farmer can access this!!", type: "warning" },
+            {
+              message: "Only agriculturist can access this!!",
+              type: "warning",
+            },
           ],
         };
 
@@ -569,39 +619,8 @@ export const agriculturistAuthorization =
         return {
           success: false,
           notifError: [
-            { message: "You are still not verified!", type: "warning" },
-          ],
-        };
-
-      return { success: true };
-    } catch (error) {
-      const err = error as Error;
-      console.log(
-        `Error occured while checking if the user is authorized: ${err.message}`
-      );
-      return {
-        success: false,
-        notifError: [
-          {
-            message: err.message,
-            type: "error",
-          },
-        ],
-      };
-    }
-  };
-
-export const adminAgriAuthorization =
-  async (): Promise<serverActionOptionalNotifMessage> => {
-    try {
-      const { userId } = await ProtectedAction("authorization:agri:admin");
-
-      if (!(await isAdminAgri(userId)))
-        return {
-          success: false,
-          notifError: [
             {
-              message: "Only admin user can access this page",
+              message: "Only agriculturist can access this!!",
               type: "warning",
             },
           ],
@@ -624,3 +643,37 @@ export const adminAgriAuthorization =
       };
     }
   };
+
+// export const adminAgriAuthorization =
+//   async (): Promise<serverActionOptionalNotifMessage> => {
+//     try {
+//       const { userId } = await ProtectedAction("authorization:agri:admin");
+
+//       if (!(await isAdminAgri(userId)))
+//         return {
+//           success: false,
+//           notifError: [
+//             {
+//               message: "Only admin user can access this page",
+//               type: "warning",
+//             },
+//           ],
+//         };
+
+//       return { success: true };
+//     } catch (error) {
+//       const err = error as Error;
+//       console.log(
+//         `Error occured while checking if the user is authorized: ${err.message}`
+//       );
+//       return {
+//         success: false,
+//         notifError: [
+//           {
+//             message: err.message,
+//             type: "error",
+//           },
+//         ],
+//       };
+//     }
+//   };

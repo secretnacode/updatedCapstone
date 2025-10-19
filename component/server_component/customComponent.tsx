@@ -569,7 +569,7 @@ export const CropForm: FC<CropFormPropType> = ({
 
 export const LoadingScreen: FC = () => {
   return (
-    <div className="loader">
+    <div className="loader fixed inset-0 flex items-center justify-center p-4 z-30 overflow-hidden bg-white">
       <div className="square" id="sq1"></div>
       <div className="square" id="sq2"></div>
       <div className="square" id="sq3"></div>

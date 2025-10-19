@@ -257,7 +257,7 @@ export const GetFarmerOrgMemberQuery = async (
  * query for updating the verified status of the farmer account
  * @param farmerId id of the farmer you want to approved
  */
-export const ApprovedOrgFarmerAccQuery = async (farmerId: string) => {
+export const ApprovedOrgMemberAccQuery = async (farmerId: string) => {
   try {
     await pool.query(
       `update capstone.farmer set "verified" = $1 where "farmerId" = $2`,

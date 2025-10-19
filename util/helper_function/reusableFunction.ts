@@ -189,6 +189,10 @@ export const FormErrorMessage = (): string => {
   return "May mali sa iyong ipinasa, baguhin muna ito";
 };
 
+export const NotAMemberErrorMessage = () => {
+  return "Hindi mo ka miyembro and user na ito";
+};
+
 /**
  * used to convert the user farmerAreaMasurement into a hectare value
  * @param measurement of the area (e.g. 200)

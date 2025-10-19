@@ -1,6 +1,6 @@
 import {
-  ApprovedButton,
-  DeleteUser,
+  ApprovedFarmerButton,
+  DeleteFarmerButton,
 } from "@/component/client_component/componentForAllUser";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { DynamicLink } from "@/component/server_component/componentForAllUser";
@@ -81,18 +81,11 @@ export default async function Page() {
                         dynamicId={farmVal.farmerId}
                       />
 
-                      <ApprovedButton
-                        farmerId={farmVal.farmerId}
-                        verificationStatus={farmVal.verified}
-                        label="Verify"
-                      />
+                      <ApprovedFarmerButton farmerId={farmVal.farmerId} />
 
-                      <DeleteUser
+                      <DeleteFarmerButton
                         farmerId={farmVal.farmerId}
                         farmerName={farmVal.farmerName}
-                        buttonLabel="Delete"
-                        proceedButtonLabel="Proceed"
-                        cancelButtonLabel="Cancel"
                       />
                     </div>
                   </td>

@@ -1,7 +1,7 @@
 "use client";
 
 import { NotificationBaseType } from "@/types";
-import { FC, memo, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import { useRouter } from "next/navigation";
 import { useLoading } from "./provider/loadingProvider";
@@ -34,8 +34,6 @@ export const RedirectManager: FC<{
 
   return null;
 };
-
-export const MemoizedRedirectManager = memo(RedirectManager);
 
 export const RenderNotification: FC<{ notif: NotificationBaseType[] }> = ({
   notif,

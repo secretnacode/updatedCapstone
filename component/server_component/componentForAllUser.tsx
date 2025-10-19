@@ -13,10 +13,10 @@ import { ClipboardPlus, LucideIcon, MapPinHouse, Wheat } from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
-  ApprovedButton,
   MyProfileForm,
-  DeleteUser,
+  DeleteMyOrgMemberButton,
   MyOrganizationForm,
+  ApprovedOrgMemberButton,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
@@ -134,12 +134,12 @@ export const FarmerOrgMemberAction: FC<{
     <div className="flex flex-row justify-center items-center gap-2">
       <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
 
-      <ApprovedButton
+      <ApprovedOrgMemberButton
         farmerId={farmerId}
         verificationStatus={verificationStatus}
       />
 
-      <DeleteUser farmerId={farmerId} farmerName={farmerName} />
+      <DeleteMyOrgMemberButton farmerId={farmerId} farmerName={farmerName} />
     </div>
   );
 };

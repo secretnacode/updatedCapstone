@@ -1,14 +1,21 @@
-"use client";
-
-import { LoadingManager } from "@/component/client_component/provider/loadingProvider";
+import { RedirectManager } from "@/component/client_component/fallbackComponent";
 import { GoBackButton } from "@/component/client_component/unauthorizedComponent";
+import { NotificationBaseType } from "@/types";
 import Link from "next/link";
-import { ReactElement } from "react";
 
-export default function Page(): ReactElement {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  let message: NotificationBaseType[] | null = null;
+
+  if (error) message = JSON.parse(error);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
-      <LoadingManager />
+      {message && <RedirectManager data={message} paramName="error" />}
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Warning Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
@@ -49,6 +56,7 @@ export default function Page(): ReactElement {
             >
               Sign In
             </Link>
+
             <GoBackButton />
           </div>
 

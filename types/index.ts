@@ -741,10 +741,12 @@ export type ViewAllUnvalidatedFarmerReturnType =
     }
   | ServerActionFailBaseType;
 
-export type ApprovedButtonPropType = {
+export type approvedButtonProp = {
   farmerId: string;
+};
+
+export type ApprovedOrgMemberButtonPropType = approvedButtonProp & {
   verificationStatus: boolean;
-  label?: string;
 };
 
 export type DynamicLinkPropType = {
@@ -754,14 +756,17 @@ export type DynamicLinkPropType = {
   className?: string;
 };
 
-export type DeleteUserPropType = {
-  farmerId: string;
+type deleteUserBaseType = {
   farmerName: string;
-  buttonLabel?: string;
-  proceedButtonLabel?: string;
-  cancelButtonLabel?: string;
-  modalTitle?: string;
-  modalMessage?: Readonly<ReactNode>;
+};
+
+export type deleteMyOrgMemberPropType = deleteUserBaseType & {
+  farmerId: string;
+};
+
+export type DeleteUserPropType = deleteUserBaseType & {
+  isEnglish: boolean;
+  deleteOnClick: () => void;
 };
 
 export type GetAllOrganizationQueryReturnType = {
