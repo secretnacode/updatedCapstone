@@ -8,9 +8,11 @@ import {
   AuthLoginType,
   AuthSignUpType,
   NewUserType,
+  serverActionNormalReturnType,
 } from "@/types";
 import {
   CreateUUID,
+  NotifToUriComponent,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import { CreateSession } from "@/lib/session";
@@ -19,10 +21,11 @@ import {
   ValidateSingupVal,
 } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import {
+  agriAuthQuery,
   CheckUsername,
-  GetAgriRole,
-  GetFarmerRole,
+  getFarmerIdByAuthId,
   InsertNewUser,
+  isFarmerVerified,
   UserLogin,
 } from "@/util/queries/user";
 import { ComparePassword, Hash } from "@/lib/reusableFunctions";
@@ -72,26 +75,61 @@ export async function LoginAuth(
         ],
       };
 
+    if (userCredentials.data.work === "agriculturist")
+      return {
+        success: false,
+        errors: [
+          {
+            message: "This login page is for farmer users only!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
+
+    // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
+    if (!farmerId) {
+      await CreateSession(userCredentials.data.authId, "newUser");
+
+      redirect("/farmerDetails");
+    }
+
+    if (!(await isFarmerVerified(farmerId.farmerId)))
+      return {
+        success: false,
+        errors: [
+          {
+            message: "Hindi pa beripikado and iyong account!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    // DIDNT INCLUDE THE CHECKING IF THE USER IS DELETED OR NOT BECAUSE IF THE VALUE OF THE USER(USERNAME)
+    // IS NOT EXISITNG IN THE AUTH TABLE(DELETED), THE userCredentials.exist WILL RETURN FALSE
+
+    // if the user is existing, correct username and pass, and is verified it will crete a session and proceed to the next page
+    // the GenerateUserRole() function is s
     await CreateSession(
-      userCredentials.data.authId,
-      await GenerateUserRole(
-        userCredentials.data.authId,
-        userCredentials.data.work
-      )
+      farmerId.farmerId,
+      farmerId.orgRole === "leader" ? farmerId.orgRole : "farmer"
     );
 
     // work = userCredentials.data.work
     redirect(
-      `/${userCredentials.data.work}/?success=${encodeURIComponent(
-        JSON.stringify([
-          { message: "Matagumpay ang iyong pag lologin", type: "success" },
-        ])
-      )}`
+      `/farmer/?notif=${NotifToUriComponent([
+        { message: "Matagumpay ang iyong pag lologin", type: "success" },
+      ])}`
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;
 
-    console.log(`May pagkakamali na hindi inaasahan sa pag lologin${(error as Error).message}`,)
+    console.log(
+      `May pagkakamali na hindi inaasahan sa pag lologin ${
+        (error as Error).message
+      }`
+    );
     return {
       success: false,
       errors: [
@@ -103,33 +141,6 @@ export async function LoginAuth(
     };
   }
 }
-
-/**
- * will generate a userRole base on the work of the current user
- * @param userId id of the current user
- * @param work of the current user
- * @returns a role of the current user(e.g. farmer, agriculturist, leader, admin)
- */
-const GenerateUserRole = async (
-  userId: string,
-  work: string
-): Promise<string> => {
-  // for generating farmer role
-  if (work === "farmer") {
-    const role = (await GetFarmerRole(userId)).orgRole;
-
-    if (role === "leader") return role;
-
-    return work;
-  }
-
-  // for generating agri role
-  const role = (await GetAgriRole(userId)).agriRole;
-
-  if (role === work) return work;
-
-  return role;
-};
 
 /**
  * used for signing up new user and validating the user input before redirecting the user into another page
@@ -163,16 +174,16 @@ export async function SignUpAuth(
         ],
       };
 
-    const userId = CreateUUID();
+    const authId = CreateUUID();
 
     await InsertNewUser({
-      userId: userId,
+      userId: authId,
       username: data.username,
       password: await Hash(data.password),
       role: `farmer`,
     } as NewUserType);
 
-    await CreateSession(userId, "newUser");
+    await CreateSession(authId, "newUser");
 
     redirect("/farmerDetails");
   } catch (error) {
@@ -186,3 +197,41 @@ export async function SignUpAuth(
     };
   }
 }
+
+/**
+ * server action for log in of the agriculturist user
+ * @param id id of the current use(clerk)
+ * @param email email of the current user(clerk)
+ * @returns
+ */
+export const agriSignIn = async (
+  id: string,
+  email: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const agriVal = await agriAuthQuery({ id, email });
+
+    if (!agriVal.exist)
+      return {
+        success: false,
+        notifMessage: [{ message: agriVal.message, type: "warning" }],
+      };
+
+    await CreateSession(agriVal.agriVal.agriId, agriVal.agriVal.agriRole);
+
+    redirect(
+      `/agriculturist/?notif=${NotifToUriComponent([
+        { message: "You've successfully logged in!!!", type: "success" },
+      ])}`
+    );
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+    console.log(`Error making a new user: ${err}`);
+    return {
+      success: false,
+      notifMessage: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+};

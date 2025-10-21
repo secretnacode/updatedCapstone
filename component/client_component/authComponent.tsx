@@ -14,15 +14,19 @@ import {
   FormEvent,
   ReactElement,
   SetStateAction,
+  useEffect,
   useRef,
   useState,
 } from "react";
 import { Eye, EyeClosed, TriangleAlert, X } from "lucide-react";
 import { useNotification } from "./provider/notificationProvider";
 import { ValidateSingupVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
-import { LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
+import { agriSignIn, LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
 import { useLoading } from "./provider/loadingProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { SignIn, SignUp, useAuth, useUser } from "@clerk/nextjs";
+import { ClerkModalLoading } from "../server_component/customComponent";
+import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
 
 /**
  * Auth form component that renders the login form(default) or the sign up form
@@ -35,7 +39,7 @@ export const AuthForm: FC = () => {
     <>
       {isSignUp ? (
         <>
-          <SignUp setIsSignUp={setIsSignUp} />
+          <FarmerSignUp setIsSignUp={setIsSignUp} />
           <ModalNotif isSignUp={isSignUp} />
         </>
       ) : (
@@ -50,7 +54,7 @@ export const AuthForm: FC = () => {
  * @param setIsSignUp a useState function that change the value of isSignUp in the parent component that renders what form will be shown
  * @returns sign up component
  */
-const SignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
+const FarmerSignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   setIsSignUp,
 }): ReactElement => {
   const [isHiddenPass, setIsHiddenPass] = useState<boolean>(true);
@@ -182,6 +186,7 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
     try {
       const res = await LoginAuth(authVal);
+
       if (res && !res.success) {
         handleSetNotification(res.errors);
         handleDoneLoading();
@@ -254,6 +259,8 @@ const ModalNotif: FC<{
   isSignUp: boolean;
 }> = ({ isSignUp }): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
+
+  console.log(modalRef.current);
 
   return (
     <>
@@ -330,7 +337,7 @@ const ModalNotif: FC<{
 
               {/* Action Button */}
               <button
-                onClick={() => modalRef.current?.classList.add("hidden")}
+                onClick={() => modalRef.current?.classList.add("!hidden")}
                 className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2.5 px-4 rounded-lg cursor-pointer transition-colors"
               >
                 Naintindihan ko
@@ -346,4 +353,77 @@ const ModalNotif: FC<{
 // an eye logo function that recieve a prop that has a value of true or false and returns an eye icon between open and closed base on that prop value
 const EyeLogo: FC<{ isHidden: boolean }> = ({ isHidden }): ReactElement => {
   return <>{isHidden ? <EyeClosed /> : <Eye />}</>;
+};
+
+export const AgriSignUp = () => {
+  const { isLoaded } = useAuth();
+
+  return (
+    <>
+      {isLoaded ? (
+        <SignUp signInUrl={undefined} forceRedirectUrl={`/agriAuth/signUp`} />
+      ) : (
+        <ClerkModalLoading />
+      )}
+    </>
+  );
+};
+
+export const AgriSignIn = () => {
+  const { isLoaded, signOut } = useAuth();
+  const { isSignedIn, user } = useUser();
+  const { handleIsLoading, handleDoneLoading, isLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+
+  useEffect(() => {
+    const userAuth = async () => {
+      if (isSignedIn && user.primaryEmailAddress) {
+        try {
+          handleIsLoading("Checking your account");
+
+          const res = await agriSignIn(
+            user.id,
+            user.primaryEmailAddress?.emailAddress
+          );
+
+          // if the authenthication is not success, it means the user is not validated
+          if (!res.success) return await signOut();
+
+          handleSetNotification(res.notifMessage);
+        } catch (error) {
+          if (!isRedirectError(error)) {
+            const err = error as Error;
+            console.error(err.message);
+
+            handleSetNotification([
+              { message: UnexpectedErrorMessageEnglish(), type: "error" },
+            ]);
+          }
+        } finally {
+          handleDoneLoading();
+        }
+      }
+    };
+
+    userAuth();
+  }, [
+    isSignedIn,
+    user,
+    handleIsLoading,
+    handleDoneLoading,
+    handleSetNotification,
+    signOut,
+  ]);
+
+  return (
+    <>
+      {isLoaded ? (
+        <SignIn signInUrl={undefined} forceRedirectUrl={`/agriAuth/signIn`} />
+      ) : (
+        <ClerkModalLoading />
+      )}
+
+      {isLoading && <ClerkModalLoading />}
+    </>
+  );
 };

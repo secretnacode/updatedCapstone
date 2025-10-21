@@ -278,6 +278,9 @@ body {
   .link {
     @apply text-xs text-gray-700 truncate flex-1 font-mono;
   }
+  .clerk-modal {
+    @apply w-[400px] min-h-[500px];
+  }
 }
 
 /* loading style */

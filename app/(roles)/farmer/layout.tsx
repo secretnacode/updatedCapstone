@@ -2,7 +2,7 @@ import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { farmerAuthorization } from "@/lib/server_action/user";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
-  RedirectUnauthorizedWithError,
+  RedirectUnauthorizedWithNotif,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import { ReactNode } from "react";
@@ -23,7 +23,7 @@ export default async function Layout({
   }
 
   if (!authorization.success)
-    RedirectUnauthorizedWithError(authorization.notifError);
+    RedirectUnauthorizedWithNotif(authorization.notifError);
 
   return (
     <div className="min-h-screen flex">

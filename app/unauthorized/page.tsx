@@ -6,16 +6,16 @@ import Link from "next/link";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ notif?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { notif } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 
-  if (error) message = JSON.parse(error);
+  if (notif) message = JSON.parse(notif);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
-      {message && <RedirectManager data={message} paramName="error" />}
+      {message && <RedirectManager data={message} />}
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Warning Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">

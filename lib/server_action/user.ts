@@ -7,6 +7,7 @@ import {
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getUserLocation,
+  isAdminAgri,
   isAgriculturist,
   isFarmer,
   isFarmerLeader,
@@ -561,7 +562,9 @@ export const farmerAuthorization =
 export const farmerLeaderAuthorization =
   async (): Promise<serverActionOptionalNotifMessage> => {
     try {
-      const { work, userId } = await ProtectedAction("authorization:farmer");
+      const { work, userId } = await ProtectedAction(
+        "authorization:farmer:leader"
+      );
 
       const auth = await farmerAndFarmerLeaderAuthorization(userId, work);
       if (!auth.success) return { success: false, notifError: auth.notifError };
@@ -644,36 +647,36 @@ export const agriculturistAuthorization =
     }
   };
 
-// export const adminAgriAuthorization =
-//   async (): Promise<serverActionOptionalNotifMessage> => {
-//     try {
-//       const { userId } = await ProtectedAction("authorization:agri:admin");
+export const adminAgriAuthorization =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { userId } = await ProtectedAction("authorization:agri:admin");
 
-//       if (!(await isAdminAgri(userId)))
-//         return {
-//           success: false,
-//           notifError: [
-//             {
-//               message: "Only admin user can access this page",
-//               type: "warning",
-//             },
-//           ],
-//         };
+      if (!(await isAdminAgri(userId)))
+        return {
+          success: false,
+          notifError: [
+            {
+              message: "Only admin user can access this page",
+              type: "warning",
+            },
+          ],
+        };
 
-//       return { success: true };
-//     } catch (error) {
-//       const err = error as Error;
-//       console.log(
-//         `Error occured while checking if the user is authorized: ${err.message}`
-//       );
-//       return {
-//         success: false,
-//         notifError: [
-//           {
-//             message: err.message,
-//             type: "error",
-//           },
-//         ],
-//       };
-//     }
-//   };
+      return { success: true };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Error occured while checking if the user is authorized: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

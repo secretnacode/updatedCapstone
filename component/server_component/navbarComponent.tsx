@@ -13,7 +13,7 @@ import {
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
-import { RedirectLoginWithError } from "@/util/helper_function/reusableFunction";
+import { RedirectLoginWithNotif } from "@/util/helper_function/reusableFunction";
 import { AgriculturistNavLinkType } from "@/types";
 
 export const NavbarComponent: FC = async () => {
@@ -23,7 +23,7 @@ export const NavbarComponent: FC = async () => {
   try {
     if (session) role = session.work;
     else
-      RedirectLoginWithError([
+      RedirectLoginWithNotif([
         {
           message: "Nag expired na ang iyong pag lologin. Mag login uli",
           type: "warning",
@@ -33,7 +33,7 @@ export const NavbarComponent: FC = async () => {
     if (isRedirectError(error)) throw error;
 
     const err = error as Error;
-    RedirectLoginWithError([
+    RedirectLoginWithNotif([
       {
         message: err.message,
         type: "warning",

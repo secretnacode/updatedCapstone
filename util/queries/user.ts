@@ -1,6 +1,9 @@
 "use server";
 
 import {
+  agriAuthQueryReturnType,
+  agriculturistRoleType,
+  agriIsExistParamType,
   barangayType,
   FarmerFirstDetailType,
   getCountNotVerifiedFarmerParamType,
@@ -8,6 +11,7 @@ import {
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
   GetFarmerProfilePersonalInfoQueryReturnType,
+  insertNewAgriculturistParamType,
   NewUserType,
   QueryUserLoginReturnType,
   ViewAllUnvalidatedFarmerQueryReturnQuery,
@@ -23,7 +27,6 @@ import { pool } from "../configuration";
  */
 export const CheckUsername = async (username: string): Promise<boolean> => {
   try {
-    // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     return (
       await pool.query(
         `select exists(select 1 from capstone.auth where username = $1)`,
@@ -43,6 +46,7 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
 };
 
 /**
+ * query for inserting new user in the auth table
  * @param {string} data.username - The username of the user that is trying to sign up
  * @param {string} data.password - The hashed password of the new user
  * @param {string} data.userId - UUID of the new user, this ensures the uniqueness of the ID
@@ -105,6 +109,33 @@ export const UserLogin = async (
 };
 
 /**
+ * query for geting the farmer id base on the authId that was passed
+ * @param authId auth Id of the farmer that you want to get its farmerId
+ * @returns farmerId
+ */
+export const getFarmerIdByAuthId = async (
+  authId: string
+): Promise<{ farmerId: string; orgRole: string }> => {
+  try {
+    return (
+      await pool.query(
+        `select "farmerId", "orgRole" from capstone.farmer where "authId" = $1`,
+        [authId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`
+    );
+  }
+};
+
+/**
  * inserting the value of the new user
  * @param data of the new user that is signing up
  * @returns the farmerId that was inserted
@@ -114,7 +145,7 @@ export const FarmerFirstDetailQuery = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated", "familyMemberCount", "isDeleted") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated", "familyMemberCount", "isDeleted", "authId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
       [
         data.farmerId,
         data.firstName,
@@ -129,6 +160,7 @@ export const FarmerFirstDetailQuery = async (
         data.dateCreated,
         data.countFamilyMember,
         data.isDeleted,
+        data.authId,
       ]
     );
   } catch (error) {
@@ -142,34 +174,6 @@ export const FarmerFirstDetailQuery = async (
     );
   }
 };
-
-/**
- * query to update the farmer info, changing its orgRole and its orgId
- * @param orgId is the id of the new orgnization that was created
- * @param userRole is the role of the user in their organization, the letter should start in small letter (e.g. "member")
- * @param userId is the id of the current user
- */
-// export const UpdateUserOrgAndRoleAfterSignUp = async (
-//   orgId: string | null,
-//   userRole: string | null,
-//   userId: string
-// ): Promise<void> => {
-//   try {
-//     await pool.query(
-//       `update capstone.farmer set "orgId"= $1, "orgRole"= $2 where "farmerId"= $3`,
-//       [orgId, userRole, userId]
-//     );
-//   } catch (error) {
-//     console.error(
-//       `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon: ${
-//         (error as Error).message
-//       }`
-//     );
-//     throw new Error(
-//       `May hindi inaasahang pagkakamali habang binabago ang impormasyon ng user sa kanyang organisasyon`
-//     );
-//   }
-// };
 
 /**
  * query to get the role of the farmer (e.g. member or leader)
@@ -236,8 +240,8 @@ export const GetFarmerOrgMemberQuery = async (
   try {
     return (
       await pool.query(
-        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId"  where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId" order by case when f."verified" = $3 then $4 else $5 end asc `,
-        [leaderId, "member", false, 1, 2]
+        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId"  where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId" order by case when f."verified" = $3 then $4 when f."isDeleted" = $5 then $6 else $7 end asc`,
+        [leaderId, "member", false, 1, true, 3, 2]
       )
     ).rows;
   } catch (error) {
@@ -315,7 +319,7 @@ export const GetFarmerProfilePersonalInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "farmerId", "farmerFirstName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "farmerLastName", "farmerMiddleName", "farmerExtensionName", "familyMemberCount" from capstone.farmer where "farmerId" = $1`,
+        `select "farmerId", "farmerFirstName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "farmerLastName", "farmerMiddleName", "farmerExtensionName", "familyMemberCount", isDeleted from capstone.farmer where "farmerId" = $1`,
         [farmerId]
       )
     ).rows[0];
@@ -366,11 +370,13 @@ export const DelteUserAccountQuery = async (
   farmerId: string
 ): Promise<void> => {
   try {
-    await pool.query(`delete from capstone.auth where "authId" = $1`, [
-      farmerId,
-    ]);
+    await pool.query(
+      `delete from capstone.auth where "authId" = (select "authId" from capstone.farmer where "farmerId" = $1)`,
+      [farmerId]
+    );
 
-    await pool.query(`update capstone.farmer set ""`);
+    // if the deletion of the auth value of the farmer is success full, it will then update the farmer table indicating the farmer was deleted
+    await pool.query(`update capstone.farmer set "isDeleted" = $1`, [true]);
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user: ${
@@ -576,7 +582,7 @@ export const getFarmerDataForResetingPass = async (): Promise<
   try {
     return (
       await pool.query(
-        `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a  on f."farmerId" = a."authId" order by a."username"`
+        `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" order by a."username"`
       )
     ).rows;
   } catch (error) {
@@ -600,7 +606,9 @@ export const isFarmer = async (farmerId: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while if the user is a farmer`);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang magsasaka`
+    );
   }
 };
 
@@ -614,7 +622,9 @@ export const isFarmerLeader = async (userId: string) => {
     ).rows[0].exist;
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while if the user is a farmer`);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer leader ang magsasaka`
+    );
   }
 };
 
@@ -633,7 +643,9 @@ export const isFarmerVerified = async (farmerId: string): Promise<boolean> => {
     ).rows[0].verified;
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while checking the farmer's verification`);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang ay beripikado `
+    );
   }
 };
 
@@ -652,7 +664,9 @@ export const isAgriculturist = async (agriId: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while checking the farmer's verification`);
+    throw new Error(
+      `Error occured while checking the agriculturist's verification`
+    );
   }
 };
 
@@ -664,6 +678,65 @@ export const isAdminAgri = async (adminId: string) => {
         [adminId, "admin"]
       )
     ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `Error occured while checking the agriculturist's verification`
+    );
+  }
+};
+
+/**
+ * was created for the roles of the agriculturist to avoid typography
+ */
+const agriculturistRole: agriculturistRoleType = {
+  admin: "admin",
+  agriculturist: "agriculturist",
+};
+
+/**
+ * query for inserting a new value in the agriculturist table
+ * @param data
+ */
+export const insertNewAgriculturist = async (
+  data: insertNewAgriculturistParamType
+) => {
+  try {
+    await pool.query(
+      `insert into capstone.agriculturist ("agriId", "agriRole", "email", "name") values ($1, $2, $3, $4)`,
+      [data.agriId, agriculturistRole.agriculturist, data.userName, data.name]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while inserting a new agriculturist`);
+  }
+};
+
+/**
+ * query for checking if the user exist
+ * @param param0 id and email of the agriculturist to be check
+ * @returns
+ */
+export const agriAuthQuery = async ({
+  id,
+  email,
+}: agriIsExistParamType): Promise<agriAuthQueryReturnType> => {
+  try {
+    const res = await pool.query(
+      `select "agriId" ,"agriRole", "name" where "agriId" = $1 and "email" = $2`,
+      [id, email]
+    );
+
+    if (!res.rows[0])
+      return {
+        exist: false,
+        message: "The user does not exist, sign up first!!!",
+      };
+
+    return {
+      exist: true,
+      agriVal: res.rows[0],
+    };
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(`Error occured while checking the farmer's verification`);

@@ -145,21 +145,17 @@ export const FarmereDetailFirstStep: FC<{
 
       const res = await AddFirstFarmerDetails(newUserVal);
 
-      if (res.success) setNextStep(true);
-      else {
-        if (res.formError) setFormError(res.formError);
-
+      if (!res.success && res.formError) {
+        setFormError(res.formError);
         handleSetNotification(res.notifError);
       }
     } catch (error) {
-      console.log((error as Error).message);
-      handleSetNotification([
-        {
-          message:
-            "May hindi inaasahang nang yari sa pag papasa ng iyong impormasyon",
-          type: "error",
-        },
-      ]);
+      if (!isRedirectError(error)) {
+        console.log((error as Error).message);
+        handleSetNotification([
+          { message: (error as Error).message, type: "error" },
+        ]);
+      }
     } finally {
       handleDoneLoading();
     }
@@ -311,732 +307,732 @@ export const FarmereDetailFirstStep: FC<{
   );
 };
 
-export const FarmerDetailSecondStep: FC = () => {
-  const mapRef = useRef<MapRef>(null);
-  const { handleSetNotification } = useNotification();
-  const { handleDoneLoading, handleIsLoading } = useLoading();
-  const [resubmit, setResubmit] = useState(false);
-  const [cropList, setCropList] = useState<FarmerSecondDetailFormType[]>([]);
-  const [geoJson, setGeoJson] = useState<Feature<Polygon> | undefined>(
-    undefined
-  );
-  const [formErrorList, setFormErrorList] = useState<CropFormErrorsType[]>([]);
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [formError, setFormError] =
-    useState<FormErrorType<FarmerSecondDetailFormType>>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [editCropId, setEditCropId] = useState<EditCropListType>({
-    editing: false,
-    cropId: null,
-  });
-  const [currentCrops, setCurrentCrops] = useState<FarmerSecondDetailFormType>({
-    cropId: "",
-    cropName: "",
-    cropFarmArea: "",
-    farmAreaMeasurement: "",
-    cropBaranggay: "",
-    cropCoor: { lng: Number(""), lat: Number("") },
-  });
-
-  /**
-   * use effect for only resubmiting()
-   */
-  useEffect(() => {
-    if (resubmit) {
-      handleIsLoading("Loading...");
-      formRef.current?.requestSubmit();
-      setResubmit(false);
-    }
-  }, [resubmit, handleIsLoading]);
-
-  const handleChangeVal = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setCurrentCrops((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-
-    if (e.target.name === "cropBaranggay") {
-      handleMapCityToHighLight((e.target.value as barangayType) || "calauan");
-
-      if (e.target.value === "")
-        setCurrentCrops((prev) => ({
-          ...prev,
-          cropCoor: {
-            lng: Number(""),
-            lat: Number(""),
-          },
-        }));
-    }
-  };
-
-  const handleMapCityToHighLight = (brgy: brangayWithCalauanType) => {
-    const { longitude, latitude } = getPointCoordinate(brgy);
-
-    setGeoJson(intoFeaturePolygon(polygonCoordinates[brgy]));
-
-    mapRef.current?.flyTo({
-      center: [longitude, latitude],
-      duration: 2000,
-      zoom: mapZoomValByBarangay(brgy),
-    });
-  };
-
-  const handlePickBrgyFirst = () => {
-    setFormError((prev) => ({
-      ...prev,
-      cropCoor: [pickBrgyFirst()],
-    }));
-  };
-
-  /**
-   * function for setting the longitude and latitude by checking first if the picked coor is inside the polygon(highlighted barangay)
-   * @param e event of the map component
-   */
-  const handleSetLngLat = useCallback(
-    (e: MapMouseEvent) => {
-      const { lng, lat } = e.lngLat;
-
-      if (
-        pointIsInsidePolygon(
-          lng,
-          lat,
-          currentCrops.cropBaranggay as barangayType
-        )
-      ) {
-        setCurrentCrops((prev) => ({
-          ...prev,
-          cropCoor: { lng: lng, lat: lat },
-        }));
-
-        if (formError?.cropCoor)
-          setFormError((prev) => ({ ...prev, cropCoor: [] }));
-      } else
-        setFormError((prev) => ({
-          ...prev,
-          cropCoor: [
-            "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
-          ],
-        }));
-    },
-    [currentCrops.cropBaranggay, formError?.cropCoor]
-  );
-
-  /**
-   * simple validation for the currentCrops,
-   * it detects if a single value of currentCrops has a empty value
-   * @returns err that is an array of objects that containst the error of each value in the form,
-   * if value in the form is valid then it returns an empty array
-   */
-  const handleValidateCurrentCrops =
-    (): FormErrorType<FarmerSecondDetailFormType> => {
-      let err: FormErrorType<FarmerSecondDetailFormType> = {};
-
-      for (const [key, value] of Object.entries(currentCrops)) {
-        if (value === "") {
-          switch (key) {
-            case "cropName":
-              err = {
-                ...err,
-                cropName: [
-                  "Mag lagay ng pangalan na sumisimbulo sa pananim nato",
-                ],
-              };
-              break;
-            case "cropFarmArea":
-              err = {
-                ...err,
-                cropFarmArea: ["Mag lagay ng lawak ng iyong pinag tataniman"],
-              };
-              break;
-            case "farmAreaMeasurement":
-              err = {
-                ...err,
-                farmAreaMeasurement: ["Pumili ng unit ng lupain"],
-              };
-              break;
-            case "cropBaranggay":
-              err = {
-                ...err,
-                cropBaranggay: [
-                  "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
-                ],
-              };
-              break;
-          }
-        }
-      }
-
-      return err;
-    };
-
-  /**
-   * performing a simple validation for the currentCrops before executing handleSaveListAndBackDefault
-   * @returns a error for the form to use if the simple validation fails
-   */
-  const handleAddNewCrop = () => {
-    const validate = handleValidateCurrentCrops();
-    if (validate && Object.entries(validate).length > 0) {
-      return handleSetFormError({ ...validate, cropId: [currentCrops.cropId] });
-    }
-
-    if (handleIsExistingName()) return;
-
-    handleSaveListAndBackDefault();
-  };
-
-  const handleRemoveCropFromList = (cropId: string) => {
-    setCropList((prev) => prev.filter((crop) => cropId !== crop.cropId));
-
-    if (editCropId.cropId === cropId) {
-      handleBackDefault();
-      setEditCropId({ editing: false, cropId: null });
-    }
-  };
-
-  /**
-   * seting the value of the state editCropId into a default value
-   */
-  const handleDefaultEditState = () => {
-    setEditCropId({ editing: false, cropId: null });
-  };
-
-  /**
-   * executing handleSaveListAndBackDefault and handleDefaultEdiState
-   */
-  const handleDoneEditingCrop = () => {
-    if (handleIsExistingName()) return;
-
-    setCropList((prev) =>
-      prev.map((crop) =>
-        crop.cropId === currentCrops.cropId ? { ...currentCrops } : crop
-      )
-    );
-    handleBackDefault();
-    handleDefaultEditState();
-
-    const hasError = handleFindIfFormErrorExist(currentCrops);
-
-    //check if the crop that was being edited has a formError thats existing in the formErrorList, if it is, it will be removed
-    if (hasError)
-      setFormErrorList((prev) =>
-        prev.filter((error) => error.cropId !== hasError.cropId)
-      );
-  };
-
-  /**
-   * executing handleDefaultEdiState and handleBackDefault to make a default value for
-   * editCropId, otherOrg, error, and currentCrops into their default value
-   */
-  const handleCancelEditCrop = () => {
-    handleDefaultEditState();
-    handleBackDefault();
-  };
-
-  /**
-   * executing the function handleSaveList and handleBackDefault
-   * if the current cropName already exist in the cropList,
-   * it wouldnt execute the handleBackDefault function
-   */
-  const handleSaveListAndBackDefault = () => {
-    handleSaveList();
-    handleBackDefault();
-  };
-
-  /**
-   * appending the value of the currentCrops while adding a unique id for that crop list
-   */
-  const handleSaveList = () => {
-    setCropList((prev) => [...prev, { ...currentCrops, cropId: CreateUUID() }]);
-  };
-
-  /**
-   * function for checking the current crop name is already existing in the cropList, if it exist, it will set a formError that say change tha name of the crop
-   */
-  const handleIsExistingName = (): boolean => {
-    if (
-      cropList.some(
-        (crop) =>
-          crop.cropName === currentCrops.cropName &&
-          crop.cropId !== editCropId.cropId
-      )
-    ) {
-      handleSetFormError({
-        cropName: ["Baguhin ang pangalan dahil ito ay may kagaya na"],
-      });
-
-      return true;
-    }
-
-    return false;
-  };
-
-  /**
-   * setting the state of otherOrg, error, and currentCrops into their default value
-   */
-  const handleBackDefault = () => {
-    setCurrentCrops({
-      cropId: "",
-      cropName: "",
-      cropFarmArea: "",
-      farmAreaMeasurement: "",
-      cropBaranggay: "",
-      cropCoor: {
-        lng: Number(""),
-        lat: Number(""),
-      },
-    });
-    setFormError(null);
-    handleMapCityToHighLight("calauan");
-  };
-
-  /**
-   * checks every value of the currentCrops variable if it has a value or not
-   * @returns returns true if the value is not equals to ""(default value, an empty string), and false otherwise
-   */
-  const handleCurrentCropHasVal = (): boolean => {
-    for (const val of Object.values(currentCrops)) {
-      if (val !== "") return true;
-    }
-
-    return false;
-  };
-
-  /**
-   * setting all back to default value and setting the reSubmit into true, after the renders it will trigger the useEffect for the re submitting of the form
-   */
-  const handleForceProceed = () => {
-    setShowModal(false);
-    handleBackDefault();
-    setResubmit(true);
-  };
-
-  const handleCancelProceed = () => {
-    setShowModal(false);
-
-    const formError = handleValidateCurrentCrops();
-
-    if (formError && Object.entries(formError).length > 0)
-      handleSetFormError({ ...formError, cropId: [currentCrops.cropId] });
-  };
-
-  const handleSetFormError = (
-    obj: FormErrorType<FarmerSecondDetailFormType>
-  ) => {
-    setFormError(obj);
-  };
-
-  /**
-   * checks the value of cropList and currentCrops value before passing the final value in the backend
-   * @returns an object, if the valid object value is false then it means both cropList and currentCrops doesnt have a value
-   * but if the valid object is true then it comes with cropList object where all the value is
-   */
-  const handleCheckCropList = (): CheckCropListReturnType => {
-    const hasCropList = cropList.length > 0;
-
-    const hasCurrentCrop = handleValidateCurrentCrops();
-
-    if (
-      hasCurrentCrop &&
-      Object.entries(hasCurrentCrop).length > 0 &&
-      !hasCropList
-    )
-      return {
-        showModal: false,
-        valid: false,
-        formError: hasCurrentCrop,
-        notifError: [
-          {
-            message:
-              "Mag lagay ng impormasyon tungkol sa iyong itinatanim bago mag pasa",
-            type: "warning",
-          },
-        ],
-      };
-
-    if (
-      cropList.length > 0 &&
-      hasCurrentCrop &&
-      Object.entries(hasCurrentCrop).length > 0 &&
-      handleCurrentCropHasVal()
-    )
-      return {
-        showModal: true,
-        valid: false,
-        formError: hasCurrentCrop,
-      };
-
-    if (handleIsExistingName())
-      return {
-        showModal: false,
-        valid: false,
-        formError: null,
-        isExistName: true,
-      };
-
-    if (hasCurrentCrop && Object.entries(hasCurrentCrop).length === 0) {
-      handleBackDefault();
-      setCropList((prev) => [
-        ...prev,
-        { ...currentCrops, cropId: CreateUUID() },
-      ]);
-      return { valid: true };
-    }
-
-    return { valid: true };
-  };
-
-  /**
-   * function for setting the form error if the crop value that will be edited has a formErrorList
-   */
-  const handleEditCropHasFormError = useCallback(
-    (existError: CropFormErrorsType | undefined) => {
-      if (existError) setFormError(existError.formError);
-    },
-    []
-  );
-
-  /**
-   * function for finding if the crop that will be edited has a formError
-   */
-  const handleFindIfFormErrorExist = useCallback(
-    (cropToEdit: FarmerSecondDetailFormType) => {
-      return formErrorList.find(
-        (formError) => formError.cropId === cropToEdit.cropId
-      );
-    },
-    [formErrorList]
-  );
-
-  /**
-   * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
-   */
-  const handleEditCrop = useCallback(
-    (cropToEdit: FarmerSecondDetailFormType) => {
-      setEditCropId({
-        editing: true,
-        cropId: cropToEdit.cropId,
-      });
-
-      setCurrentCrops({ ...cropToEdit });
-
-      handleEditCropHasFormError(handleFindIfFormErrorExist(cropToEdit));
-    },
-    [handleEditCropHasFormError, handleFindIfFormErrorExist]
-  );
-
-  /**
-   * function for handling the response formError of the server action
-   * @param formList list of formError that comes from server action
-   */
-  const handleBackendValidateFormError = (formList: CropFormErrorsType[]) => {
-    if (!formList)
-      return handleSetNotification([
-        { message: "No err value", type: "warning" },
-      ]);
-
-    setFormErrorList(formList);
-
-    const toEditVal = cropList.find(
-      (crop) => crop.cropId === formList[0].cropId
-    );
-
-    if (toEditVal) handleEditCrop(toEditVal);
-
-    setFormError(formList[0].formError);
-  };
-
-  /**
-   * last function to be called after the submission of the form
-   * @returns or exit the function if the validation is not met
-   */
-  const handleFinalizeCropList = () => {
-    handleIsLoading("Loading");
-    const validateCrop = handleCheckCropList();
-
-    if (!validateCrop.valid) {
-      if (validateCrop.isExistName) return handleDoneLoading();
-
-      if (validateCrop.showModal) {
-        setShowModal(true);
-        return handleDoneLoading();
-      }
-
-      handleSetNotification(
-        validateCrop.notifError ?? [
-          { message: "Unkown error", type: "warning" },
-        ]
-      );
-
-      handleSetFormError(validateCrop.formError);
-      handleDoneLoading();
-      return;
-    }
-
-    setResubmit(true);
-  };
-
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    try {
-      handleIsLoading("Ipinapasa na ang iyong impormasyon...");
-      const res = await AddSecondFarmerDetails(cropList);
-
-      if (res && !res.success) {
-        handleSetNotification(res.notifError);
-
-        if (res.formList) handleBackendValidateFormError(res.formList);
-      }
-    } catch (error) {
-      if (!isRedirectError(error)) {
-        const err = error as Error;
-        handleSetNotification([{ message: err.message, type: "error" }]);
-      }
-    } finally {
-      handleDoneLoading();
-    }
-  };
-
-  return (
-    <div>
-      <div className={`flex flex-row justify-between items-center mb-4 gap-4`}>
-        {editCropId.editing ? (
-          <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium w-full text-center">
-            Binabago ang taniman{" "}
-            <span className="font-bold">
-              {
-                cropList.find((crop) => crop.cropId === currentCrops.cropId)
-                  ?.cropName
-              }
-            </span>
-          </div>
-        ) : (
-          <>
-            <h1 className="title form-title !mb-0 ">
-              Impormasyon ng iyong pananim
-            </h1>
-            <SubmitButton
-              type="button"
-              onClick={handleAddNewCrop}
-              className={`!p-2 !rounded-lg ${
-                editCropId.editing && "!cursor-not-allowed hover:!bg-green-600"
-              }`}
-              disabled={editCropId.editing}
-            >
-              <ClipboardPlus className="logo !size-5" />
-            </SubmitButton>
-          </>
-        )}
-      </div>
-
-      <form onSubmit={handleFormSubmit} ref={formRef} className="form">
-        <FormDivLabelInput
-          labelMessage="Pangalanan ng taniman:"
-          inputName="cropName"
-          onChange={handleChangeVal}
-          inputValue={currentCrops.cropName}
-          formError={formError?.cropName}
-        />
-
-        <FormDivLabelInput
-          labelMessage="Sukat ng lote na iyong Pinagtataniman:"
-          inputName="cropFarmArea"
-          onChange={handleChangeVal}
-          inputValue={currentCrops.cropFarmArea}
-          formError={formError?.cropFarmArea}
-        />
-
-        <FormDivInputRadio
-          radioList={farmAreaMeasurementValue()}
-          inputName="farmAreaMeasurement"
-          inputVal={currentCrops.farmAreaMeasurement}
-          onChange={handleChangeVal}
-          formError={formError?.farmAreaMeasurement}
-        />
-
-        <FormDivLabelSelect
-          labelMessage="Lugar ng Iyong pinagtataniman:"
-          selectName="cropBaranggay"
-          selectValue={currentCrops.cropBaranggay}
-          onChange={handleChangeVal}
-          optionDefaultValueLabel={{
-            label: "--Pumili--Ng--Lugar--",
-            value: "",
-          }}
-          childrenOption={baranggayList.map((brgy) => (
-            <option key={brgy} value={brgy}>
-              {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
-            </option>
-          ))}
-          formError={formError?.cropBaranggay}
-        />
-
-        <div>
-          <label className="label">
-            Pindutin ang mapa para ma-markahan kung saan makikita ang iyong
-            taniman:
-          </label>
-
-          {formError?.cropCoor &&
-            formError.cropCoor.map((error, index) => (
-              <p key={index} className="p-error">
-                {error}
-              </p>
-            ))}
-
-          <MapComponent
-            mapHeight={"400px"}
-            ref={mapRef}
-            cityToHighlight={geoJson}
-            onClick={
-              currentCrops.cropBaranggay ? handleSetLngLat : handlePickBrgyFirst
-            }
-          >
-            {currentCrops.cropCoor.lng && currentCrops.cropCoor.lat && (
-              <MapMarkerComponent
-                markerLng={currentCrops.cropCoor.lng}
-                markerLat={currentCrops.cropCoor.lat}
-              />
-            )}
-          </MapComponent>
-        </div>
-
-        {editCropId.editing ? (
-          <FormCancelSubmitButton
-            submitButtonLabel="Baguhin"
-            submitType="button"
-            submitOnClick={handleDoneEditingCrop}
-            cancelButtonLabel="Kanselahin"
-            cancelOnClick={handleCancelEditCrop}
-            divClassName="!grid grid-cols-2 !pt-0 pb-6"
-          />
-        ) : (
-          <SubmitButton
-            onClick={handleFinalizeCropList}
-            type="button"
-            disabled={editCropId.editing}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Ipasa
-          </SubmitButton>
-        )}
-      </form>
-
-      {showModal && (
-        <div className="modal-form">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Mag patuloy padin sa pag papasa?
-            </h3>
-            <p className="text-gray-600">
-              May kulang na impormasyon kang hindi panailalagay, mag patuloy
-              padin at baliwalain itong kasalukuyang inilalagay mo?
-            </p>
-            <FormCancelSubmitButton
-              submitButtonLabel={"Mag patuloy"}
-              submitOnClick={handleForceProceed}
-              submitType="button"
-              cancelButtonLabel={"Bumalik"}
-              cancelOnClick={handleCancelProceed}
-            />
-          </div>
-        </div>
-      )}
-
-      {cropList.length > 0 && (
-        <MemoizedCropsValComponent
-          cropList={cropList}
-          cropErrors={formErrorList?.map((error) => error.cropId)}
-          handleEditCrop={handleEditCrop}
-          handleRemoveCropFromList={handleRemoveCropFromList}
-        />
-      )}
-    </div>
-  );
-};
-
-const CropsValComponent: FC<{
-  cropList: FarmerSecondDetailFormType[];
-  cropErrors: string[];
-  handleEditCrop: (cropToEdit: FarmerSecondDetailFormType) => void;
-  handleRemoveCropFromList: (cropId: string) => void;
-}> = ({ cropList, cropErrors, handleEditCrop, handleRemoveCropFromList }) => {
-  const convertMeasurement = (measure: string) => {
-    switch (measure) {
-      case "ha":
-        return "Ektarya(Hectares)";
-      case "ac":
-        return "Akre(Acres)";
-      case "sqft":
-        return "Talampakang Kuwadrado(Square Feet)";
-      case "sqm":
-        return "Metrong Kuwadrado(Square Meter)";
-      default:
-        return "";
-    }
-  };
-
-  return (
-    <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 mt-6">
-      {cropList?.map((crop, index) => {
-        const isError = cropErrors.includes(crop.cropId);
-
-        return (
-          <div
-            key={index}
-            onClick={() => handleEditCrop(crop)}
-            className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md group relative border-l-4
-              ${
-                isError
-                  ? "border-red-300 bg-red-50 hover:border-red-400"
-                  : "border-green-200 bg-white hover:border-green-300"
-              }`}
-          >
-            {isError && (
-              <div className="absolute top-0 right-0 m-2 overflow-hidden rounded-md flex justify-center items-center gap-2 bg-white border-red-500 border-2 px-3 py-1.5 text-red-700 group-hover:shadow-lg transition-all duration-250">
-                <AlertTriangle className="logo !size-5" />
-                <span>Baguhin Ito</span>
-              </div>
-            )}
-
-            <div className="">
-              <dl className="grid gap-1 text-sm space-y-1">
-                <div>
-                  <dt className="text-gray-500">Crop name:</dt>
-                  <dd className="font-medium">{crop.cropName}</dd>
-                </div>
-
-                <div>
-                  <dt className="text-gray-500">Lote:</dt>
-                  <dd className="font-medium">
-                    {crop.cropFarmArea}{" "}
-                    {convertMeasurement(crop.farmAreaMeasurement)}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-gray-500">Lokasyon:</dt>
-                  <dd className="font-medium">{crop.cropBaranggay}</dd>
-                </div>
-              </dl>
-
-              <CancelButton
-                onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                  handleRemoveCropFromList(crop.cropId);
-                }}
-                className="!px-4 !py-2 m-3 text-sm !rounded-sm absolute right-0 bottom-0 opacity-0 translate-y-1 !transition-all duration-200 ease-linear group-hover:opacity-100 group-hover:translate-y-0 hover:!bg-red-600"
-              >
-                Tanggalin
-              </CancelButton>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const MemoizedCropsValComponent = memo(CropsValComponent);
+// export const FarmerDetailSecondStep: FC = () => {
+//   const mapRef = useRef<MapRef>(null);
+//   const { handleSetNotification } = useNotification();
+//   const { handleDoneLoading, handleIsLoading } = useLoading();
+//   const [resubmit, setResubmit] = useState(false);
+//   const [cropList, setCropList] = useState<FarmerSecondDetailFormType[]>([]);
+//   const [geoJson, setGeoJson] = useState<Feature<Polygon> | undefined>(
+//     undefined
+//   );
+//   const [formErrorList, setFormErrorList] = useState<CropFormErrorsType[]>([]);
+//   const [showModal, setShowModal] = useState<boolean>(false);
+//   const [formError, setFormError] =
+//     useState<FormErrorType<FarmerSecondDetailFormType>>(null);
+//   const formRef = useRef<HTMLFormElement>(null);
+//   const [editCropId, setEditCropId] = useState<EditCropListType>({
+//     editing: false,
+//     cropId: null,
+//   });
+//   const [currentCrops, setCurrentCrops] = useState<FarmerSecondDetailFormType>({
+//     cropId: "",
+//     cropName: "",
+//     cropFarmArea: "",
+//     farmAreaMeasurement: "",
+//     cropBaranggay: "",
+//     cropCoor: { lng: Number(""), lat: Number("") },
+//   });
+
+//   /**
+//    * use effect for only resubmiting()
+//    */
+//   useEffect(() => {
+//     if (resubmit) {
+//       handleIsLoading("Loading...");
+//       formRef.current?.requestSubmit();
+//       setResubmit(false);
+//     }
+//   }, [resubmit, handleIsLoading]);
+
+//   const handleChangeVal = (
+//     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+//   ) => {
+//     setCurrentCrops((prev) => ({
+//       ...prev,
+//       [e.target.name]: e.target.value,
+//     }));
+
+//     if (e.target.name === "cropBaranggay") {
+//       handleMapCityToHighLight((e.target.value as barangayType) || "calauan");
+
+//       if (e.target.value === "")
+//         setCurrentCrops((prev) => ({
+//           ...prev,
+//           cropCoor: {
+//             lng: Number(""),
+//             lat: Number(""),
+//           },
+//         }));
+//     }
+//   };
+
+//   const handleMapCityToHighLight = (brgy: brangayWithCalauanType) => {
+//     const { longitude, latitude } = getPointCoordinate(brgy);
+
+//     setGeoJson(intoFeaturePolygon(polygonCoordinates[brgy]));
+
+//     mapRef.current?.flyTo({
+//       center: [longitude, latitude],
+//       duration: 2000,
+//       zoom: mapZoomValByBarangay(brgy),
+//     });
+//   };
+
+//   const handlePickBrgyFirst = () => {
+//     setFormError((prev) => ({
+//       ...prev,
+//       cropCoor: [pickBrgyFirst()],
+//     }));
+//   };
+
+//   /**
+//    * function for setting the longitude and latitude by checking first if the picked coor is inside the polygon(highlighted barangay)
+//    * @param e event of the map component
+//    */
+//   const handleSetLngLat = useCallback(
+//     (e: MapMouseEvent) => {
+//       const { lng, lat } = e.lngLat;
+
+//       if (
+//         pointIsInsidePolygon(
+//           lng,
+//           lat,
+//           currentCrops.cropBaranggay as barangayType
+//         )
+//       ) {
+//         setCurrentCrops((prev) => ({
+//           ...prev,
+//           cropCoor: { lng: lng, lat: lat },
+//         }));
+
+//         if (formError?.cropCoor)
+//           setFormError((prev) => ({ ...prev, cropCoor: [] }));
+//       } else
+//         setFormError((prev) => ({
+//           ...prev,
+//           cropCoor: [
+//             "Ang pwede mo lang lagyan ng marka ay ang mga lugar na may kulay",
+//           ],
+//         }));
+//     },
+//     [currentCrops.cropBaranggay, formError?.cropCoor]
+//   );
+
+//   /**
+//    * simple validation for the currentCrops,
+//    * it detects if a single value of currentCrops has a empty value
+//    * @returns err that is an array of objects that containst the error of each value in the form,
+//    * if value in the form is valid then it returns an empty array
+//    */
+//   const handleValidateCurrentCrops =
+//     (): FormErrorType<FarmerSecondDetailFormType> => {
+//       let err: FormErrorType<FarmerSecondDetailFormType> = {};
+
+//       for (const [key, value] of Object.entries(currentCrops)) {
+//         if (value === "") {
+//           switch (key) {
+//             case "cropName":
+//               err = {
+//                 ...err,
+//                 cropName: [
+//                   "Mag lagay ng pangalan na sumisimbulo sa pananim nato",
+//                 ],
+//               };
+//               break;
+//             case "cropFarmArea":
+//               err = {
+//                 ...err,
+//                 cropFarmArea: ["Mag lagay ng lawak ng iyong pinag tataniman"],
+//               };
+//               break;
+//             case "farmAreaMeasurement":
+//               err = {
+//                 ...err,
+//                 farmAreaMeasurement: ["Pumili ng unit ng lupain"],
+//               };
+//               break;
+//             case "cropBaranggay":
+//               err = {
+//                 ...err,
+//                 cropBaranggay: [
+//                   "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
+//                 ],
+//               };
+//               break;
+//           }
+//         }
+//       }
+
+//       return err;
+//     };
+
+//   /**
+//    * performing a simple validation for the currentCrops before executing handleSaveListAndBackDefault
+//    * @returns a error for the form to use if the simple validation fails
+//    */
+//   const handleAddNewCrop = () => {
+//     const validate = handleValidateCurrentCrops();
+//     if (validate && Object.entries(validate).length > 0) {
+//       return handleSetFormError({ ...validate, cropId: [currentCrops.cropId] });
+//     }
+
+//     if (handleIsExistingName()) return;
+
+//     handleSaveListAndBackDefault();
+//   };
+
+//   const handleRemoveCropFromList = (cropId: string) => {
+//     setCropList((prev) => prev.filter((crop) => cropId !== crop.cropId));
+
+//     if (editCropId.cropId === cropId) {
+//       handleBackDefault();
+//       setEditCropId({ editing: false, cropId: null });
+//     }
+//   };
+
+//   /**
+//    * seting the value of the state editCropId into a default value
+//    */
+//   const handleDefaultEditState = () => {
+//     setEditCropId({ editing: false, cropId: null });
+//   };
+
+//   /**
+//    * executing handleSaveListAndBackDefault and handleDefaultEdiState
+//    */
+//   const handleDoneEditingCrop = () => {
+//     if (handleIsExistingName()) return;
+
+//     setCropList((prev) =>
+//       prev.map((crop) =>
+//         crop.cropId === currentCrops.cropId ? { ...currentCrops } : crop
+//       )
+//     );
+//     handleBackDefault();
+//     handleDefaultEditState();
+
+//     const hasError = handleFindIfFormErrorExist(currentCrops);
+
+//     //check if the crop that was being edited has a formError thats existing in the formErrorList, if it is, it will be removed
+//     if (hasError)
+//       setFormErrorList((prev) =>
+//         prev.filter((error) => error.cropId !== hasError.cropId)
+//       );
+//   };
+
+//   /**
+//    * executing handleDefaultEdiState and handleBackDefault to make a default value for
+//    * editCropId, otherOrg, error, and currentCrops into their default value
+//    */
+//   const handleCancelEditCrop = () => {
+//     handleDefaultEditState();
+//     handleBackDefault();
+//   };
+
+//   /**
+//    * executing the function handleSaveList and handleBackDefault
+//    * if the current cropName already exist in the cropList,
+//    * it wouldnt execute the handleBackDefault function
+//    */
+//   const handleSaveListAndBackDefault = () => {
+//     handleSaveList();
+//     handleBackDefault();
+//   };
+
+//   /**
+//    * appending the value of the currentCrops while adding a unique id for that crop list
+//    */
+//   const handleSaveList = () => {
+//     setCropList((prev) => [...prev, { ...currentCrops, cropId: CreateUUID() }]);
+//   };
+
+//   /**
+//    * function for checking the current crop name is already existing in the cropList, if it exist, it will set a formError that say change tha name of the crop
+//    */
+//   const handleIsExistingName = (): boolean => {
+//     if (
+//       cropList.some(
+//         (crop) =>
+//           crop.cropName === currentCrops.cropName &&
+//           crop.cropId !== editCropId.cropId
+//       )
+//     ) {
+//       handleSetFormError({
+//         cropName: ["Baguhin ang pangalan dahil ito ay may kagaya na"],
+//       });
+
+//       return true;
+//     }
+
+//     return false;
+//   };
+
+//   /**
+//    * setting the state of otherOrg, error, and currentCrops into their default value
+//    */
+//   const handleBackDefault = () => {
+//     setCurrentCrops({
+//       cropId: "",
+//       cropName: "",
+//       cropFarmArea: "",
+//       farmAreaMeasurement: "",
+//       cropBaranggay: "",
+//       cropCoor: {
+//         lng: Number(""),
+//         lat: Number(""),
+//       },
+//     });
+//     setFormError(null);
+//     handleMapCityToHighLight("calauan");
+//   };
+
+//   /**
+//    * checks every value of the currentCrops variable if it has a value or not
+//    * @returns returns true if the value is not equals to ""(default value, an empty string), and false otherwise
+//    */
+//   const handleCurrentCropHasVal = (): boolean => {
+//     for (const val of Object.values(currentCrops)) {
+//       if (val !== "") return true;
+//     }
+
+//     return false;
+//   };
+
+//   /**
+//    * setting all back to default value and setting the reSubmit into true, after the renders it will trigger the useEffect for the re submitting of the form
+//    */
+//   const handleForceProceed = () => {
+//     setShowModal(false);
+//     handleBackDefault();
+//     setResubmit(true);
+//   };
+
+//   const handleCancelProceed = () => {
+//     setShowModal(false);
+
+//     const formError = handleValidateCurrentCrops();
+
+//     if (formError && Object.entries(formError).length > 0)
+//       handleSetFormError({ ...formError, cropId: [currentCrops.cropId] });
+//   };
+
+//   const handleSetFormError = (
+//     obj: FormErrorType<FarmerSecondDetailFormType>
+//   ) => {
+//     setFormError(obj);
+//   };
+
+//   /**
+//    * checks the value of cropList and currentCrops value before passing the final value in the backend
+//    * @returns an object, if the valid object value is false then it means both cropList and currentCrops doesnt have a value
+//    * but if the valid object is true then it comes with cropList object where all the value is
+//    */
+//   const handleCheckCropList = (): CheckCropListReturnType => {
+//     const hasCropList = cropList.length > 0;
+
+//     const hasCurrentCrop = handleValidateCurrentCrops();
+
+//     if (
+//       hasCurrentCrop &&
+//       Object.entries(hasCurrentCrop).length > 0 &&
+//       !hasCropList
+//     )
+//       return {
+//         showModal: false,
+//         valid: false,
+//         formError: hasCurrentCrop,
+//         notifError: [
+//           {
+//             message:
+//               "Mag lagay ng impormasyon tungkol sa iyong itinatanim bago mag pasa",
+//             type: "warning",
+//           },
+//         ],
+//       };
+
+//     if (
+//       cropList.length > 0 &&
+//       hasCurrentCrop &&
+//       Object.entries(hasCurrentCrop).length > 0 &&
+//       handleCurrentCropHasVal()
+//     )
+//       return {
+//         showModal: true,
+//         valid: false,
+//         formError: hasCurrentCrop,
+//       };
+
+//     if (handleIsExistingName())
+//       return {
+//         showModal: false,
+//         valid: false,
+//         formError: null,
+//         isExistName: true,
+//       };
+
+//     if (hasCurrentCrop && Object.entries(hasCurrentCrop).length === 0) {
+//       handleBackDefault();
+//       setCropList((prev) => [
+//         ...prev,
+//         { ...currentCrops, cropId: CreateUUID() },
+//       ]);
+//       return { valid: true };
+//     }
+
+//     return { valid: true };
+//   };
+
+//   /**
+//    * function for setting the form error if the crop value that will be edited has a formErrorList
+//    */
+//   const handleEditCropHasFormError = useCallback(
+//     (existError: CropFormErrorsType | undefined) => {
+//       if (existError) setFormError(existError.formError);
+//     },
+//     []
+//   );
+
+//   /**
+//    * function for finding if the crop that will be edited has a formError
+//    */
+//   const handleFindIfFormErrorExist = useCallback(
+//     (cropToEdit: FarmerSecondDetailFormType) => {
+//       return formErrorList.find(
+//         (formError) => formError.cropId === cropToEdit.cropId
+//       );
+//     },
+//     [formErrorList]
+//   );
+
+//   /**
+//    * setting the state of editCropId into editing and appending the value into the currentCrops state the comes from the children component
+//    */
+//   const handleEditCrop = useCallback(
+//     (cropToEdit: FarmerSecondDetailFormType) => {
+//       setEditCropId({
+//         editing: true,
+//         cropId: cropToEdit.cropId,
+//       });
+
+//       setCurrentCrops({ ...cropToEdit });
+
+//       handleEditCropHasFormError(handleFindIfFormErrorExist(cropToEdit));
+//     },
+//     [handleEditCropHasFormError, handleFindIfFormErrorExist]
+//   );
+
+//   /**
+//    * function for handling the response formError of the server action
+//    * @param formList list of formError that comes from server action
+//    */
+//   const handleBackendValidateFormError = (formList: CropFormErrorsType[]) => {
+//     if (!formList)
+//       return handleSetNotification([
+//         { message: "No err value", type: "warning" },
+//       ]);
+
+//     setFormErrorList(formList);
+
+//     const toEditVal = cropList.find(
+//       (crop) => crop.cropId === formList[0].cropId
+//     );
+
+//     if (toEditVal) handleEditCrop(toEditVal);
+
+//     setFormError(formList[0].formError);
+//   };
+
+//   /**
+//    * last function to be called after the submission of the form
+//    * @returns or exit the function if the validation is not met
+//    */
+//   const handleFinalizeCropList = () => {
+//     handleIsLoading("Loading");
+//     const validateCrop = handleCheckCropList();
+
+//     if (!validateCrop.valid) {
+//       if (validateCrop.isExistName) return handleDoneLoading();
+
+//       if (validateCrop.showModal) {
+//         setShowModal(true);
+//         return handleDoneLoading();
+//       }
+
+//       handleSetNotification(
+//         validateCrop.notifError ?? [
+//           { message: "Unkown error", type: "warning" },
+//         ]
+//       );
+
+//       handleSetFormError(validateCrop.formError);
+//       handleDoneLoading();
+//       return;
+//     }
+
+//     setResubmit(true);
+//   };
+
+//   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+
+//     try {
+//       handleIsLoading("Ipinapasa na ang iyong impormasyon...");
+//       const res = await AddSecondFarmerDetails(cropList);
+
+//       if (res && !res.success) {
+//         handleSetNotification(res.notifError);
+
+//         if (res.formList) handleBackendValidateFormError(res.formList);
+//       }
+//     } catch (error) {
+//       if (!isRedirectError(error)) {
+//         const err = error as Error;
+//         handleSetNotification([{ message: err.message, type: "error" }]);
+//       }
+//     } finally {
+//       handleDoneLoading();
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <div className={`flex flex-row justify-between items-center mb-4 gap-4`}>
+//         {editCropId.editing ? (
+//           <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium w-full text-center">
+//             Binabago ang taniman{" "}
+//             <span className="font-bold">
+//               {
+//                 cropList.find((crop) => crop.cropId === currentCrops.cropId)
+//                   ?.cropName
+//               }
+//             </span>
+//           </div>
+//         ) : (
+//           <>
+//             <h1 className="title form-title !mb-0 ">
+//               Impormasyon ng iyong pananim
+//             </h1>
+//             <SubmitButton
+//               type="button"
+//               onClick={handleAddNewCrop}
+//               className={`!p-2 !rounded-lg ${
+//                 editCropId.editing && "!cursor-not-allowed hover:!bg-green-600"
+//               }`}
+//               disabled={editCropId.editing}
+//             >
+//               <ClipboardPlus className="logo !size-5" />
+//             </SubmitButton>
+//           </>
+//         )}
+//       </div>
+
+//       <form onSubmit={handleFormSubmit} ref={formRef} className="form">
+//         <FormDivLabelInput
+//           labelMessage="Pangalanan ng taniman:"
+//           inputName="cropName"
+//           onChange={handleChangeVal}
+//           inputValue={currentCrops.cropName}
+//           formError={formError?.cropName}
+//         />
+
+//         <FormDivLabelInput
+//           labelMessage="Sukat ng lote na iyong Pinagtataniman:"
+//           inputName="cropFarmArea"
+//           onChange={handleChangeVal}
+//           inputValue={currentCrops.cropFarmArea}
+//           formError={formError?.cropFarmArea}
+//         />
+
+//         <FormDivInputRadio
+//           radioList={farmAreaMeasurementValue()}
+//           inputName="farmAreaMeasurement"
+//           inputVal={currentCrops.farmAreaMeasurement}
+//           onChange={handleChangeVal}
+//           formError={formError?.farmAreaMeasurement}
+//         />
+
+//         <FormDivLabelSelect
+//           labelMessage="Lugar ng Iyong pinagtataniman:"
+//           selectName="cropBaranggay"
+//           selectValue={currentCrops.cropBaranggay}
+//           onChange={handleChangeVal}
+//           optionDefaultValueLabel={{
+//             label: "--Pumili--Ng--Lugar--",
+//             value: "",
+//           }}
+//           childrenOption={baranggayList.map((brgy) => (
+//             <option key={brgy} value={brgy}>
+//               {brgy.charAt(0).toUpperCase() + brgy.slice(1)}
+//             </option>
+//           ))}
+//           formError={formError?.cropBaranggay}
+//         />
+
+//         <div>
+//           <label className="label">
+//             Pindutin ang mapa para ma-markahan kung saan makikita ang iyong
+//             taniman:
+//           </label>
+
+//           {formError?.cropCoor &&
+//             formError.cropCoor.map((error, index) => (
+//               <p key={index} className="p-error">
+//                 {error}
+//               </p>
+//             ))}
+
+//           <MapComponent
+//             mapHeight={"400px"}
+//             ref={mapRef}
+//             cityToHighlight={geoJson}
+//             onClick={
+//               currentCrops.cropBaranggay ? handleSetLngLat : handlePickBrgyFirst
+//             }
+//           >
+//             {currentCrops.cropCoor.lng && currentCrops.cropCoor.lat && (
+//               <MapMarkerComponent
+//                 markerLng={currentCrops.cropCoor.lng}
+//                 markerLat={currentCrops.cropCoor.lat}
+//               />
+//             )}
+//           </MapComponent>
+//         </div>
+
+//         {editCropId.editing ? (
+//           <FormCancelSubmitButton
+//             submitButtonLabel="Baguhin"
+//             submitType="button"
+//             submitOnClick={handleDoneEditingCrop}
+//             cancelButtonLabel="Kanselahin"
+//             cancelOnClick={handleCancelEditCrop}
+//             divClassName="!grid grid-cols-2 !pt-0 pb-6"
+//           />
+//         ) : (
+//           <SubmitButton
+//             onClick={handleFinalizeCropList}
+//             type="button"
+//             disabled={editCropId.editing}
+//             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+//           >
+//             Ipasa
+//           </SubmitButton>
+//         )}
+//       </form>
+
+//       {showModal && (
+//         <div className="modal-form">
+//           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+//             <h3 className="text-lg font-semibold text-gray-900">
+//               Mag patuloy padin sa pag papasa?
+//             </h3>
+//             <p className="text-gray-600">
+//               May kulang na impormasyon kang hindi panailalagay, mag patuloy
+//               padin at baliwalain itong kasalukuyang inilalagay mo?
+//             </p>
+//             <FormCancelSubmitButton
+//               submitButtonLabel={"Mag patuloy"}
+//               submitOnClick={handleForceProceed}
+//               submitType="button"
+//               cancelButtonLabel={"Bumalik"}
+//               cancelOnClick={handleCancelProceed}
+//             />
+//           </div>
+//         </div>
+//       )}
+
+//       {cropList.length > 0 && (
+//         <MemoizedCropsValComponent
+//           cropList={cropList}
+//           cropErrors={formErrorList?.map((error) => error.cropId)}
+//           handleEditCrop={handleEditCrop}
+//           handleRemoveCropFromList={handleRemoveCropFromList}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// const CropsValComponent: FC<{
+//   cropList: FarmerSecondDetailFormType[];
+//   cropErrors: string[];
+//   handleEditCrop: (cropToEdit: FarmerSecondDetailFormType) => void;
+//   handleRemoveCropFromList: (cropId: string) => void;
+// }> = ({ cropList, cropErrors, handleEditCrop, handleRemoveCropFromList }) => {
+//   const convertMeasurement = (measure: string) => {
+//     switch (measure) {
+//       case "ha":
+//         return "Ektarya(Hectares)";
+//       case "ac":
+//         return "Akre(Acres)";
+//       case "sqft":
+//         return "Talampakang Kuwadrado(Square Feet)";
+//       case "sqm":
+//         return "Metrong Kuwadrado(Square Meter)";
+//       default:
+//         return "";
+//     }
+//   };
+
+//   return (
+//     <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 mt-6">
+//       {cropList?.map((crop, index) => {
+//         const isError = cropErrors.includes(crop.cropId);
+
+//         return (
+//           <div
+//             key={index}
+//             onClick={() => handleEditCrop(crop)}
+//             className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md group relative border-l-4
+//               ${
+//                 isError
+//                   ? "border-red-300 bg-red-50 hover:border-red-400"
+//                   : "border-green-200 bg-white hover:border-green-300"
+//               }`}
+//           >
+//             {isError && (
+//               <div className="absolute top-0 right-0 m-2 overflow-hidden rounded-md flex justify-center items-center gap-2 bg-white border-red-500 border-2 px-3 py-1.5 text-red-700 group-hover:shadow-lg transition-all duration-250">
+//                 <AlertTriangle className="logo !size-5" />
+//                 <span>Baguhin Ito</span>
+//               </div>
+//             )}
+
+//             <div className="">
+//               <dl className="grid gap-1 text-sm space-y-1">
+//                 <div>
+//                   <dt className="text-gray-500">Crop name:</dt>
+//                   <dd className="font-medium">{crop.cropName}</dd>
+//                 </div>
+
+//                 <div>
+//                   <dt className="text-gray-500">Lote:</dt>
+//                   <dd className="font-medium">
+//                     {crop.cropFarmArea}{" "}
+//                     {convertMeasurement(crop.farmAreaMeasurement)}
+//                   </dd>
+//                 </div>
+
+//                 <div>
+//                   <dt className="text-gray-500">Lokasyon:</dt>
+//                   <dd className="font-medium">{crop.cropBaranggay}</dd>
+//                 </div>
+//               </dl>
+
+//               <CancelButton
+//                 onClick={(e: MouseEvent<HTMLButtonElement>) => {
+//                   e.stopPropagation();
+//                   handleRemoveCropFromList(crop.cropId);
+//                 }}
+//                 className="!px-4 !py-2 m-3 text-sm !rounded-sm absolute right-0 bottom-0 opacity-0 translate-y-1 !transition-all duration-200 ease-linear group-hover:opacity-100 group-hover:translate-y-0 hover:!bg-red-600"
+//               >
+//                 Tanggalin
+//               </CancelButton>
+//             </div>
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
+
+// const MemoizedCropsValComponent = memo(CropsValComponent);

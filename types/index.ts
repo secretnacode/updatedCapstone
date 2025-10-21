@@ -77,7 +77,7 @@ export type QueryUserLoginReturnType =
     }
   | {
       exist: true;
-      data: { authId: string; password: string; work: string };
+      data: { authId: string; password: string; work: workRoleType };
     };
 
 export type AuthResponseType = {
@@ -139,6 +139,7 @@ export type FarmerFirstDetailActionReturnType<T> =
 
 export type FarmerFirstDetailType = {
   farmerId: string;
+  authId: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -356,6 +357,7 @@ export type GetFarmerProfilePersonalInfoQueryReturnType = {
   farmerMiddleName: string;
   farmerExtensionName?: string;
   familyMemberCount: string;
+  isDeleted: boolean;
 };
 
 export type getFarmerCropNameQueryReturnType = {
@@ -1395,3 +1397,29 @@ export type serverActionOptionalNotifMessage =
       success: true;
     }
   | ServerActionFailBaseType;
+
+export type insertNewAgriculturistParamType = {
+  agriId: string;
+  userName: string;
+  name: string;
+};
+
+export type agriculturistRoleType = {
+  admin: "admin";
+  agriculturist: "agriculturist";
+};
+
+export type agriIsExistParamType = {
+  id: string;
+  email: string;
+};
+
+export type agriAuthValType = {
+  agriId: string;
+  agriRole: agriRoleType;
+  name: string;
+};
+
+export type agriAuthQueryReturnType =
+  | { exist: false; message: string }
+  | { exist: true; agriVal: agriAuthValType };

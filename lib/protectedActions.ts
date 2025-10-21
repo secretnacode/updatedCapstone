@@ -119,6 +119,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   leader: [
+    Actions.AUTHORIZATION_FARMER,
     Actions.AUTHORIZATION_FARMER_LEADER,
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,

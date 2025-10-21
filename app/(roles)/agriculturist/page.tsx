@@ -17,12 +17,12 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string }>;
+  searchParams: Promise<{ notif?: string }>;
 }) {
-  const { success } = await searchParams;
+  const { notif } = await searchParams;
   let message: NotificationBaseType[] | null = null;
 
-  if (success) message = JSON.parse(success);
+  if (notif) message = JSON.parse(notif);
 
   let data: getAgriculturistDashboardDataReturnType;
 
@@ -38,7 +38,7 @@ export default async function Page({
 
   return (
     <div>
-      {message && <RedirectManager data={message} paramName="success" />}
+      {message && <RedirectManager data={message} />}
 
       {data.success ? (
         <DashboardComponent

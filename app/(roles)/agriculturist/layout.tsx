@@ -2,9 +2,10 @@ import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { agriculturistAuthorization } from "@/lib/server_action/user";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
-  RedirectUnauthorizedWithError,
+  RedirectUnauthorizedWithNotif,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ReactNode } from "react";
 
 export default async function Layout({ children }: { children: ReactNode }) {
@@ -21,11 +22,13 @@ export default async function Layout({ children }: { children: ReactNode }) {
   }
 
   if (!authorization.success)
-    RedirectUnauthorizedWithError(authorization.notifError);
+    RedirectUnauthorizedWithNotif(authorization.notifError);
   return (
-    <div className="min-h-screen flex">
-      <NavbarComponent />
-      <main className="flex-1 p-8">{children}</main>
-    </div>
+    <ClerkProvider>
+      <div className="min-h-screen flex">
+        <NavbarComponent />
+        <main className="flex-1 p-8">{children}</main>
+      </div>
+    </ClerkProvider>
   );
 }

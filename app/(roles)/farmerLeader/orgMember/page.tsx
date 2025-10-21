@@ -1,24 +1,13 @@
-import {
-  RedirectManager,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { FarmerOrgMemberAction } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
-import { GetFarmerOrgMemberReturnType, NotificationBaseType } from "@/types";
+import { GetFarmerOrgMemberReturnType } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function Page() {
   let farmerMember: GetFarmerOrgMemberReturnType;
-  const { error } = await searchParams;
-  const message: NotificationBaseType[] | undefined = error
-    ? JSON.parse(error)
-    : undefined;
 
   try {
     farmerMember = await GetFarmerOrgMember();
@@ -40,7 +29,6 @@ export default async function Page({
         <RenderNotification notif={farmerMember.notifError} />
       ) : (
         <>
-          {message && <RedirectManager data={message} paramName="error" />}
           <TableComponent
             noContentMessage="Wala ka pang miyembro sa iyong organisasyon"
             listCount={farmerMember.farmerMember.length}

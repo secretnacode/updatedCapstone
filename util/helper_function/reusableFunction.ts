@@ -140,8 +140,8 @@ export const baranggayList = [
  * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
  * @returns redirect function with its message
  */
-export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
-  return redirect(`/?error=${NotifToUriComponent(error)}`);
+export const RedirectLoginWithNotif = (error: NotificationBaseType[]) => {
+  return redirect(`/?notif=${NotifToUriComponent(error)}`);
 };
 
 /**
@@ -149,10 +149,10 @@ export const RedirectLoginWithError = (error: NotificationBaseType[]) => {
  * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
  * @returns redirect function with its message
  */
-export const RedirectUnauthorizedWithError = (
+export const RedirectUnauthorizedWithNotif = (
   error: NotificationBaseType[]
 ) => {
-  return redirect(`/unauthorized?error=${NotifToUriComponent(error)}`);
+  return redirect(`/unauthorized?notif=${NotifToUriComponent(error)}`);
 };
 
 /**
@@ -182,7 +182,7 @@ export const UnexpectedErrorMessage = (): string => {
  * @returns a value mesage for the unexpected error message in english version
  */
 export const UnexpectedErrorMessageEnglish = (): string => {
-  return "Unexpected has occured";
+  return "Unexpected error has occured";
 };
 
 export const FormErrorMessage = (): string => {

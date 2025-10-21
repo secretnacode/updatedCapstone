@@ -12,7 +12,6 @@ import {
   farmerFirstDetailFormSchema,
   farmerSecondDetailFormSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { FarmerFirstDetailQuery, GetFarmerRole } from "@/util/queries/user";
 import { ProtectedAction } from "@/lib/protectedActions";
 import {
   CreateNewOrg,
@@ -22,8 +21,12 @@ import {
 import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { ConvertMeassurement } from "@/util/helper_function/reusableFunction";
-import { UpdateSessionRole } from "../session";
+import {
+  ConvertMeassurement,
+  CreateUUID,
+  NotifToUriComponent,
+} from "@/util/helper_function/reusableFunction";
+import { FarmerFirstDetailQuery } from "@/util/queries/user";
 
 /**
  * server action that partners with the actionState hook
@@ -35,7 +38,8 @@ export const AddFirstFarmerDetails = async (
   newUserVal: FarmerFirstDetailFormType
 ): Promise<FarmerFirstDetailActionReturnType<FarmerFirstDetailFormType>> => {
   try {
-    const userId = (await ProtectedAction("create:user")).userId;
+    // called an auth id because in the sign up page, the value that was stored in the redis is the value that was added in the auth table in authId and not the farmerId itself from farmer table because the farmerId was just about to create in this action
+    const authId = (await ProtectedAction("create:user")).userId;
 
     const validateVal = ZodValidateForm(
       newUserVal,
@@ -74,11 +78,14 @@ export const AddFirstFarmerDetails = async (
           },
         };
 
+    const farmerId = CreateUUID();
+
     await FarmerFirstDetailQuery({
       ...newUserVal,
       countFamilyMember: Number(newUserVal.countFamilyMember),
       mobileNumber: Number(newUserVal.mobileNumber),
-      farmerId: userId,
+      farmerId: farmerId,
+      authId: authId,
       verified: false,
       isDeleted: false,
       dateCreated: new Date(),
@@ -86,7 +93,7 @@ export const AddFirstFarmerDetails = async (
 
     const org =
       newUserVal.organization === "other" && newUserVal.newOrganization
-        ? (await CreateNewOrg(newUserVal.newOrganization, userId)).orgId
+        ? (await CreateNewOrg(newUserVal.newOrganization, farmerId)).orgId
         : newUserVal.organization === "none"
         ? null
         : newUserVal.organization;
@@ -101,15 +108,25 @@ export const AddFirstFarmerDetails = async (
     await UpdateUserOrg({
       orgId: org,
       orgRole: orgRole,
-      farmerId: userId,
+      farmerId: farmerId,
     });
 
-    return {
-      success: true,
-    };
+    redirect(
+      `/?notif=${NotifToUriComponent([
+        { message: "Matagumpay ang iyong pag si-sign up", type: "success" },
+        {
+          message: "Mag intay na aprubahan ang account bago ka makapag login",
+          type: "success",
+        },
+      ])}`
+    );
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     const err = error as Error;
+
     console.error(`Error in Adding First Farmer Detial: ${err.message}`);
+
     return {
       success: false,
       notifError: [
@@ -175,11 +192,15 @@ export const AddSecondFarmerDetails = async (
       })
     );
 
-    await UpdateSessionRole(
-      (await GetFarmerRole(userId)).orgRole === "member" ? "farmer" : "leader"
+    redirect(
+      `/?notif=${NotifToUriComponent([
+        { message: "Matagumpay ang iyong pag si-sign up", type: "success" },
+        {
+          message: "Mag intay na aprubahan ang account bago ka makapag login",
+          type: "success",
+        },
+      ])}`
     );
-
-    redirect("/farmer");
   } catch (error) {
     if (isRedirectError(error)) throw error;
 

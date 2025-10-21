@@ -8,8 +8,7 @@ import { useLoading } from "./provider/loadingProvider";
 
 export const RedirectManager: FC<{
   data: NotificationBaseType[] | undefined;
-  paramName: string;
-}> = ({ data, paramName }) => {
+}> = ({ data }) => {
   const { handleSetNotification } = useNotification();
   const { isLoading, handleDoneLoading } = useLoading();
   const route = useRouter();
@@ -20,17 +19,10 @@ export const RedirectManager: FC<{
 
     const currentUrl = new URL(window.location.href);
 
-    currentUrl.searchParams.delete(paramName);
+    currentUrl.searchParams.delete("notif");
 
     route.replace(currentUrl.pathname + currentUrl.search, { scroll: false });
-  }, [
-    data,
-    handleSetNotification,
-    route,
-    isLoading,
-    handleDoneLoading,
-    paramName,
-  ]);
+  }, [data, handleSetNotification, route, isLoading, handleDoneLoading]);
 
   return null;
 };

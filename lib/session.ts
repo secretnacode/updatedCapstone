@@ -1,12 +1,12 @@
 "use server";
 
-import { Redis } from "@upstash/redis";
 import {
   CreateUUID,
   UnexpectedErrorMessageEnglish,
 } from "../util/helper_function/reusableFunction";
 import { cookies } from "next/headers";
-import { SessionValueType } from "@/types";
+import { allUserRoleType, SessionValueType } from "@/types";
+import { Redis } from "@upstash/redis";
 
 const sessionDuration = 36000;
 
@@ -31,9 +31,19 @@ const GetCookieId = async (): Promise<string | undefined> => {
  * @param cookieId of the cookie
  * @returns key of the session
  */
-const SessionName = (cookieId: string) => {
-  return `session: ${cookieId}`;
-};
+const SessionName = (cookieId: string) => `session: ${cookieId}`;
+
+/**
+ * helper function for no cookie detected message
+ */
+const noCookieDetectedMessage = (type: "updating" | "getting" | "deleting") =>
+  `There's no cookie detected while ${type} the session`;
+
+/**
+ * helper function for no session detected message
+ */
+const noSessionDetectedMessage = (type: "updating" | "getting" | "deleting") =>
+  `There's no session detected while ${type} the session`;
 
 /**
  * Creates a new session in Redis and sets the session cookie.
@@ -43,7 +53,7 @@ const SessionName = (cookieId: string) => {
  */
 export const CreateSession = async (
   userId: string,
-  work: string
+  work: allUserRoleType | "newUser"
 ): Promise<boolean> => {
   try {
     const sessionId = CreateUUID();
@@ -72,7 +82,11 @@ export const CreateSession = async (
 
     return true;
   } catch (error) {
-    throw new Error(`Failed to create session: ${(error as Error).message}`);
+    throw new Error(
+      `${UnexpectedErrorMessageEnglish()} while creating session: ${
+        (error as Error).message
+      }`
+    );
   }
 };
 
@@ -86,18 +100,20 @@ export const GetSession = async (): Promise<SessionValueType | null> => {
 
     const cookie = await GetCookieId();
 
-    if (!cookie) return null;
+    if (!cookie) throw new Error(`${noCookieDetectedMessage("getting")}`);
 
-    const sessionWord = SessionName(cookie);
+    const sessionVal = (await redis.get(
+      SessionName(cookie)
+    )) as SessionValueType;
 
-    const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
-
-    if (!sessionVal) return null;
+    if (!sessionVal) throw new Error(`${noSessionDetectedMessage("getting")}`);
 
     return sessionVal;
   } catch (error) {
     throw new Error(
-      `Error in getting the current sesion: ${(error as Error).message}`
+      `${UnexpectedErrorMessageEnglish()} while getting the current sesion: ${
+        (error as Error).message
+      }`
     );
   }
 };
@@ -110,22 +126,46 @@ export const UpdateSessionRole = async (role: "leader" | "farmer") => {
   try {
     const cookie = await GetCookieId();
 
-    if (!cookie) return null;
+    if (!cookie) throw new Error(`${noCookieDetectedMessage("updating")}`);
 
     const sessionWord = SessionName(cookie);
 
     const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
 
-    if (!sessionVal) return null;
+    if (!sessionVal) throw new Error(`${noSessionDetectedMessage("updating")}`);
 
     await redis.set(
-      SessionName(cookie),
+      sessionWord,
       JSON.stringify({ ...sessionVal, work: role }),
       { ex: sessionDuration }
     );
   } catch (error) {
     throw new Error(
-      `${UnexpectedErrorMessageEnglish()}: ${(error as Error).message}`
+      `${UnexpectedErrorMessageEnglish()} while updating the session: ${
+        (error as Error).message
+      }`
+    );
+  }
+};
+
+export const DeleteSession = async () => {
+  try {
+    const cookie = await GetCookieId();
+
+    if (!cookie) throw new Error(`${noCookieDetectedMessage("deleting")}`);
+
+    const sessionWord = SessionName(cookie);
+
+    const sessionVal = (await redis.get(sessionWord)) as SessionValueType;
+
+    if (!sessionVal) throw new Error(`${noSessionDetectedMessage("deleting")}`);
+
+    await redis.del(sessionWord);
+  } catch (error) {
+    throw new Error(
+      `${UnexpectedErrorMessageEnglish()} while updating the session: ${
+        (error as Error).message
+      }`
     );
   }
 };

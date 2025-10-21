@@ -216,6 +216,7 @@ export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
     <div className="div form-div">
       <label htmlFor={selectName} className="label">
         {labelMessage}
+        {selectRequired && <span className="text-red-500">*</span>}
       </label>
       <select
         value={selectValue}
@@ -628,6 +629,36 @@ export const LoadingCard = () => {
         <div />
         <div />
         <div />
+      </div>
+    </div>
+  );
+};
+
+export const ClerkModalLoading = () => {
+  return (
+    <div className="p-8 bg-white animate-pulse w-full aspect-square border border-gray-300 rounded-xl shadow-xl">
+      <div className="flex items-center justify-center flex-col gap-2 [&>div]:bg-gray-400 [&>div]:rounded-xl mb-8">
+        <div className="w-1/3 p-1.5" />
+
+        <div className="w-2/3 p-1" />
+      </div>
+
+      <div className="flex items-center justify-center flex-row gap-3 [&>div]:bg-gray-400 [&>div]:rounded-xl [&>div]:p-3 [&>div]:w-3/8 mb-10">
+        <div />
+        <div />
+      </div>
+
+      <div className="bg-gray-400 rounded-xl p-1 mb-10" />
+
+      <div className="flex items-start justify-center flex-col gap-3 [&>div]:bg-gray-400 [&>div]:rounded-xl mb-8">
+        <div className="w-1/3 p-1" />
+        <div className="w-full p-3" />
+      </div>
+
+      <div className="w-full p-3 bg-gray-400 rounded-xl mb-10" />
+
+      <div className="flex justify-center item-center">
+        <div className="w-1/2 p-1 bg-gray-400 rounded-xl" />
       </div>
     </div>
   );

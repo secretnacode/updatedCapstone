@@ -1,7 +1,7 @@
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
 import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { GetViewingFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
-import { RedirectUnauthorizedWithError } from "@/util/helper_function/reusableFunction";
+import { RedirectUnauthorizedWithNotif } from "@/util/helper_function/reusableFunction";
 import { notFound } from "next/navigation";
 import { GetFarmerUserProfileInfoReturnType } from "@/types";
 
@@ -30,7 +30,7 @@ export default async function Page({
   if (!farmerData.success && !farmerData.isExist) notFound();
 
   if (!farmerData.success && !farmerData.isNotValid)
-    RedirectUnauthorizedWithError(
+    RedirectUnauthorizedWithNotif(
       farmerData.notifError ?? [
         {
           message: "The user is not authorized to view this page",

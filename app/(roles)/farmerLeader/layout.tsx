@@ -1,7 +1,7 @@
 import { farmerLeaderAuthorization } from "@/lib/server_action/user";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
-  RedirectUnauthorizedWithError,
+  RedirectUnauthorizedWithNotif,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import { ReactNode } from "react";
@@ -22,7 +22,7 @@ export default async function Layout({
   }
 
   if (!authorization.success)
-    RedirectUnauthorizedWithError(authorization.notifError);
+    RedirectUnauthorizedWithNotif(authorization.notifError);
 
   return <div>{children}</div>;
 }

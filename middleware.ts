@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
 import { NotifToUriComponent } from "./util/helper_function/reusableFunction";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`farmer`, [`/farmer`]);
@@ -9,9 +10,9 @@ authorizedPath.set(`admin`, [`/agriculturist`, `/farmerUser`]);
 authorizedPath.set(`leader`, [`/farmer`, `/farmerLeader`, `/farmerUser`]);
 // mga user na kakatapos lng mag sign up ang pwedeng pumasok sa path nato
 authorizedPath.set(`newUser`, [`/farmerDetails`]);
-const publicPath = [`/`, `/unauthorized`];
+const publicPath = [`/`, `/unauthorized`, `/agriLogin`];
 
-export default async function Middleware(req: NextRequest) {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   try {
     const res = NextResponse.next();
 
@@ -61,8 +62,13 @@ export default async function Middleware(req: NextRequest) {
     console.log(`middleware error`);
     console.log((error as Error).message);
   }
-}
+});
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
 };
