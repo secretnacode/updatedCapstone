@@ -5,6 +5,7 @@ import {
   agriculturistRoleType,
   agriIsExistParamType,
   barangayType,
+  farmerAuthStatusType,
   FarmerFirstDetailType,
   getCountNotVerifiedFarmerParamType,
   getFarmerDataForResetingPassReturnType,
@@ -18,6 +19,13 @@ import {
   ViewAllVerifiedFarmerUserQueryReturnType,
 } from "@/types";
 import { pool } from "../configuration";
+
+// option of farmer auth status
+const farmerAuthStatus: Record<farmerAuthStatusType, farmerAuthStatusType> = {
+  delete: "delete",
+  active: "active",
+  block: "block",
+};
 
 /**
  * Check the user value by making a query that returns a boolean value.
@@ -55,8 +63,8 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
 export const InsertNewUser = async (data: NewUserType): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.auth ("authId", "username", "password", "work") values ($1, $2, $3, $4)`,
-      [data.userId, data.username, data.password, data.role]
+      `insert into capstone.auth ("authId", "username", "password", "status") values ($1, $2, $3, $4)`,
+      [data.userId, data.username, data.password, farmerAuthStatus.active]
     );
   } catch (error) {
     console.error(
@@ -82,8 +90,8 @@ export const UserLogin = async (
   try {
     // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     const query = await pool.query(
-      `select "authId", "password", "work" from capstone.auth where username = $1`,
-      [username]
+      `select "authId", "password", "status" from capstone.auth where "username" = $1 and "status" <> $2`,
+      [username, farmerAuthStatus.delete]
     );
 
     if (!query.rows[0])
@@ -325,12 +333,12 @@ export const GetFarmerProfilePersonalInfoQuery = async (
     ).rows[0];
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personaol na impormasyon: ${
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personal na impormasyon: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personaol na impormasyon`
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personal na impormasyon`
     );
   }
 };
@@ -647,7 +655,7 @@ export const isFarmerVerified = async (farmerId: string): Promise<boolean> => {
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang ay beripikado `
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang ay beripikado`
     );
   }
 };

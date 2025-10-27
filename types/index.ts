@@ -21,6 +21,7 @@ import {
   ChangeEvent,
   Dispatch,
   FormEvent,
+  InputHTMLAttributes,
   ReactNode,
   Ref,
   SetStateAction,
@@ -60,7 +61,6 @@ export type ValidateReturnType = NotificationBaseType;
 
 export type NewUserType = AuthLoginType & {
   userId: string;
-  role: string;
 };
 
 export type ValidateAuthValType<T> =
@@ -77,12 +77,14 @@ export type QueryUserLoginReturnType =
     }
   | {
       exist: true;
-      data: { authId: string; password: string; work: workRoleType };
+      data: { authId: string; password: string; status: farmerAuthStatusType };
     };
 
-export type AuthResponseType = {
-  success: false;
-  errors: NotificationBaseType[];
+export type farmerAuthStatusType = "active" | "block" | "delete";
+
+export type AuthResponseType<T> = {
+  notifError: NotificationBaseType[];
+  formError?: FormErrorType<T>;
 };
 
 export type ErrorResponseType = {
@@ -561,6 +563,13 @@ export type FormType = ChildrenPropType & {
 
 export type DivPropType = ChildrenPropType & {
   className?: string;
+};
+
+export type AuthFormPropType = InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  isHidden: boolean;
+  setIsHidden: () => void;
+  formError?: string[];
 };
 
 export type FormDivLabelInputPropType = ChildrenPropType & {

@@ -140,6 +140,19 @@ export const baranggayList = [
  * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
  * @returns redirect function with its message
  */
+export const RedirectLoginFirst = () => {
+  return redirect(
+    `/?notif=${NotifToUriComponent([
+      { message: "Mag log in muna!!!", type: "warning" },
+    ])}`
+  );
+};
+
+/**
+ * used to redirect the user into login page with an error message
+ * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
+ * @returns redirect function with its message
+ */
 export const RedirectLoginWithNotif = (error: NotificationBaseType[]) => {
   return redirect(`/?notif=${NotifToUriComponent(error)}`);
 };
@@ -571,3 +584,10 @@ export const converTimeToAMPM = (time: string) =>
 
 export const capitalizeFirstLetter = (word: string) =>
   word.charAt(0).toUpperCase() + word.slice(1);
+
+export const missingFormValNotif = (): NotificationBaseType[] => [
+  {
+    message: "May mga pagkakamali sa iyong inilagay, baguhin muna ito",
+    type: "warning",
+  },
+];

@@ -1,4 +1,5 @@
 import {
+  AuthFormPropType,
   barangayType,
   ButtonPropType,
   ChildrenPropType,
@@ -18,6 +19,8 @@ import {
 import { FC } from "react";
 import {
   ClipboardX,
+  Eye,
+  EyeClosed,
   Frown,
   LucideIcon,
   OctagonX,
@@ -111,6 +114,45 @@ export const FormCancelSubmitButton: FC<FormCancelSubmitButtonPropType> = ({
         {CancelLogo && <CancelLogo />}
         {cancelButtonLabel}
       </CancelButton>
+    </div>
+  );
+};
+
+export const AuthInputPass: FC<AuthFormPropType> = ({
+  label,
+  isHidden,
+  setIsHidden,
+  formError,
+  required = false,
+  ...inputProps
+}) => {
+  return (
+    <div className="space-y-2">
+      <label>
+        {label}
+        {required && <span className="text-red-500">*</span>}
+      </label>
+
+      <div className="relative">
+        <input
+          type={isHidden ? "password" : "text"}
+          name="password"
+          placeholder="FarmerPass1"
+          className=" pr-10"
+          required={required}
+          {...inputProps}
+        />
+        <button type="button" onClick={setIsHidden}>
+          {isHidden ? <EyeClosed /> : <Eye />}
+        </button>
+      </div>
+
+      {formError &&
+        formError.map((message, index) => (
+          <p key={message + index} className="p p-error">
+            {message}
+          </p>
+        ))}
     </div>
   );
 };

@@ -39,9 +39,8 @@ import { NotAMemberErrorMessage } from "@/util/helper_function/reusableFunction"
 export const GetFarmerOrgMember =
   async (): Promise<GetFarmerOrgMemberReturnType> => {
     try {
-      const farmerId = (
-        await ProtectedAction("read:all:farmer:org:member:user")
-      ).userId;
+      const farmerId = (await ProtectedAction("read:farmer:org:member:user"))
+        .userId;
 
       return {
         success: true,

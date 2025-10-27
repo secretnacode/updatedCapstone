@@ -25,6 +25,15 @@ export const authSignUpSchema = z
       })
       .regex(/[a-zA-Z0-9]/, {
         message: `Ang laman ng username mo dapat ay mga letra at numero lamang`,
+      })
+      .regex(/[a-z]/, {
+        message: `Lagyan ng kahit isang maliit na letra (a-z) ang iyong password`,
+      })
+      .regex(/[A-Z]/, {
+        message: `Lagyan ng kahit isang malaki na letra (A-Z) ang iyong password`,
+      })
+      .regex(/[0-9]/, {
+        message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
       }),
     password: z
       .string()
@@ -50,8 +59,12 @@ export const authSignUpSchema = z
  * A schema for auth login where it only defines the type of object, {username: string, password: string}
  */
 export const authLogInSchema = z.object({
-  username: z.string(),
-  password: z.string(),
+  username: z.string().min(1, {
+    message: `Ang username mo dapat ay may walo(8) na letra o pataas`,
+  }),
+  password: z.string().min(1, {
+    message: `Ang username mo dapat ay may walo(8) na letra o pataas`,
+  }),
 });
 
 /**

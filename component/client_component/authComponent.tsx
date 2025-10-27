@@ -4,8 +4,7 @@ import {
   AuthLoginType,
   AuthSignUpType,
   ErrorResponseType,
-  NotificationBaseType,
-  ValidateAuthValType,
+  FormErrorType,
 } from "@/types";
 import {
   ChangeEvent,
@@ -18,14 +17,17 @@ import {
   useRef,
   useState,
 } from "react";
-import { Eye, EyeClosed, TriangleAlert, X } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
 import { useNotification } from "./provider/notificationProvider";
-import { ValidateSingupVal } from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import { agriSignIn, LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
 import { useLoading } from "./provider/loadingProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { SignIn, SignUp, useAuth, useUser } from "@clerk/nextjs";
-import { ClerkModalLoading } from "../server_component/customComponent";
+import {
+  AuthInputPass,
+  ClerkModalLoading,
+  FormDivLabelInput,
+} from "../server_component/customComponent";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
 
 /**
@@ -57,40 +59,37 @@ export const AuthForm: FC = () => {
 const FarmerSignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   setIsSignUp,
 }): ReactElement => {
-  const [isHiddenPass, setIsHiddenPass] = useState<boolean>(true);
-  const [isHiddenConPass, setIsHiddenConPass] = useState<boolean>(true);
   const { handleSetNotification } = useNotification();
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
+  const [hideText, setHideText] = useState({ pass: true, confirmPass: true });
+  const [formError, setFormError] = useState<FormErrorType<AuthSignUpType>>();
+  const [authVal, setAuthVal] = useState<AuthSignUpType>({
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChangeVal = (e: ChangeEvent<HTMLInputElement>) => {
+    setAuthVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleFormSubmit = async (
     e: FormEvent<HTMLFormElement>
   ): Promise<void> => {
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-
-    const authVal: AuthSignUpType = {
-      username: formData.get("username") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
-    };
-
-    const err: ValidateAuthValType<NotificationBaseType[]> =
-      ValidateSingupVal(authVal);
-
-    if (!err.valid) {
-      return handleSetNotification(err.errors as NotificationBaseType[]);
-    }
-
-    handleIsLoading("Inihahanda na ang iyong account");
-
     try {
+      e.preventDefault();
+      handleIsLoading("Inihahanda na ang iyong account");
+
       const req = await SignUpAuth(authVal);
 
-      if (!req.success) throw req;
+      if (req.formError) setFormError(req.formError);
+
+      handleSetNotification(req.notifError);
     } catch (error) {
-      const err = error as ErrorResponseType;
-      handleSetNotification(err.errors);
+      if (!isRedirectError(error)) {
+        const err = error as ErrorResponseType;
+        handleSetNotification(err.errors);
+      }
     } finally {
       handleDoneLoading();
     }
@@ -100,48 +99,43 @@ const FarmerSignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     <div className="auth_form">
       <h1>Mag Gawa ng Account</h1>
       <form onSubmit={handleFormSubmit}>
-        <div className="space-y-2">
-          <label>Username:</label>
-          <div className="relative">
-            <input type="text" name="username" placeholder="Farmer1" />
-          </div>
-        </div>
+        <FormDivLabelInput
+          labelMessage={"Username:"}
+          inputName={"username"}
+          inputPlaceholder="Farmer1"
+          inputRequired
+          inputValue={authVal.username}
+          onChange={handleChangeVal}
+          formError={formError?.username}
+        />
 
-        <div className="space-y-2">
-          <label>Password:</label>
-          <div className="relative">
-            <input
-              type={isHiddenPass ? "password" : "text"}
-              name="password"
-              placeholder="FarmerPass1"
-              className=" pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setIsHiddenPass((prev) => !prev)}
-            >
-              <EyeLogo isHidden={isHiddenPass} />
-            </button>
-          </div>
-        </div>
+        <AuthInputPass
+          label="Password:"
+          isHidden={hideText.pass}
+          setIsHidden={() =>
+            setHideText((prev) => ({ ...prev, pass: !prev.pass }))
+          }
+          name="password"
+          placeholder="FarmerPass123"
+          value={authVal.password}
+          onChange={handleChangeVal}
+          formError={formError?.password}
+          required
+        />
 
-        <div className="space-y-2">
-          <label>Kumpirmahin ang Password:</label>
-          <div className="relative">
-            <input
-              type={isHiddenConPass ? "password" : "text"}
-              name="confirmPassword"
-              placeholder="FarmerConfirmPass1"
-              className=" pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setIsHiddenConPass((prev) => !prev)}
-            >
-              <EyeLogo isHidden={isHiddenConPass} />
-            </button>
-          </div>
-        </div>
+        <AuthInputPass
+          label="Kumpirmahin ang Password:"
+          isHidden={hideText.confirmPass}
+          setIsHidden={() =>
+            setHideText((prev) => ({ ...prev, confirmPass: !prev.confirmPass }))
+          }
+          name="confirmPassword"
+          placeholder="FarmerPass123"
+          value={authVal.confirmPassword}
+          onChange={handleChangeVal}
+          formError={formError?.confirmPassword}
+          required
+        />
 
         <button type="submit">Ipasa</button>
       </form>
@@ -171,6 +165,7 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   const { handleSetNotification } = useNotification();
   const [isHidden, setIsHidden] = useState<boolean>(true);
   const { isLoading, handleIsLoading, handleDoneLoading } = useLoading();
+  const [formError, setFormError] = useState<FormErrorType<AuthLoginType>>();
   const [authVal, setAuthVal] = useState<AuthLoginType>({
     username: "",
     password: "",
@@ -181,26 +176,22 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
   };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleIsLoading("Sinusuri lang ang iyong username at password");
-
     try {
+      e.preventDefault();
+
+      handleIsLoading("Sinusuri lang ang iyong username at password");
+
       const res = await LoginAuth(authVal);
 
-      if (res && !res.success) {
-        handleSetNotification(res.errors);
-        handleDoneLoading();
-      }
+      if (res.formError) setFormError(res.formError);
+
+      handleSetNotification(res.notifError);
     } catch (error) {
-      let err: ErrorResponseType | undefined;
-
-      if (!isRedirectError(error))
-        err = {
-          errors: [{ message: (error as Error).message, type: "error" }],
-        };
-
-      if (err) handleSetNotification(err.errors);
-
+      if (!isRedirectError(error)) {
+        const err = error as ErrorResponseType;
+        handleSetNotification(err.errors);
+      }
+    } finally {
       handleDoneLoading();
     }
   };
@@ -209,33 +200,27 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
     <div className="auth_form">
       <h1>Mag Log In</h1>
       <form onSubmit={handleFormSubmit}>
-        <div className="space-y-2">
-          <label>Username:</label>
-          <input
-            type="text"
-            name="username"
-            placeholder="Farmer1"
-            onChange={handleChangeVal}
-            value={authVal.username}
-          />
-        </div>
+        <FormDivLabelInput
+          labelMessage={"Username:"}
+          inputName={"username"}
+          inputPlaceholder="Farmer1"
+          inputRequired
+          inputValue={authVal.username}
+          onChange={handleChangeVal}
+          formError={formError?.username}
+        />
 
-        <div className="space-y-2">
-          <label>Password:</label>
-          <div className="relative">
-            <input
-              type={isHidden ? "password" : "text"}
-              name="password"
-              value={authVal.password}
-              placeholder="FarmerPass1"
-              className=" pr-10"
-              onChange={handleChangeVal}
-            />
-            <button type="button" onClick={() => setIsHidden((prev) => !prev)}>
-              <EyeLogo isHidden={isHidden} />
-            </button>
-          </div>
-        </div>
+        <AuthInputPass
+          label="Password:"
+          isHidden={isHidden}
+          setIsHidden={() => setIsHidden((prev) => !prev)}
+          name="password"
+          placeholder="FarmerPass123"
+          value={authVal.password}
+          onChange={handleChangeVal}
+          formError={formError?.password}
+          required
+        />
 
         <button type="submit">IPASA</button>
       </form>
@@ -348,11 +333,6 @@ const ModalNotif: FC<{
       )}
     </>
   );
-};
-
-// an eye logo function that recieve a prop that has a value of true or false and returns an eye icon between open and closed base on that prop value
-const EyeLogo: FC<{ isHidden: boolean }> = ({ isHidden }): ReactElement => {
-  return <>{isHidden ? <EyeClosed /> : <Eye />}</>;
 };
 
 /**

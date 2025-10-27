@@ -569,7 +569,7 @@ export const farmerLeaderAuthorization =
       const auth = await farmerAndFarmerLeaderAuthorization(userId, work);
       if (!auth.success) return { success: false, notifError: auth.notifError };
 
-      if (!(await isFarmerLeader(userId)))
+      if (await isFarmerLeader(userId))
         return {
           success: false,
           notifError: [

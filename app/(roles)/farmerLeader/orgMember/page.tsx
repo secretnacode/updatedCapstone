@@ -40,7 +40,7 @@ export default async function Page() {
                 <th scope="col">Alyas ng magsasaka</th>
                 <th scope="col">Numero ng telepono</th>
                 <th scope="col">Baranggay na tinitirhan</th>
-                <th scope="col">Estado account</th>
+                <th scope="col">Estado ng account</th>
                 <th scope="col">Bilang ng pananim</th>
                 <th scope="col">Aksyon</th>
               </>

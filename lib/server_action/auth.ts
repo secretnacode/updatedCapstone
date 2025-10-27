@@ -1,25 +1,19 @@
 "use server";
 
 import {
-  AuthResponseType,
-  NotificationBaseType,
   QueryUserLoginReturnType,
-  ValidateAuthValType,
   AuthLoginType,
   AuthSignUpType,
-  NewUserType,
   serverActionNormalReturnType,
+  AuthResponseType,
 } from "@/types";
 import {
   CreateUUID,
+  missingFormValNotif,
   NotifToUriComponent,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import { CreateSession } from "@/lib/session";
-import {
-  ValidateLoginVal,
-  ValidateSingupVal,
-} from "@/util/helper_function/validation/frontendValidation/authvalidation";
 import {
   agriAuthQuery,
   CheckUsername,
@@ -31,6 +25,11 @@ import {
 import { ComparePassword, Hash } from "@/lib/reusableFunctions";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { ZodValidateForm } from "../validation/authValidation";
+import {
+  authLogInSchema,
+  authSignUpSchema,
+} from "@/util/helper_function/validation/validationSchema";
 
 /**
  * used for login authentication of the user and validating the user input before redirecting the user into another page if the user
@@ -40,16 +39,15 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
  */
 export async function LoginAuth(
   data: AuthLoginType
-): Promise<AuthResponseType> {
+): Promise<AuthResponseType<AuthLoginType>> {
   // let work = ""
   try {
     // will check the user first then will see if the user input is both string
-    const validateData: ValidateAuthValType<NotificationBaseType[]> =
-      ValidateLoginVal(data);
-    if (!validateData.valid)
+    const validate = ZodValidateForm(data, authLogInSchema);
+    if (!validate.valid)
       return {
-        success: false,
-        errors: validateData.errors,
+        formError: validate.formError,
+        notifError: missingFormValNotif(),
       };
 
     // will check if the user is existing
@@ -59,15 +57,13 @@ export async function LoginAuth(
 
     if (!userCredentials.exist)
       return {
-        success: false,
-        errors: [{ message: userCredentials.message, type: "warning" }],
+        notifError: [{ message: userCredentials.message, type: "warning" }],
       };
 
     // if its allready existing, will compare the user passwod input and the hash password that is in the database and will compare it
     if (!(await ComparePassword(data.password, userCredentials.data.password)))
       return {
-        success: false,
-        errors: [
+        notifError: [
           {
             message: `Mali ang nailagay mong password o username`,
             type: "warning",
@@ -75,20 +71,22 @@ export async function LoginAuth(
         ],
       };
 
-    if (userCredentials.data.work === "agriculturist")
+    if (userCredentials.data.status === "block")
       return {
-        success: false,
-        errors: [
+        notifError: [
           {
-            message: "This login page is for farmer users only!!!",
+            message: `Naka block ang iyong account`,
+            type: "warning",
+          },
+          {
+            message: `Kausapin ang iyong leader o ang agriculturist para maalis`,
             type: "warning",
           },
         ],
       };
 
-    const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
-
     // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
+    const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
     if (!farmerId) {
       await CreateSession(userCredentials.data.authId, "newUser");
 
@@ -97,8 +95,7 @@ export async function LoginAuth(
 
     if (!(await isFarmerVerified(farmerId.farmerId)))
       return {
-        success: false,
-        errors: [
+        notifError: [
           {
             message: "Hindi pa beripikado and iyong account!!!",
             type: "warning",
@@ -106,17 +103,11 @@ export async function LoginAuth(
         ],
       };
 
-    // DIDNT INCLUDE THE CHECKING IF THE USER IS DELETED OR NOT BECAUSE IF THE VALUE OF THE USER(USERNAME)
-    // IS NOT EXISITNG IN THE AUTH TABLE(DELETED), THE userCredentials.exist WILL RETURN FALSE
-
-    // if the user is existing, correct username and pass, and is verified it will crete a session and proceed to the next page
-    // the GenerateUserRole() function is s
     await CreateSession(
       farmerId.farmerId,
       farmerId.orgRole === "leader" ? farmerId.orgRole : "farmer"
     );
 
-    // work = userCredentials.data.work
     redirect(
       `/farmer/?notif=${NotifToUriComponent([
         { message: "Matagumpay ang iyong pag lologin", type: "success" },
@@ -131,8 +122,7 @@ export async function LoginAuth(
       }`
     );
     return {
-      success: false,
-      errors: [
+      notifError: [
         {
           message: `May pagkakamali na hindi inaasahan sa pag lologin`,
           type: "error",
@@ -149,23 +139,21 @@ export async function LoginAuth(
  */
 export async function SignUpAuth(
   data: AuthSignUpType
-): Promise<AuthResponseType> {
+): Promise<AuthResponseType<AuthSignUpType>> {
   try {
     // validating the all the value ({username, password, confirmPassword})
-    const err: ValidateAuthValType<NotificationBaseType[]> =
-      ValidateSingupVal(data);
-    if (!err.valid) {
+    const validate = ZodValidateForm(data, authSignUpSchema);
+    if (!validate.valid) {
       return {
-        success: false,
-        errors: err.errors,
+        formError: validate.formError,
+        notifError: missingFormValNotif(),
       };
     }
 
     // checking if other user already have the same username
     if (await CheckUsername(data.username))
       return {
-        success: false,
-        errors: [
+        notifError: [
           {
             message:
               "Ang username ay ginagamit na ng ibang tao, gumamit ng ibang username",
@@ -180,8 +168,7 @@ export async function SignUpAuth(
       userId: authId,
       username: data.username,
       password: await Hash(data.password),
-      role: `farmer`,
-    } as NewUserType);
+    });
 
     await CreateSession(authId, "newUser");
 
@@ -192,8 +179,7 @@ export async function SignUpAuth(
     const err = error as Error;
     console.log(`Error making a new user: ${err}`);
     return {
-      success: false,
-      errors: [{ message: UnexpectedErrorMessage(), type: "error" }],
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
     };
   }
 }
@@ -216,9 +202,6 @@ export const agriSignIn = async (
         success: false,
         notifMessage: [{ message: agriVal.message, type: "warning" }],
       };
-
-    console.log(agriVal.agriVal.agriId);
-    console.log(agriVal.agriVal.agriRole);
 
     const res = await CreateSession(
       agriVal.agriVal.agriId,

@@ -21,6 +21,6 @@ export async function ComparePassword(
   } catch (error) {
     const err = error as Error;
     console.log(`Error in comparing of password and hash password: ${err}`);
-    throw new Error(`Error in comparing of password and hash password: ${err}`);
+    throw new Error(`Error in comparing of password and hash password`);
   }
 }

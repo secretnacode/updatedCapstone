@@ -21,7 +21,6 @@ const Actions = {
   UPDATE_USER: "update:user", // action for the user to update their OWN information
 
   // action for the farmer leader to access their farmer org member
-  READ_ALL_FARMER_ORG_MEMBER_USER: "read:all:farmer:org:member:user", // action to view the FARMER USER
   READ_FARMER_ORG_MEMBER_USER: "read:farmer:org:member:user", // action to view the FARMER org member user
   UPDATE_FARMER_ORG_MEMBER_USER: "update:farmer:org:member:user", // action to update the FARMER USER (e.g. Validated)
   DELETE_FARMER_ORG_MEMBER_USER: "delete:farmer:org:member:user", // action for the farmer leader if the user is not active
@@ -86,7 +85,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_FARMER_USER,
-    Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
@@ -108,7 +106,6 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_FARMER_USER,
-    Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
