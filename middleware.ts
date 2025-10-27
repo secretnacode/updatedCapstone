@@ -10,7 +10,7 @@ authorizedPath.set(`admin`, [`/agriculturist`, `/farmerUser`]);
 authorizedPath.set(`leader`, [`/farmer`, `/farmerLeader`, `/farmerUser`]);
 // mga user na kakatapos lng mag sign up ang pwedeng pumasok sa path nato
 authorizedPath.set(`newUser`, [`/farmerDetails`]);
-const publicPath = [`/`, `/unauthorized`, `/agriLogin`];
+const publicPath = [`/`, `/unauthorized`, `/agriAuth`];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   try {
@@ -25,7 +25,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     const session = await GetSession();
 
     // if the current path was defines in the publicPath Variable, the middleware will let it pass through
-    if (publicPath.includes(pathname)) return res;
+    if (publicPath.some((path) => pathname.startsWith(path))) return res;
 
     if (session) {
       const accessiblePath = authorizedPath.get(session.work);
@@ -33,7 +33,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
       if (
         accessiblePath &&
-        accessiblePath.some((path) => `/${pathname.split("/")[1]}` === path)
+        accessiblePath.some((path) => pathname.startsWith(path))
       ) {
         // will return if the user is authorized to go in the path
         console.warn(`middleware: you're authorized to go ${pathname}`);
@@ -46,9 +46,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
         return NextResponse.redirect(new URL(`/unauthorized`, req.url));
       }
     } else {
-      // will return if the user is not logged in
-      console.warn(`middleware: you're not logged in`);
-
       return NextResponse.redirect(
         new URL(
           `/?error=${NotifToUriComponent([
@@ -59,7 +56,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       );
     }
   } catch (error) {
-    console.log(`middleware error`);
     console.log((error as Error).message);
   }
 });

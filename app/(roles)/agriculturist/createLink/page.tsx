@@ -32,6 +32,8 @@ export default async function Page() {
     };
   }
 
+  console.log(linkData);
+
   const tableCount = (): number => {
     if (!linkData.success) return 0;
 

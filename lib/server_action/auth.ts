@@ -217,10 +217,18 @@ export const agriSignIn = async (
         notifMessage: [{ message: agriVal.message, type: "warning" }],
       };
 
-    await CreateSession(agriVal.agriVal.agriId, agriVal.agriVal.agriRole);
+    console.log(agriVal.agriVal.agriId);
+    console.log(agriVal.agriVal.agriRole);
+
+    const res = await CreateSession(
+      agriVal.agriVal.agriId,
+      agriVal.agriVal.agriRole
+    );
+
+    console.log(`session val: ${res}`);
 
     redirect(
-      `/agriculturist/?notif=${NotifToUriComponent([
+      `/agriculturist?notif=${NotifToUriComponent([
         { message: "You've successfully logged in!!!", type: "success" },
       ])}`
     );

@@ -355,53 +355,46 @@ const EyeLogo: FC<{ isHidden: boolean }> = ({ isHidden }): ReactElement => {
   return <>{isHidden ? <EyeClosed /> : <Eye />}</>;
 };
 
-export const AgriSignUp = () => {
-  const { isLoaded } = useAuth();
-
-  return (
-    <>
-      {isLoaded ? (
-        <SignUp signInUrl={undefined} forceRedirectUrl={`/agriAuth/signUp`} />
-      ) : (
-        <ClerkModalLoading />
-      )}
-    </>
-  );
-};
-
-export const AgriSignIn = () => {
-  const { isLoaded, signOut } = useAuth();
+/**
+ * component to validate the agticulturist account and if validated will be redirected to the agriculturist page
+ * @returns
+ */
+export const AgriAuth: FC = () => {
+  const { signOut } = useAuth();
   const { isSignedIn, user } = useUser();
-  const { handleIsLoading, handleDoneLoading, isLoading } = useLoading();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
 
+  console.log("start");
+
   useEffect(() => {
+    if (!isSignedIn || !user?.primaryEmailAddress) return;
+
+    const email = user.primaryEmailAddress.emailAddress;
+
     const userAuth = async () => {
-      if (isSignedIn && user.primaryEmailAddress) {
-        try {
-          handleIsLoading("Checking your account");
+      try {
+        handleIsLoading("Redirecting!!!");
 
-          const res = await agriSignIn(
-            user.id,
-            user.primaryEmailAddress?.emailAddress
-          );
+        const res = await agriSignIn(user.id, email);
 
-          // if the authenthication is not success, it means the user is not validated
-          if (!res.success) return await signOut();
+        console.log("middle");
+        if (!res.success) return await signOut();
 
-          handleSetNotification(res.notifMessage);
-        } catch (error) {
-          if (!isRedirectError(error)) {
-            const err = error as Error;
-            console.error(err.message);
+        handleSetNotification(res.notifMessage);
+      } catch (error) {
+        if (!isRedirectError(error)) {
+          const err = error as Error;
+          console.error(err.message);
 
-            handleSetNotification([
-              { message: UnexpectedErrorMessageEnglish(), type: "error" },
-            ]);
-          }
-        } finally {
-          handleDoneLoading();
+          handleSetNotification([
+            { message: UnexpectedErrorMessageEnglish(), type: "error" },
+          ]);
         }
+      } finally {
+        handleDoneLoading();
+
+        console.log("end");
       }
     };
 
@@ -415,15 +408,19 @@ export const AgriSignIn = () => {
     signOut,
   ]);
 
-  return (
-    <>
-      {isLoaded ? (
-        <SignIn signInUrl={undefined} forceRedirectUrl={`/agriAuth/signIn`} />
-      ) : (
-        <ClerkModalLoading />
-      )}
+  return null;
+};
 
-      {isLoading && <ClerkModalLoading />}
-    </>
+export const AgriSignUp: FC = () => {
+  const { isLoaded } = useAuth();
+
+  return <>{isLoaded ? <SignUp /> : <ClerkModalLoading />}</>;
+};
+
+export const AgriSignIn = () => {
+  const { isLoaded } = useAuth();
+
+  return (
+    <>{isLoaded ? <SignIn signUpUrl={undefined} /> : <ClerkModalLoading />}</>
   );
 };

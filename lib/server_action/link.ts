@@ -1,14 +1,16 @@
 "use server";
 
 import {
+  checkCreateAgriToken,
   createResetPassWordLinkQuery,
   createSignUpLinkForAgriQuery,
-  deleteCreateAgriLink,
+  updateAgriLinkIsUse,
   deleteResetPassLink,
   getCreateAgriLink,
   getRestPasswordLinkQuery,
   linkIsExistInCreateAgriDb,
   linkIsExistInResetPassDb,
+  deleteCreateAgriLink,
 } from "@/util/queries/link";
 import { ProtectedAction } from "../protectedActions";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
@@ -18,7 +20,9 @@ import { revalidatePath } from "next/cache";
 import {
   getAllLinkDataReturnType,
   serverActionNormalReturnType,
+  serverActionOptionalNotifMessage,
 } from "@/types";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 const rndmToken = async () => crypto.randomBytes(32).toString("hex");
 const hostName = async () => (await headers()).get("host");
@@ -98,7 +102,8 @@ export const createSignUpLinkForAgri =
       const host = await hostName();
       const protocol = await hostNameProtocol();
 
-      const link = `${protocol}://${host}/createAgri/${token}`;
+      // secured link with a token
+      const link = `${protocol}://${host}/agriAuth/${token}/signUp`;
 
       await createSignUpLinkForAgriQuery({
         linkId: CreateUUID(),
@@ -106,6 +111,7 @@ export const createSignUpLinkForAgri =
         dateExpired: new Date(Date.now() + 3600000), // an hour from now on
         link: link,
         linkToken: token,
+        isUsed: false,
       });
 
       revalidatePath(`/agriculturist/createLink`);
@@ -194,24 +200,19 @@ export const deleteLink = async (
       };
     }
 
-    const isCreateAgrfi = await linkIsExistInCreateAgriDb(linkId);
+    const isCreateAgri = await linkIsExistInCreateAgriDb(linkId);
 
-    // can only be accessed by the user that is an admin
-    if (isCreateAgrfi && work === "admin") {
-      await deleteCreateAgriLink(linkId);
-
+    // if the linkId was not found in both table, it means its not existing
+    if (!isCreateAgri)
       return {
-        success: true,
+        success: false,
         notifMessage: [
-          {
-            message:
-              "Successfully deleted the link sign up for agriculturist!!!",
-            type: "success",
-          },
+          { message: "No link was found in the data base!!!", type: "error" },
         ],
       };
-    } else if (isCreateAgrfi && work !== "admin")
-      // if still exist and not an admin, it will not still delete the link
+
+    // if still exist and not an admin, it will not still delete the link
+    if (isCreateAgri && work !== "admin")
       return {
         success: false,
         notifMessage: [
@@ -222,11 +223,15 @@ export const deleteLink = async (
         ],
       };
 
-    // if the linkId was not found in both table, it means its not existing
+    await deleteCreateAgriLink(linkId);
+
     return {
-      success: false,
+      success: true,
       notifMessage: [
-        { message: "No link was found in the data base!!!", type: "error" },
+        {
+          message: "Successfully deleted the link sign up for agriculturist!!!",
+          type: "success",
+        },
       ],
     };
   } catch (error) {
@@ -243,5 +248,40 @@ export const deleteLink = async (
     };
   } finally {
     revalidatePath("/agriculturist/createLink");
+  }
+};
+
+export const checkSignUp = async (
+  token: string
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    if (!(await checkCreateAgriToken(token)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "You are unauthorized to access the page",
+            type: "warning",
+          },
+        ],
+      };
+
+    await updateAgriLinkIsUse(token);
+
+    return { success: true };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+    console.log(`Error making a new user: ${err}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: `Unexpected error occured while making validating the link for sign up`,
+          type: "error",
+        },
+      ],
+    };
   }
 };

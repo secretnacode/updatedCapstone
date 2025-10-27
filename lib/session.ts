@@ -18,12 +18,14 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+const cookieName = `sessionId`;
+
 /**
  * getting the cookie id
  * @returns value of the cookie
  */
 const GetCookieId = async (): Promise<string | undefined> => {
-  return (await cookies()).get(`sessionId`)?.value;
+  return (await cookies()).get(cookieName)?.value;
 };
 
 /**
@@ -72,7 +74,7 @@ export const CreateSession = async (
 
     // setting the cookie in the header together its session id
     // this will be passed in the browser in the header response
-    (await cookies()).set("sessionId", sessionId, {
+    (await cookies()).set(cookieName, sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

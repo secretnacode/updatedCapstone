@@ -9,10 +9,8 @@ import {
 } from "@/types";
 import { pool } from "../configuration";
 
-const resetPassDbName = async (): Promise<"resetFarmerPassLink"> =>
-  "resetFarmerPassLink";
-const createAgriDbName = async (): Promise<"signUpLinkForAgri"> =>
-  "signUpLinkForAgri";
+const resetPassDbName = (): "resetFarmerPassLink" => "resetFarmerPassLink";
+const createAgriDbName = (): "signUpLinkForAgri" => "signUpLinkForAgri";
 
 /**
  * query for inserting a new link so the farmer can reset their password if the user go to the said link
@@ -21,10 +19,8 @@ export const createResetPassWordLinkQuery = async (
   data: createResetPassWordLinkQueryParamType
 ) => {
   try {
-    const resetPass = await resetPassDbName();
-
     await pool.query(
-      `insert into capstone."${resetPass}" ("linkId", "dateCreated", "dateExpired", "link", "farmerId", "linkToken") values ($1, $2, $3, $4, $5, $6)`,
+      `insert into capstone."${resetPassDbName()}" ("linkId", "dateCreated", "dateExpired", "link", "farmerId", "linkToken") values ($1, $2, $3, $4, $5, $6)`,
       [
         data.linkId,
         data.dateCreated,
@@ -53,16 +49,15 @@ export const createSignUpLinkForAgriQuery = async (
   data: createSignUpLinkForAgriQueryParamType
 ) => {
   try {
-    const createAgri = await createAgriDbName();
-
     await pool.query(
-      `insert into capstone."${createAgri}" ("linkId", "linkToken", "link", "dateCreated", "dateExpired") values ($1, $2, $3, $4, $5)`,
+      `insert into capstone."${createAgriDbName()}" ("linkId", "linkToken", "link", "dateCreated", "dateExpired", "isUsed") values ($1, $2, $3, $4, $5, $6)`,
       [
         data.linkId,
         data.linkToken,
         data.link,
         data.dateCreated,
         data.dateExpired,
+        data.isUsed,
       ]
     );
   } catch (error) {
@@ -84,11 +79,9 @@ export const getRestPasswordLinkQuery = async (): Promise<
   getLinkResetPassQueryReturnType[]
 > => {
   try {
-    const resetPass = await resetPassDbName();
-
     return (
       await pool.query(
-        `select l."linkId", l."link", l."dateCreated", l."dateExpired", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", a."username" from capstone."${resetPass}" l join capstone.farmer f on l."farmerId" = f."farmerId" join capstone.auth a on f."farmerId" = a."authId"`
+        `select l."linkId", l."link", l."dateCreated", l."dateExpired", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", a."username" from capstone."${resetPassDbName()}" l join capstone.farmer f on l."farmerId" = f."farmerId" join capstone.auth a on f."farmerId" = a."authId"`
       )
     ).rows;
   } catch (error) {
@@ -110,11 +103,9 @@ export const getCreateAgriLink = async (): Promise<
   getLinkQueryReturnTyepe[]
 > => {
   try {
-    const createAgri = await createAgriDbName();
-
     return (
       await pool.query(
-        `select "linkId", "link", "dateCreated", "dateExpired" from capstone."${createAgri}"`
+        `select "linkId", "link", "dateCreated", "dateExpired" from capstone."${createAgriDbName()}"`
       )
     ).rows;
   } catch (error) {
@@ -169,9 +160,7 @@ export const linkIsExistInResetPassDb = async (
   linkId: string
 ): Promise<boolean> => {
   try {
-    const resetPass = await resetPassDbName();
-
-    return await isLinkExist(resetPass, linkId);
+    return await isLinkExist(resetPassDbName(), linkId);
   } catch (error) {
     console.error(
       `Unexpected error occur while checking the link if it exist: ${
@@ -193,9 +182,7 @@ export const linkIsExistInCreateAgriDb = async (
   linkId: string
 ): Promise<boolean> => {
   try {
-    const createAgri = await createAgriDbName();
-
-    return await isLinkExist(createAgri, linkId);
+    return await isLinkExist(createAgriDbName(), linkId);
   } catch (error) {
     console.error(
       `Unexpected error occur while checking the link if it exist: ${
@@ -237,9 +224,7 @@ const deleteLink = async (tableName: linkTableType, linkId: string) => {
  */
 export const deleteResetPassLink = async (linkId: string) => {
   try {
-    const resetPass = await resetPassDbName();
-
-    await deleteLink(resetPass, linkId);
+    await deleteLink(resetPassDbName(), linkId);
   } catch (error) {
     console.error(
       `Unexpected error occur while deleting the link: ${
@@ -256,9 +241,7 @@ export const deleteResetPassLink = async (linkId: string) => {
  */
 export const deleteCreateAgriLink = async (linkId: string) => {
   try {
-    const createAgri = await createAgriDbName();
-
-    await deleteLink(createAgri, linkId);
+    await deleteLink(createAgriDbName(), linkId);
   } catch (error) {
     console.error(
       `Unexpected error occur while deleting the link: ${
@@ -266,5 +249,42 @@ export const deleteCreateAgriLink = async (linkId: string) => {
       }`
     );
     throw new Error(`Unexpected error occur while deleting the link`);
+  }
+};
+
+/**
+ * query for checking the link if it exist or not by finding if the passed token is in the db and if that token wasnt used yet
+ * @param token link token to be ckecked
+ * @returns boolean
+ */
+export const checkCreateAgriToken = async (token: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone."${createAgriDbName()}" where "linkToken" = $1)`,
+        [token]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `Error occured while checking the agriculturist's verification`
+    );
+  }
+};
+
+/**
+ * query for marking the token in the database that it was used
+ * @param token value of token to be deleted
+ */
+export const updateAgriLinkIsUse = async (token: string) => {
+  try {
+    await pool.query(
+      `update capstone."${createAgriDbName()}" set "isUsed" = $1 where "linkToken" = $2`,
+      [true, token]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while consuming the token`);
   }
 };

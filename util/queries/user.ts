@@ -376,7 +376,10 @@ export const DelteUserAccountQuery = async (
     );
 
     // if the deletion of the auth value of the farmer is success full, it will then update the farmer table indicating the farmer was deleted
-    await pool.query(`update capstone.farmer set "isDeleted" = $1`, [true]);
+    await pool.query(
+      `update capstone.farmer set "isDeleted" = $1 where "farmerId" = $2`,
+      [true, farmerId]
+    );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user: ${
@@ -723,7 +726,7 @@ export const agriAuthQuery = async ({
 }: agriIsExistParamType): Promise<agriAuthQueryReturnType> => {
   try {
     const res = await pool.query(
-      `select "agriId" ,"agriRole", "name" where "agriId" = $1 and "email" = $2`,
+      `select "agriId" ,"agriRole", "name" from capstone.agriculturist where "agriId" = $1 and "email" = $2`,
       [id, email]
     );
 
@@ -739,6 +742,8 @@ export const agriAuthQuery = async ({
     };
   } catch (error) {
     console.log((error as Error).message);
-    throw new Error(`Error occured while checking the farmer's verification`);
+    throw new Error(
+      `Error occured while checking the agriculturist's verification`
+    );
   }
 };

@@ -1334,7 +1334,7 @@ export type getAllFarmerForResetPassReturnType =
     }
   | ServerActionFailBaseType;
 
-export type createSignUpLinkForAgriQueryParamType = {
+type linkBaseType = {
   linkId: string;
   dateCreated: Date;
   dateExpired: Date;
@@ -1342,10 +1342,13 @@ export type createSignUpLinkForAgriQueryParamType = {
   linkToken: string;
 };
 
-export type createResetPassWordLinkQueryParamType =
-  createSignUpLinkForAgriQueryParamType & {
-    farmerId: string;
-  };
+export type createSignUpLinkForAgriQueryParamType = linkBaseType & {
+  isUsed: boolean;
+};
+
+export type createResetPassWordLinkQueryParamType = linkBaseType & {
+  farmerId: string;
+};
 
 export type serverActionNormalReturnType = {
   success: boolean;
@@ -1423,3 +1426,8 @@ export type agriAuthValType = {
 export type agriAuthQueryReturnType =
   | { exist: false; message: string }
   | { exist: true; agriVal: agriAuthValType };
+
+export type AgriAuthPropType = {
+  handleIsAuthLoaded: (val: boolean) => void;
+  handleIsContextLoading: (val: boolean) => void;
+};

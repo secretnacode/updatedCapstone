@@ -146,13 +146,13 @@ export const RedirectLoginWithNotif = (error: NotificationBaseType[]) => {
 
 /**
  * used to redirect the user into unauthorized page with an error message
- * @param errorMessage params for the messsage of the error after redirecting to the login page and the type of its error
+ * @param notif params for the messsage of the error after redirecting to the login page and the type of its error
  * @returns redirect function with its message
  */
 export const RedirectUnauthorizedWithNotif = (
-  error: NotificationBaseType[]
+  notif: NotificationBaseType[]
 ) => {
-  return redirect(`/unauthorized?notif=${NotifToUriComponent(error)}`);
+  return redirect(`/unauthorized?notif=${NotifToUriComponent(notif)}`);
 };
 
 /**
