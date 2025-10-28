@@ -18,19 +18,14 @@ export default async function Middleware(req: NextRequest) {
     console.log(`Request URL: ${req.url}`);
     console.log(`Request Method: ${req.method}`);
 
-    console.log("Middleware");
-
     const { pathname } = req.nextUrl;
-    console.log(pathname);
 
     // if the current path was defines in the publicPath Variable, the middleware will let it pass through
     if (
       publicPath.some((path) => pathname.startsWith(path)) ||
       pathname === "/"
-    ) {
-      console.log("hawow po");
+    )
       return res;
-    }
 
     const session = await GetSession();
 

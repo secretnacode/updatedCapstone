@@ -23,7 +23,6 @@ import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   ConvertMeassurement,
-  CreateUUID,
   NotifToUriComponent,
 } from "@/util/helper_function/reusableFunction";
 import { FarmerFirstDetailQuery } from "@/util/queries/user";
@@ -78,22 +77,18 @@ export const AddFirstFarmerDetails = async (
           },
         };
 
-    const farmerId = CreateUUID();
-
     await FarmerFirstDetailQuery({
       ...newUserVal,
       countFamilyMember: Number(newUserVal.countFamilyMember),
       mobileNumber: Number(newUserVal.mobileNumber),
-      farmerId: farmerId,
-      authId: authId,
+      farmerId: authId,
       verified: false,
-      isDeleted: false,
       dateCreated: new Date(),
     });
 
     const org =
       newUserVal.organization === "other" && newUserVal.newOrganization
-        ? (await CreateNewOrg(newUserVal.newOrganization, farmerId)).orgId
+        ? (await CreateNewOrg(newUserVal.newOrganization, authId)).orgId
         : newUserVal.organization === "none"
         ? null
         : newUserVal.organization;
@@ -108,9 +103,10 @@ export const AddFirstFarmerDetails = async (
     await UpdateUserOrg({
       orgId: org,
       orgRole: orgRole,
-      farmerId: farmerId,
+      farmerId: authId,
     });
 
+    // no session creation because the user need to be validate first before it proceed to the system
     redirect(
       `/?notif=${NotifToUriComponent([
         { message: "Matagumpay ang iyong pag si-sign up", type: "success" },

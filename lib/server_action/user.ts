@@ -3,7 +3,6 @@
 import {
   CheckMyMemberquery,
   DelteUserAccountQuery,
-  farmerIsExist,
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getUserLocation,
@@ -163,18 +162,10 @@ export const DeleteFarmerUser = async (
 export const newUserValNeedInfo =
   async (): Promise<newUserValNeedInfoReturnType> => {
     try {
-      const userId = (await ProtectedAction("create:user")).userId;
-
-      if (await farmerIsExist(userId))
-        return {
-          success: true,
-          isExist: true,
-          orgList: await GetAvailableOrgQuery(),
-        };
+      await ProtectedAction("create:user");
 
       return {
         success: true,
-        isExist: false,
         orgList: await GetAvailableOrgQuery(),
       };
     } catch (error) {

@@ -183,6 +183,8 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
       const res = await LoginAuth(authVal);
 
+      console.log(res);
+
       if (res.formError) setFormError(res.formError);
 
       handleSetNotification(res.notifError);

@@ -38,7 +38,6 @@ export default async function Page() {
           <div>
             <FarmerDetailForm
               orgList={newUserNeedInfo.success ? newUserNeedInfo.orgList : []}
-              farmerInfoExist={newUserNeedInfo.isExist}
             />
           </div>
         </div>

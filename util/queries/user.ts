@@ -127,7 +127,7 @@ export const getFarmerIdByAuthId = async (
   try {
     return (
       await pool.query(
-        `select "farmerId", "orgRole" from capstone.farmer where "authId" = $1`,
+        `select f."farmerId", f."orgRole" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where a."authId" = $1`,
         [authId]
       )
     ).rows[0];
@@ -153,7 +153,7 @@ export const FarmerFirstDetailQuery = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated", "familyMemberCount", "isDeleted", "authId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      `insert into capstone.farmer ("farmerId", "farmerFirstName", "farmerMiddleName", "farmerLastName", "farmerExtensionName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "dateCreated", "familyMemberCount") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         data.farmerId,
         data.firstName,
@@ -167,8 +167,6 @@ export const FarmerFirstDetailQuery = async (
         data.verified,
         data.dateCreated,
         data.countFamilyMember,
-        data.isDeleted,
-        data.authId,
       ]
     );
   } catch (error) {

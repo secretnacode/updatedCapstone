@@ -141,7 +141,6 @@ export type FarmerFirstDetailActionReturnType<T> =
 
 export type FarmerFirstDetailType = {
   farmerId: string;
-  authId: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -151,7 +150,6 @@ export type FarmerFirstDetailType = {
   farmerBarangay: string;
   birthdate: Date;
   verified: boolean;
-  isDeleted: boolean;
   dateCreated: Date;
   countFamilyMember: number;
 };
@@ -1033,14 +1031,12 @@ export type ViewUserReportTableDataPropType = {
 export type newUserValNeedInfoReturnType =
   | {
       success: true;
-      isExist: boolean;
       orgList: QueryAvailableOrgReturnType[];
     }
   | ServerActionFailBaseType;
 
 export type FarmerDetailFormPropType = {
   orgList: QueryAvailableOrgReturnType[];
-  farmerInfoExist: boolean;
 };
 
 export type checkFarmerRoleReturnType =

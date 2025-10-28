@@ -60,8 +60,13 @@ export async function LoginAuth(
         notifError: [{ message: userCredentials.message, type: "warning" }],
       };
 
+    const compare = await ComparePassword(
+      data.password,
+      userCredentials.data.password
+    );
+
     // if its allready existing, will compare the user passwod input and the hash password that is in the database and will compare it
-    if (!(await ComparePassword(data.password, userCredentials.data.password)))
+    if (!compare)
       return {
         notifError: [
           {
@@ -87,6 +92,9 @@ export async function LoginAuth(
 
     // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
     const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
+
+    console.log(farmerId);
+
     if (!farmerId) {
       await CreateSession(userCredentials.data.authId, "newUser");
 
