@@ -261,7 +261,7 @@ body {
     @apply tracking-wider bg-gray-100 text-gray-500 font-semibold text-[12px] px-2 rounded-2xl hover:shadow-md transition-shadow;
   }
   .card-title-wrapper {
-    @apply mb-6;
+    @apply mb-4;
   }
   .card-title-wrapper p {
     @apply font-semibold;
@@ -280,6 +280,12 @@ body {
   }
   .clerk-modal {
     @apply w-[400px] min-h-[500px];
+  }
+  .side-bar-wrapper {
+    @apply flex flex-col gap-4  [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm;
+  }
+  .subscript {
+    @apply text-[14px] text-gray-400 tracking-wide;
   }
 }
 

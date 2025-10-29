@@ -1,30 +1,19 @@
 "use client";
 
-import { NotificationBaseType } from "@/types";
+import { NotificationBaseType, RemoveSearchParamsValPropType } from "@/types";
 import { FC, useEffect } from "react";
 import { useNotification } from "./provider/notificationProvider";
 import { useRouter } from "next/navigation";
-import { useLoading } from "./provider/loadingProvider";
 
 export const RedirectManager: FC<{
-  data: NotificationBaseType[] | undefined;
+  data: NotificationBaseType[];
 }> = ({ data }) => {
-  const { handleSetNotification } = useNotification();
-  const { isLoading, handleDoneLoading } = useLoading();
-  const route = useRouter();
-
-  useEffect(() => {
-    if (data) handleSetNotification(data);
-    if (isLoading) handleDoneLoading();
-
-    const currentUrl = new URL(window.location.href);
-
-    currentUrl.searchParams.delete("notif");
-
-    route.replace(currentUrl.pathname + currentUrl.search, { scroll: false });
-  }, [data, handleSetNotification, route, isLoading, handleDoneLoading]);
-
-  return null;
+  return (
+    <>
+      <RenderNotification notif={data} />
+      <RemoveSearchParamsVal name={"notif"} />
+    </>
+  );
 };
 
 export const RenderNotification: FC<{ notif: NotificationBaseType[] }> = ({
@@ -35,6 +24,22 @@ export const RenderNotification: FC<{ notif: NotificationBaseType[] }> = ({
   useEffect(() => {
     handleSetNotification(notif);
   }, [notif, handleSetNotification]);
+
+  return null;
+};
+
+export const RemoveSearchParamsVal: FC<RemoveSearchParamsValPropType> = ({
+  name,
+}) => {
+  const route = useRouter();
+
+  useEffect(() => {
+    const currentUrl = new URL(window.location.href);
+
+    currentUrl.searchParams.delete(name);
+
+    route.replace(currentUrl.pathname + currentUrl.search, { scroll: false });
+  }, [route, name]);
 
   return null;
 };

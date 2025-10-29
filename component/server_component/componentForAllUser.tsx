@@ -8,6 +8,8 @@ import {
   UserOrganizationInfoFormPropType,
   WeatherComponentPropType,
   getWeatherTodayReturnType,
+  getReportCountPerCropReturnType,
+  getLatestReportReturnType,
 } from "@/types";
 import { ClipboardPlus, LucideIcon, MapPinHouse, Wheat } from "lucide-react";
 import { FC } from "react";
@@ -17,11 +19,16 @@ import {
   DeleteMyOrgMemberButton,
   MyOrganizationForm,
   ApprovedOrgMemberButton,
+  PieChartCard,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
-import { FormDivLabelInput, TableComponent } from "./customComponent";
+import {
+  FormDivLabelInput,
+  SubmitButton,
+  TableComponent,
+} from "./customComponent";
 import {
   capitalizeFirstLetter,
   converTimeToAMPM,
@@ -33,6 +40,10 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import { getWeatherToday } from "@/lib/server_action/weather";
 import Image from "next/image";
+import {
+  getLatestReport,
+  getReportCountPerCrop,
+} from "@/lib/server_action/report";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -468,16 +479,110 @@ export const FarmerQuickActionComponent: FC = () => {
       </div>
 
       <div className="flex flex-col space-y-4 [&>a]:flex [&>a]:items-center [&>a]:gap-2 [&>a]:border [&>a]:border-gray-300 [&>a]:hover:bg-gray-100 [&>a]:rounded-md [&>a]:p-2">
-        <Link href={`/farmer/report`}>
+        <Link href={`/farmer/report?addReport=true`}>
           <ClipboardPlus className="logo !size-5" />
           <span>Mag gawa ng ulat</span>
         </Link>
 
-        <Link href={"/farmer/crop"}>
+        <Link href={"/farmer/crop?addCrop=true"}>
           <Wheat className="logo !size-5" />
           <span>Mag dagdag ng pananim</span>
         </Link>
       </div>
     </div>
+  );
+};
+
+export const ReportCountPerCrop = async () => {
+  let reportCount: getReportCountPerCropReturnType;
+
+  try {
+    reportCount = await getReportCountPerCrop();
+  } catch (error) {
+    console.error((error as Error).message);
+    reportCount = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  return (
+    <>
+      {reportCount.success ? (
+        <div>
+          <div className="card-title-wrapper">
+            <p>Bilang ng ulat kada pananim</p>
+          </div>
+
+          <PieChartCard
+            data={reportCount.reportCountVal.map((val) => ({
+              id: val.cropId,
+              value: val.reportCount,
+              label: val.cropName,
+            }))}
+          />
+
+          <div className="flex justify-center items-center">
+            <p>Mag dagdag ng pananim</p>
+
+            <Link href={`/farmer/report`} className="card-link text-nowrap">
+              Mga Ulat
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <RenderNotification notif={reportCount.notifError} />
+      )}
+    </>
+  );
+};
+
+export const LatestReport = async () => {
+  let report: getLatestReportReturnType;
+
+  try {
+    report = await getLatestReport();
+  } catch (error) {
+    console.error((error as Error).message);
+    report = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+  return (
+    <>
+      {report.success ? (
+        <div>
+          <div className="card-title-wrapper">
+            <p>Huling ulat na naipasa</p>
+          </div>
+
+          <div>
+            {report.reportVal.map((val) => (
+              <div key={val.reportId}>
+                <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
+                  <div className="flex flex-col justify-center items-start leading-4 w-1/2">
+                    <p className="text-nowrap overflow-hidden text-ellipsis w-full">
+                      {val.title}
+                    </p>
+                    <p className="subscript">{val.cropName}</p>
+                  </div>
+
+                  <Link href={`/farmer/report?viewReport=${val.reportId}`}>
+                    <SubmitButton className="slimer-button">
+                      Tingnan
+                    </SubmitButton>
+                  </Link>
+                </div>
+
+                <div className="border-b border-gray-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <RenderNotification notif={report.notifError} />
+      )}
+    </>
   );
 };

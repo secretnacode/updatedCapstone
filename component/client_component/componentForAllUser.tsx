@@ -30,6 +30,7 @@ import {
   ButtonPropType,
   approvedButtonProp,
   deleteMyOrgMemberPropType,
+  PieChartCardPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -52,7 +53,7 @@ import {
   DeleteMyOrgMember,
   getAllFarmerForResetPass,
 } from "@/lib/server_action/user";
-import { LineChart } from "@mui/x-charts";
+import { LineChart, PieChart } from "@mui/x-charts";
 import {
   baranggayList,
   capitalizeFirstLetter,
@@ -1107,5 +1108,19 @@ export const DeleteLinkButton: FC<ButtonPropType & { linkId: string }> = ({
     <button className={`button ${className}`} onClick={handleDeleteLink}>
       {children}
     </button>
+  );
+};
+
+export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
+  console.log(data);
+  return (
+    <PieChart
+      series={[
+        {
+          data: [...data],
+        },
+      ]}
+      height={100}
+    />
   );
 };

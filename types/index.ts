@@ -237,6 +237,10 @@ export type GetFarmerReportReturnType =
     }
   | ServerActionFailBaseType;
 
+export type addReportComponentPropType = { openModal?: boolean };
+
+export type RemoveSearchParamsValPropType = { name: string };
+
 export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
 
 export type AddReportActionFormType = FormActionBaseType<AddReportValType>;
@@ -357,7 +361,7 @@ export type GetFarmerProfilePersonalInfoQueryReturnType = {
   farmerMiddleName: string;
   farmerExtensionName?: string;
   familyMemberCount: string;
-  isDeleted: boolean;
+  status: farmerAuthStatusType;
 };
 
 export type getFarmerCropNameQueryReturnType = {
@@ -890,6 +894,7 @@ export type GetMyCropInfoReturnType =
 
 export type FarmerCropPagePropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType[];
+  addCrop?: boolean;
 };
 
 export type FarmerCropPageShowModalStateType = {
@@ -930,6 +935,7 @@ export type FormCropModalPropType = {
     cropInfo: FarmerSecondDetailFormType
   ) => void;
   formTitle: string;
+  buttonLabel: { submit: string; cancel: string };
   cropVal?: GetMyCropInfoQueryRetrunType;
   error?: FormErrorType<FarmerSecondDetailFormType>;
 };
@@ -1282,6 +1288,7 @@ type UserReportDetailsBasePropType = {
   userReport: ReportDetailType;
   closeModal: () => void;
   farmerName?: string;
+  myReport: boolean;
 };
 
 export type EditableUserReportDetailsPropType =
@@ -1436,3 +1443,27 @@ export type AgriAuthPropType = {
   handleIsAuthLoaded: (val: boolean) => void;
   handleIsContextLoading: (val: boolean) => void;
 };
+
+export type getReportCountPerCropQueryReturnType = {
+  reportCount: number;
+  cropName: string;
+  cropId: string;
+};
+
+export type getReportCountPerCropReturnType =
+  | { success: true; reportCountVal: getReportCountPerCropQueryReturnType[] }
+  | ServerActionFailBaseType;
+
+export type PieChartCardPropType = {
+  data: { id: string; value: number; label: string }[];
+};
+
+export type getLatestReportQueryReturnType = {
+  reportId: string;
+  title: string;
+  cropName: string;
+};
+
+export type getLatestReportReturnType =
+  | { success: true; reportVal: getLatestReportQueryReturnType[] }
+  | ServerActionFailBaseType;

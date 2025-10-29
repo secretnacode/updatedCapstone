@@ -184,7 +184,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
 
         <LineChartComponent {...lineChart} />
       </div>
-      <div className="flex flex-col gap-4 [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm ">
+      <div className="side-bar-wrapper ">
         <Suspense fallback={<LoadingCard />}>
           <WeatherComponent userLocation={userLocation} user={user} />
         </Suspense>

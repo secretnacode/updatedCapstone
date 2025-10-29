@@ -114,11 +114,7 @@ export const ViewCropModal: FC<{
 }> = ({ cropId, removeModal, isViewing }) => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>({
-    dayPlanted: new Date(),
-    cropLocation: "",
-    farmAreaMeasurement: "",
-  });
+  const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>();
 
   useEffect(() => {
     const GetCrop = async (cropId: string, isViewing: boolean) => {
@@ -155,13 +151,14 @@ export const ViewCropModal: FC<{
     <>
       {cropInfo && (
         <div className="modal-form">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
+          <div className="absolute inset-0" onClick={removeModal} />
+          <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold text-gray-900">
                 Impormasyon ng Pananim
               </h2>
               <button
-                onClick={() => removeModal()}
+                onClick={removeModal}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -197,7 +194,7 @@ export const ViewCropModal: FC<{
               </div>
 
               <button
-                onClick={() => removeModal()}
+                onClick={removeModal}
                 className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Isara
@@ -212,6 +209,7 @@ export const ViewCropModal: FC<{
 
 export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   myCropInfoList,
+  addCrop,
 }) => {
   const mapRef = useRef<MapRef>(null);
   const { handleIsLoading, handleDoneLoading } = useLoading();
@@ -223,6 +221,10 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     deleteModal: false,
     cropHasReportModal: false,
   });
+
+  useEffect(() => {
+    if (addCrop !== undefined) handleOpenModal({ modalName: "addModal" });
+  }, [addCrop]);
 
   const handleOpenModal = (
     openModal: FarmerCropPageHandleOpenModalParamType
@@ -454,6 +456,7 @@ const FormCropModal: FC<FormCropModalPropType> = ({
   hideCropModal,
   formSubmit,
   formTitle,
+  buttonLabel,
   cropVal,
   error,
 }) => {
@@ -543,8 +546,8 @@ const FormCropModal: FC<FormCropModalPropType> = ({
           </div>
 
           <FormCancelSubmitButton
-            submitButtonLabel="Baguhin"
-            cancelButtonLabel="Kanselahin"
+            submitButtonLabel={buttonLabel.submit}
+            cancelButtonLabel={buttonLabel.cancel}
             cancelOnClick={hideCropModal}
             divClassName="p-4 pt-0"
             submitClassName="slimer-button"
@@ -568,7 +571,7 @@ const AddCropModal: FC<AddCropModalPropType> = ({ hideAddCropModal }) => {
       cropInfo: FarmerSecondDetailFormType
     ) => {
       e.preventDefault();
-      handleIsLoading("Inuupdate na ang iyong pananim");
+      handleIsLoading("Dinadagdag na ang iyong pananim");
       try {
         const addCrop = await AddUserCropInfo(cropInfo);
 
@@ -602,6 +605,7 @@ const AddCropModal: FC<AddCropModalPropType> = ({ hideAddCropModal }) => {
       formSubmit={handleFormSubmit}
       formTitle="Ilagay ang impormasyon ng iyong bagong taniman"
       error={formError}
+      buttonLabel={{ submit: "Idagdag", cancel: "Bumalik" }}
     />
   );
 };
@@ -658,6 +662,7 @@ const EditCropModal: FC<EditCropModalPropType> = ({
       formTitle="Baguhin ang impormasyon ng iyong pananim"
       cropVal={myCropInfoList}
       error={formError}
+      buttonLabel={{ submit: "Baguhin", cancel: "Kanselahin" }}
     />
   );
 };

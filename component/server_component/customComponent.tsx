@@ -746,7 +746,7 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
                   <p className="">
                     {val.farmerFirstName + " " + val.farmerLastName}
                   </p>
-                  <p className="very-small-text text-gray-400 tracking-wide">
+                  <p className="subscript">
                     {val.barangay.charAt(0).toUpperCase() +
                       val.barangay.slice(1)}
                   </p>

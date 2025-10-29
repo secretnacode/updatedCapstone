@@ -41,6 +41,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  addReportComponentPropType,
   AddReportPictureType,
   allUserRoleType,
   EditableUserReportDetailsPropType,
@@ -65,8 +66,14 @@ import { getFarmerCropName } from "@/lib/server_action/crop";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 
-export const AddReportComponent: FC = () => {
+export const AddReportComponent: FC<addReportComponentPropType> = ({
+  openModal,
+}) => {
   const [addReport, setAddReport] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (openModal !== undefined) setAddReport(openModal);
+  }, [openModal]);
 
   return (
     <>
@@ -647,6 +654,7 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
           userReport={userReport}
           reportId={reportId}
           farmerName={farmerName}
+          myReport={myReport}
         />
       );
     else
@@ -657,6 +665,7 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
           isView={true}
           work={userWork}
           farmerName={farmerName}
+          myReport={myReport}
         />
       );
   };
@@ -670,7 +679,7 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
 
 export const EditableUserReportDetails: FC<
   EditableUserReportDetailsPropType
-> = ({ userReport, reportId, farmerName, closeModal }) => {
+> = ({ userReport, reportId, farmerName, closeModal, myReport }) => {
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
   const [newDesc, setNewDesc] = useState<string>(userReport.description);
@@ -717,6 +726,7 @@ export const EditableUserReportDetails: FC<
   return (
     <>
       <UserReportDetails
+        myReport={myReport}
         userReport={userReport}
         closeModal={closeModal}
         isView={false}
@@ -766,6 +776,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
   backDefault = () => {},
   textAreaValue,
   isChange,
+  myReport,
 }) => {
   const isEnglish: boolean = work === "admin" || work === "agriculturist";
 
@@ -840,13 +851,17 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-6 [&_.date-report]:flex [&_.date-report]:flex-row [&_.date-report]:justify-start [&_.date-report]:items-center [&_.date-report]:gap-2 [&_.date-report]:[&>svg]:text-gray-500 [&_.date-report]:[&>p]:text-sm [&_.date-report]:[&>p]:text-gray-600 [&_.date-report]:[&>p]:tracking-wide [&>div]:p-3 [&>div]:bg-gray-100 [&>div]:rounded-lg [&>div]:[&>p]:font-semibold">
-              <div className="space-y-1">
-                <div className="date-report">
-                  <CircleUser className="logo" />
-                  <p>{isEnglish ? "Farmer name" : "Pangalan ng mag sasaka"}</p>
+              {!myReport && (
+                <div className="space-y-1">
+                  <div className="date-report">
+                    <CircleUser className="logo" />
+                    <p>
+                      {isEnglish ? "Farmer name" : "Pangalan ng mag sasaka"}
+                    </p>
+                  </div>
+                  <p className="font-medium">{farmerName}</p>
                 </div>
-                <p className="font-medium">{farmerName}</p>
-              </div>
+              )}
 
               <div className="space-y-1">
                 <div className="date-report">

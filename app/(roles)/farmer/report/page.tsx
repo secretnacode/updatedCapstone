@@ -1,4 +1,7 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import {
+  RemoveSearchParamsVal,
+  RenderNotification,
+} from "@/component/client_component/fallbackComponent";
 import {
   AddReportComponent,
   ViewUserReportButton,
@@ -10,7 +13,13 @@ import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ addReport?: boolean }>;
+}) {
+  const isAddingReport = (await searchParams).addReport;
+
   let report: GetFarmerReportReturnType;
 
   try {
@@ -29,11 +38,13 @@ export default async function Page() {
           <RenderNotification notif={report.notifError} />
         ) : (
           <>
+            {isAddingReport && <RemoveSearchParamsVal name={"addReport"} />}
+
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900">
                 Aking mga ulat
               </h1>
-              <AddReportComponent />
+              <AddReportComponent openModal={isAddingReport} />
             </div>
             <TableComponent
               noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."

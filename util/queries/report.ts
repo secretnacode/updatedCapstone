@@ -5,9 +5,11 @@ import {
   allUserRoleType,
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
+  getLatestReportQueryReturnType,
   GetOrgMemberReportQueryType,
   getRecentReportParamType,
   getRecentReportReturnType,
+  getReportCountPerCropQueryReturnType,
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisWeekReturnType,
   getReportCountThisYearReturnType,
@@ -579,6 +581,55 @@ export const changeTheReportDescription = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag babago ng impormasyon ng ulat`
+    );
+  }
+};
+
+/**
+ * query for getting the count of report made per crop
+ * @param farmerId id of the user who wants to see the report coint
+ * @returns
+ */
+export const getReportCountPerCropQuery = async (
+  farmerId: string
+): Promise<getReportCountPerCropQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select count(r."reportId") as "reportCount", c."cropName", c."cropId" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where c."farmerId" = $1 group by c."cropName", c."cropId"`,
+        [farmerId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng iyong ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng bilang ng iyong ulat`
+    );
+  }
+};
+
+export const getLatestReportQuery = async (
+  farmerId: string
+): Promise<getLatestReportQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select r."reportId", r."title", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1 limit 5`,
+        [farmerId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng iyong mga ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng iyong mga ulat`
     );
   }
 };

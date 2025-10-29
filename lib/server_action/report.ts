@@ -7,7 +7,9 @@ import {
   GetAllFarmerReportQuery,
   getFarmerIdOfReport,
   GetFarmerReportDetailQuery,
+  getLatestReportQuery,
   GetOrgMemberReportQuery,
+  getReportCountPerCropQuery,
   getReportCountThisAndPrevMonth,
   getReportCountThisWeek,
   getReportCountThisYear,
@@ -23,7 +25,9 @@ import {
   GetAllFarmerReportReturnType,
   GetFarmerReportDetailReturnType,
   GetFarmerReportReturnType,
+  getLatestReportReturnType,
   GetOrgMemberReportReturnType,
+  getReportCountPerCropReturnType,
   reportPerDayWeekAndMonthReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -338,6 +342,54 @@ export const changeApproveOrJustApproveReport = async ({
     );
     return {
       notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+export const getReportCountPerCrop =
+  async (): Promise<getReportCountPerCropReturnType> => {
+    try {
+      const { userId } = await ProtectedAction("read:crop");
+
+      return {
+        success: true,
+        reportCountVal: await getReportCountPerCropQuery(userId),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May pagkakamali sa pag kuha ng bilang ng ulat ng iyong pananim: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getLatestReport = async (): Promise<getLatestReportReturnType> => {
+  try {
+    const { userId } = await ProtectedAction("read:report");
+
+    return { success: true, reportVal: await getLatestReportQuery(userId) };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag kuha ng mga ginawang ulat: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
     };
   }
 };

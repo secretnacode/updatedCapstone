@@ -325,7 +325,7 @@ export const GetFarmerProfilePersonalInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "farmerId", "farmerFirstName", "farmerAlias", "mobileNumber", "barangay", "birthdate", "verified", "farmerLastName", "farmerMiddleName", "farmerExtensionName", "familyMemberCount", isDeleted from capstone.farmer where "farmerId" = $1`,
+        `select f."farmerId", f."farmerFirstName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate", f."verified", f."farmerLastName", f."farmerMiddleName", f."farmerExtensionName", f."familyMemberCount", a."status" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where f."farmerId" = $1`,
         [farmerId]
       )
     ).rows[0];
@@ -377,14 +377,8 @@ export const DelteUserAccountQuery = async (
 ): Promise<void> => {
   try {
     await pool.query(
-      `delete from capstone.auth where "authId" = (select "authId" from capstone.farmer where "farmerId" = $1)`,
-      [farmerId]
-    );
-
-    // if the deletion of the auth value of the farmer is success full, it will then update the farmer table indicating the farmer was deleted
-    await pool.query(
-      `update capstone.farmer set "isDeleted" = $1 where "farmerId" = $2`,
-      [true, farmerId]
+      `update capstone.auth set "status" = $1 where "authId" = $2`,
+      [farmerAuthStatus.delete, farmerId]
     );
   } catch (error) {
     console.error(

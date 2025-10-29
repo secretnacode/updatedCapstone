@@ -169,6 +169,10 @@ export const CheckCropIfHasReport = async (
   }
 };
 
+/**
+ * query for deleteing the crop info
+ * @param cropId id of the crop to be deleted
+ */
 export const DeleteUserCropInfoQuery = async (cropId: string) => {
   try {
     await pool.query(`delete from capstone.crop where "cropId" = $1`, [cropId]);
@@ -184,6 +188,10 @@ export const DeleteUserCropInfoQuery = async (cropId: string) => {
   }
 };
 
+/**
+ * query for getting all the crop info of the farmer
+ * @returns
+ */
 export const GetAllCropInfoQuery = async (): Promise<
   GetAllCropInfoQueryReturnType[]
 > => {
@@ -205,6 +213,11 @@ export const GetAllCropInfoQuery = async (): Promise<
   }
 };
 
+/**
+ * qurty for getting all the crop name of the farmer
+ * @param farmerId id of the farmer who will get all the crop name
+ * @returns
+ */
 export const getFarmerCropNameQuery = async (
   farmerId: string
 ): Promise<getFarmerCropNameQueryReturnType[]> => {

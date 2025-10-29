@@ -24,7 +24,6 @@ import {
   ViewAllUnvalidatedFarmerReturnType,
   ViewAllValidatedFarmerUserReturnType,
 } from "@/types";
-import { GetSession } from "../session";
 import { userProfileInfoUpdateSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
 import { getFarmerCropNameQuery } from "@/util/queries/crop";
@@ -344,13 +343,9 @@ const checkAgri = async (): Promise<serverActionOptionalNotifMessage> => {
 export const GetMyProfileInfo =
   async (): Promise<GetMyProfileInfoReturnType> => {
     try {
-      await ProtectedAction("read:user");
+      const { userId } = await ProtectedAction("read:user");
 
-      const session = await GetSession();
-
-      if (session) return await userFarmerProfileInfo(session.userId);
-      else
-        throw new Error("Nag expire na ang iyong pag lologin, mag log in ulit");
+      return await userFarmerProfileInfo(userId);
     } catch (error) {
       const err = error as Error;
       console.log(
