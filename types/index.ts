@@ -1467,3 +1467,7 @@ export type getLatestReportQueryReturnType = {
 export type getLatestReportReturnType =
   | { success: true; reportVal: getLatestReportQueryReturnType[] }
   | ServerActionFailBaseType;
+
+export type ReportContentPropType = { selectedCrop?: string };
+
+export type reportTypeStateType = "damage" | "harvesting" | "planting";

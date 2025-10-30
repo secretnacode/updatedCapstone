@@ -35,7 +35,10 @@ import {
   CircleUser,
   FileText,
   Info,
+  Leaf,
   Plus,
+  Tractor,
+  TriangleAlert,
   Upload,
   Wheat,
   X,
@@ -47,7 +50,9 @@ import {
   EditableUserReportDetailsPropType,
   getFarmerCropNameQueryReturnType,
   GetFarmerReportDetailReturnType,
+  ReportContentPropType,
   ReportDetailType,
+  reportTypeStateType,
   UserReportDetailsPropType,
   UserReportModalPropType,
   ViewUserReportTableDataPropType,
@@ -55,6 +60,7 @@ import {
 import { useLoading } from "./provider/loadingProvider";
 import { createPortal } from "react-dom";
 import {
+  Button,
   CancelButton,
   FormCancelSubmitButton,
   FormDivLabelTextArea,
@@ -66,93 +72,59 @@ import { getFarmerCropName } from "@/lib/server_action/crop";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 
-export const AddReportComponent: FC<addReportComponentPropType> = ({
-  openModal,
-}) => {
-  const [addReport, setAddReport] = useState<boolean>(false);
+// export const AddReportComponent: FC<addReportComponentPropType> = ({
+//   openModal,
+// }) => {
+//   const [addReport, setAddReport] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (openModal !== undefined) setAddReport(openModal);
-  }, [openModal]);
+//   useEffect(() => {
+//     if (openModal !== undefined) setAddReport(openModal);
+//   }, [openModal]);
 
-  return (
-    <>
-      <button
-        onClick={() => setAddReport(true)}
-        className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-      >
-        <Plus className="h-5 w-5" />
-        Mag sagawa ng ulat
-      </button>
+//   return (
+//     <>
+//       <button
+//         onClick={() => setAddReport(true)}
+//         className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+//       >
+//         <Plus className="h-5 w-5" />
+//         Mag sagawa ng ulat
+//       </button>
 
-      {addReport && (
-        <div className="modal-form">
-          <div
-            className="absolute inset-0"
-            onClick={() => setAddReport(false)}
-          />
-          <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">
-                Mag sagawa ng panibagong ulat
-              </h2>
-              <button
-                onClick={() => setAddReport(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <AddingReport setAddReport={setAddReport} />
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+//       {addReport && (
+//         <div className="modal-form">
+//           <div
+//             className="absolute inset-0"
+//             onClick={() => setAddReport(false)}
+//           />
+//           <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+//             <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+//               <h2 className="text-lg font-semibold">
+//                 Mag sagawa ng panibagong ulat
+//               </h2>
+//               <button
+//                 onClick={() => setAddReport(false)}
+//                 className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+//               >
+//                 <X className="h-5 w-5" />
+//               </button>
+//             </div>
+//             <AddingReport setAddReport={setAddReport} />
+//           </div>
+//         </div>
+//       )}
+//     </>
+//   );
+// };
 
-const AddingReport: FC<{
-  setAddReport: Dispatch<SetStateAction<boolean>>;
-}> = ({ setAddReport }) => {
+export const CreateReport = () => {
   const { handleSetNotification } = useNotification();
-  const pickFileRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [openCam, setOpenCam] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
-  const [isPassing, startPassing] = useTransition();
-  const { handleIsLoading, handleDoneLoading } = useLoading();
   const [cropList, setCropList] = useState<getFarmerCropNameQueryReturnType[]>(
     []
   );
-  const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
-  const [state, formAction] = useActionState(PostFarmerReport, {
-    success: null,
-    notifError: null,
-    formError: null,
-  });
-
-  useEffect(() => {
-    if (videoRef.current && openCam) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play();
-    }
-  }, [stream, openCam]);
-
-  useEffect(() => {
-    if (state.success) {
-      setAddReport(false);
-    }
-  }, [state.success, setAddReport]);
-
-  useEffect(() => {
-    if (state.notifError) handleSetNotification(state.notifError);
-  }, [handleSetNotification, state.notifError]);
-
-  useEffect(() => {
-    if (!isPassing) handleDoneLoading();
-  }, [isPassing, handleDoneLoading]);
+  const [selectedCrop, setSelectedCrop] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const getCropInfo = async () => {
@@ -176,6 +148,169 @@ const AddingReport: FC<{
   const handleSetSelectedCrop = (cropId: string) => {
     setSelectedCrop(cropList.find((crop) => crop.cropId === cropId)!.cropId);
   };
+
+  return (
+    <div className="space-y-4">
+      <h1 className="title form-title">Mag sagawa ng panibagong ulat</h1>
+
+      <div className="h-auto">
+        <label htmlFor="" className="label">
+          Pangalan ng pananim mo:
+        </label>
+        <div className="w-full grid grid-cols-4 gap-4">
+          {cropList.length > 0 ? (
+            cropList.map((list) => (
+              <div key={list.cropId}>
+                <label
+                  htmlFor={list.cropId}
+                  className={`button !rounded-lg border-2 ${
+                    selectedCrop === list.cropId
+                      ? "bg-green-50 border-green-500 shadow-lg"
+                      : "bg-white border-green-200 hover:border-green-300 hover:shadow-md"
+                  }`}
+                  onClick={() => handleSetSelectedCrop(list.cropId)}
+                >
+                  <h4>{list.cropName}</h4>
+                </label>
+                <input
+                  name="cropList"
+                  defaultValue={list.cropId}
+                  className="hidden"
+                />
+
+                {/* {!state.success &&
+                  state.formError?.cropId?.map((err, index) => (
+                    <p key={err + index} className="mt-1 text-sm text-red-600">
+                      {err}
+                    </p>
+                  ))} */}
+              </div>
+            ))
+          ) : (
+            <div className="bg-gray-100 rounded-lg p-4 w-[150px] ">
+              <div className="animate-pulse grid grid-cols-1">
+                <div className="h-4 rounded bg-gray-300 w-full" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ReportContent selectedCrop={selectedCrop} />
+    </div>
+  );
+};
+
+/**
+ * @returns a component that renders the options of report the user can make and the coresponding report form
+ */
+const ReportContent: FC<ReportContentPropType> = ({ selectedCrop }) => {
+  const [reportType, setReportType] = useState<reportTypeStateType | null>(
+    null
+  );
+
+  const handleSetReportType = (type: reportTypeStateType) =>
+    setReportType(type);
+
+  return (
+    <div>
+      <label htmlFor="">Uri ng ulat na iyong gagawin:</label>
+      <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
+        {/* Damage Button */}
+        <Button
+          onClick={() => handleSetReportType("damage")}
+          className={
+            reportType === "damage"
+              ? "bg-red-50 border-red-500 shadow-lg"
+              : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
+          }
+        >
+          <TriangleAlert className="text-red-500" />
+          <span
+            className={`font-semibold text-gray-500 ${
+              reportType === "damage" && "!text-gray-700"
+            }`}
+          >
+            Damage
+          </span>
+        </Button>
+
+        <Button
+          onClick={() => handleSetReportType("harvesting")}
+          className={
+            reportType === "harvesting"
+              ? "bg-amber-50 border-amber-500 shadow-lg"
+              : "bg-white border-gray-200 hover:border-amber-300 hover:shadow-md"
+          }
+        >
+          <Tractor className="text-amber-300" />
+          <span
+            className={`font-semibold text-gray-500 ${
+              reportType === "harvesting" && "!text-gray-700"
+            }`}
+          >
+            Harvesting
+          </span>
+        </Button>
+
+        <Button
+          onClick={() => handleSetReportType("planting")}
+          className={
+            reportType === "planting"
+              ? "bg-green-50 border-green-500 shadow-lg"
+              : "bg-white border-gray-200 hover:border-green-300 hover:shadow-md"
+          }
+        >
+          <Leaf className="text-green-500" />
+          <span
+            className={`font-semibold text-gray-500 ${
+              reportType === "planting" && "!text-gray-700"
+            }`}
+          >
+            Planting
+          </span>
+        </Button>
+      </div>
+
+      {reportType && reportType === "damage" && (
+        <DamageReport selectedCrop={selectedCrop} />
+      )}
+      {reportType && reportType === "planting" && <PlantingReport />}
+      {reportType && reportType === "harvesting" && <HarvestReport />}
+    </div>
+  );
+};
+
+const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
+  const { handleSetNotification } = useNotification();
+  const pickFileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [openCam, setOpenCam] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
+  const [isPassing, startPassing] = useTransition();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [state, formAction] = useActionState(PostFarmerReport, {
+    success: null,
+    notifError: null,
+    formError: null,
+  });
+
+  useEffect(() => {
+    if (videoRef.current && openCam) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+    }
+  }, [stream, openCam]);
+
+  useEffect(() => {
+    if (state.notifError) handleSetNotification(state.notifError);
+  }, [handleSetNotification, state.notifError]);
+
+  useEffect(() => {
+    if (!isPassing) handleDoneLoading();
+  }, [isPassing, handleDoneLoading]);
 
   const handleStartCamera = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
@@ -327,48 +462,6 @@ const AddingReport: FC<{
 
   return (
     <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
-      <div className="h-auto">
-        <label htmlFor="" className="label">
-          Pangalan ng pananim mo:
-        </label>
-        <div className="w-full grid grid-cols-4 gap-4">
-          {cropList.length > 0 ? (
-            cropList.map((list) => (
-              <div key={list.cropId}>
-                <label
-                  htmlFor={list.cropId}
-                  className={`button !rounded-lg border ${
-                    selectedCrop === list.cropId
-                      ? "bg-green-200 border-green-700"
-                      : "bg-green-50 border-green-500"
-                  }`}
-                  onClick={() => handleSetSelectedCrop(list.cropId)}
-                >
-                  <h4>{list.cropName}</h4>
-                </label>
-                <input
-                  name="cropList"
-                  defaultValue={list.cropId}
-                  className="hidden"
-                />
-
-                {!state.success &&
-                  state.formError?.cropId?.map((err, index) => (
-                    <p key={err + index} className="mt-1 text-sm text-red-600">
-                      {err}
-                    </p>
-                  ))}
-              </div>
-            ))
-          ) : (
-            <div className="bg-gray-100 rounded-lg p-4 w-[150px] ">
-              <div className="animate-pulse grid grid-cols-1">
-                <div className="h-4 rounded bg-gray-300 w-full" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
       <div className="space-y-4">
         <div>
           <label
@@ -524,14 +617,6 @@ const AddingReport: FC<{
         >
           {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         </button>
-        <button
-          type="button"
-          onClick={() => setAddReport(false)}
-          disabled={isPassing}
-          className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-        >
-          Kanselahin
-        </button>
       </div>
 
       {/* view for viewing the cam */}
@@ -568,6 +653,14 @@ const AddingReport: FC<{
       )}
     </form>
   );
+};
+
+const PlantingReport = () => {
+  return <div>planting</div>;
+};
+
+const HarvestReport = () => {
+  return <div>harvesting</div>;
 };
 
 export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
