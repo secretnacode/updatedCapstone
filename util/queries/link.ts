@@ -288,3 +288,24 @@ export const updateAgriLinkIsUse = async (token: string) => {
     throw new Error(`Error occured while consuming the token`);
   }
 };
+
+/**
+ * query for checking the link if it exist or not by finding if the passed token is in the db and if that token wasnt used yet
+ * @param token link token to be ckecked
+ * @returns boolean
+ */
+export const checkResetPassToken = async (token: string): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone."${resetPassDbName()}" where "linkToken" = $1)`,
+        [token]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May Hindi inaasahang pag kakamali habang chinecheck and user`
+    );
+  }
+};

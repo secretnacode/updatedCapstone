@@ -9,7 +9,7 @@ authorizedPath.set(`admin`, [`/agriculturist`, `/farmerUser`]);
 authorizedPath.set(`leader`, [`/farmer`, `/farmerLeader`, `/farmerUser`]);
 // mga user na kakatapos lng mag sign up ang pwedeng pumasok sa path nato
 authorizedPath.set(`newUser`, [`/farmerDetails`]);
-const publicPath = [`/unauthorized`, `/agriAuth`];
+const publicPath = [`/unauthorized`, `/agriAuth`, `/resetPassword`];
 
 export default async function Middleware(req: NextRequest) {
   try {

@@ -11,6 +11,7 @@ import {
   linkIsExistInCreateAgriDb,
   linkIsExistInResetPassDb,
   deleteCreateAgriLink,
+  checkResetPassToken,
 } from "@/util/queries/link";
 import { ProtectedAction } from "../protectedActions";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
@@ -279,6 +280,39 @@ export const checkSignUp = async (
       notifError: [
         {
           message: `Unexpected error occured while making validating the link for sign up`,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const checkResetPassLink = async (token: string) => {
+  try {
+    if (!(await checkResetPassToken(token)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Hindi po pwedeng iaccess ang page na ito",
+            type: "warning",
+          },
+        ],
+      };
+
+    await updateAgriLinkIsUse(token);
+
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang chinecheck and user: ${err}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
           type: "error",
         },
       ],
