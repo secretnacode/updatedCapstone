@@ -15,10 +15,8 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import {
   ChangeEvent,
-  Dispatch,
   FC,
   FormEvent,
-  SetStateAction,
   useActionState,
   useCallback,
   useEffect,
@@ -36,7 +34,6 @@ import {
   FileText,
   Info,
   Leaf,
-  Plus,
   Tractor,
   TriangleAlert,
   Upload,
@@ -44,12 +41,12 @@ import {
   X,
 } from "lucide-react";
 import {
-  addReportComponentPropType,
   AddReportPictureType,
   allUserRoleType,
   EditableUserReportDetailsPropType,
   getFarmerCropNameQueryReturnType,
   GetFarmerReportDetailReturnType,
+  openCamPropType,
   ReportContentPropType,
   ReportDetailType,
   reportTypeStateType,
@@ -276,7 +273,7 @@ const ReportContent: FC<ReportContentPropType> = ({ selectedCrop }) => {
         <DamageReport selectedCrop={selectedCrop} />
       )}
       {reportType && reportType === "planting" && <PlantingReport />}
-      {reportType && reportType === "harvesting" && <HarvestReport />}
+      {reportType && reportType === "harvesting" && <HarvestingReport />}
     </div>
   );
 };
@@ -284,10 +281,6 @@ const ReportContent: FC<ReportContentPropType> = ({ selectedCrop }) => {
 const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [openCam, setOpenCam] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
@@ -298,130 +291,12 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   });
 
   useEffect(() => {
-    if (videoRef.current && openCam) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play();
-    }
-  }, [stream, openCam]);
-
-  useEffect(() => {
     if (state.notifError) handleSetNotification(state.notifError);
   }, [handleSetNotification, state.notifError]);
 
   useEffect(() => {
     if (!isPassing) handleDoneLoading();
   }, [isPassing, handleDoneLoading]);
-
-  const handleStartCamera = async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
-      return handleSetNotification([
-        {
-          message:
-            "Ang browser mo ay hindi supported ang pag gamit ng camera mo",
-          type: "warning",
-        },
-      ]);
-
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      setOpenCam(true);
-      setStream(mediaStream);
-    } catch (error) {
-      const err = error as Error;
-      if (
-        err.name === "NotAllowedError" ||
-        err.name === "PermissionDeniedError"
-      )
-        handleSetNotification([
-          {
-            message:
-              "Mag bigay ng pahintulot na gamitin ang iyong camera para mag patuloy",
-            type: "warning",
-          },
-        ]);
-      else if (err.name === "NotFoundError")
-        handleSetNotification([
-          {
-            message: "Hindi ma detect and iyong camera",
-            type: "error",
-          },
-        ]);
-      else
-        handleSetNotification([
-          {
-            message: `May hindi inaasahang error na nangyari: ${err.message}`,
-            type: "error",
-          },
-        ]);
-    }
-  };
-
-  const handleStopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((tracks) => tracks.stop());
-      setStream(null);
-    }
-
-    setOpenCam(false);
-  }, [stream]);
-
-  const handleCaptureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      const context = canvas.getContext("2d");
-
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              setSelectedFile((prev) => [
-                ...prev,
-                {
-                  picId: CreateUUID(),
-                  file: new File([blob], `captureImage.jpg`, {
-                    type: "image/jpeg",
-                    lastModified: Date.now(),
-                  }),
-                },
-              ]);
-              handleSetNotification([
-                {
-                  message: "Matagumpay na nakakuha ng larawan",
-                  type: "success",
-                },
-              ]);
-            } else {
-              handleSetNotification([
-                {
-                  message: "Hindi matagumpay na nakuha ang larawan",
-                  type: "warning",
-                },
-              ]);
-            }
-
-            handleStopCamera();
-          },
-          "images/jpeg",
-          0.9
-        );
-      } else {
-        handleSetNotification([
-          {
-            message: "Hindi matagumpay na nakuha ang larawan",
-            type: "warning",
-          },
-        ]);
-      }
-    }
-  };
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -453,12 +328,6 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
 
     startPassing(() => formAction(formData));
   };
-
-  useEffect(() => {
-    return () => {
-      if (openCam) handleStopCamera();
-    };
-  });
 
   return (
     <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
@@ -553,15 +422,7 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
               className="hidden"
             />
 
-            <button
-              type="button"
-              disabled={openCam || isPassing}
-              onClick={handleStartCamera}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
-            >
-              <Camera className="h-5 w-5" />
-              <span className="font-medium">Gamitin ang camera</span>
-            </button>
+            <OpenCam setSelectedFile={setSelectedFile} isPassing={isPassing} />
           </div>
 
           {selectedFile.length > 0 && (
@@ -606,8 +467,247 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
         </div>
       )}
 
-      {/* turning the captured picture into a canvas, then turning canvas into a blob(file) */}
-      <canvas ref={canvasRef} className="hidden" />
+      <div className="flex gap-4 pt-6 border-t">
+        <button
+          type="submit"
+          disabled={isPassing}
+          className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+        >
+          {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const PlantingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
+  const { handleSetNotification } = useNotification();
+  const pickFileRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
+  const [isPassing, startPassing] = useTransition();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [state, formAction] = useActionState(PostFarmerReport, {
+    success: null,
+    notifError: null,
+    formError: null,
+  });
+
+  useEffect(() => {
+    if (state.notifError) handleSetNotification(state.notifError);
+  }, [handleSetNotification, state.notifError]);
+
+  useEffect(() => {
+    if (!isPassing) handleDoneLoading();
+  }, [isPassing, handleDoneLoading]);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFile((prev) => [
+        ...prev,
+        ...Array.from(e.target.files as FileList).map((file) => ({
+          picId: CreateUUID(),
+          file: file,
+        })),
+      ]);
+    }
+  };
+
+  const handleRemovePicture = (picId: string) => {
+    setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
+  };
+
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleIsLoading("Ipinapasa na ang iyong ulat");
+
+    const formData = new FormData(e.currentTarget);
+
+    if (selectedCrop) formData.append("cropId", selectedCrop);
+    formData.append("reportType", "planting"); // Planting specific
+
+    selectedFile.forEach((image) => {
+      formData.append("file", image.file);
+    });
+
+    startPassing(() => formAction(formData));
+  };
+
+  return (
+    <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+      <div className="space-y-4">
+        <div>
+          <label
+            htmlFor="reportTitle"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Pamagat ng ulat ng pagtatanim:
+          </label>
+          <input
+            type="text"
+            name="reportTitle"
+            placeholder="Hal: Nagtanim ng 50 punong palay"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {!state.success &&
+            state.formError?.reportTitle?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))}
+        </div>
+
+        <div>
+          <label
+            htmlFor="plantingDate"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Araw ng pagtatanim:
+          </label>
+          <input
+            type="date"
+            name="plantingDate"
+            max={MaxDateToday()}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {/* {!state.success &&
+            state.formError?.plantingDate?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="areaPlanted"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Sukat ng lugar na tinanimang (ektarya):
+          </label>
+          <input
+            type="number"
+            name="areaPlanted"
+            step="0.01"
+            min="0"
+            placeholder="Hal: 2.5"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {/* {!state.success &&
+            state.formError?.areaPlanted?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="seedsUsed"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Dami ng binhi na ginamit (kg):
+          </label>
+          <input
+            type="number"
+            name="seedsUsed"
+            step="0.1"
+            min="0"
+            placeholder="Hal: 50"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {/* {!state.success &&
+            state.formError?.seedsUsed?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="reportDescription"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Karagdagang detalye (opsyonal):
+          </label>
+          <textarea
+            name="reportDescription"
+            rows={4}
+            placeholder="Hal: Ginamit ang organic fertilizer at rice variety RC222"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+          />
+          {/* {!state.success &&
+            state.formError?.reportDescription?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="reportPicture"
+            className="block text-sm font-medium text-gray-700 mb-3"
+          >
+            Mag lagay ng larawan ng lugar na tinanimang (opsyonal)
+          </label>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              disabled={isPassing}
+              onClick={() => pickFileRef.current?.click()}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <Upload className="h-5 w-5" />
+              <span className="font-medium">Pumili ng larawan</span>
+            </button>
+
+            <input
+              multiple
+              type="file"
+              ref={pickFileRef}
+              onChange={handleFileSelect}
+              accept="image/*"
+              className="hidden"
+            />
+
+            <OpenCam setSelectedFile={setSelectedFile} isPassing={isPassing} />
+          </div>
+
+          {selectedFile.length > 0 && (
+            <p className="mt-2 text-sm text-gray-500">
+              {selectedFile.length}{" "}
+              {selectedFile.length === 1 ? "larawan" : "mga larawan"} ang napili
+            </p>
+          )}
+        </div>
+      </div>
+
+      {selectedFile.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {selectedFile.map((image, index) => (
+            <div
+              key={image.picId + index}
+              className="relative aspect-square group"
+            >
+              <Image
+                src={URL.createObjectURL(image.file)}
+                alt={`Larawan ${index + 1} ng gagawing ulat`}
+                fill
+                unoptimized
+                className="object-cover rounded-lg"
+              />
+              <button
+                onClick={() => handleRemovePicture(image.picId)}
+                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <X className="z-20 relative" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-4 pt-6 border-t">
         <button
@@ -618,8 +718,399 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
           {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         </button>
       </div>
+    </form>
+  );
+};
 
-      {/* view for viewing the cam */}
+const HarvestingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
+  const { handleSetNotification } = useNotification();
+  const pickFileRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
+  const [isPassing, startPassing] = useTransition();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [state, formAction] = useActionState(PostFarmerReport, {
+    success: null,
+    notifError: null,
+    formError: null,
+  });
+
+  useEffect(() => {
+    if (state.notifError) handleSetNotification(state.notifError);
+  }, [handleSetNotification, state.notifError]);
+
+  useEffect(() => {
+    if (!isPassing) handleDoneLoading();
+  }, [isPassing, handleDoneLoading]);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFile((prev) => [
+        ...prev,
+        ...Array.from(e.target.files as FileList).map((file) => ({
+          picId: CreateUUID(),
+          file: file,
+        })),
+      ]);
+    }
+  };
+
+  const handleRemovePicture = (picId: string) => {
+    setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
+  };
+
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleIsLoading("Ipinapasa na ang iyong ulat");
+
+    const formData = new FormData(e.currentTarget);
+
+    if (selectedCrop) formData.append("cropId", selectedCrop);
+    formData.append("reportType", "harvesting"); // Harvesting specific
+
+    selectedFile.forEach((image) => {
+      formData.append("file", image.file);
+    });
+
+    startPassing(() => formAction(formData));
+  };
+
+  return (
+    <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+      <div className="space-y-4">
+        <div>
+          <label
+            htmlFor="reportTitle"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Pamagat ng ulat ng pag-aani:
+          </label>
+          <input
+            type="text"
+            name="reportTitle"
+            placeholder="Hal: Nag-ani ng palay sa taniman A"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          />
+          {!state.success &&
+            state.formError?.reportTitle?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))}
+        </div>
+
+        <div>
+          <label
+            htmlFor="harvestDate"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Araw ng pag-aani:
+          </label>
+          <input
+            type="date"
+            name="harvestDate"
+            max={MaxDateToday()}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          />
+          {/* {!state.success &&
+            state.formError?.harvestDate?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="harvestAmount"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Dami ng naaning ani (kg):
+          </label>
+          <input
+            type="number"
+            name="harvestAmount"
+            step="0.1"
+            min="0"
+            placeholder="Hal: 500"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          />
+          {/* {!state.success &&
+            state.formError?.harvestAmount?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="qualityRating"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Kalidad ng ani:
+          </label>
+          <select
+            name="qualityRating"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          >
+            <option value="">Pumili ng kalidad</option>
+            <option value="excellent">Napakaganda</option>
+            <option value="good">Maganda</option>
+            <option value="fair">Katamtaman</option>
+            <option value="poor">Hindi maganda</option>
+          </select>
+          {/* {!state.success &&
+            state.formError?.qualityRating?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))} */}
+        </div>
+
+        <div>
+          <label
+            htmlFor="reportDescription"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Karagdagang detalye (opsyonal):
+          </label>
+          <textarea
+            name="reportDescription"
+            rows={4}
+            placeholder="Hal: Mabuti ang kalidad ng ani. Walang problema sa panahon ng pag-aani."
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+          />
+          {!state.success &&
+            state.formError?.reportDescription?.map((err, index) => (
+              <p key={err + index} className="mt-1 text-sm text-red-600">
+                {err}
+              </p>
+            ))}
+        </div>
+
+        <div>
+          <label
+            htmlFor="reportPicture"
+            className="block text-sm font-medium text-gray-700 mb-3"
+          >
+            Mag lagay ng larawan ng ani (opsyonal)
+          </label>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              disabled={isPassing}
+              onClick={() => pickFileRef.current?.click()}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <Upload className="h-5 w-5" />
+              <span className="font-medium">Pumili ng larawan</span>
+            </button>
+
+            <input
+              multiple
+              type="file"
+              ref={pickFileRef}
+              onChange={handleFileSelect}
+              accept="image/*"
+              className="hidden"
+            />
+
+            <OpenCam setSelectedFile={setSelectedFile} isPassing={isPassing} />
+          </div>
+
+          {selectedFile.length > 0 && (
+            <p className="mt-2 text-sm text-gray-500">
+              {selectedFile.length}{" "}
+              {selectedFile.length === 1 ? "larawan" : "mga larawan"} ang napili
+            </p>
+          )}
+        </div>
+      </div>
+
+      {selectedFile.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {selectedFile.map((image, index) => (
+            <div
+              key={image.picId + index}
+              className="relative aspect-square group"
+            >
+              <Image
+                src={URL.createObjectURL(image.file)}
+                alt={`Larawan ${index + 1} ng gagawing ulat`}
+                fill
+                unoptimized
+                className="object-cover rounded-lg"
+              />
+              <button
+                onClick={() => handleRemovePicture(image.picId)}
+                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <X className="z-20 relative" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-4 pt-6 border-t">
+        <button
+          type="submit"
+          disabled={isPassing}
+          className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+        >
+          {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
+  const { handleSetNotification } = useNotification();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [openCam, setOpenCam] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (videoRef.current && openCam) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+    }
+  }, [stream, openCam]);
+
+  const handleStartCamera = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+      return handleSetNotification([
+        {
+          message:
+            "Ang browser mo ay hindi supported ang pag gamit ng camera mo",
+          type: "warning",
+        },
+      ]);
+
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      setOpenCam(true);
+      setStream(mediaStream);
+    } catch (error) {
+      const err = error as Error;
+      if (
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
+      )
+        handleSetNotification([
+          {
+            message:
+              "Mag bigay ng pahintulot na gamitin ang iyong camera para mag patuloy",
+            type: "warning",
+          },
+        ]);
+      else if (err.name === "NotFoundError")
+        handleSetNotification([
+          {
+            message: "Hindi ma detect and iyong camera",
+            type: "error",
+          },
+        ]);
+      else
+        handleSetNotification([
+          {
+            message: `May hindi inaasahang error na nangyari: ${err.message}`,
+            type: "error",
+          },
+        ]);
+    }
+  };
+
+  const handleStopCamera = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach((tracks) => tracks.stop());
+      setStream(null);
+    }
+
+    setOpenCam(false);
+  }, [stream]);
+
+  useEffect(() => {
+    return () => {
+      if (openCam) handleStopCamera();
+    };
+  });
+
+  const handleCaptureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext("2d");
+
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              setSelectedFile((prev) => [
+                ...prev,
+                {
+                  picId: CreateUUID(),
+                  file: new File([blob], `captureImage.jpg`, {
+                    type: "image/jpeg",
+                    lastModified: Date.now(),
+                  }),
+                },
+              ]);
+              handleSetNotification([
+                {
+                  message: "Matagumpay na nakakuha ng larawan",
+                  type: "success",
+                },
+              ]);
+            } else {
+              handleSetNotification([
+                {
+                  message: "Hindi matagumpay na nakuha ang larawan",
+                  type: "warning",
+                },
+              ]);
+            }
+
+            handleStopCamera();
+          },
+          "images/jpeg",
+          0.9
+        );
+      } else {
+        handleSetNotification([
+          {
+            message: "Hindi matagumpay na nakuha ang larawan",
+            type: "warning",
+          },
+        ]);
+      }
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        disabled={openCam || isPassing}
+        onClick={handleStartCamera}
+        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+      >
+        <Camera className="h-5 w-5" />
+        <span className="font-medium">Gamitin ang camera</span>
+      </button>
+
+      <canvas ref={canvasRef} className="hidden" />
+
       {openCam && (
         <div className="fixed inset-0 bg-black z-50">
           <div className="relative h-full flex flex-col">
@@ -651,16 +1142,8 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
           </div>
         </div>
       )}
-    </form>
+    </>
   );
-};
-
-const PlantingReport = () => {
-  return <div>planting</div>;
-};
-
-const HarvestReport = () => {
-  return <div>harvesting</div>;
 };
 
 export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({

@@ -1471,3 +1471,8 @@ export type getLatestReportReturnType =
 export type ReportContentPropType = { selectedCrop?: string };
 
 export type reportTypeStateType = "damage" | "harvesting" | "planting";
+
+export type openCamPropType = {
+  setSelectedFile: Dispatch<SetStateAction<AddReportPictureType>>;
+  isPassing: boolean;
+};
