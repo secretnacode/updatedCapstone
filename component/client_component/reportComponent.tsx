@@ -3,7 +3,9 @@
 import {
   changeApproveOrJustApproveReport,
   GetFarmerReportDetail,
-  PostFarmerReport,
+  uploadDamageReport,
+  uploadHarvestingReport,
+  uploadPlantingReport,
 } from "@/lib/server_action/report";
 import {
   CreateUUID,
@@ -43,6 +45,7 @@ import {
 import {
   AddReportPictureType,
   allUserRoleType,
+  cropStatusType,
   EditableUserReportDetailsPropType,
   getFarmerCropNameQueryReturnType,
   GetFarmerReportDetailReturnType,
@@ -60,6 +63,7 @@ import {
   Button,
   CancelButton,
   FormCancelSubmitButton,
+  FormDivLabelInput,
   FormDivLabelTextArea,
   ModalLoading,
   ModalNotice,
@@ -114,8 +118,11 @@ import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 //   );
 // };
 
-export const CreateReport = () => {
+export const CreateReport: FC = () => {
   const { handleSetNotification } = useNotification();
+  const [defaultReport, setDefaultReport] = useState<
+    reportTypeStateType | undefined
+  >(undefined);
   const [cropList, setCropList] = useState<getFarmerCropNameQueryReturnType[]>(
     []
   );
@@ -130,6 +137,10 @@ export const CreateReport = () => {
         if (cropName.success) {
           setCropList(cropName.cropList);
           setSelectedCrop(cropName.cropList[0].cropId);
+          handleSetDefaultReport(
+            cropName.cropList[0].datePlanted,
+            cropName.cropList[0].cropStatus
+          );
         } else handleSetNotification(cropName.notifError);
       } catch (error) {
         console.log((error as Error).message);
@@ -142,18 +153,39 @@ export const CreateReport = () => {
     getCropInfo();
   }, [handleSetNotification]);
 
+  const handleSetDefaultReport = (
+    datePlanted: Date,
+    cropStatus: cropStatusType
+  ) => {
+    const planted = new Date(datePlanted);
+
+    const planted5Months = new Date(planted.setMonth(planted.getMonth() + 5));
+
+    switch (cropStatus) {
+      case `planted`:
+        if (new Date() >= planted5Months) return setDefaultReport("harvesting");
+
+        return setDefaultReport("damage");
+
+      case `harvested`:
+        setDefaultReport("planting");
+
+      default:
+        return setDefaultReport("damage");
+    }
+  };
+
   const handleSetSelectedCrop = (cropId: string) => {
-    setSelectedCrop(cropList.find((crop) => crop.cropId === cropId)!.cropId);
+    setSelectedCrop(cropId);
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="title form-title">Mag sagawa ng panibagong ulat</h1>
-
+    <>
       <div className="h-auto">
         <label htmlFor="" className="label">
-          Pangalan ng pananim mo:
+          Pumili ng pananim na iyong iuulat:
         </label>
+
         <div className="w-full grid grid-cols-4 gap-4">
           {cropList.length > 0 ? (
             cropList.map((list) => (
@@ -165,7 +197,10 @@ export const CreateReport = () => {
                       ? "bg-green-50 border-green-500 shadow-lg"
                       : "bg-white border-green-200 hover:border-green-300 hover:shadow-md"
                   }`}
-                  onClick={() => handleSetSelectedCrop(list.cropId)}
+                  onClick={() => {
+                    handleSetSelectedCrop(list.cropId);
+                    handleSetDefaultReport(list.datePlanted, list.cropStatus);
+                  }}
                 >
                   <h4>{list.cropName}</h4>
                 </label>
@@ -193,88 +228,104 @@ export const CreateReport = () => {
         </div>
       </div>
 
-      <ReportContent selectedCrop={selectedCrop} />
-    </div>
+      <ReportContent
+        selectedCrop={selectedCrop}
+        defaultReport={defaultReport}
+      />
+    </>
   );
 };
 
 /**
  * @returns a component that renders the options of report the user can make and the coresponding report form
  */
-const ReportContent: FC<ReportContentPropType> = ({ selectedCrop }) => {
+const ReportContent: FC<ReportContentPropType> = ({
+  selectedCrop,
+  defaultReport,
+}) => {
   const [reportType, setReportType] = useState<reportTypeStateType | null>(
     null
   );
+
+  useEffect(() => {
+    if (defaultReport) setReportType(defaultReport);
+  }, [defaultReport]);
 
   const handleSetReportType = (type: reportTypeStateType) =>
     setReportType(type);
 
   return (
-    <div>
-      <label htmlFor="">Uri ng ulat na iyong gagawin:</label>
-      <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
-        {/* Damage Button */}
-        <Button
-          onClick={() => handleSetReportType("damage")}
-          className={
-            reportType === "damage"
-              ? "bg-red-50 border-red-500 shadow-lg"
-              : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
-          }
-        >
-          <TriangleAlert className="text-red-500" />
-          <span
-            className={`font-semibold text-gray-500 ${
-              reportType === "damage" && "!text-gray-700"
-            }`}
+    <>
+      <div>
+        <label htmlFor="" className="label">
+          Uri ng ulat na iyong gagawin:
+        </label>
+        <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
+          {/* Damage Button */}
+          <Button
+            onClick={() => handleSetReportType("damage")}
+            className={
+              reportType === "damage"
+                ? "bg-red-50 border-red-500 shadow-lg"
+                : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
+            }
           >
-            Damage
-          </span>
-        </Button>
+            <TriangleAlert className="text-red-500" />
+            <span
+              className={`font-semibold text-gray-500 ${
+                reportType === "damage" && "!text-gray-700"
+              }`}
+            >
+              Damage
+            </span>
+          </Button>
 
-        <Button
-          onClick={() => handleSetReportType("harvesting")}
-          className={
-            reportType === "harvesting"
-              ? "bg-amber-50 border-amber-500 shadow-lg"
-              : "bg-white border-gray-200 hover:border-amber-300 hover:shadow-md"
-          }
-        >
-          <Tractor className="text-amber-300" />
-          <span
-            className={`font-semibold text-gray-500 ${
-              reportType === "harvesting" && "!text-gray-700"
-            }`}
+          <Button
+            onClick={() => handleSetReportType("harvesting")}
+            className={
+              reportType === "harvesting"
+                ? "bg-amber-50 border-amber-500 shadow-lg"
+                : "bg-white border-gray-200 hover:border-amber-300 hover:shadow-md"
+            }
           >
-            Harvesting
-          </span>
-        </Button>
+            <Tractor className="text-amber-300" />
+            <span
+              className={`font-semibold text-gray-500 ${
+                reportType === "harvesting" && "!text-gray-700"
+              }`}
+            >
+              Harvesting
+            </span>
+          </Button>
 
-        <Button
-          onClick={() => handleSetReportType("planting")}
-          className={
-            reportType === "planting"
-              ? "bg-green-50 border-green-500 shadow-lg"
-              : "bg-white border-gray-200 hover:border-green-300 hover:shadow-md"
-          }
-        >
-          <Leaf className="text-green-500" />
-          <span
-            className={`font-semibold text-gray-500 ${
-              reportType === "planting" && "!text-gray-700"
-            }`}
+          <Button
+            onClick={() => handleSetReportType("planting")}
+            className={
+              reportType === "planting"
+                ? "bg-green-50 border-green-500 shadow-lg"
+                : "bg-white border-gray-200 hover:border-green-300 hover:shadow-md"
+            }
           >
-            Planting
-          </span>
-        </Button>
+            <Leaf className="text-green-500" />
+            <span
+              className={`font-semibold text-gray-500 ${
+                reportType === "planting" && "!text-gray-700"
+              }`}
+            >
+              Planting
+            </span>
+          </Button>
+        </div>
       </div>
 
       {reportType && reportType === "damage" && (
         <DamageReport selectedCrop={selectedCrop} />
       )}
+
       {reportType && reportType === "planting" && <PlantingReport />}
+
       {reportType && reportType === "harvesting" && <HarvestingReport />}
-    </div>
+    </>
   );
 };
 
@@ -284,7 +335,7 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [state, formAction] = useActionState(PostFarmerReport, {
+  const [state, formAction] = useActionState(uploadDamageReport, {
     success: null,
     notifError: null,
     formError: null,
@@ -330,74 +381,35 @@ const DamageReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="reportTitle"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Pamagat ng ulat:
-          </label>
-          <input
-            type="text"
-            name="reportTitle"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.reportTitle?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Pamagat ng ulat:"
+          inputName={"reportTitle"}
+          formError={state.formError?.reportTitle}
+          inputRequired
+          inputPlaceholder="Hal: Mga nasirang palay sa dayap"
+        />
+
+        <FormDivLabelInput
+          labelMessage="Araw na ito ay naganap:"
+          inputName={"dateHappen"}
+          formError={state.formError?.dateHappen}
+          inputType="date"
+          inputMax={MaxDateToday()}
+          inputRequired
+        />
+
+        <FormDivLabelTextArea
+          labelMessage="Karagdagang detalye:"
+          name={"reportDescription"}
+          formError={state.formError?.reportDescription}
+          required
+          placeholder="Hal: May mga bahagyang nasirang palay sa kagagawan ng mga insekto"
+        />
 
         <div>
-          <label
-            htmlFor="reportDescription"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Ilarawan ang ulat:
-          </label>
-          <textarea
-            name="reportDescription"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-          />
-          {!state.success &&
-            state.formError?.reportDescription?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <label
-            htmlFor="dateHappen"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Araw na ito ay naganap:
-          </label>
-          <input
-            type="date"
-            name="dateHappen"
-            min={FourDaysBefore()}
-            max={MaxDateToday()}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.dateHappen?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
-
-        <div>
-          <label
-            htmlFor="reportPicture"
-            className="block text-sm font-medium text-gray-700 mb-3"
-          >
+          <label htmlFor="reportPicture" className="label">
             Mag lagay ng larawan ng mga nasira
           </label>
 
@@ -486,7 +498,7 @@ const PlantingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [state, formAction] = useActionState(PostFarmerReport, {
+  const [state, formAction] = useActionState(uploadPlantingReport, {
     success: null,
     notifError: null,
     formError: null,
@@ -523,6 +535,7 @@ const PlantingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
     const formData = new FormData(e.currentTarget);
 
     if (selectedCrop) formData.append("cropId", selectedCrop);
+
     formData.append("reportType", "planting"); // Planting specific
 
     selectedFile.forEach((image) => {
@@ -533,123 +546,48 @@ const PlantingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="reportTitle"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Pamagat ng ulat ng pagtatanim:
-          </label>
-          <input
-            type="text"
-            name="reportTitle"
-            placeholder="Hal: Nagtanim ng 50 punong palay"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.reportTitle?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Pamagat ng ulat ng pagtatanim:"
+          inputName={"reportTitle"}
+          formError={state.formError?.reportTitle}
+          inputRequired
+          inputPlaceholder="Hal: Bagong tanim na palay sa dayap"
+        />
 
-        <div>
-          <label
-            htmlFor="plantingDate"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Araw ng pagtatanim:
-          </label>
-          <input
-            type="date"
-            name="plantingDate"
-            max={MaxDateToday()}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {/* {!state.success &&
-            state.formError?.plantingDate?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Araw ng pagtatanim:"
+          inputName={"dateHappen"}
+          formError={state.formError?.dateHappen}
+          inputRequired
+          inputType="date"
+          inputMax={MaxDateToday()}
+        />
 
-        <div>
-          <label
-            htmlFor="areaPlanted"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Sukat ng lugar na tinanimang (ektarya):
-          </label>
-          <input
-            type="number"
-            name="areaPlanted"
-            step="0.01"
-            min="0"
-            placeholder="Hal: 2.5"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {/* {!state.success &&
-            state.formError?.areaPlanted?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Dami ng binhi na ginamit (kg):"
+          inputName={"totalCropPlanted"}
+          formError={state.formError?.totalCropPlanted}
+          inputRequired
+          inputType="number"
+          inputPlaceholder="Hal: 500"
+        />
 
-        <div>
-          <label
-            htmlFor="seedsUsed"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Dami ng binhi na ginamit (kg):
-          </label>
-          <input
-            type="number"
-            name="seedsUsed"
-            step="0.1"
-            min="0"
-            placeholder="Hal: 50"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-          {/* {!state.success &&
-            state.formError?.seedsUsed?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
-
-        <div>
-          <label
-            htmlFor="reportDescription"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Karagdagang detalye (opsyonal):
-          </label>
-          <textarea
-            name="reportDescription"
-            rows={4}
-            placeholder="Hal: Ginamit ang organic fertilizer at rice variety RC222"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-          />
-          {/* {!state.success &&
-            state.formError?.reportDescription?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelTextArea
+          labelMessage="Karagdagang detalye:"
+          name={"reportDescription"}
+          formError={state.formError?.reportDescription}
+          required
+          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang bilhin"
+        />
 
         <div>
           <label
             htmlFor="reportPicture"
             className="block text-sm font-medium text-gray-700 mb-3"
           >
-            Mag lagay ng larawan ng lugar na tinanimang (opsyonal)
+            Mag lagay ng larawan ng lugar na tinaniman:
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -728,7 +666,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [state, formAction] = useActionState(PostFarmerReport, {
+  const [state, formAction] = useActionState(uploadHarvestingReport, {
     success: null,
     notifError: null,
     formError: null,
@@ -775,125 +713,56 @@ const HarvestingReport: FC<ReportContentPropType> = ({ selectedCrop }) => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="reportTitle"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Pamagat ng ulat ng pag-aani:
-          </label>
-          <input
-            type="text"
-            name="reportTitle"
-            placeholder="Hal: Nag-ani ng palay sa taniman A"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-          />
-          {!state.success &&
-            state.formError?.reportTitle?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Pamagat ng ulat ng pag-aani:"
+          inputName={"reportTitle"}
+          formError={state.formError?.reportTitle}
+          inputRequired
+          inputPlaceholder="Hal: Pag aani sa taniman sa may lamot 1"
+        />
 
-        <div>
-          <label
-            htmlFor="harvestDate"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Araw ng pag-aani:
-          </label>
-          <input
-            type="date"
-            name="harvestDate"
-            max={MaxDateToday()}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-          />
-          {/* {!state.success &&
-            state.formError?.harvestDate?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Araw ng pag-aani:"
+          inputName={"dateHappen"}
+          formError={state.formError?.dateHappen}
+          inputRequired
+          inputType="date"
+          inputMax={MaxDateToday()}
+        />
 
-        <div>
-          <label
-            htmlFor="harvestAmount"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Dami ng naaning ani (kg):
-          </label>
-          <input
-            type="number"
-            name="harvestAmount"
-            step="0.1"
-            min="0"
-            placeholder="Hal: 500"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-          />
-          {/* {!state.success &&
-            state.formError?.harvestAmount?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Dami ng naaning ani (kg):"
+          inputName={"totalHarvest"}
+          formError={state.formError?.totalHarvest}
+          inputRequired
+          inputType="decimal"
+          inputPlaceholder="Hal: 500"
+        />
 
-        <div>
-          <label
-            htmlFor="qualityRating"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Kalidad ng ani:
-          </label>
-          <select
-            name="qualityRating"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-          >
-            <option value="">Pumili ng kalidad</option>
-            <option value="excellent">Napakaganda</option>
-            <option value="good">Maganda</option>
-            <option value="fair">Katamtaman</option>
-            <option value="poor">Hindi maganda</option>
-          </select>
-          {/* {!state.success &&
-            state.formError?.qualityRating?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))} */}
-        </div>
+        <FormDivLabelInput
+          labelMessage="Karagdagang detalye:"
+          inputName={"reportDescription"}
+          formError={state.formError?.reportDescription}
+          inputRequired
+          inputPlaceholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang "
+        />
 
-        <div>
-          <label
-            htmlFor="reportDescription"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Karagdagang detalye (opsyonal):
-          </label>
-          <textarea
-            name="reportDescription"
-            rows={4}
-            placeholder="Hal: Mabuti ang kalidad ng ani. Walang problema sa panahon ng pag-aani."
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
-          />
-          {!state.success &&
-            state.formError?.reportDescription?.map((err, index) => (
-              <p key={err + index} className="mt-1 text-sm text-red-600">
-                {err}
-              </p>
-            ))}
-        </div>
+        <FormDivLabelTextArea
+          labelMessage="Karagdagang detalye:"
+          name={"reportDescription"}
+          formError={state.formError?.reportDescription}
+          required
+          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang bilhin"
+        />
 
         <div>
           <label
             htmlFor="reportPicture"
             className="block text-sm font-medium text-gray-700 mb-3"
           >
-            Mag lagay ng larawan ng ani (opsyonal)
+            Mag lagay ng larawan ng ani:
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -1474,7 +1343,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                   labelMessage={`${
                     isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
                   }`}
-                  textAreaName="reportDescription"
+                  name="reportDescription"
                   value={textAreaValue}
                   onChange={textAreaOnChange}
                   disabled={false}
@@ -1484,7 +1353,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                   labelMessage={`${
                     isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
                   }`}
-                  textAreaName="reportDescription"
+                  name="reportDescription"
                   defaultValue={userReport.description}
                   disabled={true}
                 />

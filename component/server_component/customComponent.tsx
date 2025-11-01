@@ -214,29 +214,37 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
 };
 
 export const FormDivLabelTextArea: FC<FormDivLabelTextAreaPropType> = ({
-  textAreaName,
+  name,
   labelClassName = "",
   labelOnClick,
   labelMessage,
-  textAreaRequired,
+  required,
+  formError,
   ...textAreaProp
 }) => {
   return (
     <div>
       <label
-        htmlFor={textAreaName}
+        htmlFor={name}
         className={`label ${labelClassName}`}
         onClick={labelOnClick}
       >
         {labelMessage}
-        {textAreaRequired && <span className="text-red-500">*</span>}
+        {required && <span className="text-red-500">*</span>}
       </label>
 
       <textarea
-        name={textAreaName}
+        name={name}
         className="w-full h-[150px] resize-none input"
         {...textAreaProp}
-      ></textarea>
+      />
+
+      {formError &&
+        formError.map((message, index) => (
+          <p key={message + index} className="p p-error">
+            {message}
+          </p>
+        ))}
     </div>
   );
 };

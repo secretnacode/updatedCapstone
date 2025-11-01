@@ -314,3 +314,17 @@ export const userProfileOrgUpdateSchema = z
       path: ["otherOrgName"],
     }
   );
+
+// additional object for report type planting
+export const addPlantingReportSchema = addFarmerReportSchema.extend({
+  totalCropPlanted: z
+    .number()
+    .min(1, { error: "Mag lagay kung gano kadami ang tinanim na ani(kg)" }),
+});
+
+// additional object for report type harvesting
+export const addHarvestingReportSchema = addFarmerReportSchema.extend({
+  totalHarvest: z
+    .number()
+    .min(1, { error: "Mag lagay kung gano kadami ang naani(kg)" }),
+});

@@ -1,7 +1,7 @@
 "use server";
 
 import {
-  AddNewFarmerReport,
+  addNewReport,
   ApprovedOrgMemberQuery,
   changeTheReportDescription,
   GetAllFarmerReportQuery,
@@ -14,6 +14,7 @@ import {
   getReportCountThisWeek,
   getReportCountThisYear,
   GetUserReport,
+  updateReportType,
 } from "@/util/queries/report";
 import { ProtectedAction } from "../protectedActions";
 import {
@@ -29,9 +30,16 @@ import {
   GetOrgMemberReportReturnType,
   getReportCountPerCropReturnType,
   reportPerDayWeekAndMonthReturnType,
+  uploadHarvestingReportType,
+  uploadHarvestingReportFormType,
+  uploadPlantingReportFormType,
+  uploadPlantingReportType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
-import { addFarmerReportSchema } from "@/util/helper_function/validation/validationSchema";
+import {
+  addFarmerReportSchema,
+  addPlantingReportSchema,
+} from "@/util/helper_function/validation/validationSchema";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
 import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
@@ -39,6 +47,16 @@ import { AddNewFarmerReportImage } from "@/util/queries/image";
 import { GetUserOrgId } from "@/util/queries/org";
 import { revalidatePath } from "next/cache";
 import { CheckMyMemberquery } from "@/util/queries/user";
+import {
+  getCropStatus,
+  getCropStatusAndPlantedDate,
+  updateCropIntoHarvestedStatus,
+  updateCropIntoPlantedStatus,
+} from "@/util/queries/crop";
+import {
+  addHarvestedCrop,
+  addPlantedCrop,
+} from "@/util/queries/plantedHarvested";
 
 /**
  * server action to get the farmer report
@@ -69,7 +87,13 @@ export const GetFarmerReport = async (): Promise<GetFarmerReportReturnType> => {
   }
 };
 
-export const PostFarmerReport = async (
+/**
+ * server action for passing a damage report
+ * @param prevState value of the form before the submission
+ * @param formData
+ * @returns
+ */
+export const uploadDamageReport = async (
   prevState: AddReportActionFormType,
   formData: FormData
 ): Promise<AddReportActionFormType> => {
@@ -88,7 +112,7 @@ export const PostFarmerReport = async (
   };
 
   try {
-    const userId = (await ProtectedAction("create:report")).userId;
+    const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
     if (!validateVal.valid)
@@ -98,9 +122,24 @@ export const PostFarmerReport = async (
         formError: validateVal.formError,
       };
 
+    // the user can only passed a damage report if the crop status is planted,
+    // means in the paddy field theres a crop that was destroyed to be reported
+    if ((await getCropStatus(reportVal.cropId)).cropStatus !== "planted")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Mag pasa muna ng ulat tungkol sa pag tatanim bago mag pasa ng ulat tungkol sa pagkasira",
+            type: "warning",
+          },
+        ],
+      };
+
     const reportId = CreateUUID();
 
-    await AddNewFarmerReport({
+    await addNewReport({
       reportId: reportId,
       cropId: reportVal.cropId,
       orgId: (await GetUserOrgId(userId)).orgId,
@@ -109,9 +148,279 @@ export const PostFarmerReport = async (
       reportDescription: reportVal.reportDescription,
       dayHappen: reportVal.dateHappen,
       dayReported: new Date().toISOString(),
-      verificationStatus: "false",
-      isSeenByAgri: false,
+      verificationStatus: work === "leader" ? true : false,
     });
+
+    // did this because the 3 report types uses the same query and their only difference is the reportType,
+    // so after the insertion of new report, this is needed to be executed
+    await updateReportType("damage", reportId);
+
+    reportVal.reportPicture.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const uploadResult: UploadApiResponse | undefined = await new Promise(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({}, (error, result) => {
+              if (error) reject(error);
+
+              resolve(result);
+            })
+            .end(buffer);
+        }
+      );
+
+      if (uploadResult)
+        await AddNewFarmerReportImage({
+          picId: CreateUUID(),
+          reportId: reportId,
+          pictureUrl: uploadResult.secure_url,
+        });
+    });
+
+    revalidatePath(`/farmer/report`);
+
+    return {
+      ...returnVal,
+      success: true,
+      notifError: [
+        { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May Hindi inaasahang pag kakamali habang nag papasa ng ulat: ${err}`
+    );
+    return {
+      formError: null,
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * server action for passing a planting report
+ * @param prevState value of the form before the submission
+ * @param formData
+ * @returns
+ */
+export const uploadPlantingReport = async (
+  prevState: uploadPlantingReportFormType,
+  formData: FormData
+): Promise<uploadPlantingReportFormType> => {
+  const reportVal: uploadPlantingReportType = {
+    cropId: formData.get("cropId") as string,
+    reportTitle: formData.get("reportTitle") as string,
+    reportDescription: formData.get("reportDescription") as string,
+    dateHappen: new Date(formData.get("dateHappen") as string),
+    reportPicture: formData.getAll("file") as File[],
+    totalCropPlanted: Number(formData.get("totalCropPlanted")),
+  };
+
+  const returnVal = {
+    success: null,
+    notifError: null,
+    formError: null,
+  };
+
+  try {
+    const { userId, work } = await ProtectedAction("create:report");
+
+    const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
+    if (!validateVal.valid)
+      return {
+        ...returnVal,
+        success: false,
+        formError: validateVal.formError,
+      };
+
+    // if the cropStatus is equasl to planted, it means the user already passed a report type planted
+    // you can only passed a planted type report if the user last report is about harvest
+    if ((await getCropStatus(reportVal.cropId)).cropStatus === "planted")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Mag pasa muna ng ulat tungkol sa pag aani bago mag pasa ng ulat tungkol sa pag tatanim",
+            type: "warning",
+          },
+        ],
+      };
+
+    const reportId = CreateUUID();
+
+    await addNewReport({
+      reportId: reportId,
+      cropId: reportVal.cropId,
+      orgId: (await GetUserOrgId(userId)).orgId,
+      farmerId: userId,
+      reportTitle: reportVal.reportTitle,
+      reportDescription: reportVal.reportDescription,
+      dayHappen: reportVal.dateHappen,
+      dayReported: new Date().toISOString(),
+      verificationStatus: work === "leader" ? true : false,
+    });
+
+    await Promise.all([
+      // did this because the 3 report types uses the same query and their only difference is the reportType,
+      // so after the insertion of new report, this is needed to be executed
+      updateReportType("planting", reportId),
+      updateCropIntoPlantedStatus({
+        datePlanted: reportVal.dateHappen,
+        cropId: reportVal.cropId,
+      }),
+      addPlantedCrop({
+        plantedId: CreateUUID(),
+        reportId: reportId,
+        cropId: reportVal.cropId,
+        cropKgPlanted: reportVal.totalCropPlanted,
+        datePlanted: reportVal.dateHappen,
+      }),
+    ]);
+
+    reportVal.reportPicture.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const uploadResult: UploadApiResponse | undefined = await new Promise(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({}, (error, result) => {
+              if (error) reject(error);
+
+              resolve(result);
+            })
+            .end(buffer);
+        }
+      );
+
+      if (uploadResult)
+        await AddNewFarmerReportImage({
+          picId: CreateUUID(),
+          reportId: reportId,
+          pictureUrl: uploadResult.secure_url,
+        });
+    });
+
+    revalidatePath(`/farmer/report`);
+
+    return {
+      ...returnVal,
+      success: true,
+      notifError: [
+        { message: "Matagumpay ang pag papasa mo ng ulat", type: "success" },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Error in adding farmer report: ${err}`);
+    return {
+      formError: null,
+      success: false,
+      notifError: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * server action for passing a planting report
+ * @param prevState value of the form before the submission
+ * @param formData
+ * @returns
+ */
+export const uploadHarvestingReport = async (
+  prevState: uploadHarvestingReportFormType,
+  formData: FormData
+): Promise<uploadHarvestingReportFormType> => {
+  const reportVal: uploadHarvestingReportType = {
+    cropId: formData.get("cropId") as string,
+    reportTitle: formData.get("reportTitle") as string,
+    reportDescription: formData.get("reportDescription") as string,
+    dateHappen: new Date(formData.get("dateHappen") as string),
+    reportPicture: formData.getAll("file") as File[],
+    totalHarvest: Number(formData.get("totalHarvest")),
+  };
+
+  const returnVal = {
+    success: null,
+    notifError: null,
+    formError: null,
+  };
+
+  try {
+    const userId = (await ProtectedAction("create:report")).userId;
+
+    const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
+    if (!validateVal.valid)
+      return {
+        ...returnVal,
+        success: false,
+        formError: validateVal.formError,
+      };
+
+    const crop = await getCropStatusAndPlantedDate(reportVal.cropId);
+
+    // if the cropStatus is equasl to planted, it means the user already passed a report type planted
+    // you can only passed a planted type report if the user last report is about harvest
+    if (crop.cropStatus === "harvested")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Mag pasa muna ng ulat tungkol sa pag tatanim bago mag pasa ng ulat tungkol sa pag aani",
+            type: "warning",
+          },
+        ],
+      };
+
+    // the date today should be more than the expected date of the harvest to ensure the user cant make a harvest report to early
+    if (new Date() >= crop.expectedHarvest)
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message: "Ang ulat na patungkol sa pag aani ay masyadong maaga",
+            type: "warning",
+          },
+        ],
+      };
+
+    const reportId = CreateUUID();
+
+    await addNewReport({
+      reportId: reportId,
+      cropId: reportVal.cropId,
+      orgId: (await GetUserOrgId(userId)).orgId,
+      farmerId: userId,
+      reportTitle: reportVal.reportTitle,
+      reportDescription: reportVal.reportDescription,
+      dayHappen: reportVal.dateHappen,
+      dayReported: new Date().toISOString(),
+      verificationStatus: false,
+    });
+
+    await Promise.all([
+      // did this because the 3 report types uses the same query and their only difference is the reportType,
+      // so after the insertion of new report, this is needed to be executed
+      updateReportType("harvesting", reportId),
+      updateCropIntoHarvestedStatus({
+        datePlanted: reportVal.dateHappen,
+        cropId: reportVal.cropId,
+      }),
+      addHarvestedCrop({
+        harvestId: CreateUUID(),
+        reportId: reportId,
+        cropId: reportVal.cropId,
+        totalKgHarvested: reportVal.totalHarvest,
+        dateHarvested: reportVal.dateHappen,
+      }),
+    ]);
 
     reportVal.reportPicture.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());

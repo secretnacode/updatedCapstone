@@ -1,6 +1,7 @@
 import {
   barangayType,
   brangayWithCalauanType,
+  determineCropStatusParamType,
   getPointCoordinateReturnType,
   intoFeatureCollectionDataParam,
   NotificationBaseType,
@@ -582,12 +583,60 @@ export const converTimeToAMPM = (time: string) =>
     .split(",")[1]
     .trim();
 
+/**
+ * capitalizing the word that was passed in the param
+ * @param word word to be capitalize
+ * @returns capitalize word
+ */
 export const capitalizeFirstLetter = (word: string) =>
   word.charAt(0).toUpperCase() + word.slice(1);
 
+/**
+ * missing form value notif message
+ * @returns notif message
+ */
 export const missingFormValNotif = (): NotificationBaseType[] => [
   {
     message: "May mga pagkakamali sa iyong inilagay, baguhin muna ito",
     type: "warning",
   },
 ];
+
+/**
+ * returns a crop status base on the passed value
+ * @param param0 necessary data
+ * @returns crop status
+ */
+export const determineCropStatus = ({
+  cropStatus,
+  datePlanted,
+  dateHarvested,
+  isEnglish,
+}: determineCropStatusParamType) => {
+  // 5 days in millisecond
+  const fiveDaysLater = 1000 * 60 * 60 * 24 * 5;
+
+  const planted5DaysAgo = new Date(
+    new Date(datePlanted).getTime() + fiveDaysLater
+  );
+  const harvested5DaysAgo = new Date(
+    new Date(dateHarvested).getTime() + fiveDaysLater
+  );
+
+  switch (cropStatus) {
+    case `planted`:
+      if (new Date() >= planted5DaysAgo)
+        return isEnglish ? "Growing" : "Pag papatubo";
+
+      return isEnglish ? "Planted" : "Nataniman";
+
+    case `harvested`:
+      if (new Date() >= harvested5DaysAgo)
+        return isEnglish ? "Vacant" : "Bakante";
+
+      return isEnglish ? "Harvested" : "Naani na";
+
+    default:
+      return isEnglish ? "Can't determine" : "Hindi matukoy";
+  }
+};

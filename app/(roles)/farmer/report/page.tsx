@@ -17,7 +17,9 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   return (
     <div className="grid grid-cols-4 gap-4 ">
-      <div className="col-span-3 bg-white rounded-xl shadow-sm p-6 ">
+      <div className="col-span-3 bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <h1 className="title form-title">Mag sagawa ng panibagong ulat</h1>
+
         <CreateReport />
       </div>
       {/* <div className="max-w-7xl mx-auto space-y-6">

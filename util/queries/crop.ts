@@ -1,13 +1,24 @@
 "use server";
 
 import {
+  cropStatusType,
   GetAllCropInfoQueryReturnType,
+  getCropStatusAndPlantedDateReturnType,
+  getCropStatusReturnType,
   GetFarmerCropInfoQueryReturnType,
   getFarmerCropNameQueryReturnType,
   GetMyCropInfoQueryRetrunType,
   HandleInsertCropType,
+  updateCropPantedPropType,
 } from "@/types";
 import { pool } from "../configuration";
+
+export const cropStatus = async (): Promise<
+  Record<cropStatusType, cropStatusType>
+> => ({
+  planted: "planted",
+  harvested: "harvested",
+});
 
 /**
  * query function that is used to insert the new information of the farmer about their crops
@@ -224,7 +235,7 @@ export const getFarmerCropNameQuery = async (
   try {
     return (
       await pool.query(
-        `select "cropName", "cropId" from capstone.crop where "farmerId" = $1`,
+        `select "cropName", "cropId", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "farmerId" = $1`,
         [farmerId]
       )
     ).rows;
@@ -236,6 +247,114 @@ export const getFarmerCropNameQuery = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim`
+    );
+  }
+};
+
+/**
+ * query for getting the crop status
+ * @param cropId id of the crop to be fetch
+ * @returns
+ */
+export const getCropStatus = async (
+  cropId: string
+): Promise<getCropStatusReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropStatus" from capstone.crop where "cropId" = $1`,
+        [cropId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim`
+    );
+  }
+};
+
+/**
+ * query for getting the crop status and the expected harvest of the crop
+ * @param cropId id of the crop to be fetch
+ * @returns
+ */
+export const getCropStatusAndPlantedDate = async (
+  cropId: string
+): Promise<getCropStatusAndPlantedDateReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropStatus", date("dateHarvested" + interval '3 months' ) as expectedHarvest from capstone.crop where "cropId" = $1`,
+        [cropId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim`
+    );
+  }
+};
+
+/**
+ * query for updating the crop into planted status
+ * @param param0 id of the crop and date planted
+ */
+export const updateCropIntoPlantedStatus = async ({
+  datePlanted,
+  cropId,
+}: updateCropPantedPropType) => {
+  try {
+    const planted = (await cropStatus()).planted;
+
+    await pool.query(
+      `update capstone.crop set "cropStatus" = $1, "datePlanted" = $2 where "cropId" = $3`,
+      [planted, datePlanted, cropId]
+    );
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
+    );
+  }
+};
+
+/**
+ * query for updating the crop into planted status
+ * @param param0 id of the crop and date planted
+ */
+export const updateCropIntoHarvestedStatus = async ({
+  datePlanted,
+  cropId,
+}: updateCropPantedPropType) => {
+  try {
+    const harvested = (await cropStatus()).harvested;
+
+    await pool.query(
+      `update capstone.crop set "cropStatus" = $1, "datePlanted" = $2 where "cropId" = $3`,
+      [harvested, datePlanted, cropId]
+    );
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
     );
   }
 };

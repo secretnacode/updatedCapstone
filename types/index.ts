@@ -1,5 +1,7 @@
 import {
   addFarmerReportSchema,
+  addHarvestingReportSchema,
+  addPlantingReportSchema,
   authLogInSchema,
   authSignUpSchema,
   farmerSecondDetailFormSchema,
@@ -245,6 +247,18 @@ export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
 
 export type AddReportActionFormType = FormActionBaseType<AddReportValType>;
 
+export type uploadPlantingReportType = z.infer<typeof addPlantingReportSchema>;
+
+export type uploadPlantingReportFormType =
+  FormActionBaseType<uploadPlantingReportType>;
+
+export type uploadHarvestingReportType = z.infer<
+  typeof addHarvestingReportSchema
+>;
+
+export type uploadHarvestingReportFormType =
+  FormActionBaseType<uploadHarvestingReportType>;
+
 export type AddReportPictureType = {
   picId: string;
   file: File;
@@ -259,8 +273,7 @@ export type AddNewFarmerReportQueryType = {
   reportDescription: string;
   dayHappen: Date;
   dayReported: string;
-  verificationStatus: verificationStatusType;
-  isSeenByAgri: boolean;
+  verificationStatus: boolean;
 };
 
 export type AddNewFarmerReportImageType = {
@@ -367,6 +380,9 @@ export type GetFarmerProfilePersonalInfoQueryReturnType = {
 export type getFarmerCropNameQueryReturnType = {
   cropId: string;
   cropName: string;
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
 };
 
 export type GetFarmerProfileOrgInfoQueryReturnType = {
@@ -596,11 +612,10 @@ export type FormDivLabelInputPropType = ChildrenPropType & {
 
 export type FormDivLabelTextAreaPropType =
   TextareaHTMLAttributes<HTMLTextAreaElement> & {
-    textAreaName: string;
     labelMessage: string;
     labelClassName?: string;
     labelOnClick?: () => void;
-    textAreaRequired?: string;
+    formError?: string[];
   };
 
 export type FormDivLabelSelectType = {
@@ -1468,11 +1483,52 @@ export type getLatestReportReturnType =
   | { success: true; reportVal: getLatestReportQueryReturnType[] }
   | ServerActionFailBaseType;
 
-export type ReportContentPropType = { selectedCrop?: string };
+export type ReportContentPropType = {
+  selectedCrop?: string;
+  defaultReport?: reportTypeStateType;
+};
 
 export type reportTypeStateType = "damage" | "harvesting" | "planting";
 
 export type openCamPropType = {
   setSelectedFile: Dispatch<SetStateAction<AddReportPictureType>>;
   isPassing: boolean;
+};
+
+export type cropStatusType = "planted" | "harvested";
+
+export type determineCropStatusParamType = {
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
+  isEnglish: boolean;
+};
+
+export type getCropStatusReturnType = {
+  cropStatus: cropStatusType;
+};
+
+export type getCropStatusAndPlantedDateReturnType = getCropStatusReturnType & {
+  expectedHarvest: Date;
+};
+
+export type updateCropPantedPropType = {
+  cropId: string;
+  datePlanted: Date;
+};
+
+export type addPlantedCropParamType = {
+  plantedId: string;
+  reportId: string;
+  cropId: string;
+  cropKgPlanted: number;
+  datePlanted: Date;
+};
+
+export type addHarvestedCropParamType = {
+  harvestId: string;
+  reportId: string;
+  cropId: string;
+  totalKgHarvested: number;
+  dateHarvested: Date;
 };

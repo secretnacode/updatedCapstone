@@ -13,8 +13,8 @@ import {
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisWeekReturnType,
   getReportCountThisYearReturnType,
-  getTotalFarmerStatusType,
   GetUserReportReturnType,
+  reportTypeStateType,
   verificationStatusType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -24,6 +24,14 @@ import {
   cteWeekSeries,
   dateFilter,
 } from "./reausableQuery";
+
+export const reportType = async (): Promise<
+  Record<reportTypeStateType, reportTypeStateType>
+> => ({
+  damage: "damage",
+  planting: "planting",
+  harvesting: "harvesting",
+});
 
 export const GetUserReport = async (
   userId: string
@@ -48,15 +56,16 @@ export const GetUserReport = async (
 };
 
 /**
+ * IF ADDING ANOTHER REPORT, JUST USE THIS AND UPDATE THE TABLE AND USE FUNCTION ` updateReportType `
+ * TO UPDATE THE REPORT INTO DAMAGE, HARVESTING, OR PLANTING
+ *
  * query for inserting the new value of the report in the db
  * @param data are the needed value in the insertion
  */
-export const AddNewFarmerReport = async (
-  data: AddNewFarmerReportQueryType
-): Promise<void> => {
+export const addNewReport = async (data: AddNewFarmerReportQueryType) => {
   try {
     await pool.query(
-      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropId", "orgId", "isSeenByAgri") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      `insert into capstone.report ("reportId", "farmerId", "verificationStatus", "dayReported", "dayHappen", "title", "description", "cropId", "orgId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         data.reportId,
         data.farmerId,
@@ -67,7 +76,6 @@ export const AddNewFarmerReport = async (
         data.reportDescription,
         data.cropId,
         data.orgId,
-        data.isSeenByAgri,
       ]
     );
   } catch (error) {
@@ -82,6 +90,40 @@ export const AddNewFarmerReport = async (
   }
 };
 
+/**
+ * query for updating the reportType of the report, use this after the insertion of report to update the null value
+ *
+ * did this because the 3 report types uses the same query and their only difference is the reportType,
+ * so after the insertion of new report, this is needed to be executed
+ * @param type
+ * @param reportId
+ */
+export const updateReportType = async (
+  type: reportTypeStateType,
+  reportId: string
+) => {
+  try {
+    await pool.query(
+      `update capstone.report set "reportType" = $1 where "reportId" = $2`,
+      [type, reportId]
+    );
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng ulat`
+    );
+  }
+};
+
+/**
+ * query for getting all the necessary information to view the report detail
+ * @param reportId if of the report
+ * @returns
+ */
 export const GetFarmerReportDetailQuery = async (
   reportId: string
 ): Promise<GetFarmerReportDetailQueryReturnType> => {
@@ -116,7 +158,7 @@ export const GetOrgMemberReportQuery = async (
     return (
       await pool.query(
         `select r."reportId", r."verificationStatus", r."dayReported", r."title", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 and f."orgRole" = $2 order by case when r."verificationStatus" = $3 then $4 else $5 end asc`,
-        [orgId, "member", reportStatus.false, 1, 2]
+        [orgId, "member", false, 1, 2]
       )
     ).rows;
   } catch (error) {
@@ -166,16 +208,7 @@ export const GetAllFarmerReportQuery =
       return (
         await pool.query(
           `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null order by case when r."isSeenByAgri" = $2 and r."verificationStatus" = $3 then $4 when r."isSeenByAgri" = $5 and r."verificationStatus" = $6 then $7 else $8 end`,
-          [
-            reportStatus.pending,
-            false,
-            reportStatus.pending,
-            1,
-            false,
-            reportStatus.false,
-            2,
-            3,
-          ]
+          [true, false, true, 1, false, false, 2, 3]
         )
       ).rows;
     } catch (error) {
@@ -395,16 +428,16 @@ export const getRecentReport = async (
   try {
     const dynamicFilterAndParam: {
       filter: string;
-      param: [string, boolean | string];
+      param: [string | boolean, boolean];
     } =
       param.userRole === "agriculturist"
         ? {
             filter: `r."verificationStatus" = $1 or r."isSeenByAgri" = $2`,
-            param: [reportStatus.pending, false],
+            param: [true, false],
           }
         : {
             filter: `o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
-            param: [param.leaderId, reportStatus.false],
+            param: [param.leaderId, false],
           };
 
     return (
@@ -479,11 +512,6 @@ export const getCountTotalReportMade = async (
   }
 };
 
-const reportStatus: getTotalFarmerStatusType = {
-  pending: "pending",
-  false: "false",
-};
-
 /**
  * query for geting the total of report that was approved by the farmer leader and the farmer who dont have a organization
  * @returns
@@ -493,7 +521,7 @@ export const getTotalFarmerReport = async (): Promise<number> => {
     return (
       await pool.query(
         `select count("reportId") from capstone.report where "verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null`,
-        [reportStatus.pending, reportStatus.false]
+        [true, false]
       )
     ).rows[0].count;
   } catch (error) {
@@ -517,7 +545,7 @@ export const getTotalNewFarmerReportToday = async (): Promise<number> => {
     return (
       await pool.query(
         `select count("reportId") from capstone.report where ("verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null) and date("dayReported") = current_date and "isSeenByAgri" = $3`,
-        [reportStatus.pending, reportStatus.false, false]
+        [true, false, false]
       )
     ).rows[0].count;
   } catch (error) {
