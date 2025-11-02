@@ -3,10 +3,10 @@
 import {
   cropStatusType,
   GetAllCropInfoQueryReturnType,
+  getCropNameQueryReturnType,
   getCropStatusAndPlantedDateReturnType,
   getCropStatusReturnType,
   GetFarmerCropInfoQueryReturnType,
-  getFarmerCropNameQueryReturnType,
   GetMyCropInfoQueryRetrunType,
   HandleInsertCropType,
   updateCropPantedPropType,
@@ -231,14 +231,30 @@ export const GetAllCropInfoQuery = async (): Promise<
  */
 export const getFarmerCropNameQuery = async (
   farmerId: string
-): Promise<getFarmerCropNameQueryReturnType[]> => {
+): Promise<getCropNameQueryReturnType> => {
   try {
-    return (
-      await pool.query(
-        `select "cropName", "cropId", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "farmerId" = $1`,
-        [farmerId]
-      )
-    ).rows;
+    const crop = await pool.query(
+      `select "cropName", "cropId", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "farmerId" = $1`,
+      [farmerId]
+    );
+
+    if (crop.rowCount === 0)
+      return {
+        hasCrop: false,
+        notifError: [
+          { message: "Wala ka pang pananim na nakalagay", type: "warning" },
+          {
+            message:
+              "Mag lagay muna ng impormasyon ng pananim bago mag pasa ng ulat",
+            type: "warning",
+          },
+        ],
+      };
+
+    return {
+      hasCrop: true,
+      cropName: crop.rows,
+    };
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pangalan ng iyong pananim: ${

@@ -28,8 +28,10 @@ import {
   ConvertMeassurement,
   CreateUUID,
   FormErrorMessage,
+  redirectWithNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 // export const GetFarmerNameCrop = async () => {
 //   try {
@@ -299,8 +301,15 @@ export const getFarmerCropName =
     try {
       const userId = (await ProtectedAction("read:crop")).userId;
 
-      return { success: true, cropList: await getFarmerCropNameQuery(userId) };
+      const crop = await getFarmerCropNameQuery(userId);
+
+      if (!crop.hasCrop)
+        return redirectWithNotifMessage("/farmer/crop", crop.notifError);
+
+      return { success: true, cropList: crop.cropName };
     } catch (error) {
+      if (isRedirectError(error)) throw error;
+
       const err = error as Error;
       console.log(
         `May pagkakamali sa pag kuha ng pangalan ng iyong taniman: ${err.message}`

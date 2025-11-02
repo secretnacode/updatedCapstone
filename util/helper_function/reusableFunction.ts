@@ -170,6 +170,19 @@ export const RedirectUnauthorizedWithNotif = (
 };
 
 /**
+ * function for redirecting the user to the given path together with the notif parameters to be consumed by notification context
+ * @param path path to be redirected to
+ * @param notif notif to be shown
+ * @returns redirect function
+ */
+export const redirectWithNotifMessage = (
+  path: string,
+  notif: NotificationBaseType[]
+) => {
+  return redirect(`${path}?notif=${NotifToUriComponent(notif)}`);
+};
+
+/**
  * encoding the notification param into an URI component
  * @param notif the message you want to encode
  * @returns encoded uri message

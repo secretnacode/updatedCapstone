@@ -90,11 +90,9 @@ export async function LoginAuth(
         ],
       };
 
-    // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
     const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
 
-    console.log(farmerId);
-
+    // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
     if (!farmerId) {
       await CreateSession(userCredentials.data.authId, "newUser");
 

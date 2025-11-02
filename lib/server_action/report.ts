@@ -34,6 +34,7 @@ import {
   uploadHarvestingReportFormType,
   uploadPlantingReportFormType,
   uploadPlantingReportType,
+  reportTypeStateType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -97,21 +98,22 @@ export const uploadDamageReport = async (
   prevState: AddReportActionFormType,
   formData: FormData
 ): Promise<AddReportActionFormType> => {
-  const reportVal: AddReportValType = {
-    cropId: formData.get("cropId") as string,
-    reportTitle: formData.get("reportTitle") as string,
-    reportDescription: formData.get("reportDescription") as string,
-    dateHappen: new Date(formData.get("dateHappen") as string),
-    reportPicture: formData.getAll("file") as File[],
-  };
-
-  const returnVal = {
-    success: null,
-    notifError: null,
-    formError: null,
-  };
-
   try {
+    const reportVal: AddReportValType = {
+      cropId: formData.get("cropId") as string,
+      reportTitle: formData.get("reportTitle") as string,
+      reportDescription: formData.get("reportDescription") as string,
+      dateHappen: new Date(formData.get("dateHappen") as string),
+      reportPicture: formData.getAll("file") as File[],
+      reportType: formData.get("reportType") as reportTypeStateType,
+    };
+
+    const returnVal = {
+      success: null,
+      notifError: null,
+      formError: null,
+    };
+
     const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
@@ -120,6 +122,19 @@ export const uploadDamageReport = async (
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+      };
+
+    if (reportVal.reportType !== "damage")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Ang pwede mo lamang ipasa sa ulat na ito ay patungkol sa pagkasira ng iyong pananim",
+            type: "warning",
+          },
+        ],
       };
 
     // the user can only passed a damage report if the crop status is planted,
@@ -210,22 +225,23 @@ export const uploadPlantingReport = async (
   prevState: uploadPlantingReportFormType,
   formData: FormData
 ): Promise<uploadPlantingReportFormType> => {
-  const reportVal: uploadPlantingReportType = {
-    cropId: formData.get("cropId") as string,
-    reportTitle: formData.get("reportTitle") as string,
-    reportDescription: formData.get("reportDescription") as string,
-    dateHappen: new Date(formData.get("dateHappen") as string),
-    reportPicture: formData.getAll("file") as File[],
-    totalCropPlanted: Number(formData.get("totalCropPlanted")),
-  };
-
-  const returnVal = {
-    success: null,
-    notifError: null,
-    formError: null,
-  };
-
   try {
+    const reportVal: uploadPlantingReportType = {
+      cropId: formData.get("cropId") as string,
+      reportTitle: formData.get("reportTitle") as string,
+      reportDescription: formData.get("reportDescription") as string,
+      dateHappen: new Date(formData.get("dateHappen") as string),
+      reportPicture: formData.getAll("file") as File[],
+      totalCropPlanted: Number(formData.get("totalCropPlanted")),
+      reportType: formData.get("reportType") as reportTypeStateType,
+    };
+
+    const returnVal = {
+      success: null,
+      notifError: null,
+      formError: null,
+    };
+
     const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
@@ -234,6 +250,19 @@ export const uploadPlantingReport = async (
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+      };
+
+    if (reportVal.reportType !== "planting")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Ang pwede mo lamang ipasa sa ulat na ito ay patungkol iyong sa pag tatanim",
+            type: "warning",
+          },
+        ],
       };
 
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
@@ -335,22 +364,23 @@ export const uploadHarvestingReport = async (
   prevState: uploadHarvestingReportFormType,
   formData: FormData
 ): Promise<uploadHarvestingReportFormType> => {
-  const reportVal: uploadHarvestingReportType = {
-    cropId: formData.get("cropId") as string,
-    reportTitle: formData.get("reportTitle") as string,
-    reportDescription: formData.get("reportDescription") as string,
-    dateHappen: new Date(formData.get("dateHappen") as string),
-    reportPicture: formData.getAll("file") as File[],
-    totalHarvest: Number(formData.get("totalHarvest")),
-  };
-
-  const returnVal = {
-    success: null,
-    notifError: null,
-    formError: null,
-  };
-
   try {
+    const reportVal: uploadHarvestingReportType = {
+      cropId: formData.get("cropId") as string,
+      reportTitle: formData.get("reportTitle") as string,
+      reportDescription: formData.get("reportDescription") as string,
+      dateHappen: new Date(formData.get("dateHappen") as string),
+      reportPicture: formData.getAll("file") as File[],
+      totalHarvest: Number(formData.get("totalHarvest")),
+      reportType: formData.get("reportType") as reportTypeStateType,
+    };
+
+    const returnVal = {
+      success: null,
+      notifError: null,
+      formError: null,
+    };
+
     const userId = (await ProtectedAction("create:report")).userId;
 
     const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
@@ -359,6 +389,19 @@ export const uploadHarvestingReport = async (
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+      };
+
+    if (reportVal.reportType !== "harvesting")
+      return {
+        ...returnVal,
+        success: true,
+        notifError: [
+          {
+            message:
+              "Ang pwede mo lamang ipasa sa ulat na ito ay patungkol sa pagaani ng iyong pananim",
+            type: "warning",
+          },
+        ],
       };
 
     const crop = await getCropStatusAndPlantedDate(reportVal.cropId);
@@ -385,7 +428,8 @@ export const uploadHarvestingReport = async (
         success: true,
         notifError: [
           {
-            message: "Ang ulat na patungkol sa pag aani ay masyadong maaga",
+            message:
+              "Masyado pang maaga para mag pasa ng ulat patungkol sa pagaani",
             type: "warning",
           },
         ],

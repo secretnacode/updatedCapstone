@@ -220,6 +220,8 @@ export const farmerSecondDetailFormSchema = z
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];
+export const REPORT_TYPE = ["damage", "harvesting", "planting"] as const;
+// to change the value of this, change the value of the REPORT_TYPE first
 export const addFarmerReportSchema = z.object({
   cropId: z.string().min(1, { error: "Pumili ng pananim na iuulat" }),
   reportTitle: z
@@ -238,6 +240,10 @@ export const addFarmerReportSchema = z.object({
     .min(new Date(FourDaysBefore()), {
       error: "Ang maaari mo lang iulat ay yung mga nakaraang apat na araw",
     }),
+  reportType: z.enum([...REPORT_TYPE], {
+    error:
+      "Ang puwede mo lamang ipasang ulat ay patungkol sa pagkasira, pag tatanim, at pag aani ng iyong tanim",
+  }),
   reportPicture: z
     .array(
       z

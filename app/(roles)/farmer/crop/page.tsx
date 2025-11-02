@@ -1,5 +1,6 @@
 import { FarmerCropPage } from "@/component/client_component/cropComponent";
 import {
+  RedirectManager,
   RemoveSearchParamsVal,
   RenderNotification,
 } from "@/component/client_component/fallbackComponent";
@@ -9,7 +10,7 @@ import {
 } from "@/component/server_component/componentForAllUser";
 import { LoadingCard } from "@/component/server_component/customComponent";
 import { GetMyCropInfo } from "@/lib/server_action/crop";
-import { GetMyCropInfoReturnType } from "@/types";
+import { GetMyCropInfoReturnType, NotificationBaseType } from "@/types";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ addCrop?: boolean }>;
+  searchParams: Promise<{ addCrop?: boolean; notif?: string }>;
 }) {
+  const { notif } = await searchParams;
+  let message: NotificationBaseType[] | null = null;
+  if (notif) message = JSON.parse(notif);
+
   const isAddingCrop = (await searchParams).addCrop;
 
   let cropInfo: GetMyCropInfoReturnType;
@@ -46,7 +51,7 @@ export default async function Page({
             />
           </div>
 
-          <div className="side-bar-wrapper">
+          <div className="side-bar-wrapper [&_div.no-val]:flex [&_div.no-val]:flex-col [&_div.no-val]:items-center [&_div.no-val]:justify-center [&_div.no-val]:p-8 [&_div.no-val]:text-center [&_div.no-val]:border-2 [&_div.no-val]:border-dashed [&_div.no-val]:border-gray-300 [&_div.no-val]:rounded-lg [&_div.no-val]:bg-gray-50 [&_div.no-val]:max-w-sm [&_div.no-val]:mx-auto">
             <Suspense fallback={<LoadingCard />}>
               <ReportCountPerCrop />
 
@@ -55,6 +60,8 @@ export default async function Page({
           </div>
         </div>
       )}
+
+      {message && <RedirectManager data={message} />}
     </div>
   );
 }

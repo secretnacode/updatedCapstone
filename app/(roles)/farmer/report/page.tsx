@@ -3,7 +3,6 @@ import {
   RenderNotification,
 } from "@/component/client_component/fallbackComponent";
 import {
-  CreateReport,
   AddReportComponent,
   ViewUserReportButton,
 } from "@/component/client_component/reportComponent";
@@ -14,15 +13,27 @@ import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  return (
-    <div className="grid grid-cols-4 gap-4 ">
-      <div className="col-span-3 bg-white rounded-xl shadow-sm p-6 space-y-4">
-        <h1 className="title form-title">Mag sagawa ng panibagong ulat</h1>
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ addReport?: boolean }>;
+}) {
+  const isAddingReport = (await searchParams).addReport;
 
-        <CreateReport />
-      </div>
-      {/* <div className="max-w-7xl mx-auto space-y-6">
+  let report: GetFarmerReportReturnType;
+
+  try {
+    report = await GetFarmerReport();
+  } catch (error) {
+    report = {
+      success: false,
+      notifError: [{ message: (error as Error).message, type: "error" }],
+    };
+  }
+
+  return (
+    <>
+      <div className="max-w-7xl mx-auto space-y-6">
         {!report.success ? (
           <RenderNotification notif={report.notifError} />
         ) : (
@@ -97,7 +108,7 @@ export default async function Page() {
             />
           </>
         )}
-      </div> */}
-    </div>
+      </div>
+    </>
   );
 }

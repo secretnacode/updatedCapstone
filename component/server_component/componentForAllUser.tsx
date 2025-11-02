@@ -11,7 +11,13 @@ import {
   getReportCountPerCropReturnType,
   getLatestReportReturnType,
 } from "@/types";
-import { ClipboardPlus, LucideIcon, MapPinHouse, Wheat } from "lucide-react";
+import {
+  ClipboardPlus,
+  LucideIcon,
+  MapPinHouse,
+  Pencil,
+  Wheat,
+} from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
@@ -493,7 +499,7 @@ export const FarmerQuickActionComponent: FC = () => {
   );
 };
 
-export const ReportCountPerCrop = async () => {
+export const ReportCountPerCrop: FC = async () => {
   let reportCount: getReportCountPerCropReturnType;
 
   try {
@@ -506,26 +512,58 @@ export const ReportCountPerCrop = async () => {
     };
   }
 
+  const NoValueInPieChart: FC = () => {
+    if (!reportCount.success) return null;
+
+    return (
+      <div className="no-val">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          className="w-12 h-12 text-gray-400 mb-4"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          />
+        </svg>
+
+        <p className="text-xl font-semibold text-gray-700 mb-1">
+          Wala ka pang pananim
+        </p>
+      </div>
+    );
+  };
+
   return (
     <>
       {reportCount.success ? (
-        <div>
-          <div className="card-title-wrapper">
+        <div className="space-y-4">
+          <div className="font-semibold">
             <p>Bilang ng ulat kada pananim</p>
           </div>
 
-          <PieChartCard
-            data={reportCount.reportCountVal.map((val) => ({
-              id: val.cropId,
-              value: val.reportCount,
-              label: val.cropName,
-            }))}
-          />
+          {reportCount.reportCountVal.length > 0 ? (
+            <PieChartCard
+              data={reportCount.reportCountVal.map((val) => ({
+                id: val.cropId,
+                value: val.reportCount,
+                label: val.cropName,
+              }))}
+            />
+          ) : (
+            <NoValueInPieChart />
+          )}
 
-          <div className="flex justify-center items-center">
-            <p>Mag dagdag ng pananim</p>
-
-            <Link href={`/farmer/report`} className="card-link text-nowrap">
+          <div className="flex justify-end items-center">
+            <Link
+              href={`/farmer/report`}
+              className="card-link !px-3 py-1 text-nowrap !bg-gray-100 !text-gray-600"
+            >
               Mga Ulat
             </Link>
           </div>
@@ -549,35 +587,58 @@ export const LatestReport = async () => {
       notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
     };
   }
+
+  const NoVal: FC = () => {
+    if (!report.success) return null;
+
+    return (
+      <div className="no-val">
+        <p className="text-gray-500">Wala ka pang ulat</p>
+
+        <Link
+          href={`/farmer/report?addCrop=true`}
+          className="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition duration-150 flex justify-center items-center gap-3"
+        >
+          <Pencil className="logo" />
+
+          <span>Mag ulat</span>
+        </Link>
+      </div>
+    );
+  };
   return (
     <>
       {report.success ? (
-        <div>
-          <div className="card-title-wrapper">
+        <div className="space-y-4">
+          <div className="font-semibold">
             <p>Huling ulat na naipasa</p>
           </div>
 
           <div>
-            {report.reportVal.map((val) => (
-              <div key={val.reportId}>
-                <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
-                  <div className="flex flex-col justify-center items-start leading-4 w-1/2">
-                    <p className="text-nowrap overflow-hidden text-ellipsis w-full">
-                      {val.title}
-                    </p>
-                    <p className="subscript">{val.cropName}</p>
+            {report.reportVal.length > 0 ? (
+              report.reportVal.map((val) => (
+                <div key={val.reportId}>
+                  <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
+                    <div className="flex flex-col justify-center items-start leading-4 w-1/2">
+                      <p className="text-nowrap overflow-hidden text-ellipsis w-full">
+                        {val.title}
+                      </p>
+                      <p className="subscript">{val.cropName}</p>
+                    </div>
+
+                    <Link href={`/farmer/report?viewReport=${val.reportId}`}>
+                      <SubmitButton className="slimer-button">
+                        Tingnan
+                      </SubmitButton>
+                    </Link>
                   </div>
 
-                  <Link href={`/farmer/report?viewReport=${val.reportId}`}>
-                    <SubmitButton className="slimer-button">
-                      Tingnan
-                    </SubmitButton>
-                  </Link>
+                  <div className="border-b border-gray-300" />
                 </div>
-
-                <div className="border-b border-gray-300" />
-              </div>
-            ))}
+              ))
+            ) : (
+              <NoVal />
+            )}
           </div>
         </div>
       ) : (

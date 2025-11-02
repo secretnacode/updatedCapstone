@@ -5,6 +5,7 @@ import {
   authLogInSchema,
   authSignUpSchema,
   farmerSecondDetailFormSchema,
+  REPORT_TYPE,
   userProfileInfoUpdateSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
@@ -140,6 +141,11 @@ export type FormActionBaseType<T> = {
 export type FarmerFirstDetailActionReturnType<T> =
   | { success: true }
   | (ServerActionFailBaseType & { formError?: FormErrorType<T> });
+
+export type createReportFormErrorType = FormErrorType<{
+  cropId: string;
+  reportType: reportTypeStateType;
+}>;
 
 export type FarmerFirstDetailType = {
   farmerId: string;
@@ -384,6 +390,10 @@ export type getFarmerCropNameQueryReturnType = {
   datePlanted: Date;
   dateHarvested: Date;
 };
+
+export type getCropNameQueryReturnType =
+  | { hasCrop: false; notifError: NotificationBaseType[] }
+  | { hasCrop: true; cropName: getFarmerCropNameQueryReturnType[] };
 
 export type GetFarmerProfileOrgInfoQueryReturnType = {
   orgId: string;
@@ -1484,11 +1494,13 @@ export type getLatestReportReturnType =
   | ServerActionFailBaseType;
 
 export type ReportContentPropType = {
-  selectedCrop?: string;
-  defaultReport?: reportTypeStateType;
+  selectedCrop: string;
+  reportType: reportTypeStateType;
+  setOpenReportModal: Dispatch<SetStateAction<boolean>>;
+  handleFormError: (formError: createReportFormErrorType) => void;
 };
 
-export type reportTypeStateType = "damage" | "harvesting" | "planting";
+export type reportTypeStateType = (typeof REPORT_TYPE)[number];
 
 export type openCamPropType = {
   setSelectedFile: Dispatch<SetStateAction<AddReportPictureType>>;
@@ -1531,4 +1543,8 @@ export type addHarvestedCropParamType = {
   cropId: string;
   totalKgHarvested: number;
   dateHarvested: Date;
+};
+
+export type createReportPropType = {
+  setOpenReportModal: Dispatch<SetStateAction<boolean>>;
 };

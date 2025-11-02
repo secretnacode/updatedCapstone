@@ -287,26 +287,30 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <MapComponent
-          mapHeight={400}
-          ref={mapRef}
-          cityToHighlight={intoFeatureCollection(handleCityToLight())}
-        >
-          {myCropInfoList[0].cropLat &&
-            myCropInfoList[0].cropLat &&
-            myCropInfoList.map((coor) => (
-              <MapMarkerComponent
-                key={coor.cropId}
-                markerLng={coor.cropLng}
-                markerLat={coor.cropLat}
-              />
-            ))}
-        </MapComponent>
+        {myCropInfoList.length > 0 ? (
+          <MapComponent
+            mapHeight={400}
+            ref={mapRef}
+            cityToHighlight={intoFeatureCollection(handleCityToLight())}
+          >
+            {myCropInfoList[0].cropLat &&
+              myCropInfoList[0].cropLat &&
+              myCropInfoList.map((coor) => (
+                <MapMarkerComponent
+                  key={coor.cropId}
+                  markerLng={coor.cropLng}
+                  markerLat={coor.cropLat}
+                />
+              ))}
+          </MapComponent>
+        ) : (
+          <MapComponent mapHeight={400} ref={mapRef} />
+        )}
       </div>
 
       <div className="p-4 bg-white rounded-lg">
         <div className="mb-4 flex flex-row justify-between items-center">
-          <p className="text-gray-500 font-semibold text-lg">
+          <p className=" font-semibold text-lg">
             Impormasyon ng iyong mga pananim
           </p>
 
