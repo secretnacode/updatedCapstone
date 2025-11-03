@@ -1,7 +1,6 @@
 import { z } from "zod/v4";
 import {
   Date10YearsAgo,
-  FourDaysBefore,
   MaxDateToday,
   pointIsInsidePolygon,
 } from "../reusableFunction";
@@ -236,9 +235,6 @@ export const addFarmerReportSchema = z.object({
     .max(new Date(MaxDateToday()), {
       error:
         "Hanggang ngayon lang ang pinakang mataas na date na pede mong mailagay",
-    })
-    .min(new Date(FourDaysBefore()), {
-      error: "Ang maaari mo lang iulat ay yung mga nakaraang apat na araw",
     }),
   reportType: z.enum([...REPORT_TYPE], {
     error:

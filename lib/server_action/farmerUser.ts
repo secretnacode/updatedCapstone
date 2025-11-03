@@ -26,7 +26,7 @@ import {
 } from "@/types";
 import { userProfileInfoUpdateSchema } from "@/util/helper_function/validation/validationSchema";
 import { ZodValidateForm } from "../validation/authValidation";
-import { getFarmerCropNameQuery } from "@/util/queries/crop";
+import { getFarmerCropInfoQuery } from "@/util/queries/crop";
 import { revalidatePath } from "next/cache";
 import { agriculturistAuthorization, farmerLeaderAuthorization } from "./user";
 import { NotAMemberErrorMessage } from "@/util/helper_function/reusableFunction";
@@ -368,7 +368,7 @@ const userFarmerProfileInfo = async (
 ): Promise<SuccessGetMyProfileInfoReturnType> => {
   const [farmerInfo, cropInfo, orgInfo] = await Promise.all([
     GetFarmerProfilePersonalInfoQuery(userId),
-    getFarmerCropNameQuery(userId),
+    getFarmerCropInfoQuery(userId),
     GetFarmerProfileOrgInfoQuery(userId),
   ]);
 

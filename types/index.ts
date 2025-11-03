@@ -1520,9 +1520,10 @@ export type getCropStatusReturnType = {
   cropStatus: cropStatusType;
 };
 
-export type getCropStatusAndPlantedDateReturnType = getCropStatusReturnType & {
-  expectedHarvest: Date;
-};
+export type getCropStatusAndExpectedHarvestReturnType =
+  getCropStatusReturnType & {
+    expectedHarvest: Date;
+  };
 
 export type updateCropPantedPropType = {
   cropId: string;
@@ -1547,4 +1548,9 @@ export type addHarvestedCropParamType = {
 
 export type createReportPropType = {
   setOpenReportModal: Dispatch<SetStateAction<boolean>>;
+};
+
+export type getCropStatusAndPlantedDateReturnType = {
+  cropStatus: cropStatusType;
+  dateHarvested: Date;
 };

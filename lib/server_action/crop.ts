@@ -27,7 +27,7 @@ import { farmerSecondDetailFormSchema } from "@/util/helper_function/validation/
 import {
   ConvertMeassurement,
   CreateUUID,
-  FormErrorMessage,
+  missingFormValNotif,
   redirectWithNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
@@ -111,7 +111,7 @@ export const UpdateUserCropInfo = async (
       return {
         success: false,
         formError: validate.formError,
-        notifMessage: [{ message: FormErrorMessage(), type: "warning" }],
+        notifMessage: missingFormValNotif(),
       };
 
     if (!(await checkIfFarmerCrop(userId, cropVal.cropId))) {
@@ -221,7 +221,7 @@ export const AddUserCropInfo = async (
   cropVal: FarmerSecondDetailFormType
 ): Promise<AddUserCropInfoReturnType> => {
   try {
-    const userId = (await ProtectedAction("create:crop")).userId;
+    const { userId } = await ProtectedAction("create:crop");
 
     // eslint-disable-next-line prefer-const
     let { cropId, farmAreaMeasurement, cropFarmArea, ...otherCropInfo } =
@@ -236,7 +236,7 @@ export const AddUserCropInfo = async (
       return {
         success: false,
         formError: validate.formError,
-        notifMessage: [{ message: FormErrorMessage(), type: "warning" }],
+        notifMessage: missingFormValNotif(),
       };
 
     await CreateNewCropAfterSignUp({

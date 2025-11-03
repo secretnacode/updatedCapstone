@@ -212,10 +212,6 @@ export const UnexpectedErrorMessageEnglish = (): string => {
   return "Unexpected error has occured";
 };
 
-export const FormErrorMessage = (): string => {
-  return "May mali sa iyong ipinasa, baguhin muna ito";
-};
-
 export const NotAMemberErrorMessage = () => {
   return "Hindi mo ka miyembro and user na ito";
 };

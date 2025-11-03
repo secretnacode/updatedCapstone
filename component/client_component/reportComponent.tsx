@@ -193,7 +193,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
         setDefaultReport("planting");
 
       default:
-        return setDefaultReport("damage");
+        return setDefaultReport("planting");
     }
   };
 
@@ -204,9 +204,12 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
     setSelectedCrop(cropId);
   };
 
-  const handleFormError = (formError: createReportFormErrorType) => {
-    setFormError({ ...formError });
-  };
+  const handleFormError = useCallback(
+    (formError: createReportFormErrorType) => {
+      setFormError({ ...formError });
+    },
+    []
+  );
 
   return (
     <>
@@ -255,43 +258,6 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
               Uri ng ulat na iyong gagawin:
             </label>
             <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
-              {/* Damage Button */}
-              <Button
-                onClick={() => handleSetReportType("damage")}
-                className={
-                  defaultReport === "damage"
-                    ? "bg-red-50 border-red-500 shadow-lg"
-                    : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
-                }
-              >
-                <TriangleAlert className="text-red-500" />
-                <span
-                  className={`font-semibold text-gray-500 ${
-                    defaultReport === "damage" && "!text-gray-700"
-                  }`}
-                >
-                  Damage
-                </span>
-              </Button>
-
-              <Button
-                onClick={() => handleSetReportType("harvesting")}
-                className={
-                  defaultReport === "harvesting"
-                    ? "bg-amber-50 border-amber-500 shadow-lg"
-                    : "bg-white border-gray-200 hover:border-amber-300 hover:shadow-md"
-                }
-              >
-                <Tractor className="text-amber-300" />
-                <span
-                  className={`font-semibold text-gray-500 ${
-                    defaultReport === "harvesting" && "!text-gray-700"
-                  }`}
-                >
-                  Harvesting
-                </span>
-              </Button>
-
               <Button
                 onClick={() => handleSetReportType("planting")}
                 className={
@@ -306,7 +272,42 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
                     defaultReport === "planting" && "!text-gray-700"
                   }`}
                 >
-                  Planting
+                  Pag tatanim
+                </span>
+              </Button>
+
+              <Button
+                onClick={() => handleSetReportType("damage")}
+                className={
+                  defaultReport === "damage"
+                    ? "bg-red-50 border-red-500 shadow-lg"
+                    : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
+                }
+              >
+                <TriangleAlert className="text-red-500" />
+                <span
+                  className={`font-semibold text-gray-500 ${
+                    defaultReport === "damage" && "!text-gray-700"
+                  }`}
+                >
+                  Pagkasira
+                </span>
+              </Button>
+              <Button
+                onClick={() => handleSetReportType("harvesting")}
+                className={
+                  defaultReport === "harvesting"
+                    ? "bg-amber-50 border-amber-500 shadow-lg"
+                    : "bg-white border-gray-200 hover:border-amber-300 hover:shadow-md"
+                }
+              >
+                <Tractor className="text-amber-300" />
+                <span
+                  className={`font-semibold text-gray-500 ${
+                    defaultReport === "harvesting" && "!text-gray-700"
+                  }`}
+                >
+                  Pag aani
                 </span>
               </Button>
             </div>
@@ -318,8 +319,8 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
             ))}
           </div>
 
-          {selectedCrop && defaultReport === "damage" && (
-            <DamageReport
+          {selectedCrop && defaultReport === "planting" && (
+            <PlantingReport
               selectedCrop={selectedCrop}
               reportType={defaultReport}
               handleFormError={handleFormError}
@@ -327,8 +328,8 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
             />
           )}
 
-          {selectedCrop && defaultReport === "planting" && (
-            <PlantingReport
+          {selectedCrop && defaultReport === "damage" && (
+            <DamageReport
               selectedCrop={selectedCrop}
               reportType={defaultReport}
               handleFormError={handleFormError}
@@ -631,7 +632,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           inputName={"totalCropPlanted"}
           formError={state.formError?.totalCropPlanted}
           inputRequired
-          inputType="number"
+          inputType="decimal"
           inputPlaceholder="Hal: 500"
           inputClassName="input-green-ring"
         />
@@ -641,7 +642,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
           required
-          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang bilhin"
+          placeholder="Hal: Naitanim na ang mga palay dine sa lamot 1"
           className="input-green-ring"
         />
 
@@ -831,6 +832,15 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           inputRequired
           inputPlaceholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
           inputClassName="input-amber-ring"
+        />
+
+        <FormDivLabelTextArea
+          labelMessage="Karagdagang detalye:"
+          name={"reportDescription"}
+          formError={state.formError?.reportDescription}
+          required
+          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
+          className="input-amber-ring"
         />
 
         <div>

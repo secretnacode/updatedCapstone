@@ -5,8 +5,8 @@ export default async function Page({
 }) {
   console.log((await params).token);
 
-  try {
-  } catch (error) {}
+  // try {
+  // } catch (error) {}
 
   return <div></div>;
 }

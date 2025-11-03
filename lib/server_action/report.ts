@@ -41,7 +41,10 @@ import {
   addFarmerReportSchema,
   addPlantingReportSchema,
 } from "@/util/helper_function/validation/validationSchema";
-import { CreateUUID } from "@/util/helper_function/reusableFunction";
+import {
+  CreateUUID,
+  missingFormValNotif,
+} from "@/util/helper_function/reusableFunction";
 import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
 import { AddNewFarmerReportImage } from "@/util/queries/image";
@@ -50,6 +53,7 @@ import { revalidatePath } from "next/cache";
 import { CheckMyMemberquery } from "@/util/queries/user";
 import {
   getCropStatus,
+  getCropStatusAndExpectedHarvest,
   getCropStatusAndPlantedDate,
   updateCropIntoHarvestedStatus,
   updateCropIntoPlantedStatus,
@@ -122,6 +126,7 @@ export const uploadDamageReport = async (
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+        notifError: missingFormValNotif(),
       };
 
     if (reportVal.reportType !== "damage")
@@ -137,9 +142,11 @@ export const uploadDamageReport = async (
         ],
       };
 
+    const crop = await getCropStatusAndPlantedDate(reportVal.cropId);
+
     // the user can only passed a damage report if the crop status is planted,
     // means in the paddy field theres a crop that was destroyed to be reported
-    if ((await getCropStatus(reportVal.cropId)).cropStatus !== "planted")
+    if (crop.cropStatus !== "planted")
       return {
         ...returnVal,
         success: true,
@@ -147,6 +154,24 @@ export const uploadDamageReport = async (
           {
             message:
               "Mag pasa muna ng ulat tungkol sa pag tatanim bago mag pasa ng ulat tungkol sa pagkasira",
+            type: "warning",
+          },
+        ],
+      };
+
+    if (crop.dateHarvested >= reportVal.dateHappen)
+      return {
+        ...returnVal,
+        success: true,
+        formError: {
+          dateHappen: [
+            "Mas maaga ang nailagay na petsa kesa sa araw na ikaw ay nagtanim",
+          ],
+        },
+        notifError: [
+          {
+            message:
+              "Mas nauna ang petsa ng pagkasira sa iyong ulat kaysa sa petsa ng pagtatanim na iyong isinasaad",
             type: "warning",
           },
         ],
@@ -250,6 +275,7 @@ export const uploadPlantingReport = async (
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+        notifError: missingFormValNotif(),
       };
 
     if (reportVal.reportType !== "planting")
@@ -365,6 +391,8 @@ export const uploadHarvestingReport = async (
   formData: FormData
 ): Promise<uploadHarvestingReportFormType> => {
   try {
+    console.log("harvesting");
+
     const reportVal: uploadHarvestingReportType = {
       cropId: formData.get("cropId") as string,
       reportTitle: formData.get("reportTitle") as string,
@@ -382,13 +410,17 @@ export const uploadHarvestingReport = async (
     };
 
     const userId = (await ProtectedAction("create:report")).userId;
+    console.log("harvesting 2");
 
     const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
+
+    console.log(validateVal);
     if (!validateVal.valid)
       return {
         ...returnVal,
         success: false,
         formError: validateVal.formError,
+        notifError: missingFormValNotif(),
       };
 
     if (reportVal.reportType !== "harvesting")
@@ -404,11 +436,13 @@ export const uploadHarvestingReport = async (
         ],
       };
 
-    const crop = await getCropStatusAndPlantedDate(reportVal.cropId);
+    console.log("harvesting 3");
+
+    const crop = await getCropStatusAndExpectedHarvest(reportVal.cropId);
 
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
     // you can only passed a planted type report if the user last report is about harvest
-    if (crop.cropStatus === "harvested")
+    if (crop.cropStatus !== "planted")
       return {
         ...returnVal,
         success: true,
@@ -434,6 +468,8 @@ export const uploadHarvestingReport = async (
           },
         ],
       };
+
+    console.log("harvesting 4");
 
     const reportId = CreateUUID();
 
@@ -466,6 +502,8 @@ export const uploadHarvestingReport = async (
       }),
     ]);
 
+    console.log("harvesting 5");
+
     reportVal.reportPicture.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -488,6 +526,8 @@ export const uploadHarvestingReport = async (
           pictureUrl: uploadResult.secure_url,
         });
     });
+
+    console.log("harvesting 6");
 
     revalidatePath(`/farmer/report`);
 
