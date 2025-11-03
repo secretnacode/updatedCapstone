@@ -4,8 +4,12 @@ import {
 } from "@/lib/server_action/user";
 import {
   DashboardCard,
-  LoadingCard,
+  WeatherSideComponentLoading,
+  MyPreviousReport,
+  MyRecentReportLoading,
   RecentReportWidget,
+  SideComponentMyCropStatus,
+  SideComponentMyCropStatusLoading,
 } from "./customComponent";
 import {
   Archive,
@@ -183,10 +187,21 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
         </div>
 
         <LineChartComponent {...lineChart} />
+
+        {user === "leader" ||
+          (user === "farmer" && (
+            <Suspense fallback={<MyRecentReportLoading />}>
+              <MyPreviousReport user={user} />
+            </Suspense>
+          ))}
       </div>
       <div className="side-bar-wrapper ">
-        <Suspense fallback={<LoadingCard />}>
+        <Suspense fallback={<WeatherSideComponentLoading />}>
           <WeatherComponent userLocation={userLocation} user={user} />
+        </Suspense>
+
+        <Suspense fallback={<SideComponentMyCropStatusLoading />}>
+          <SideComponentMyCropStatus />
         </Suspense>
 
         {widget}

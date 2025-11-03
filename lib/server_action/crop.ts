@@ -9,6 +9,7 @@ import {
   GetFarmerCropInfoQuery,
   getFarmerCropNameQuery,
   GetMyCropInfoQuery,
+  getMyCropStatusDetailQuery,
   UpdateUserCropInfoQuery,
 } from "@/util/queries/crop";
 import { ProtectedAction } from "../protectedActions";
@@ -20,6 +21,7 @@ import {
   GetFarmerCropInfoReturnType,
   getFarmerCropNameReturnType,
   GetMyCropInfoReturnType,
+  getMyCropStatusDetailReturnType,
   UpdateUserCropInfoReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -313,6 +315,32 @@ export const getFarmerCropName =
       const err = error as Error;
       console.log(
         `May pagkakamali sa pag kuha ng pangalan ng iyong taniman: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getMyCropStatusDetail =
+  async (): Promise<getMyCropStatusDetailReturnType> => {
+    try {
+      const { userId } = await ProtectedAction("read:crop");
+
+      return {
+        success: true,
+        cropInfoStatus: await getMyCropStatusDetailQuery(userId),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May pagkakamali sa pag kuha ng impormasyon ng iyong pananim: ${err.message}`
       );
       return {
         success: false,

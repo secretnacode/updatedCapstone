@@ -1565,3 +1565,38 @@ export type getMyRecentReportQueryReturnType = {
   title: string;
   reportType: reportTypeStateType;
 };
+
+export type getMyRecentReportReturnType =
+  | {
+      success: true;
+      recentReport: getMyRecentReportQueryReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type MyPreviousReportPropType = { user: farmerRoleType };
+
+export type NoContentYetPropType = ChildrenPropType & {
+  message: string;
+  logo: LucideIcon;
+  parentDiv?: string;
+  logoClassName?: string;
+  textClassName?: string;
+  childrenDivClassName?: string;
+  textWrapperDivClassName?: string;
+};
+
+export type getMyCropStatusDetailQueryReturnType = {
+  cropId: string;
+  cropName: string;
+  farmAreaMeasurement: string;
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
+};
+
+export type getMyCropStatusDetailReturnType =
+  | {
+      success: true;
+      cropInfoStatus: getMyCropStatusDetailQueryReturnType[];
+    }
+  | ServerActionFailBaseType;

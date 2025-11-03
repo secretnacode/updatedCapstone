@@ -11,26 +11,40 @@ import {
   FormDivLabelSelectType,
   FormDivLabelTextAreaPropType,
   FormMapComponentPropType,
+  getMyCropStatusDetailReturnType,
+  getMyRecentReportReturnType,
   ModalNoticePropType,
+  MyPreviousReportPropType,
+  NoContentYetPropType,
   RecentReportWidgetReturnType,
+  reportTypeStateType,
   TableComponentPropType,
   tableNoDataPropType,
 } from "@/types";
 import { FC } from "react";
 import {
+  Calendar,
+  CheckCircle,
   ClipboardX,
+  Clock,
   Eye,
   EyeClosed,
   Frown,
   LucideIcon,
+  FileX,
   OctagonX,
   TriangleAlert,
   X,
+  ClipboardPenLine,
+  WheatOff,
 } from "lucide-react";
 import {
   baranggayList,
+  capitalizeFirstLetter,
   farmAreaMeasurementValue,
   intoFeaturePolygon,
+  ReadableDateFomat,
+  UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
 import {
   MapComponent,
@@ -38,6 +52,9 @@ import {
 } from "../client_component/mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import Link from "next/link";
+import { getMyRecentReport } from "@/lib/server_action/report";
+import { RenderNotification } from "../client_component/fallbackComponent";
+import { getMyCropStatusDetail } from "@/lib/server_action/crop";
 
 export const Button: FC<ButtonPropType> = ({
   children,
@@ -674,15 +691,40 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
   );
 };
 
-export const LoadingCard = () => {
+// export const LoadingCard = () => {
+//   return (
+//     <div className="bg-white animate-pulse w-full aspect-square">
+//       <div className="bg-gray-400 p-1 rounded-xl w-1/3" />
+//       <div className="grid grid-rows-4 space-y-2 mt-2 [&>div]:bg-gray-400 [&>div]:p-1 [&>div]:rounded-xl">
+//         <div />
+//         <div />
+//         <div />
+//         <div />
+//       </div>
+//     </div>
+//   );
+// };
+
+export const WeatherSideComponentLoading = () => {
   return (
-    <div className="bg-white animate-pulse w-full aspect-square">
-      <div className="bg-gray-400 p-1 rounded-xl w-1/3" />
-      <div className="grid grid-rows-4 space-y-2 mt-2 [&>div]:bg-gray-400 [&>div]:p-1 [&>div]:rounded-xl">
-        <div />
-        <div />
-        <div />
-        <div />
+    <div className="bg-gray-500 p-4 rounded-xl">
+      <div className="card-title-wrapper flex justify-start items-center gap-2 mb-4 children-div-loading">
+        <div className="h-6 w-6 " />
+        <div className="h-4 w-28 " />
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div className=" children-div-loading">
+          <div className="h-10 w-20  mb-1" />
+          <div className="h-4 w-36 " />
+        </div>
+
+        <div className="h-12 w-12 div-loading" />
+      </div>
+
+      <div className="mt-4 very-small-text text-gray-600 flex justify-between items-center children-div-loading">
+        <div className="h-3 w-32" />
+        <div className="h-3 w-16" />
       </div>
     </div>
   );
@@ -892,6 +934,359 @@ export const LoadingReportModal: FC = () => {
   );
 };
 
-export const MyPreviousReport: FC = () => {
-  return <div></div>;
+export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
+  user,
+}) => {
+  let recentReport: getMyRecentReportReturnType;
+
+  try {
+    recentReport = await getMyRecentReport();
+  } catch (error) {
+    console.log((error as Error).message);
+
+    recentReport = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  const getTypeColor = (type: reportTypeStateType): string => {
+    switch (type) {
+      case "damage":
+        return "bg-red-100 text-red-800";
+
+      case "planting":
+        return "bg-green-100 text-green-800";
+
+      case "harvesting":
+        return "bg-amber-100 text-amber-800";
+
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  return (
+    <>
+      {recentReport.success ? (
+        <div className="bg-white rounded-xl shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Kamakailang mga Ulat
+            </h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {recentReport.recentReport.length > 0 ? (
+              recentReport.recentReport.map((report) => (
+                <div
+                  key={report.reportId}
+                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold ${getTypeColor(
+                            report.reportType
+                          )}`}
+                        >
+                          {capitalizeFirstLetter(report.reportType)}
+                        </span>
+
+                        <h3 className="font-medium text-gray-900">
+                          {report.title}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {ReadableDateFomat(report.dayReported)}
+                        </span>
+                      </div>
+                    </div>
+                    {user === "leader" ? (
+                      <div
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
+                          report.verificationStatus
+                            ? "text-green-600 bg-green-50 border-green-200"
+                            : "text-amber-600 bg-amber-50 border-amber-200"
+                        }`}
+                      >
+                        {report.verificationStatus ? (
+                          <CheckCircle />
+                        ) : (
+                          <Clock />
+                        )}
+                        <span className="capitalize">
+                          {report.verificationStatus
+                            ? "Naaprubahan"
+                            : "Hindi pa"}
+                        </span>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/farmer/report?viewReport=${report.reportId}`}
+                        className="button slimer-button submit-button"
+                      >
+                        Tingnan
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <NoContentYet logo={FileX} message="Wala ka pang nagagawang ulat">
+                <Link
+                  href={`/farmer/report?addReport=true`}
+                  className="button submit-button blue-button"
+                >
+                  <ClipboardPenLine className="logo !size-5" />
+                  <span>Mag Ulat</span>
+                </Link>
+              </NoContentYet>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <RenderNotification notif={recentReport.notifError} />
+
+          <MyRecentReportLoading />
+        </>
+      )}
+    </>
+  );
+};
+
+export const MyRecentReportLoading: FC = () => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="p-6 border-b border-gray-100">
+        <div className="h-6 w-48  div-loading" />
+      </div>
+
+      <div className="divide-y divide-gray-100">
+        <div className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2 children-div-loading">
+                <div className="h-5 w-16 " />
+                <div className="h-5 w-40 " />
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500 children-div-loading">
+                <div className="h-4 w-20 " />
+                <div className="h-4 w-24 " />
+              </div>
+            </div>
+
+            <div className="h-6 w-20 div-loading" />
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2 children-div-loading">
+                <div className="h-5 w-16 " />
+                <div className="h-5 w-40 " />
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500 children-div-loading">
+                <div className="h-4 w-20 " />
+                <div className="h-4 w-24 " />
+              </div>
+            </div>
+
+            <div className="h-6 w-20 div-loading" />
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2 children-div-loading">
+                <div className="h-5 w-16 " />
+                <div className="h-5 w-40 " />
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500 children-div-loading">
+                <div className="h-4 w-20 " />
+                <div className="h-4 w-24 " />
+              </div>
+            </div>
+
+            <div className="h-6 w-20 div-loading" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const NoContentYet: FC<NoContentYetPropType> = ({
+  message,
+  logo: Logo,
+  children,
+  parentDiv = "",
+  logoClassName = "",
+  textClassName = "",
+  childrenDivClassName = "",
+  textWrapperDivClassName = "",
+}) => {
+  return (
+    <div
+      className={`div text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 m-8 space-y-3 ${parentDiv}`}
+    >
+      <div
+        className={`flex justify-center items-center gap-3 ${textWrapperDivClassName}`}
+      >
+        <Logo className={`size-15 text-gray-400 stroke-1.5 ${logoClassName}`} />
+        <p
+          className={`p font-semibold text-gray-500 !text-xl ${textClassName}`}
+        >
+          {message}
+        </p>
+      </div>
+
+      <div
+        className={`flex justify-center items-center gap-2 ${childrenDivClassName}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
+export const SideComponentMyCropStatus = async () => {
+  let cropStatus: getMyCropStatusDetailReturnType;
+
+  try {
+    cropStatus = await getMyCropStatusDetail();
+  } catch (error) {
+    console.error((error as Error).message);
+
+    cropStatus = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  return (
+    <>
+      {cropStatus.success ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="card-title-wrapper">
+            <p>Aking mga Pananim</p>
+          </div>
+
+          {cropStatus.cropInfoStatus.length > 0 ? (
+            <>
+              <div className="divide-y divide-gray-100">
+                {cropStatus.cropInfoStatus.map((crop) => (
+                  <div
+                    key={crop.cropId}
+                    className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">
+                            {crop.cropName}
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            {crop.farmAreaMeasurement}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-semibold ${
+                          crop.cropStatus === "harvested"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {crop.cropStatus === "harvested"
+                          ? "Naani na"
+                          : "Na tanima na"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>Itinanim: {ReadableDateFomat(crop.datePlanted)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 bg-gray-50 border-t border-gray-100">
+                <button className="w-full text-sm text-green-600 hover:text-green-700 font-medium">
+                  Tingnan lahat
+                </button>
+              </div>
+            </>
+          ) : (
+            <NoContentYet
+              message={"Wala ka pang pananim"}
+              logo={WheatOff}
+              parentDiv="!m-0 p-4"
+              logoClassName="!size-10"
+              textWrapperDivClassName="!gap-2"
+            >
+              <Link
+                href={`/farmer/crop?addReport=true`}
+                className="button submit-button"
+              >
+                <ClipboardPenLine className="logo !size-5" />
+                <span>Mag dagdag</span>
+              </Link>
+            </NoContentYet>
+          )}
+        </div>
+      ) : (
+        <>
+          <RenderNotification notif={cropStatus.notifError} />
+          <SideComponentMyCropStatusLoading />
+        </>
+      )}
+    </>
+  );
+};
+
+export const SideComponentMyCropStatusLoading = () => {
+  const skeletonItems = Array.from({ length: 3 });
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="p-4 border-b border-gray-100">
+        <div className="h-6 w-36 div-loading" />
+      </div>
+
+      <div className="divide-y divide-gray-100">
+        {skeletonItems.map((_, index) => (
+          <div key={index} className="p-4">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="p-2  h-9 w-9 div-loading" />
+
+                <div className="children-div-loading">
+                  <div className="h-4 w-28  mb-1" />
+                  <div className="h-3 w-20 " />
+                </div>
+              </div>
+
+              <div className="h-5 w-16 div-loading" />
+            </div>
+
+            <div className="text-xs text-gray-500 space-y-1 children-div-loading [&>div]:h-3 [&>div]:w-40">
+              <div />
+              <div />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="p-4 bg-gray-50 border-t border-gray-100">
+        <div className="w-full h-4 div-loading" />
+      </div>
+    </div>
+  );
 };

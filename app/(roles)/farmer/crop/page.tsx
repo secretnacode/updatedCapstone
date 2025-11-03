@@ -51,7 +51,7 @@ export default async function Page({
             />
           </div>
 
-          <div className="side-bar-wrapper [&_div.no-val]:flex [&_div.no-val]:flex-col [&_div.no-val]:items-center [&_div.no-val]:justify-center [&_div.no-val]:p-8 [&_div.no-val]:text-center [&_div.no-val]:border-2 [&_div.no-val]:border-dashed [&_div.no-val]:border-gray-300 [&_div.no-val]:rounded-lg [&_div.no-val]:bg-gray-50 [&_div.no-val]:max-w-sm [&_div.no-val]:mx-auto">
+          <div className="side-bar-wrapper ">
             <Suspense fallback={<LoadingCard />}>
               <ReportCountPerCrop />
 

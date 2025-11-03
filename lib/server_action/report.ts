@@ -36,6 +36,7 @@ import {
   uploadPlantingReportFormType,
   uploadPlantingReportType,
   reportTypeStateType,
+  getMyRecentReportReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -778,27 +779,28 @@ export const getLatestReport = async (): Promise<getLatestReportReturnType> => {
   }
 };
 
-export const getMyRecentReport = async () => {
-  try {
-    const { userId } = await ProtectedAction("read:report");
+export const getMyRecentReport =
+  async (): Promise<getMyRecentReportReturnType> => {
+    try {
+      const { userId } = await ProtectedAction("read:report");
 
-    return {
-      success: true,
-      recentReport: await getMyRecentReportQuery(userId),
-    };
-  } catch (error) {
-    const err = error as Error;
-    console.log(
-      `May pagkakamali sa pag kuha ng mga ginawang ulat: ${err.message}`
-    );
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
+      return {
+        success: true,
+        recentReport: await getMyRecentReportQuery(userId),
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `May pagkakamali sa pag kuha ng mga ginawang ulat: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

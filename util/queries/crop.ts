@@ -10,6 +10,7 @@ import {
   GetFarmerCropInfoQueryReturnType,
   getFarmerCropNameQueryReturnType,
   GetMyCropInfoQueryRetrunType,
+  getMyCropStatusDetailQueryReturnType,
   HandleInsertCropType,
   updateCropPantedPropType,
 } from "@/types";
@@ -404,6 +405,11 @@ export const updateCropIntoHarvestedStatus = async ({
   }
 };
 
+/**
+ * query for ggetting the crop status and its planted date
+ * @param cropId id of the crop to be get
+ * @returns
+ */
 export const getCropStatusAndPlantedDate = async (
   cropId: string
 ): Promise<getCropStatusAndPlantedDateReturnType> => {
@@ -414,6 +420,33 @@ export const getCropStatusAndPlantedDate = async (
         [cropId]
       )
     ).rows[0];
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
+    );
+  }
+};
+
+/**
+ * query for getting all the crop status detail
+ * @param farmerId id of the farmer that will get the crop status detail
+ * @returns
+ */
+export const getMyCropStatusDetailQuery = async (
+  farmerId: string
+): Promise<getMyCropStatusDetailQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropId", "cropName", "farmAreaMeasurement", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "farmerId" = $1 limit 3`,
+        [farmerId]
+      )
+    ).rows;
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${

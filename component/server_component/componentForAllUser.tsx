@@ -606,6 +606,7 @@ export const LatestReport = async () => {
       </div>
     );
   };
+
   return (
     <>
       {report.success ? (
