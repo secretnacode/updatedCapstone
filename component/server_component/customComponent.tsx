@@ -176,6 +176,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   inputRequired = false,
   labelOnClick,
   children,
+  ...inputProps
 }) => {
   return (
     <div className={`cursor-pointer div form-div ${divClassName}`}>
@@ -200,6 +201,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
         min={inputMin}
         required={inputRequired}
         checked={inputChecked}
+        {...inputProps}
       />
 
       {children}
@@ -888,4 +890,8 @@ export const LoadingReportModal: FC = () => {
       </div>
     </div>
   );
+};
+
+export const MyPreviousReport: FC = () => {
+  return <div></div>;
 };

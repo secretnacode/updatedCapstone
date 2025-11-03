@@ -557,16 +557,16 @@ const PlantingReport: FC<ReportContentPropType> = ({
   });
 
   useEffect(() => {
-    if (state.notifError) handleSetNotification(state.notifError);
-  }, [handleSetNotification, state.notifError]);
+    if (state.success) setOpenReportModal(false);
 
-  useEffect(() => {
+    if (state.notifError) handleSetNotification(state.notifError);
+
     if (state.formError)
       handleFormError({
         cropId: state.formError.cropId,
         reportType: state.formError.reportType,
       });
-  }, [handleFormError, state.formError]);
+  }, [handleSetNotification, handleFormError, setOpenReportModal, state]);
 
   useEffect(() => {
     if (!isPassing) handleDoneLoading();
@@ -632,9 +632,10 @@ const PlantingReport: FC<ReportContentPropType> = ({
           inputName={"totalCropPlanted"}
           formError={state.formError?.totalCropPlanted}
           inputRequired
-          inputType="decimal"
+          inputType="number"
           inputPlaceholder="Hal: 500"
           inputClassName="input-green-ring"
+          step={"any"}
         />
 
         <FormDivLabelTextArea
@@ -820,17 +821,8 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           inputName={"totalHarvest"}
           formError={state.formError?.totalHarvest}
           inputRequired
-          inputType="number"
+          inputType="decimal"
           inputPlaceholder="Hal: 500"
-          inputClassName="input-amber-ring"
-        />
-
-        <FormDivLabelInput
-          labelMessage="Karagdagang detalye:"
-          inputName={"reportDescription"}
-          formError={state.formError?.reportDescription}
-          inputRequired
-          inputPlaceholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
           inputClassName="input-amber-ring"
         />
 

@@ -6,6 +6,7 @@ import {
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
   getLatestReportQueryReturnType,
+  getMyRecentReportQueryReturnType,
   GetOrgMemberReportQueryType,
   getRecentReportParamType,
   getRecentReportReturnType,
@@ -647,6 +648,33 @@ export const getLatestReportQuery = async (
     return (
       await pool.query(
         `select r."reportId", r."title", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1 limit 5`,
+        [farmerId]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng iyong mga ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng iyong mga ulat`
+    );
+  }
+};
+
+/**
+ * query for getting the recent report of the farmer user
+ * @param farmerId if of the farmer
+ * @returns
+ */
+export const getMyRecentReportQuery = async (
+  farmerId: string
+): Promise<getMyRecentReportQueryReturnType[]> => {
+  try {
+    return (
+      await pool.query(
+        `select  "reportId", "dayReported", "verificationStatus", "title", "reportType" from capstone.report where "farmerId" = $1 order by "dayReported" asc limit 5`,
         [farmerId]
       )
     ).rows;

@@ -8,6 +8,7 @@ import {
   getFarmerIdOfReport,
   GetFarmerReportDetailQuery,
   getLatestReportQuery,
+  getMyRecentReportQuery,
   GetOrgMemberReportQuery,
   getReportCountPerCropQuery,
   getReportCountThisAndPrevMonth,
@@ -39,6 +40,7 @@ import {
 import { ZodValidateForm } from "../validation/authValidation";
 import {
   addFarmerReportSchema,
+  addHarvestingReportSchema,
   addPlantingReportSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import {
@@ -334,6 +336,7 @@ export const uploadPlantingReport = async (
         cropId: reportVal.cropId,
         cropKgPlanted: reportVal.totalCropPlanted,
         datePlanted: reportVal.dateHappen,
+        farmerId: userId,
       }),
     ]);
 
@@ -391,8 +394,6 @@ export const uploadHarvestingReport = async (
   formData: FormData
 ): Promise<uploadHarvestingReportFormType> => {
   try {
-    console.log("harvesting");
-
     const reportVal: uploadHarvestingReportType = {
       cropId: formData.get("cropId") as string,
       reportTitle: formData.get("reportTitle") as string,
@@ -410,11 +411,8 @@ export const uploadHarvestingReport = async (
     };
 
     const userId = (await ProtectedAction("create:report")).userId;
-    console.log("harvesting 2");
 
-    const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
-
-    console.log(validateVal);
+    const validateVal = ZodValidateForm(reportVal, addHarvestingReportSchema);
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -435,8 +433,6 @@ export const uploadHarvestingReport = async (
           },
         ],
       };
-
-    console.log("harvesting 3");
 
     const crop = await getCropStatusAndExpectedHarvest(reportVal.cropId);
 
@@ -469,8 +465,6 @@ export const uploadHarvestingReport = async (
         ],
       };
 
-    console.log("harvesting 4");
-
     const reportId = CreateUUID();
 
     await addNewReport({
@@ -499,10 +493,9 @@ export const uploadHarvestingReport = async (
         cropId: reportVal.cropId,
         totalKgHarvested: reportVal.totalHarvest,
         dateHarvested: reportVal.dateHappen,
+        farmerId: userId,
       }),
     ]);
-
-    console.log("harvesting 5");
 
     reportVal.reportPicture.map(async (file) => {
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -526,8 +519,6 @@ export const uploadHarvestingReport = async (
           pictureUrl: uploadResult.secure_url,
         });
     });
-
-    console.log("harvesting 6");
 
     revalidatePath(`/farmer/report`);
 
@@ -770,6 +761,31 @@ export const getLatestReport = async (): Promise<getLatestReportReturnType> => {
     const { userId } = await ProtectedAction("read:report");
 
     return { success: true, reportVal: await getLatestReportQuery(userId) };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May pagkakamali sa pag kuha ng mga ginawang ulat: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const getMyRecentReport = async () => {
+  try {
+    const { userId } = await ProtectedAction("read:report");
+
+    return {
+      success: true,
+      recentReport: await getMyRecentReportQuery(userId),
+    };
   } catch (error) {
     const err = error as Error;
     console.log(

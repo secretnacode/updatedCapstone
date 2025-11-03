@@ -600,25 +600,26 @@ export type AuthFormPropType = InputHTMLAttributes<HTMLInputElement> & {
   formError?: string[];
 };
 
-export type FormDivLabelInputPropType = ChildrenPropType & {
-  labelMessage: string;
-  labelClassName?: string;
-  divClassName?: string;
-  labelOnClick?: () => void;
-  inputType?: string;
-  formError?: string[];
-  inputDisable?: boolean;
-  inputMax?: string | number;
-  inputMin?: string | number;
-  inputName: string;
-  inputChecked?: boolean;
-  inputValue?: string;
-  inputClassName?: string;
-  inputDefaultValue?: string;
-  inputPlaceholder?: string;
-  inputRequired?: boolean;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-};
+export type FormDivLabelInputPropType = ChildrenPropType &
+  InputHTMLAttributes<HTMLInputElement> & {
+    labelMessage: string;
+    labelClassName?: string;
+    divClassName?: string;
+    labelOnClick?: () => void;
+    inputType?: string;
+    formError?: string[];
+    inputDisable?: boolean;
+    inputMax?: string | number;
+    inputMin?: string | number;
+    inputName: string;
+    inputChecked?: boolean;
+    inputValue?: string;
+    inputClassName?: string;
+    inputDefaultValue?: string;
+    inputPlaceholder?: string;
+    inputRequired?: boolean;
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  };
 
 export type FormDivLabelTextAreaPropType =
   TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -1536,6 +1537,7 @@ export type addPlantedCropParamType = {
   cropId: string;
   cropKgPlanted: number;
   datePlanted: Date;
+  farmerId: string;
 };
 
 export type addHarvestedCropParamType = {
@@ -1544,6 +1546,7 @@ export type addHarvestedCropParamType = {
   cropId: string;
   totalKgHarvested: number;
   dateHarvested: Date;
+  farmerId: string;
 };
 
 export type createReportPropType = {
@@ -1553,4 +1556,12 @@ export type createReportPropType = {
 export type getCropStatusAndPlantedDateReturnType = {
   cropStatus: cropStatusType;
   dateHarvested: Date;
+};
+
+export type getMyRecentReportQueryReturnType = {
+  reportId: string;
+  dayReported: Date;
+  verificationStatus: boolean;
+  title: string;
+  reportType: reportTypeStateType;
 };

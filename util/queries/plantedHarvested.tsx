@@ -13,11 +13,12 @@ export const addPlantedCrop = async ({
   cropId,
   cropKgPlanted,
   datePlanted,
+  farmerId,
 }: addPlantedCropParamType) => {
   try {
     await pool.query(
-      `insert into capstone.planted ("plantedId", "reportId", "cropId", "cropKgPlanted", "datePlanted") values ($1, $2, $3, $4, $5)`,
-      [plantedId, reportId, cropId, cropKgPlanted, datePlanted]
+      `insert into capstone.planted ("plantedId", "reportId", "cropId", "cropKgPlanted", "datePlanted", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
+      [plantedId, reportId, cropId, cropKgPlanted, datePlanted, farmerId]
     );
   } catch (error) {
     console.error(
@@ -41,11 +42,12 @@ export const addHarvestedCrop = async ({
   cropId,
   totalKgHarvested,
   dateHarvested,
+  farmerId,
 }: addHarvestedCropParamType) => {
   try {
     await pool.query(
-      `insert into capstone.harvested ("harvestId", "reportId", "cropId", "totalKgHarvested", "dateHarvested") values ($1, $2, $3, $4, $5)`,
-      [harvestId, reportId, cropId, totalKgHarvested, dateHarvested]
+      `insert into capstone.harvested ("harvestId", "reportId", "cropId", "totalKgHarvested", "dateHarvested", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
+      [harvestId, reportId, cropId, totalKgHarvested, dateHarvested, farmerId]
     );
   } catch (error) {
     console.error(

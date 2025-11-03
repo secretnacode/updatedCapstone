@@ -11,13 +11,7 @@ import {
   getReportCountPerCropReturnType,
   getLatestReportReturnType,
 } from "@/types";
-import {
-  ClipboardPlus,
-  LucideIcon,
-  MapPinHouse,
-  Pencil,
-  Wheat,
-} from "lucide-react";
+import { FileText, LucideIcon, MapPinHouse, Pencil, Wheat } from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
@@ -484,14 +478,20 @@ export const FarmerQuickActionComponent: FC = () => {
         <p>Mabilisang Pag gawa</p>
       </div>
 
-      <div className="flex flex-col space-y-4 [&>a]:flex [&>a]:items-center [&>a]:gap-2 [&>a]:border [&>a]:border-gray-300 [&>a]:hover:bg-gray-100 [&>a]:rounded-md [&>a]:p-2">
-        <Link href={`/farmer/report?addReport=true`}>
-          <ClipboardPlus className="logo !size-5" />
+      <div className="flex flex-col space-y-4 [&>a]:flex [&>a]:items-center [&>a]:gap-2 [&>a]:border [&>a]:rounded-md [&>a]:p-2">
+        <Link
+          href={`/farmer/report?addReport=true`}
+          className="text-blue-700 border-blue-500 hover:bg-blue-50 hover:border-blue-800"
+        >
+          <FileText className="logo !size-5 " />
           <span>Mag gawa ng ulat</span>
         </Link>
 
-        <Link href={"/farmer/crop?addCrop=true"}>
-          <Wheat className="logo !size-5" />
+        <Link
+          href={"/farmer/crop?addCrop=true"}
+          className="text-green-700 border-green-500 hover:bg-green-50 hover:border-green-800"
+        >
+          <Wheat className="logo !size-5  " />
           <span>Mag dagdag ng pananim</span>
         </Link>
       </div>

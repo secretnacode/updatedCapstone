@@ -61,10 +61,10 @@ const Actions = {
   READ_ORG_MEMBER_LIST: "read:org:member:list", // action to read all the member inside an organization
 
   // actions for user farmer role crops
-  CREATE_CROP: "create:crop", // action for creating your own crop info
-  READ_CROP: "read:crop", // action for reading the crop of farmer user
-  UPDATE_CROP: "update:crop", // action for updating the crop of farmer user
-  DELET_CROP: "delete:crop", // action for deleting the crop of the farmer user
+  CREATE_CROP: "create:crop", // action farmer when creating your own crop info
+  READ_CROP: "read:crop", // action farmer when reading the crop
+  UPDATE_CROP: "update:crop", // action farmer when updating the crop
+  DELET_CROP: "delete:crop", // action farmer when deleting the crop
 
   // action for viewing the other farmer crop
   READ_FARMER_CROP: "read:farmer:crop", // action for reading the crop of farmer user
