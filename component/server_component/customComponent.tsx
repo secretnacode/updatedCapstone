@@ -18,10 +18,11 @@ import {
   NoContentYetPropType,
   RecentReportWidgetReturnType,
   reportTypeStateType,
+  TableComponentLoadingPropType,
   TableComponentPropType,
   tableNoDataPropType,
 } from "@/types";
-import { FC } from "react";
+import { FC, memo, useMemo } from "react";
 import {
   Calendar,
   CheckCircle,
@@ -503,7 +504,7 @@ export const TableComponent: FC<TableComponentPropType> = ({
             </div>
           )}
           <div
-            className={`div bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${tableClassName}`}
+            className={`div  rounded-lg border border-gray-200 overflow-hidden ${tableClassName}`}
           >
             <div className="div overflow-x-auto">
               <table className="table-style farmerReportTable">
@@ -1286,6 +1287,62 @@ export const SideComponentMyCropStatusLoading = () => {
       </div>
       <div className="p-4 bg-gray-50 border-t border-gray-100">
         <div className="w-full h-4 div-loading" />
+      </div>
+    </div>
+  );
+};
+
+const ColCell = memo(
+  ({ cols, uniqueName }: { cols: unknown[]; uniqueName: string }) =>
+    cols.map((_, index) => (
+      <th key={index + "cell" + uniqueName} scope="col" className="p-4">
+        <div className="" />
+      </th>
+    ))
+);
+ColCell.displayName = "ColCell";
+
+const RowCell = memo(({ rows, cols }: { rows: unknown[]; cols: unknown[] }) =>
+  rows.map((_, index) => (
+    <tr
+      className="animate-pulse [&_div]:bg-gray-200 [&_div]:rounded [&_div]:h-4"
+      key={index}
+    >
+      <ColCell cols={cols} uniqueName="rowNum" />
+    </tr>
+  ))
+);
+RowCell.displayName = "RowCell";
+
+export const TableComponentLoading: FC<TableComponentLoadingPropType> = ({
+  col = 7,
+  row = 5,
+}) => {
+  const rows = useMemo(() => Array.from({ length: row }), [row]);
+  const cols = useMemo(() => Array.from({ length: col }), [col]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center animate-pulse">
+        <div className="h-8 w-48 bg-gray-300 rounded"></div>
+
+        <div className="h-10 w-32 bg-green-500 rounded-lg"></div>
+      </div>
+
+      <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 [&_div]:bg-gray-300 [&_div]:rounded [&_div]:animate-pulse [&_div]:w-full [&_div]:h-5">
+                <ColCell cols={cols} uniqueName="tableHead" />
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200 bg-white">
+              <RowCell rows={rows} cols={cols} />
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

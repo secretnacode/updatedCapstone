@@ -6,7 +6,10 @@ import {
   AddReportComponent,
   ViewUserReportButton,
 } from "@/component/client_component/reportComponent";
-import { TableComponent } from "@/component/server_component/customComponent";
+import {
+  TableComponent,
+  TableComponentLoading,
+} from "@/component/server_component/customComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
 import { GetFarmerReportReturnType } from "@/types";
 import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
@@ -32,10 +35,13 @@ export default async function Page({
   }
 
   return (
-    <>
+    <div className="component">
       <div className="max-w-7xl mx-auto space-y-6">
         {!report.success ? (
-          <RenderNotification notif={report.notifError} />
+          <>
+            <RenderNotification notif={report.notifError} />
+            <TableComponentLoading />
+          </>
         ) : (
           <>
             {isAddingReport && <RemoveSearchParamsVal name={"addReport"} />}
@@ -109,6 +115,6 @@ export default async function Page({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }

@@ -471,7 +471,7 @@ export const getCountPendingReport = async (
     return (
       await pool.query(
         `select count("reportId") from capstone.report where "farmerId" = $1 and "verificationStatus" = $2`,
-        [farmerId, "false"]
+        [farmerId, false]
       )
     ).rows[0].count;
   } catch (error) {

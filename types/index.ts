@@ -1600,3 +1600,8 @@ export type getMyCropStatusDetailReturnType =
       cropInfoStatus: getMyCropStatusDetailQueryReturnType[];
     }
   | ServerActionFailBaseType;
+
+export type TableComponentLoadingPropType = {
+  col?: number;
+  row?: number;
+};
