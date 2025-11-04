@@ -195,6 +195,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
             </Suspense>
           ))}
       </div>
+
       <div className="side-bar-wrapper ">
         <Suspense fallback={<WeatherSideComponentLoading />}>
           <WeatherComponent userLocation={userLocation} user={user} />

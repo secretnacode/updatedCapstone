@@ -6,9 +6,10 @@ import {
 } from "@/component/client_component/fallbackComponent";
 import {
   LatestReport,
+  LatestReportLoading,
   ReportCountPerCrop,
+  ReportCountPerCropLoading,
 } from "@/component/server_component/componentForAllUser";
-import { LoadingCard } from "@/component/server_component/customComponent";
 import { GetMyCropInfo } from "@/lib/server_action/crop";
 import { GetMyCropInfoReturnType, NotificationBaseType } from "@/types";
 import { Suspense } from "react";
@@ -52,9 +53,11 @@ export default async function Page({
           </div>
 
           <div className="side-bar-wrapper ">
-            <Suspense fallback={<LoadingCard />}>
+            <Suspense fallback={<ReportCountPerCropLoading />}>
               <ReportCountPerCrop />
+            </Suspense>
 
+            <Suspense fallback={<LatestReportLoading />}>
               <LatestReport />
             </Suspense>
           </div>

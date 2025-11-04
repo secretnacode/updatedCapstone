@@ -11,7 +11,16 @@ import {
   getReportCountPerCropReturnType,
   getLatestReportReturnType,
 } from "@/types";
-import { FileText, LucideIcon, MapPinHouse, Pencil, Wheat } from "lucide-react";
+import {
+  AlertCircle,
+  CloudOff,
+  FileText,
+  LucideIcon,
+  MapPinHouse,
+  Pencil,
+  Wheat,
+  WheatOff,
+} from "lucide-react";
 import { FC } from "react";
 import { ViewCropModalButton } from "../client_component/cropComponent";
 import {
@@ -421,7 +430,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
   return (
     <>
       {currentWeather.success ? (
-        <div className=" bg-gray-500">
+        <div className="component">
           <div className="card-title-wrapper flex justify-start items-center gap-2">
             {WeatherIcon && <WeatherIcon />}
             <p>{isEnglish ? "Weather Today" : "Panahon ngayon"}</p>
@@ -465,7 +474,42 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
           </div>
         </div>
       ) : (
-        <RenderNotification notif={currentWeather.notifError} />
+        <>
+          <RenderNotification notif={currentWeather.notifError} />
+
+          <div className="component">
+            <div className="card-title-wrapper flex justify-start items-center gap-2">
+              <CloudOff className="logo text-gray-500" />
+              <p>{isEnglish ? "Weather Today" : "Panahon ngayon"}</p>
+            </div>
+
+            <div className="flex justify-between items-center py-4 text-center">
+              <div className="w-full space-y-2">
+                <AlertCircle className="h-8 w-8 mx-auto text-yellow-400" />
+
+                <p className="text-lg font-bold">
+                  {isEnglish ? "Data Unavailable" : "Walang Nakuhang Datos"}
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  {isEnglish
+                    ? "Could not load current weather information."
+                    : "Hindi makuha ang kasalukuyang impormasyon ng panahon."}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 very-small-text text-gray-500 flex justify-between items-center border-t border-gray-400 pt-2">
+              <p>
+                <span className="">
+                  {isEnglish ? "Last check" : "Huling suri"}:{" "}
+                </span>
+                {isEnglish ? "N/A" : "Wala"}
+              </p>
+              <p>--:--</p>
+            </div>
+          </div>
+        </>
       )}
     </>
   );
@@ -473,7 +517,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
 
 export const FarmerQuickActionComponent: FC = () => {
   return (
-    <div>
+    <div className="component !p-0">
       <div className="card-title-wrapper">
         <p>Mabilisang Pag gawa</p>
       </div>
@@ -512,42 +556,25 @@ export const ReportCountPerCrop: FC = async () => {
     };
   }
 
-  const NoValueInPieChart: FC = () => {
-    if (!reportCount.success) return null;
+  const NoValueInPieChart: FC = () => (
+    <div className="no-val">
+      <WheatOff className="!size-10 text-gray-400 mb-4" />
 
-    return (
-      <div className="no-val">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          className="w-12 h-12 text-gray-400 mb-4"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-          />
-        </svg>
-
-        <p className="text-xl font-semibold text-gray-700 mb-1">
-          Wala ka pang pananim
-        </p>
-      </div>
-    );
-  };
+      <p className="text-xl font-semibold text-gray-700 mb-1">
+        Wala ka pang pananim
+      </p>
+    </div>
+  );
 
   return (
-    <>
-      {reportCount.success ? (
-        <div className="space-y-4">
-          <div className="font-semibold">
-            <p>Bilang ng ulat kada pananim</p>
-          </div>
+    <div className="component ">
+      <div className=" space-y-4">
+        <div className="font-semibold">
+          <p>Bilang ng ulat kada pananim</p>
+        </div>
 
-          {reportCount.reportCountVal.length > 0 ? (
+        {reportCount.success ? (
+          reportCount.reportCountVal.length > 0 ? (
             <PieChartCard
               data={reportCount.reportCountVal.map((val) => ({
                 id: val.cropId,
@@ -557,21 +584,34 @@ export const ReportCountPerCrop: FC = async () => {
             />
           ) : (
             <NoValueInPieChart />
-          )}
+          )
+        ) : (
+          <>
+            <RenderNotification notif={reportCount.notifError} />
+            <NoValueInPieChart />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
-          <div className="flex justify-end items-center">
-            <Link
-              href={`/farmer/report`}
-              className="card-link !px-3 py-1 text-nowrap !bg-gray-100 !text-gray-600"
-            >
-              Mga Ulat
-            </Link>
-          </div>
+export const ReportCountPerCropLoading = () => {
+  return (
+    <div className="space-y-4 component">
+      <div className="font-semibold">
+        <div className="h-4 w-48 div-loading" />
+      </div>
+
+      <div className="flex flex-col items-center justify-center space-y-4 p-4 rounded-xl shadow-sm border border-gray-100 animate-pulse">
+        <div className="h-40 w-40 div-loading" />
+
+        <div className="flex flex-col space-y-2 w-full max-w-xs children-div-loading">
+          <div className="h-3 w-full "></div>
+          <div className="h-3 w-5/6 "></div>
         </div>
-      ) : (
-        <RenderNotification notif={reportCount.notifError} />
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
@@ -588,63 +628,92 @@ export const LatestReport = async () => {
     };
   }
 
-  const NoVal: FC = () => {
-    if (!report.success) return null;
+  const NoVal: FC = () => (
+    <div className="no-val">
+      <p className="text-gray-500">Wala ka pang ulat</p>
 
-    return (
-      <div className="no-val">
-        <p className="text-gray-500">Wala ka pang ulat</p>
+      <Link
+        href={`/farmer/report?addCrop=true`}
+        className="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition duration-150 flex justify-center items-center gap-3"
+      >
+        <Pencil className="logo" />
 
-        <Link
-          href={`/farmer/report?addCrop=true`}
-          className="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition duration-150 flex justify-center items-center gap-3"
-        >
-          <Pencil className="logo" />
-
-          <span>Mag ulat</span>
-        </Link>
-      </div>
-    );
-  };
+        <span>Mag ulat</span>
+      </Link>
+    </div>
+  );
 
   return (
-    <>
-      {report.success ? (
-        <div className="space-y-4">
-          <div className="font-semibold">
-            <p>Huling ulat na naipasa</p>
-          </div>
+    <div className="space-y-4 component">
+      <div className="font-semibold">
+        <p>Huling ulat na naipasa</p>
+      </div>
 
-          <div>
-            {report.reportVal.length > 0 ? (
-              report.reportVal.map((val) => (
-                <div key={val.reportId}>
-                  <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
-                    <div className="flex flex-col justify-center items-start leading-4 w-1/2">
-                      <p className="text-nowrap overflow-hidden text-ellipsis w-full">
-                        {val.title}
-                      </p>
-                      <p className="subscript">{val.cropName}</p>
-                    </div>
-
-                    <Link href={`/farmer/report?viewReport=${val.reportId}`}>
-                      <SubmitButton className="slimer-button">
-                        Tingnan
-                      </SubmitButton>
-                    </Link>
+      <div>
+        {report.success ? (
+          report.reportVal.length > 0 ? (
+            report.reportVal.map((val) => (
+              <div key={val.reportId}>
+                <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
+                  <div className="flex flex-col justify-center items-start leading-4 w-1/2">
+                    <p className="text-nowrap overflow-hidden text-ellipsis w-full">
+                      {val.title}
+                    </p>
+                    <p className="subscript">{val.cropName}</p>
                   </div>
 
-                  <div className="border-b border-gray-300" />
+                  <Link href={`/farmer/report?viewReport=${val.reportId}`}>
+                    <SubmitButton className="slimer-button">
+                      Tingnan
+                    </SubmitButton>
+                  </Link>
                 </div>
-              ))
-            ) : (
-              <NoVal />
+
+                <div className="border-b border-gray-300" />
+              </div>
+            ))
+          ) : (
+            <NoVal />
+          )
+        ) : (
+          <>
+            <RenderNotification notif={report.notifError} />
+            <NoVal />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const LatestReportLoading = () => {
+  const items = Array.from({ length: 3 });
+
+  return (
+    <div className="component space-y-4">
+      <div className="font-semibold ">
+        <div className="h-4 w-48 div-loading" />
+      </div>
+
+      <div>
+        {items.map((_, index) => (
+          <div key={index} className="animate-pulse">
+            <div className="flex justify-between items-center py-2">
+              <div className="flex flex-col justify-center items-start leading-4 w-1/2 space-y-1 children-div-loading">
+                <div className="h-4 w-full" />
+
+                <div className="h-3 w-3/4" />
+              </div>
+
+              <div className="h-6 w-16 div-loading" />
+            </div>
+
+            {index < items.length - 1 && (
+              <div className="border-b border-gray-100 h-px bg-gray-100" />
             )}
           </div>
-        </div>
-      ) : (
-        <RenderNotification notif={report.notifError} />
-      )}
-    </>
+        ))}
+      </div>
+    </div>
   );
 };

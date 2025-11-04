@@ -38,6 +38,7 @@ import {
   X,
   ClipboardPenLine,
   WheatOff,
+  Wheat,
 } from "lucide-react";
 import {
   baranggayList,
@@ -664,7 +665,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
   link,
 }) => {
   return (
-    <div className="rounded-xl p-4 bg-white space-y-2 ">
+    <div className="component space-y-2 ">
       <div className="flex justify-between items-start [&>svg]:!size-8 mb-3">
         <div
           className={`p-2 inline-block rounded-md shadow-md ${logo.iconWrapperStyle}`}
@@ -692,23 +693,23 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
   );
 };
 
-// export const LoadingCard = () => {
-//   return (
-//     <div className="bg-white animate-pulse w-full aspect-square">
-//       <div className="bg-gray-400 p-1 rounded-xl w-1/3" />
-//       <div className="grid grid-rows-4 space-y-2 mt-2 [&>div]:bg-gray-400 [&>div]:p-1 [&>div]:rounded-xl">
-//         <div />
-//         <div />
-//         <div />
-//         <div />
-//       </div>
-//     </div>
-//   );
-// };
+export const LoadingCard = () => {
+  return (
+    <div className="bg-white animate-pulse w-full aspect-square">
+      <div className="bg-gray-400 p-1 rounded-xl w-1/3" />
+      <div className="grid grid-rows-4 space-y-2 mt-2 [&>div]:bg-gray-400 [&>div]:p-1 [&>div]:rounded-xl">
+        <div />
+        <div />
+        <div />
+        <div />
+      </div>
+    </div>
+  );
+};
 
 export const WeatherSideComponentLoading = () => {
   return (
-    <div className="bg-gray-500 p-4 rounded-xl">
+    <div className="component">
       <div className="card-title-wrapper flex justify-start items-center gap-2 mb-4 children-div-loading">
         <div className="h-6 w-6 " />
         <div className="h-4 w-28 " />
@@ -968,94 +969,86 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
   };
 
   return (
-    <>
-      {recentReport.success ? (
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Kamakailang mga Ulat
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {recentReport.recentReport.length > 0 ? (
-              recentReport.recentReport.map((report) => (
-                <div
-                  key={report.reportId}
-                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-semibold ${getTypeColor(
-                            report.reportType
-                          )}`}
-                        >
-                          {capitalizeFirstLetter(report.reportType)}
-                        </span>
+    <div className="component !p-0">
+      <div className="p-6 border-b border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Kamakailang mga Ulat
+        </h2>
+      </div>
+      <div className="divide-y divide-gray-100">
+        {recentReport.success ? (
+          recentReport.recentReport.length > 0 ? (
+            recentReport.recentReport.map((report) => (
+              <div
+                key={report.reportId}
+                className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-semibold ${getTypeColor(
+                          report.reportType
+                        )}`}
+                      >
+                        {capitalizeFirstLetter(report.reportType)}
+                      </span>
 
-                        <h3 className="font-medium text-gray-900">
-                          {report.title}
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {ReadableDateFomat(report.dayReported)}
-                        </span>
-                      </div>
+                      <h3 className="font-medium text-gray-900">
+                        {report.title}
+                      </h3>
                     </div>
-                    {user === "leader" ? (
-                      <div
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
-                          report.verificationStatus
-                            ? "text-green-600 bg-green-50 border-green-200"
-                            : "text-amber-600 bg-amber-50 border-amber-200"
-                        }`}
-                      >
-                        {report.verificationStatus ? (
-                          <CheckCircle />
-                        ) : (
-                          <Clock />
-                        )}
-                        <span className="capitalize">
-                          {report.verificationStatus
-                            ? "Naaprubahan"
-                            : "Hindi pa"}
-                        </span>
-                      </div>
-                    ) : (
-                      <Link
-                        href={`/farmer/report?viewReport=${report.reportId}`}
-                        className="button slimer-button submit-button"
-                      >
-                        Tingnan
-                      </Link>
-                    )}
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {ReadableDateFomat(report.dayReported)}
+                      </span>
+                    </div>
                   </div>
+                  {user === "leader" ? (
+                    <div
+                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
+                        report.verificationStatus
+                          ? "text-green-600 bg-green-50 border-green-200"
+                          : "text-amber-600 bg-amber-50 border-amber-200"
+                      }`}
+                    >
+                      {report.verificationStatus ? <CheckCircle /> : <Clock />}
+                      <span className="capitalize">
+                        {report.verificationStatus ? "Naaprubahan" : "Hindi pa"}
+                      </span>
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/farmer/report?viewReport=${report.reportId}`}
+                      className="button slimer-button submit-button"
+                    >
+                      Tingnan
+                    </Link>
+                  )}
                 </div>
-              ))
-            ) : (
-              <NoContentYet logo={FileX} message="Wala ka pang nagagawang ulat">
-                <Link
-                  href={`/farmer/report?addReport=true`}
-                  className="button submit-button blue-button"
-                >
-                  <ClipboardPenLine className="logo !size-5" />
-                  <span>Mag Ulat</span>
-                </Link>
-              </NoContentYet>
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <RenderNotification notif={recentReport.notifError} />
+              </div>
+            ))
+          ) : (
+            <NoContentYet logo={FileX} message="Wala ka pang nagagawang ulat">
+              <Link
+                href={`/farmer/report?addReport=true`}
+                className="button submit-button blue-button"
+              >
+                <ClipboardPenLine className="logo !size-5" />
+                <span>Mag Ulat</span>
+              </Link>
+            </NoContentYet>
+          )
+        ) : (
+          <>
+            <RenderNotification notif={recentReport.notifError} />
 
-          <MyRecentReportLoading />
-        </>
-      )}
-    </>
+            <NoContentYet logo={FileX} message="Wala ka pang nagagawang ulat" />
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -1174,82 +1167,87 @@ export const SideComponentMyCropStatus = async () => {
   }
 
   return (
-    <>
+    <div className="component overflow-hidden">
+      <div className="card-title-wrapper">
+        <p>Aking mga Pananim</p>
+      </div>
+
       {cropStatus.success ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="card-title-wrapper">
-            <p>Aking mga Pananim</p>
-          </div>
-
-          {cropStatus.cropInfoStatus.length > 0 ? (
-            <>
-              <div className="divide-y divide-gray-100">
-                {cropStatus.cropInfoStatus.map((crop) => (
-                  <div
-                    key={crop.cropId}
-                    className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
-                            {crop.cropName}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {crop.farmAreaMeasurement}
-                          </p>
-                        </div>
+        cropStatus.cropInfoStatus.length > 0 ? (
+          <>
+            <div className="divide-y divide-gray-100">
+              {cropStatus.cropInfoStatus.map((crop) => (
+                <div
+                  key={crop.cropId}
+                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">
+                          {crop.cropName}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {crop.farmAreaMeasurement}
+                        </p>
                       </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          crop.cropStatus === "harvested"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {crop.cropStatus === "harvested"
-                          ? "Naani na"
-                          : "Na tanima na"}
-                      </span>
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p>Itinanim: {ReadableDateFomat(crop.datePlanted)}</p>
-                    </div>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold ${
+                        crop.cropStatus === "harvested"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {crop.cropStatus === "harvested"
+                        ? "Naani na"
+                        : "Na tanima na"}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>Itinanim: {ReadableDateFomat(crop.datePlanted)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              <div className="p-4 bg-gray-50 border-t border-gray-100">
-                <button className="w-full text-sm text-green-600 hover:text-green-700 font-medium">
-                  Tingnan lahat
-                </button>
-              </div>
-            </>
-          ) : (
-            <NoContentYet
-              message={"Wala ka pang pananim"}
-              logo={WheatOff}
-              parentDiv="!m-0 p-4"
-              logoClassName="!size-10"
-              textWrapperDivClassName="!gap-2"
+            <div className="p-4 bg-gray-50 border-t border-gray-100">
+              <button className="w-full text-sm text-green-600 hover:text-green-700 font-medium">
+                Tingnan lahat
+              </button>
+            </div>
+          </>
+        ) : (
+          <NoContentYet
+            message={"Wala ka pang pananim"}
+            logo={WheatOff}
+            parentDiv="!m-0 p-4"
+            logoClassName="!size-10"
+            textWrapperDivClassName="!gap-0"
+          >
+            <Link
+              href={`/farmer/crop?addReport=true`}
+              className="button submit-button"
             >
-              <Link
-                href={`/farmer/crop?addReport=true`}
-                className="button submit-button"
-              >
-                <ClipboardPenLine className="logo !size-5" />
-                <span>Mag dagdag</span>
-              </Link>
-            </NoContentYet>
-          )}
-        </div>
+              <Wheat className="logo !size-5" />
+              <span>Mag dagdag</span>
+            </Link>
+          </NoContentYet>
+        )
       ) : (
         <>
           <RenderNotification notif={cropStatus.notifError} />
-          <SideComponentMyCropStatusLoading />
+
+          <NoContentYet
+            message={"Wala ka pang pananim"}
+            logo={WheatOff}
+            parentDiv="!m-0 p-4"
+            logoClassName="!size-10"
+            textWrapperDivClassName="!gap-0"
+          />
         </>
       )}
-    </>
+    </div>
   );
 };
 

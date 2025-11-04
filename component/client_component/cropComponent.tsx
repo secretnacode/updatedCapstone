@@ -308,7 +308,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
         )}
       </div>
 
-      <div className="p-4 bg-white rounded-lg">
+      <div className="component">
         <div className="mb-4 flex flex-row justify-between items-center">
           <p className=" font-semibold text-lg">
             Impormasyon ng iyong mga pananim

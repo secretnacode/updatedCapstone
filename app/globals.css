@@ -297,7 +297,7 @@ body {
     @apply w-[400px] min-h-[500px];
   }
   .side-bar-wrapper {
-    @apply flex flex-col gap-4  [&>div]:rounded-xl [&>div]:p-6 [&>div]:bg-white [&>div]:shadow-sm;
+    @apply flex flex-col gap-4 [&>div]:!p-6;
   }
   .subscript {
     @apply text-[14px] text-gray-400 tracking-wide;
@@ -313,7 +313,7 @@ body {
   }
   /* used for the component to elevate/highlight the component from the backgroud  */
   .component {
-    @apply bg-white rounded-2xl p-4 shadow-sm;
+    @apply bg-white rounded-lg p-4 shadow-sm;
   }
 }
 
