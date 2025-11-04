@@ -45,6 +45,7 @@ export default async function Page({
       ) : (
         <div className="grid grid-cols-4 gap-4 h-full">
           {isAddingCrop && <RemoveSearchParamsVal name={"addCrop"} />}
+
           <div className="col-span-3 h-full">
             <FarmerCropPage
               myCropInfoList={cropInfo.myCropInfoList}

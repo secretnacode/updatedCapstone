@@ -40,7 +40,7 @@ export const GetUserReport = async (
   try {
     return (
       await pool.query(
-        `select r."reportId", r."verificationStatus",  r."dayReported", r."dayHappen",  r."title", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1`,
+        `select r."reportId", r."verificationStatus",  r."dayReported", r."dayHappen",  r."title", "reportType", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1`,
         [userId]
       )
     ).rows;

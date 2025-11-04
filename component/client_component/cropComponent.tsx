@@ -2,7 +2,6 @@
 
 import {
   AddUserCropInfo,
-  DeleteUserCropInfo,
   GetFarmerCropInfo,
   UpdateUserCropInfo,
 } from "@/lib/server_action/crop";
@@ -27,15 +26,17 @@ import {
   FormErrorType,
   barangayType,
   intoFeatureCollectionDataParam,
-  DeleteUserCropInfoReturnType,
   FarmerCropPageHandleOpenModalParamType,
   FormCropModalPropType,
   AddCropModalPropType,
   AllFarmerCropPropType,
+  cropStatusType,
+  determineCropStatusReturnType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
 import {
+  determineCropStatus,
   intoFeatureCollection,
   pickBrgyFirst,
   pointIsInsidePolygon,
@@ -44,10 +45,8 @@ import {
   ViewCrop,
 } from "@/util/helper_function/reusableFunction";
 import {
-  CancelButton,
   CropForm,
   FormCancelSubmitButton,
-  ModalNotice,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
@@ -212,14 +211,10 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   addCrop,
 }) => {
   const mapRef = useRef<MapRef>(null);
-  const { handleIsLoading, handleDoneLoading } = useLoading();
-  const { handleSetNotification } = useNotification();
   const [cropIdToModify, setCropIdToModify] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<FarmerCropPageShowModalStateType>({
     addModal: false,
     editModal: false,
-    deleteModal: false,
-    cropHasReportModal: false,
   });
 
   useEffect(() => {
@@ -260,28 +255,23 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     );
   };
 
-  const handleDeleteCrop = async () => {
-    try {
-      handleCloseModal("deleteModal");
-      handleIsLoading("Tinatanggal na ang iyong pananim");
+  const cropStatus = (
+    status: cropStatusType,
+    datePlanted: Date,
+    dateHarvested: Date
+  ): determineCropStatusReturnType => {
+    if (status === null)
+      return {
+        status: "Wala ka pang ulat",
+        className: "bg-red-100 text-red-800",
+      };
 
-      let deleteCrop: DeleteUserCropInfoReturnType;
-
-      if (cropIdToModify) deleteCrop = await DeleteUserCropInfo(cropIdToModify);
-      else throw new Error("No cropId was passed in the server action");
-
-      if (!deleteCrop.success && deleteCrop.openNotifModal)
-        handleOpenModal({ modalName: "cropHasReportModal" });
-
-      handleSetNotification(deleteCrop.notifMessage);
-    } catch (error) {
-      console.log((error as Error).message);
-      handleSetNotification([
-        { message: UnexpectedErrorMessage(), type: "error" },
-      ]);
-    } finally {
-      handleDoneLoading();
-    }
+    return determineCropStatus({
+      cropStatus: status,
+      dateHarvested: dateHarvested,
+      datePlanted: datePlanted,
+      isEnglish: false,
+    });
   };
 
   return (
@@ -332,19 +322,47 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           listCount={myCropInfoList.length}
           tableHeaderCell={
             <>
-              <th>#</th>
               <th>Pangalan</th>
               <th>Lokasyon</th>
               <th>Sukat(HA)</th>
+              <th>Estado ng pananim</th>
+              <th>Araw ng kaganapan</th>
               <th></th>
             </>
           }
-          tableCell={myCropInfoList.map((crop, index) => (
+          tableCell={myCropInfoList.map((crop) => (
             <tr key={crop.cropId}>
-              <td className="text-color">{index + 1}</td>
               <td className="text-color">{crop.cropName}</td>
               <td className="text-color">{crop.cropLocation}</td>
               <td className="text-color">{crop.farmAreaMeasurement}</td>
+              <td className="text-color">
+                <span
+                  className={`py-1 px-3 rounded-2xl ${
+                    cropStatus(
+                      crop.cropStatus,
+                      crop.datePlanted,
+                      crop.dateHarvested
+                    ).className
+                  }`}
+                >
+                  {
+                    cropStatus(
+                      crop.cropStatus,
+                      crop.datePlanted,
+                      crop.dateHarvested
+                    ).status
+                  }
+                </span>
+              </td>
+              <td className="text-color">
+                {!crop.cropStatus
+                  ? "Wala pang ulat"
+                  : ReadableDateFomat(
+                      crop.cropStatus === "planted"
+                        ? crop.datePlanted
+                        : crop.dateHarvested
+                    )}
+              </td>
               <td>
                 <div className="flex flex-row gap-2">
                   <SubmitButton
@@ -374,18 +392,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   >
                     Baguhin
                   </SubmitButton>
-
-                  <CancelButton
-                    className="slimer-button"
-                    onClick={() =>
-                      handleOpenModal({
-                        modalName: "deleteModal",
-                        cropId: crop.cropId,
-                      })
-                    }
-                  >
-                    Tanggalin
-                  </CancelButton>
                 </div>
               </td>
             </tr>
@@ -404,48 +410,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           }
           hideEditCropModal={() => handleCloseModal("editModal")}
           setCropIdToModify={setCropIdToModify}
-        />
-      )}
-
-      {showModal.deleteModal && (
-        <ModalNotice
-          type="warning"
-          title="Tanggalin ang pananim?"
-          message={
-            <>
-              Sigurado ka bang tatanggalin mo ang pananim{" "}
-              <span className="modal-highligt-word">
-                {
-                  myCropInfoList.find((crop) => crop.cropId === cropIdToModify)!
-                    .cropName
-                }
-              </span>
-              ? Pag ito ay tinaggal, hindi na ito maibabalik.
-            </>
-          }
-          onClose={() => handleCloseModal("deleteModal")}
-          onProceed={handleDeleteCrop}
-          showCancelButton={true}
-          proceed={{ label: "Tanggalin" }}
-          cancel={{ label: "Kanselahin" }}
-        />
-      )}
-
-      {showModal.cropHasReportModal && (
-        <ModalNotice
-          type="warning"
-          title="Bawal tanggalin ang taniman"
-          message={
-            <>
-              Bawal mong tanggalin ang taniman na ito sapagkat ikaw ay{" "}
-              <span className="modal-highligt-word">
-                nakapag sagawa na ng ulat
-              </span>{" "}
-              tungkol sa taniman na ito. Maari mo lang itong baguhin
-            </>
-          }
-          onClose={() => handleCloseModal("cropHasReportModal")}
-          showCancelButton={false}
         />
       )}
     </div>

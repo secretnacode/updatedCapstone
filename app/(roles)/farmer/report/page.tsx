@@ -11,8 +11,11 @@ import {
   TableComponentLoading,
 } from "@/component/server_component/customComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
-import { GetFarmerReportReturnType } from "@/types";
-import { DateToYYMMDD } from "@/util/helper_function/reusableFunction";
+import { GetFarmerReportReturnType, reportTypeStateType } from "@/types";
+import {
+  capitalizeFirstLetter,
+  DateToYYMMDD,
+} from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +37,32 @@ export default async function Page({
     };
   }
 
+  const handleReportStatus = (type: reportTypeStateType) => {
+    const colorScheme = () => {
+      switch (type) {
+        case "damage":
+          return "bg-red-100 text-red-800";
+
+        case "harvesting":
+          return "bg-amber-100 text-amber-800";
+
+        case "planting":
+          return "bg-green-100 text-green-800";
+
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    return (
+      <span
+        className={`px-3 py-1 rounded-2xl very-small-text ${colorScheme()}`}
+      >
+        {capitalizeFirstLetter(type)}
+      </span>
+    );
+  };
+
   return (
     <div className="component">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -50,29 +79,29 @@ export default async function Page({
               <h1 className="text-2xl font-bold text-gray-900">
                 Aking mga ulat
               </h1>
+
               <AddReportComponent openModal={isAddingReport} />
             </div>
+
             <TableComponent
               noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
               listCount={report.userReport.length}
               tableHeaderCell={
                 <>
-                  <th scope="col">#</th>
                   <th scope="col">Pamagat ng ulat</th>
                   <th scope="col">Pangalan ng pananim</th>
                   <th scope="col">Estado ng ulat</th>
                   <th scope="col">Araw na ipinasa</th>
                   <th scope="col">Araw na naganap</th>
+                  <th scope="col">Uri ng ulat</th>
                   <th scope="col">Aksyon</th>
                 </>
               }
               tableCell={
                 <>
                   {report.success &&
-                    report.userReport.map((report, index) => (
+                    report.userReport.map((report) => (
                       <tr key={report.reportId}>
-                        <td className="text-gray-500">{index + 1}</td>
-
                         <td className=" text-gray-900 font-medium">
                           {report.title}
                         </td>
@@ -82,14 +111,14 @@ export default async function Page({
                         <td>
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              report.verificationStatus === "false"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
+                              report.verificationStatus
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {report.verificationStatus === "false"
-                              ? "kinukumpirma"
-                              : "Naipasa"}
+                            {report.verificationStatus
+                              ? "Naipasa"
+                              : "kinukumpirma"}
                           </span>
                         </td>
 
@@ -99,6 +128,10 @@ export default async function Page({
 
                         <td className="text-gray-500">
                           {DateToYYMMDD(new Date(report.dayHappen))}
+                        </td>
+
+                        <td scope="col">
+                          {handleReportStatus(report.reportType)}
                         </td>
 
                         <td className="text-center">

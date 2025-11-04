@@ -13,6 +13,7 @@ import {
   FormMapComponentPropType,
   getMyCropStatusDetailReturnType,
   getMyRecentReportReturnType,
+  ModalNoticeLogoType,
   ModalNoticePropType,
   MyPreviousReportPropType,
   NoContentYetPropType,
@@ -401,9 +402,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
   cancel,
   proceed = { label: "Mag patuloy", className: "" },
 }) => {
-  const logo:
-    | { logo: LucideIcon; logoColor: string; bgColor: string }
-    | undefined =
+  const logo: ModalNoticeLogoType =
     type === "warning"
       ? {
           logo: TriangleAlert as LucideIcon,

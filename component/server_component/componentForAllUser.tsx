@@ -13,6 +13,7 @@ import {
 } from "@/types";
 import {
   AlertCircle,
+  ClipboardX,
   CloudOff,
   FileText,
   LucideIcon,
@@ -556,12 +557,18 @@ export const ReportCountPerCrop: FC = async () => {
     };
   }
 
-  const NoValueInPieChart: FC = () => (
+  const NoValueInPieChart: FC<{ hasCrop?: boolean }> = ({
+    hasCrop = false,
+  }) => (
     <div className="no-val">
-      <WheatOff className="!size-10 text-gray-400 mb-4" />
+      {hasCrop ? (
+        <ClipboardX className="!size-10 text-gray-400 mb-4" />
+      ) : (
+        <WheatOff className="!size-10 text-gray-400 mb-4" />
+      )}
 
       <p className="text-xl font-semibold text-gray-700 mb-1">
-        Wala ka pang pananim
+        {hasCrop ? "Wala ka pang Ulat" : "Wala ka pang pananim"}
       </p>
     </div>
   );
@@ -583,12 +590,12 @@ export const ReportCountPerCrop: FC = async () => {
               }))}
             />
           ) : (
-            <NoValueInPieChart />
+            <NoValueInPieChart hasCrop={true} />
           )
         ) : (
           <>
             <RenderNotification notif={reportCount.notifError} />
-            <NoValueInPieChart />
+            <NoValueInPieChart hasCrop={false} />
           </>
         )}
       </div>

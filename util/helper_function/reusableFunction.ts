@@ -2,6 +2,7 @@ import {
   barangayType,
   brangayWithCalauanType,
   determineCropStatusParamType,
+  determineCropStatusReturnType,
   getPointCoordinateReturnType,
   intoFeatureCollectionDataParam,
   NotificationBaseType,
@@ -621,7 +622,7 @@ export const determineCropStatus = ({
   datePlanted,
   dateHarvested,
   isEnglish,
-}: determineCropStatusParamType) => {
+}: determineCropStatusParamType): determineCropStatusReturnType => {
   // 5 days in millisecond
   const fiveDaysLater = 1000 * 60 * 60 * 24 * 5;
 
@@ -635,17 +636,32 @@ export const determineCropStatus = ({
   switch (cropStatus) {
     case `planted`:
       if (new Date() >= planted5DaysAgo)
-        return isEnglish ? "Growing" : "Pag papatubo";
+        return {
+          status: isEnglish ? "Growing" : "Pag papatubo",
+          className: "bg-green-100 text-green-800",
+        };
 
-      return isEnglish ? "Planted" : "Nataniman";
+      return {
+        status: isEnglish ? "Planted" : "Nataniman",
+        className: "bg-lime-100 text-lime-800",
+      };
 
     case `harvested`:
       if (new Date() >= harvested5DaysAgo)
-        return isEnglish ? "Vacant" : "Bakante";
+        return {
+          status: isEnglish ? "Vacant" : "Bakante",
+          className: "bg-gray-100 text-gray-800",
+        };
 
-      return isEnglish ? "Harvested" : "Naani na";
+      return {
+        status: isEnglish ? "Harvested" : "Naani na",
+        className: "bg-yellow-100 text-yellow-800",
+      };
 
     default:
-      return isEnglish ? "Can't determine" : "Hindi matukoy";
+      return {
+        status: isEnglish ? "Can't determine" : "Hindi matukoy",
+        className: "bg-red-100 text-red-800",
+      };
   }
 };

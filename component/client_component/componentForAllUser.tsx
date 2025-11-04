@@ -1112,7 +1112,6 @@ export const DeleteLinkButton: FC<ButtonPropType & { linkId: string }> = ({
 };
 
 export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
-  console.log(data);
   return (
     <PieChart
       series={[

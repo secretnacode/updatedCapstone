@@ -55,9 +55,10 @@ export function NotificationProvider({
 
   const handleSetNotification = useCallback((data: NotificationBaseType[]) => {
     if (data) {
-      const newNotification: NotificationValType[] = data.map((notif) => {
-        return { ...notif, notifId: CreateUUID() };
-      });
+      const newNotification: NotificationValType[] = data.map((notif) => ({
+        ...notif,
+        notifId: CreateUUID(),
+      }));
 
       setNotificationVal((prev) => [...prev, ...newNotification]);
 
@@ -66,8 +67,14 @@ export function NotificationProvider({
       }
 
       timeRef.current = setTimeout(() => {
-        setNotificationVal([{ message: "", type: null, notifId: null }]);
-        timeRef.current = null;
+        document.querySelectorAll(".notification").forEach((item) => {
+          item.classList.add("animate-toRight");
+        });
+
+        setTimeout(() => {
+          setNotificationVal([{ message: "", type: null, notifId: null }]);
+          timeRef.current = null;
+        }, 1000);
       }, 10000);
     }
   }, []);

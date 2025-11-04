@@ -179,13 +179,15 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
     datePlanted: Date,
     cropStatus: cropStatusType
   ) => {
+    if (!datePlanted) return setDefaultReport("planting");
+
     const planted = new Date(datePlanted);
 
-    const planted5Months = new Date(planted.setMonth(planted.getMonth() + 3));
+    const planted3Months = new Date(planted.setMonth(planted.getMonth() + 3));
 
     switch (cropStatus) {
       case `planted`:
-        if (new Date() >= planted5Months) return setDefaultReport("harvesting");
+        if (new Date() >= planted3Months) return setDefaultReport("harvesting");
 
         return setDefaultReport("damage");
 
@@ -218,6 +220,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
           <div className="h-auto">
             <label htmlFor="" className="label">
               Pumili ng pananim na iyong iuulat:
+              <span className="text-red-500">*</span>
             </label>
 
             <div className="w-full grid grid-cols-4 gap-4">
@@ -256,6 +259,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
           <div>
             <label htmlFor="" className="label">
               Uri ng ulat na iyong gagawin:
+              <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
               <Button
@@ -383,8 +387,11 @@ const DamageReport: FC<ReportContentPropType> = ({
   }, [handleFormError, state.formError]);
 
   useEffect(() => {
-    if (!isPassing) handleDoneLoading();
-  }, [isPassing, handleDoneLoading]);
+    if (!isPassing) {
+      handleDoneLoading();
+      setOpenReportModal(false);
+    }
+  }, [isPassing, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -530,6 +537,7 @@ const DamageReport: FC<ReportContentPropType> = ({
           {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         </button>
       </div> */}
+
       <FormCancelSubmitButton
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
@@ -545,11 +553,13 @@ const PlantingReport: FC<ReportContentPropType> = ({
   setOpenReportModal,
   handleFormError,
 }) => {
+  const formRef = useRef<HTMLFormElement>(null);
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const [state, formAction] = useActionState(uploadPlantingReport, {
     success: null,
     notifError: null,
@@ -569,8 +579,12 @@ const PlantingReport: FC<ReportContentPropType> = ({
   }, [handleSetNotification, handleFormError, setOpenReportModal, state]);
 
   useEffect(() => {
-    if (!isPassing) handleDoneLoading();
-  }, [isPassing, handleDoneLoading]);
+    if (!isPassing) {
+      handleDoneLoading();
+      setOpenModal(false);
+      setOpenReportModal(false);
+    }
+  }, [isPassing, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -587,6 +601,8 @@ const PlantingReport: FC<ReportContentPropType> = ({
   const handleRemovePicture = (picId: string) => {
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
+
+  const handleSubmit = () => formRef.current?.requestSubmit();
 
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -720,10 +736,31 @@ const PlantingReport: FC<ReportContentPropType> = ({
       )}
 
       <FormCancelSubmitButton
+        submitType="button"
+        submitOnClick={() => setOpenModal(true)}
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
         cancelOnClick={() => setOpenReportModal}
       />
+
+      {openModal && (
+        <ModalNotice
+          type="warning"
+          title="Mag ulat tungkol sa pag tatanim?"
+          message={
+            <>
+              Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
+              tatanim ? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
+              estado ng iyong pananim.
+            </>
+          }
+          onClose={() => setOpenModal(false)}
+          onProceed={handleSubmit}
+          showCancelButton={true}
+          proceed={{ label: "Mag patuloy" }}
+          cancel={{ label: "Kanselahin" }}
+        />
+      )}
     </form>
   );
 };
@@ -758,8 +795,11 @@ const HarvestingReport: FC<ReportContentPropType> = ({
   }, [handleFormError, state.formError]);
 
   useEffect(() => {
-    if (!isPassing) handleDoneLoading();
-  }, [isPassing, handleDoneLoading]);
+    if (!isPassing) {
+      handleDoneLoading();
+      setOpenReportModal(false);
+    }
+  }, [isPassing, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

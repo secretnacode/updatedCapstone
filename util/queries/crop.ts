@@ -83,7 +83,7 @@ export const GetMyCropInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "cropId", "cropLocation", "farmAreaMeasurement", "cropName", "cropLng", "cropLat" from capstone.crop where "farmerId" = $1`,
+        `select "cropId", "cropLocation", "farmAreaMeasurement", "cropName", "cropLng", "cropLat", "cropStatus", "dateHarvested", "datePlanted"  from capstone.crop where "farmerId" = $1`,
         [userId]
       )
     ).rows;
@@ -179,25 +179,6 @@ export const CheckCropIfHasReport = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng iyong pananim bago tanggalin`
-    );
-  }
-};
-
-/**
- * query for deleteing the crop info
- * @param cropId id of the crop to be deleted
- */
-export const DeleteUserCropInfoQuery = async (cropId: string) => {
-  try {
-    await pool.query(`delete from capstone.crop where "cropId" = $1`, [cropId]);
-  } catch (error) {
-    console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng iyong pananim: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng iyong pananim`
     );
   }
 };

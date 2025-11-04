@@ -231,6 +231,7 @@ export type GetUserReportReturnType =
       dayReported: string;
       dayHappen: string;
       title: string;
+      reportType: reportTypeStateType;
     }[];
 
 export type ServerActionFailBaseType = {
@@ -685,7 +686,10 @@ export type ModalNoticePropType = {
   onProceed?: () => void;
   showCancelButton: boolean;
   cancel?: { label: string; className?: string };
-  proceed?: { label: string; className?: string };
+  proceed?: {
+    label: string;
+    className?: string;
+  };
 };
 
 export type NewOrgType = {
@@ -909,6 +913,9 @@ export type GetMyCropInfoQueryRetrunType = {
   cropName: string;
   cropLng: number;
   cropLat: number;
+  cropStatus: cropStatusType;
+  dateHarvested: Date;
+  datePlanted: Date;
 };
 
 export type GetMyCropInfoReturnType =
@@ -926,16 +933,14 @@ export type FarmerCropPagePropType = {
 export type FarmerCropPageShowModalStateType = {
   addModal: boolean;
   editModal: boolean;
-  deleteModal: boolean;
-  cropHasReportModal: boolean;
 };
 
 export type FarmerCropPageHandleOpenModalParamType =
   | {
-      modalName: "addModal" | "cropHasReportModal";
+      modalName: "addModal";
     }
   | {
-      modalName: "editModal" | "deleteModal";
+      modalName: "editModal";
       cropId: string;
     };
 
@@ -1605,3 +1610,12 @@ export type TableComponentLoadingPropType = {
   col?: number;
   row?: number;
 };
+
+export type determineCropStatusReturnType = {
+  status: string;
+  className: string;
+};
+
+export type ModalNoticeLogoType =
+  | { logo: LucideIcon; logoColor: string; bgColor: string }
+  | undefined;

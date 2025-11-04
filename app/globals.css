@@ -77,19 +77,18 @@ body {
     @apply font-bold italic text-4xl md:text-5xl lg:text-7xl text-green-800 mb-4 tracking-wide font-serif;
   }
   .notification-wrapper {
-    @apply fixed top-4 right-4 z-50 flex flex-col gap-4;
+    @apply fixed top-4 right-4 z-50 flex w-fit flex-col items-end gap-4;
     pointer-events: none;
   }
   .notification {
-    @apply flex items-center gap-3 p-4 rounded-lg shadow-lg border backdrop-blur-sm;
+    @apply flex items-center gap-3 p-4 rounded-lg w-fit shadow-lg border backdrop-blur-sm;
     pointer-events: auto;
-    transform-origin: top right;
   }
   .success {
     @apply bg-green-50/90 border-green-600 text-green-900;
   }
   .warning {
-    @apply bg-orange-50/90 border-orange-600 text-orange-900;
+    @apply bg-amber-50/90 border-amber-600 text-amber-900;
   }
   .error {
     @apply bg-red-50/90 border-red-600 text-red-900;
