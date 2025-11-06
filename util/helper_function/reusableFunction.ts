@@ -665,3 +665,12 @@ export const determineCropStatus = ({
       };
   }
 };
+
+/**
+ * Make the initials of the name by getting its first letter
+ * @param firstName of the user
+ * @param lastName of the user
+ * @returns initial of both first and last name
+ */
+export const getInitials = (firstName: string, lastName: string) =>
+  (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();

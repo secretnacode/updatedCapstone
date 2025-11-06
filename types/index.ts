@@ -899,6 +899,7 @@ export type MapComponentPropType = ChildrenPropType &
     ref?: Ref<MapRef>;
     mapWidth?: string | number;
     mapHeight: string | number;
+    divClassName?: string;
   };
 
 export type getPointCoordinateReturnType = {
@@ -1138,7 +1139,7 @@ export type barDataStateType = {
   data: number[];
 };
 
-type timeStampzType = {
+export type timeStampzType = {
   days?: number;
   hours?: number;
   minutes?: number;
@@ -1278,6 +1279,7 @@ export type DashboardComponentPropType = {
   card3: DashboardCardPropType;
   lineChart: { title: string; user: workRoleType; data: lineChartDataType };
   userLocation: barangayType;
+  importantWidget?: ChildrenType;
   widget?: ChildrenType;
   showQuickAction?: boolean;
 };
@@ -1619,3 +1621,5 @@ export type determineCropStatusReturnType = {
 export type ModalNoticeLogoType =
   | { logo: LucideIcon; logoColor: string; bgColor: string }
   | undefined;
+
+export type seeAllValButtonPropType = { link: string };

@@ -45,11 +45,11 @@ export const FarmerLeadDashBoard = async () => {
               iconWrapperStyle: "bg-blue-200",
             },
             cardLabel: {
-              label: "Ulat ng miyembro",
+              label: "Ulat sa organisasyon",
               className: "text-blue-700 bg-blue-100",
             },
             cardContent: String(data.cardValue.orgMemberTotalReportToday),
-            contentLabel: "Ulat ng miyembro ngayon",
+            contentLabel: "Mga napasang ulat",
             link: "/farmerLeader/validateReport",
           }}
           card2={{
@@ -77,7 +77,7 @@ export const FarmerLeadDashBoard = async () => {
               className: "text-red-700 bg-red-100",
             },
             cardContent: String(data.cardValue.totalUnverfiedUser),
-            contentLabel: "Hindi beripikadong mga user",
+            contentLabel: "Hindi beripikadong user",
             link: "/farmerLeader/orgMember",
           }}
           lineChart={{
@@ -86,13 +86,11 @@ export const FarmerLeadDashBoard = async () => {
             data: data.reportSequence,
           }}
           userLocation={data.userLocation}
-          widget={
-            <>
-              <RecentReportWidget
-                recentReport={data.recentReport}
-                widgetTitle={"Mga nag pasa ng ulat"}
-              />
-            </>
+          importantWidget={
+            <RecentReportWidget
+              recentReport={data.recentReport}
+              widgetTitle={"Mga nag pasa ng ulat"}
+            />
           }
           user="leader"
         />
@@ -172,6 +170,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   card3,
   lineChart,
   userLocation,
+  importantWidget,
   widget,
   showQuickAction = true,
 }) => {
@@ -188,18 +187,19 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
 
         <LineChartComponent {...lineChart} />
 
-        {user === "leader" ||
-          (user === "farmer" && (
-            <Suspense fallback={<MyRecentReportLoading />}>
-              <MyPreviousReport user={user} />
-            </Suspense>
-          ))}
+        {(user === "leader" || user === "farmer") && (
+          <Suspense fallback={<MyRecentReportLoading />}>
+            <MyPreviousReport user={user} />
+          </Suspense>
+        )}
       </div>
 
       <div className="side-bar-wrapper ">
         <Suspense fallback={<WeatherSideComponentLoading />}>
           <WeatherComponent userLocation={userLocation} user={user} />
         </Suspense>
+
+        {importantWidget}
 
         <Suspense fallback={<SideComponentMyCropStatusLoading />}>
           <SideComponentMyCropStatus />

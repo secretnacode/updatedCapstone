@@ -43,6 +43,7 @@ import {
   capitalizeFirstLetter,
   converTimeToAMPM,
   DateToYYMMDD,
+  getInitials,
   makeWeatherIcon,
   ReadableDateFomat,
   translateWeatherConditionToTagalog,
@@ -80,7 +81,10 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
           <div className="flex flex-col items-center">
             <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
               <span className="text-4xl text-green-700 font-bold">
-                {userFarmerInfo.farmerInfo.farmerFirstName.charAt(0)}
+                {getInitials(
+                  userFarmerInfo.farmerInfo.farmerFirstName,
+                  userFarmerInfo.farmerInfo.farmerLastName
+                )}
               </span>
             </div>
           </div>
@@ -669,10 +673,11 @@ export const LatestReport = async () => {
                     <p className="subscript">{val.cropName}</p>
                   </div>
 
-                  <Link href={`/farmer/report?viewReport=${val.reportId}`}>
-                    <SubmitButton className="slimer-button">
-                      Tingnan
-                    </SubmitButton>
+                  <Link
+                    href={`/farmer/report?viewReport=${val.reportId}`}
+                    className="button submit-button slimer-button very-small-text"
+                  >
+                    Tingnan
                   </Link>
                 </div>
 

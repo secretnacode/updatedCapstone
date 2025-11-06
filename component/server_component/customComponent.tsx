@@ -19,9 +19,11 @@ import {
   NoContentYetPropType,
   RecentReportWidgetReturnType,
   reportTypeStateType,
+  seeAllValButtonPropType,
   TableComponentLoadingPropType,
   TableComponentPropType,
   tableNoDataPropType,
+  timeStampzType,
 } from "@/types";
 import { FC, memo, useMemo } from "react";
 import {
@@ -40,11 +42,14 @@ import {
   ClipboardPenLine,
   WheatOff,
   Wheat,
+  ChevronRight,
+  User,
+  MapPin,
 } from "lucide-react";
 import {
   baranggayList,
-  capitalizeFirstLetter,
   farmAreaMeasurementValue,
+  getInitials,
   intoFeaturePolygon,
   ReadableDateFomat,
   UnexpectedErrorMessage,
@@ -765,55 +770,79 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
   recentReport,
   widgetTitle,
 }) => {
+  const timePass = (pastTime: timeStampzType) => {
+    if ((pastTime.days ?? 0) > 0) {
+      return `${pastTime.days} ${pastTime.days === 1 ? "day" : "days"}`;
+    } else if ((pastTime.hours ?? 0) > 0) {
+      return `${pastTime.hours} ${pastTime.hours === 1 ? "hr" : "hrs"}`;
+    } else if ((pastTime.minutes ?? 0) > 0) {
+      return `${pastTime.minutes} min`;
+    } else {
+      return "Just now";
+    }
+  };
+
   return (
-    <div>
-      <div className="card-title-wrapper">
-        <p className="font-semibold">{widgetTitle}</p>
+    <div className="component">
+      <div className=" card-title-wrapper">
+        <p>{widgetTitle}</p>
       </div>
 
-      <div className=" [&>a]:not-last:border-b [&>a]:first:border-t  [&>a]:not-last:border-gray-300">
-        {recentReport.map((val) => {
-          const timePass = () => {
-            if (val.pastTime.days ?? 0 > 0) return `${val.pastTime.days} day/s`;
-            else if (val.pastTime.hours ?? 0 > 0)
-              return `${val.pastTime.hours} hr/s`;
-            else if (val.pastTime.minutes ?? 0 > 0)
-              return `${val.pastTime.minutes} min/s`;
-            else return `0min`;
-          };
-
-          return (
+      {recentReport.length > 0 ? (
+        <div className="divide-y divide-gray-100">
+          {recentReport.map((val) => (
             <Link
-              href={`/farmer/validateReport?reportId=${val.reportId}`}
+              href={`/farmerLeader/validateReport?reportId=${val.reportId}`}
               key={val.reportId}
-              className="block"
+              className="block hover:bg-gray-50 transition-all duration-200 group cursor-pointer pl-2 py-2"
             >
-              <div className="rounded-md hover:bg-gray-200 transition-colors grid grid-cols-4 py-1.5">
-                <div className="flex items-center justify-center">
-                  <p className="text-gray-700 size-9 text-sm rounded-full bg-gray-100 grid place-items-center">
-                    {val.farmerFirstName.charAt(0) +
-                      val.farmerLastName.charAt(0)}
+              <div className="flex items-center gap-4">
+                <div
+                  className={`flex-shrink-0 w-11 h-11 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-semibold text-sm shadow-sm`}
+                >
+                  {getInitials(val.farmerFirstName, val.farmerLastName)}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors">
+                    {val.farmerFirstName} {val.farmerLastName}
+                  </p>
+
+                  <p className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                    <span className="capitalize">{val.barangay}</span>
+
+                    <span>•</span>
+
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {timePass(val.pastTime)}
+                    </span>
                   </p>
                 </div>
 
-                <div className="col-span-2 flex flex-col justify-center items-start leading-4">
-                  <p className="">
-                    {val.farmerFirstName + " " + val.farmerLastName}
-                  </p>
-                  <p className="subscript">
-                    {val.barangay.charAt(0).toUpperCase() +
-                      val.barangay.slice(1)}
-                  </p>
-                </div>
-
-                <p className="text-gray-500 very-very-small-text grid place-items-center">
-                  {timePass()}
-                </p>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
               </div>
             </Link>
-          );
-        })}
-      </div>
+          ))}
+
+          <SeeAllValButton link="/farmerLeader/validateReport" />
+        </div>
+      ) : (
+        // Empty State
+        <>
+          <div className="px-5 py-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <User className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-sm text-gray-500 font-medium">
+              Walang bagong ulat
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Mag-antay ng mga bagong submission
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -967,6 +996,22 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
     }
   };
 
+  const translatedReportType = (type: reportTypeStateType) => {
+    switch (type) {
+      case "damage":
+        return "Pagkasira";
+
+      case "harvesting":
+        return "Pagaani";
+
+      case "planting":
+        return "Pagtatanim";
+
+      default:
+        return "Hindi matukoy";
+    }
+  };
+
   return (
     <div className="component !p-0">
       <div className="p-6 border-b border-gray-100">
@@ -990,7 +1035,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                           report.reportType
                         )}`}
                       >
-                        {capitalizeFirstLetter(report.reportType)}
+                        {translatedReportType(report.reportType)}
                       </span>
 
                       <h3 className="font-medium text-gray-900">
@@ -1174,20 +1219,23 @@ export const SideComponentMyCropStatus = async () => {
       {cropStatus.success ? (
         cropStatus.cropInfoStatus.length > 0 ? (
           <>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 [&>div]:not-last-of-type:border-b [&>div]:not-last-of-type:border-gray-200">
               {cropStatus.cropInfoStatus.map((crop) => (
-                <div
-                  key={crop.cropId}
-                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-2">
+                <div key={crop.cropId} className=" py-2 ">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <div>
                         <h4 className="font-semibold text-gray-900">
                           {crop.cropName}
                         </h4>
-                        <p className="text-sm text-gray-500">
-                          {crop.farmAreaMeasurement}
+                        <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>
+                            {crop.farmAreaMeasurement}{" "}
+                            {parseFloat(crop.farmAreaMeasurement) === 1
+                              ? "hectare"
+                              : "hectares"}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -1200,21 +1248,19 @@ export const SideComponentMyCropStatus = async () => {
                     >
                       {crop.cropStatus === "harvested"
                         ? "Naani na"
-                        : "Na tanima na"}
+                        : "Na taniman na"}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500 space-y-1">
-                    <p>Itinanim: {ReadableDateFomat(crop.datePlanted)}</p>
+
+                  <div className="text-sm text-gray-500 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Itinanim: {ReadableDateFomat(crop.datePlanted)}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-100">
-              <button className="w-full text-sm text-green-600 hover:text-green-700 font-medium">
-                Tingnan lahat
-              </button>
-            </div>
+            <SeeAllValButton link="/farmer/crop" />
           </>
         ) : (
           <NoContentYet
@@ -1344,3 +1390,13 @@ export const TableComponentLoading: FC<TableComponentLoadingPropType> = ({
     </div>
   );
 };
+
+export const SeeAllValButton: FC<seeAllValButtonPropType> = ({ link }) => (
+  <Link
+    href={link}
+    className="p-2 bg-gray-100/80 border-t-2 border-gray-200 rounded-b-md text-sm text-green-600 hover:text-green-700 font-medium tracking-wide flex justify-center items-center"
+  >
+    Tingnan lahat
+    <ChevronRight className="w-4 h-4" />
+  </Link>
+);

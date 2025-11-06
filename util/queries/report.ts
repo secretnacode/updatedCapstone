@@ -235,7 +235,7 @@ export const getCountFarmerMemReportToday = async (
   try {
     return (
       await pool.query(
-        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where fl."farmerId" = $1 and date(r."dayReported") = current_date`,
+        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and date(r."dayReported") = current_date`,
         [farmerLeadId]
       )
     ).rows[0].count;
@@ -262,7 +262,7 @@ export const getCountUnvalidatedReport = async (
   try {
     return (
       await pool.query(
-        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where fl."farmerId" = $1 and r."verificationStatus" = $2`,
+        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
         [farmerLeadId, "false"]
       )
     ).rows[0].count;

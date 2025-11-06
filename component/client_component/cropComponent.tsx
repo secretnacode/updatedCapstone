@@ -282,6 +282,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             mapHeight={400}
             ref={mapRef}
             cityToHighlight={intoFeatureCollection(handleCityToLight())}
+            divClassName="shadow-sm"
           >
             {myCropInfoList[0].cropLat &&
               myCropInfoList[0].cropLat &&
@@ -294,7 +295,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
               ))}
           </MapComponent>
         ) : (
-          <MapComponent mapHeight={400} ref={mapRef} />
+          <MapComponent mapHeight={400} ref={mapRef} divClassName="shadow-sm" />
         )}
       </div>
 
