@@ -34,6 +34,8 @@ export const RemoveSearchParamsVal: FC<RemoveSearchParamsValPropType> = ({
   const route = useRouter();
 
   useEffect(() => {
+    if (!name) return;
+
     const currentUrl = new URL(window.location.href);
 
     currentUrl.searchParams.delete(name);

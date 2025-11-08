@@ -213,9 +213,21 @@ export const UnexpectedErrorMessageEnglish = (): string => {
   return "Unexpected error has occured";
 };
 
+/**
+ * error message to notify the farmer leader that its not their member
+ * @returns
+ */
 export const NotAMemberErrorMessage = () => {
   return "Hindi mo ka miyembro and user na ito";
 };
+
+/**
+ * path to the report page with the viewReport search param val that automatically open the report base on the value of the viewReport
+ * @param id id of the report that will be view
+ * @returns
+ */
+export const viewFarmerReportPath = (id: string) =>
+  `/farmer/report?viewReport=${id}`;
 
 /**
  * used to convert the user farmerAreaMasurement into a hectare value

@@ -129,12 +129,14 @@ export const GetFarmerReportDetailQuery = async (
   reportId: string
 ): Promise<GetFarmerReportDetailQueryReturnType> => {
   try {
-    return (
-      await pool.query(
-        `select c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description"`,
-        [reportId]
-      )
-    ).rows[0];
+    const reportInfo = await pool.query(
+      `select c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description"`,
+      [reportId]
+    );
+
+    if (reportInfo.rowCount === 0) return { isExist: false };
+
+    return { isExist: true, reportInfo: reportInfo.rows[0] };
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng ulat: ${
@@ -647,7 +649,7 @@ export const getLatestReportQuery = async (
   try {
     return (
       await pool.query(
-        `select r."reportId", r."title", c."cropName" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where r."farmerId" = $1 limit 5`,
+        `select "reportId", "title", "dayReported", "reportType" from capstone.report where "farmerId" = $1 limit 5`,
         [farmerId]
       )
     ).rows;

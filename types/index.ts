@@ -248,7 +248,7 @@ export type GetFarmerReportReturnType =
 
 export type addReportComponentPropType = { openModal?: boolean };
 
-export type RemoveSearchParamsValPropType = { name: string };
+export type RemoveSearchParamsValPropType = { name?: string };
 
 export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
 
@@ -302,9 +302,13 @@ type GetFarmerReportDetailBaseType = {
 };
 
 export type GetFarmerReportDetailQueryReturnType =
-  GetFarmerReportDetailBaseType & {
-    pictures: string;
-  };
+  | { isExist: false }
+  | {
+      isExist: true;
+      reportInfo: GetFarmerReportDetailBaseType & {
+        pictures: string;
+      };
+    };
 
 export type ReportDetailType = GetFarmerReportDetailBaseType & {
   pictures: string[];
@@ -1494,7 +1498,8 @@ export type PieChartCardPropType = {
 export type getLatestReportQueryReturnType = {
   reportId: string;
   title: string;
-  cropName: string;
+  dayReported: Date;
+  reportType: reportTypeStateType;
 };
 
 export type getLatestReportReturnType =
@@ -1623,3 +1628,7 @@ export type ModalNoticeLogoType =
   | undefined;
 
 export type seeAllValButtonPropType = { link: string };
+
+export type autoOpenMyReportPropType = {
+  reportId: string;
+};

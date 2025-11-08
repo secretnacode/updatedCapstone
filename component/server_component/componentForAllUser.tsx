@@ -10,15 +10,20 @@ import {
   getWeatherTodayReturnType,
   getReportCountPerCropReturnType,
   getLatestReportReturnType,
+  reportTypeStateType,
 } from "@/types";
 import {
   AlertCircle,
+  AlertTriangle,
+  Calendar,
   ClipboardX,
   CloudOff,
   FileText,
   LucideIcon,
   MapPinHouse,
+  Package,
   Pencil,
+  Sprout,
   Wheat,
   WheatOff,
 } from "lucide-react";
@@ -36,7 +41,7 @@ import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
 import {
   FormDivLabelInput,
-  SubmitButton,
+  SeeAllValButton,
   TableComponent,
 } from "./customComponent";
 import {
@@ -48,6 +53,7 @@ import {
   ReadableDateFomat,
   translateWeatherConditionToTagalog,
   UnexpectedErrorMessage,
+  viewFarmerReportPath,
 } from "@/util/helper_function/reusableFunction";
 import { getWeatherToday } from "@/lib/server_action/weather";
 import Image from "next/image";
@@ -614,7 +620,7 @@ export const ReportCountPerCropLoading = () => {
         <div className="h-4 w-48 div-loading" />
       </div>
 
-      <div className="flex flex-col items-center justify-center space-y-4 p-4 rounded-xl shadow-sm border border-gray-100 animate-pulse">
+      <div className="flex flex-col items-center justify-center space-y-4 p-4 rounded-xl animate-pulse">
         <div className="h-40 w-40 div-loading" />
 
         <div className="flex flex-col space-y-2 w-full max-w-xs children-div-loading">
@@ -654,6 +660,38 @@ export const LatestReport = async () => {
     </div>
   );
 
+  const reportTypeIcon = (type: reportTypeStateType) => {
+    switch (type) {
+      case "damage":
+        return <AlertTriangle className="logo" />;
+
+      case "planting":
+        return <Sprout className="logo" />;
+
+      case "harvesting":
+        return <Package className="logo" />;
+
+      default:
+        return <FileText className="logo" />;
+    }
+  };
+
+  const reportTypeColor = (type: reportTypeStateType) => {
+    switch (type) {
+      case "damage":
+        return "bg-red-100 text-red-700";
+
+      case "planting":
+        return "bg-green-100 text-green-700";
+
+      case "harvesting":
+        return "bg-amber-100 text-amber-700";
+
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   return (
     <div className="space-y-4 component">
       <div className="font-semibold">
@@ -663,27 +701,46 @@ export const LatestReport = async () => {
       <div>
         {report.success ? (
           report.reportVal.length > 0 ? (
-            report.reportVal.map((val) => (
-              <div key={val.reportId}>
-                <div className="rounded-md hover:bg-gray-200 transition-colors flex justify-between items-center py-2">
-                  <div className="flex flex-col justify-center items-start leading-4 w-1/2">
-                    <p className="text-nowrap overflow-hidden text-ellipsis w-full">
-                      {val.title}
-                    </p>
-                    <p className="subscript">{val.cropName}</p>
+            <div className="divide-y divide-gray-100">
+              {report.reportVal.map((val) => (
+                <div
+                  key={val.reportId}
+                  className="hover:bg-gray-50 transition-all duration-200 group py-2"
+                >
+                  <div className="flex items-center justify-evenly gap-2">
+                    <div
+                      className={`flex-shrink-0 p-2 rounded-lg ${reportTypeColor(
+                        val.reportType
+                      )} flex items-center justify-center`}
+                    >
+                      {reportTypeIcon(val.reportType)}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <h4 className="font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors leading-snug">
+                          {val.title}
+                        </h4>
+                      </div>
+
+                      <div className="flex justify-start items-center text-xs text-gray-500">
+                        <Calendar className="w-3.5 h-3.5 mr-1" />
+                        <span>{ReadableDateFomat(val.dayReported)}</span>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={viewFarmerReportPath(val.reportId)}
+                      className="button submit-button slimer-button flex-shrink-0 ml-3 very-small"
+                    >
+                      Tingnan
+                    </Link>
                   </div>
-
-                  <Link
-                    href={`/farmer/report?viewReport=${val.reportId}`}
-                    className="button submit-button slimer-button very-small-text"
-                  >
-                    Tingnan
-                  </Link>
                 </div>
+              ))}
 
-                <div className="border-b border-gray-300" />
-              </div>
-            ))
+              <SeeAllValButton link="/farmer/report" />
+            </div>
           ) : (
             <NoVal />
           )

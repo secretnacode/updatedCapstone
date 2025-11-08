@@ -554,12 +554,26 @@ export const GetFarmerReportDetail = async (
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
 
+    if (!reportDetail.isExist) {
+      const message = (): string => {
+        if (work === "admin" || work === "agriculturist")
+          return "The report doesnt exist";
+
+        return "Hindi makita ang ulat";
+      };
+
+      return {
+        success: false,
+        notifError: [{ message: message(), type: "warning" }],
+      };
+    }
+
     return {
       success: true,
       work,
       reportDetail: {
-        ...reportDetail,
-        pictures: reportDetail.pictures.split(","),
+        ...reportDetail.reportInfo,
+        pictures: reportDetail.reportInfo.pictures.split(","),
       },
     };
   } catch (error) {

@@ -53,6 +53,7 @@ import {
   intoFeaturePolygon,
   ReadableDateFomat,
   UnexpectedErrorMessage,
+  viewFarmerReportPath,
 } from "@/util/helper_function/reusableFunction";
 import {
   MapComponent,
@@ -866,7 +867,7 @@ export const ModalLoading: FC = () => {
         </div>
 
         <div className="flex justify-center mt-6">
-          <div className="flex gap-1 !bg-blue-500 children-div-loading [&>div]: [&>div]:w-2 [&>div]:h-2 ">
+          <div className="flex gap-1 children-div-loading [&>div]:!bg-blue-500 [&>div]:w-2 [&>div]:h-2 ">
             <div />
             <div style={{ animationDelay: "0.2s" }} />
             <div style={{ animationDelay: "0.4s" }} />
@@ -1049,7 +1050,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                       </span>
                     </div>
                   </div>
-                  {user === "leader" ? (
+                  {user !== "leader" ? (
                     <div
                       className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
                         report.verificationStatus
@@ -1064,7 +1065,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                     </div>
                   ) : (
                     <Link
-                      href={`/farmer/report?viewReport=${report.reportId}`}
+                      href={viewFarmerReportPath(report.reportId)}
                       className="button slimer-button submit-button"
                     >
                       Tingnan

@@ -46,6 +46,7 @@ import {
   addReportComponentPropType,
   AddReportPictureType,
   allUserRoleType,
+  autoOpenMyReportPropType,
   createReportFormErrorType,
   createReportPropType,
   cropStatusType,
@@ -77,6 +78,7 @@ import { getFarmerCropName } from "@/lib/server_action/crop";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { RemoveSearchParamsVal } from "./fallbackComponent";
 
 export const AddReportComponent: FC<addReportComponentPropType> = ({
   openModal,
@@ -1144,6 +1146,7 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
   myReport = false,
 }) => {
   const [viewReport, setViewReport] = useState<boolean>(false);
+
   return (
     <>
       <SubmitButton
@@ -1162,9 +1165,37 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
             farmerName={farmerName}
             myReport={myReport}
           />,
-
           document.body
         )}
+    </>
+  );
+};
+
+/**
+ * component that is for automatically opening the report of the user base on the viewReport param
+ * @param param0
+ */
+export const AutoOpenMyReport: FC<autoOpenMyReportPropType> = ({
+  reportId,
+}) => {
+  //will remove the param after the
+  const [showModal, setShowModal] = useState(false);
+  const [reportToView, setReportToView] = useState<string>();
+
+  useEffect(() => {
+    setReportToView(reportId);
+    setShowModal(true);
+  }, [reportId]);
+
+  return (
+    <>
+      {reportToView && showModal && (
+        <UserReportModal
+          reportId={reportToView}
+          closeModal={() => setShowModal(false)}
+          myReport={true}
+        />
+      )}
     </>
   );
 };
@@ -1180,30 +1211,23 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
   const [userWork, setUserWork] = useState<allUserRoleType>("farmer");
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  });
-
-  useEffect(() => {
     const report = async () => {
       let report: GetFarmerReportDetailReturnType;
 
       try {
         report = await GetFarmerReportDetail(reportId);
 
-        if (report.success) {
-          setUserReport(report.reportDetail);
-          setUserWork(report.work);
-        } else {
+        if (!report.success) {
           handleSetNotification(report.notifError);
-          closeModal();
+          return closeModal();
         }
+
+        setUserReport(report.reportDetail);
+        setUserWork(report.work);
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
+        closeModal();
       }
     };
 
@@ -1261,8 +1285,6 @@ export const EditableUserReportDetails: FC<
     setNewDesc(userReport.description);
     setIsChanged(false);
   };
-
-  console.log(reportId);
 
   const handleChangeApproveOrJustApprove = async () => {
     try {
@@ -1358,8 +1380,6 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
       ? "Not yet validated"
       : "Validated";
   };
-
-  console.log(userReport.verificationStatus);
 
   return (
     <>
@@ -1539,57 +1559,6 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
             </div>
           )}
         </div>
-
-        {/* <div className="p-6 space-y-6">
-          <div className="grid gap-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">Nang yari ang kaganapan</p>
-                <p className="font-medium">
-                  {userReport.dayHappen.toDateString()}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">
-                  Araw na ipinasa ang ulat:{" "}
-                </p>
-                <p className="font-medium">
-                  {userReport.dayReported.toDateString()}
-                </p>
-              </div>
-
-              <div
-                className={`px-3 py-1 rounded-full text-sm ${
-                  userReport.verificationStatus === "false"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-green-100 text-green-700"
-                }`}
-              >
-                {reportStatus()}
-              </div>
-            </div>
-
-            <div className="prose max-w-none">
-              <p>{userReport.description}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {userReport.pictures.map((pic, index) => (
-              <div key={pic + index} className="relative aspect-video">
-                -
-                <Image
-                  src={pic}
-                  alt={`Larawan ${index + 1} ng gagawing ulat`}
-                  fill
-                  unoptimized
-                  className="object-cover rounded-lg"
-                />
-              </div>
-            ))}
-          </div>
-        </div> */}
       </div>
     </>
   );
