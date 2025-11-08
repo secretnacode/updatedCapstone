@@ -1,9 +1,5 @@
 import { FarmerCropPage } from "@/component/client_component/cropComponent";
-import {
-  RedirectManager,
-  RemoveSearchParamsVal,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import {
   LatestReport,
   LatestReportLoading,
@@ -19,13 +15,13 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ addCrop?: boolean; notif?: string }>;
+  searchParams: Promise<{ notif?: string; addCrop?: string }>;
 }) {
-  const { notif } = await searchParams;
-  let message: NotificationBaseType[] | null = null;
-  if (notif) message = JSON.parse(notif);
+  const { notif, addCrop } = await searchParams;
 
-  const isAddingCrop = (await searchParams).addCrop;
+  let message: NotificationBaseType[] | null = null;
+
+  if (notif) message = JSON.parse(notif);
 
   let cropInfo: GetMyCropInfoReturnType;
 
@@ -41,15 +37,13 @@ export default async function Page({
   return (
     <div>
       {!cropInfo.success ? (
-        <RenderNotification notif={cropInfo.notifError} />
+        <RenderRedirectNotification notif={cropInfo.notifError} />
       ) : (
         <div className="grid grid-cols-4 gap-4 h-full">
-          {isAddingCrop && <RemoveSearchParamsVal name={"addCrop"} />}
-
           <div className="col-span-3 h-full">
             <FarmerCropPage
               myCropInfoList={cropInfo.myCropInfoList}
-              addCrop={isAddingCrop}
+              addCrop={addCrop === "true"}
             />
           </div>
 
@@ -65,7 +59,7 @@ export default async function Page({
         </div>
       )}
 
-      {message && <RedirectManager data={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
     </div>
   );
 }

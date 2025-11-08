@@ -1,5 +1,5 @@
 import { AllFarmerCrop } from "@/component/client_component/cropComponent";
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GetAllCropInfo } from "@/lib/server_action/crop";
 import { GetAllCropInfoReturnType } from "@/types";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
@@ -22,7 +22,7 @@ export default async function Page() {
   return (
     <div>
       {!cropVal.success ? (
-        <RenderNotification notif={cropVal.notifError} />
+        <RenderRedirectNotification notif={cropVal.notifError} />
       ) : (
         <div className="grid grid-cols-4 gap-5">
           <div className="col-span-3">

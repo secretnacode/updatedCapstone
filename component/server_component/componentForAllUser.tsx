@@ -37,7 +37,6 @@ import {
   PieChartCard,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
-import { RenderNotification } from "../client_component/fallbackComponent";
 import Link from "next/link";
 import {
   FormDivLabelInput,
@@ -61,6 +60,7 @@ import {
   getLatestReport,
   getReportCountPerCrop,
 } from "@/lib/server_action/report";
+import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -80,7 +80,9 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   return (
     <div className="grid md:grid-cols-4 gap-6">
       {/* Left Column - Profile Info */}
-      {!AvailOrg.success && <RenderNotification notif={AvailOrg.notifError} />}
+      {!AvailOrg.success && (
+        <RenderRedirectNotification notif={AvailOrg.notifError} />
+      )}
       <div>
         {/* Profile Picture */}
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
@@ -486,7 +488,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
         </div>
       ) : (
         <>
-          <RenderNotification notif={currentWeather.notifError} />
+          <RenderRedirectNotification notif={currentWeather.notifError} />
 
           <div className="component">
             <div className="card-title-wrapper flex justify-start items-center gap-2">
@@ -604,7 +606,7 @@ export const ReportCountPerCrop: FC = async () => {
           )
         ) : (
           <>
-            <RenderNotification notif={reportCount.notifError} />
+            <RenderRedirectNotification notif={reportCount.notifError} />
             <NoValueInPieChart hasCrop={false} />
           </>
         )}
@@ -746,7 +748,7 @@ export const LatestReport = async () => {
           )
         ) : (
           <>
-            <RenderNotification notif={report.notifError} />
+            <RenderRedirectNotification notif={report.notifError} />
             <NoVal />
           </>
         )}

@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { ViewUserReportButton } from "@/component/client_component/reportComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllFarmerReport } from "@/lib/server_action/report";
@@ -22,7 +22,7 @@ export default async function Page() {
   return (
     <>
       {!farmerReport.success ? (
-        <RenderNotification notif={farmerReport.notifError} />
+        <RenderRedirectNotification notif={farmerReport.notifError} />
       ) : (
         <TableComponent
           noContentMessage="There's no farmer report that's been passed yet!!!"

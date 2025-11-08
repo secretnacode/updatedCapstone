@@ -57,6 +57,7 @@ import {
 } from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
+import { useSearchParam } from "./customHook";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -211,14 +212,17 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   addCrop,
 }) => {
   const mapRef = useRef<MapRef>(null);
+  const { deleteParams } = useSearchParam();
   const [cropIdToModify, setCropIdToModify] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<FarmerCropPageShowModalStateType>({
     addModal: false,
     editModal: false,
   });
 
+  const paramName = "addCrop";
+
   useEffect(() => {
-    if (addCrop !== undefined) handleOpenModal({ modalName: "addModal" });
+    if (addCrop) handleOpenModal({ modalName: "addModal" });
   }, [addCrop]);
 
   const handleOpenModal = (
@@ -272,6 +276,12 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       datePlanted: datePlanted,
       isEnglish: false,
     });
+  };
+
+  const handleCloseAddModal = () => {
+    deleteParams(paramName);
+
+    handleCloseModal("addModal");
   };
 
   return (
@@ -401,7 +411,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       </div>
 
       {showModal.addModal && (
-        <AddCropModal hideAddCropModal={() => handleCloseModal("addModal")} />
+        <AddCropModal hideAddCropModal={handleCloseAddModal} />
       )}
 
       {showModal.editModal && (

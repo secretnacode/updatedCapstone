@@ -1,7 +1,4 @@
-import {
-  RedirectManager,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import {
   FarmerDashBoard,
   FarmerLeadDashBoard,
@@ -36,11 +33,12 @@ export default async function Page({
 
   return (
     <div>
-      {message && <RedirectManager data={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
+
       {userRole.success ? (
         <div className="grid grid-cols-4 gap-4"></div>
       ) : (
-        <RenderNotification notif={userRole.notifError} />
+        <RenderRedirectNotification notif={userRole.notifError} />
       )}
       {userRole.success && userRole.role === "leader" ? (
         <FarmerLeadDashBoard />

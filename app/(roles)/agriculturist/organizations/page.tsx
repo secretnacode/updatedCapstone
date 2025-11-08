@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { DynamicLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
@@ -19,7 +19,7 @@ export default async function Page() {
   return (
     <>
       {!availableOrgs.success ? (
-        <RenderNotification notif={availableOrgs.notifError} />
+        <RenderRedirectNotification notif={availableOrgs.notifError} />
       ) : (
         <TableComponent
           noContentMessage="There's no organization that was listed yet"

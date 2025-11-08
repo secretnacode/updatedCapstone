@@ -78,16 +78,23 @@ import { getFarmerCropName } from "@/lib/server_action/crop";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { RemoveSearchParamsVal } from "./fallbackComponent";
+import { useSearchParam } from "./customHook";
 
 export const AddReportComponent: FC<addReportComponentPropType> = ({
   openModal,
 }) => {
+  const { deleteParams } = useSearchParam();
   const [openReportModal, setOpenReportModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (openModal !== undefined) setOpenReportModal(openModal);
+    setOpenReportModal(openModal);
   }, [openModal]);
+
+  const handleCloseModal = () => {
+    deleteParams("addReport");
+
+    setOpenReportModal(false);
+  };
 
   return (
     <>
@@ -101,10 +108,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
 
       {openReportModal && (
         <div className="modal-form">
-          <div
-            className="absolute inset-0"
-            onClick={() => setOpenReportModal(false)}
-          />
+          <div className="absolute inset-0" onClick={handleCloseModal} />
 
           <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
@@ -113,7 +117,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
               </h2>
 
               <button
-                onClick={() => setOpenReportModal(false)}
+                onClick={handleCloseModal}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -391,9 +395,10 @@ const DamageReport: FC<ReportContentPropType> = ({
   useEffect(() => {
     if (!isPassing) {
       handleDoneLoading();
-      setOpenReportModal(false);
+
+      if (state.success) setOpenReportModal(false);
     }
-  }, [isPassing, handleDoneLoading, setOpenReportModal]);
+  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -543,7 +548,7 @@ const DamageReport: FC<ReportContentPropType> = ({
       <FormCancelSubmitButton
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
-        cancelOnClick={() => setOpenReportModal}
+        cancelOnClick={() => setOpenReportModal(false)}
       />
     </form>
   );
@@ -584,9 +589,10 @@ const PlantingReport: FC<ReportContentPropType> = ({
     if (!isPassing) {
       handleDoneLoading();
       setOpenModal(false);
-      setOpenReportModal(false);
+
+      if (state.success) setOpenReportModal(false);
     }
-  }, [isPassing, handleDoneLoading, setOpenReportModal]);
+  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -742,7 +748,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
         submitOnClick={() => setOpenModal(true)}
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
-        cancelOnClick={() => setOpenReportModal}
+        cancelOnClick={() => setOpenReportModal(false)}
       />
 
       {openModal && (
@@ -799,9 +805,10 @@ const HarvestingReport: FC<ReportContentPropType> = ({
   useEffect(() => {
     if (!isPassing) {
       handleDoneLoading();
-      setOpenReportModal(false);
+
+      if (state.success) setOpenReportModal(false);
     }
-  }, [isPassing, handleDoneLoading, setOpenReportModal]);
+  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -952,7 +959,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
       <FormCancelSubmitButton
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
-        cancelOnClick={() => setOpenReportModal}
+        cancelOnClick={() => setOpenReportModal(false)}
       />
     </form>
   );
@@ -1179,6 +1186,7 @@ export const AutoOpenMyReport: FC<autoOpenMyReportPropType> = ({
   reportId,
 }) => {
   //will remove the param after the
+  const { deleteParams } = useSearchParam();
   const [showModal, setShowModal] = useState(false);
   const [reportToView, setReportToView] = useState<string>();
 
@@ -1187,12 +1195,18 @@ export const AutoOpenMyReport: FC<autoOpenMyReportPropType> = ({
     setShowModal(true);
   }, [reportId]);
 
+  const handleCloseModal = () => {
+    deleteParams("viewReport");
+
+    setShowModal(false);
+  };
+
   return (
     <>
       {reportToView && showModal && (
         <UserReportModal
           reportId={reportToView}
-          closeModal={() => setShowModal(false)}
+          closeModal={handleCloseModal}
           myReport={true}
         />
       )}

@@ -1,5 +1,5 @@
 import { AuthForm } from "@/component/client_component/authComponent";
-import { RedirectManager } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { NotificationBaseType } from "@/types";
 
 export default async function Page({
@@ -14,7 +14,7 @@ export default async function Page({
 
   return (
     <div className="w-[90%] max-w-md">
-      {message && <RedirectManager data={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
       <AuthForm />
     </div>
   );
