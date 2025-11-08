@@ -201,7 +201,7 @@ const Logo: FC<{ type: "success" | "error" | "warning" | null }> = ({
 
 export const RenderRedirectNotification: FC<renderRedirectNotification> = ({
   notif,
-}) => <RenderNotification notif={notif} />;
+}) => <RenderNotification notif={notif} paramName="notif" />;
 
 export const RenderNotification: FC<renderNotificationPropType> = ({
   notif,
