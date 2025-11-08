@@ -19,13 +19,13 @@ import {
   UserRound,
 } from "lucide-react";
 import { LineChartComponent } from "../client_component/componentForAllUser";
-import { RenderNotification } from "../client_component/fallbackComponent";
 import {
   FarmerQuickActionComponent,
   WeatherComponent,
 } from "./componentForAllUser";
 import { DashboardComponentPropType } from "@/types";
 import { FC, Suspense } from "react";
+import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +35,7 @@ export const FarmerLeadDashBoard = async () => {
   return (
     <>
       {!data.success ? (
-        <RenderNotification notif={data.notifError} />
+        <RenderRedirectNotification notif={data.notifError} />
       ) : (
         <DashboardComponent
           card1={{
@@ -107,7 +107,7 @@ export const FarmerDashBoard = async () => {
   return (
     <>
       {!data.success ? (
-        <RenderNotification notif={data.notifError} />
+        <RenderRedirectNotification notif={data.notifError} />
       ) : (
         <DashboardComponent
           card1={{

@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
 import { GetMyProfileInfo } from "@/lib/server_action/farmerUser";
 import { GetMyProfileInfoReturnType } from "@/types";
@@ -33,7 +33,7 @@ export default async function Page() {
           />
         </div>
       ) : (
-        <RenderNotification notif={userInfo.notifError} />
+        <RenderRedirectNotification notif={userInfo.notifError} />
       )}
     </div>
   );

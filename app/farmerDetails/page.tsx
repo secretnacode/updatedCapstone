@@ -1,5 +1,5 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { FarmerDetailForm } from "@/component/client_component/farmerDetailsComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { newUserValNeedInfo } from "@/lib/server_action/user";
 import { newUserValNeedInfoReturnType } from "@/types";
 
@@ -26,7 +26,7 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
       {!newUserNeedInfo.success ? (
-        <RenderNotification notif={newUserNeedInfo.notifError} />
+        <RenderRedirectNotification notif={newUserNeedInfo.notifError} />
       ) : (
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">

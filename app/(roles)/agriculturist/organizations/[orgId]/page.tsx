@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { OrganizationMemberList } from "@/component/server_component/componentForAllUser";
 import { GetAllOrgMemberList } from "@/lib/server_action/org";
 import { GetAllOrgMemberListReturnType } from "@/types";
@@ -27,7 +27,7 @@ export default async function Page({
   return (
     <>
       {!orgMemberList.success ? (
-        <RenderNotification notif={orgMemberList.notifError} />
+        <RenderRedirectNotification notif={orgMemberList.notifError} />
       ) : (
         <OrganizationMemberList memberList={orgMemberList.memberList} />
       )}

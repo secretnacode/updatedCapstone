@@ -4,6 +4,8 @@ import {
   NotificationBaseType,
   NotificationContextType,
   NotificationValType,
+  renderNotificationPropType,
+  renderRedirectNotification,
 } from "@/types";
 import { CreateUUID } from "@/util/helper_function/reusableFunction";
 import {
@@ -20,9 +22,11 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
+import { useSearchParam } from "../customHook";
 
 /**
  * defining the default value of the notification context
@@ -193,4 +197,24 @@ const Logo: FC<{ type: "success" | "error" | "warning" | null }> = ({
       )}
     </>
   );
+};
+
+export const RenderRedirectNotification: FC<renderRedirectNotification> = ({
+  notif,
+}) => <RenderNotification notif={notif} />;
+
+export const RenderNotification: FC<renderNotificationPropType> = ({
+  notif,
+  paramName,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { deleteParams } = useSearchParam();
+
+  useEffect(() => {
+    handleSetNotification(notif);
+
+    if (paramName) deleteParams(paramName);
+  }, [notif, paramName, handleSetNotification, deleteParams]);
+
+  return null;
 };

@@ -2,7 +2,7 @@ import {
   ApprovedFarmerButton,
   DeleteFarmerButton,
 } from "@/component/client_component/componentForAllUser";
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { DynamicLink } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
@@ -33,7 +33,7 @@ export default async function Page() {
   return (
     <>
       {!unvalidatedUser.success ? (
-        <RenderNotification notif={unvalidatedUser.notifError} />
+        <RenderRedirectNotification notif={unvalidatedUser.notifError} />
       ) : (
         <TableComponent
           noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"

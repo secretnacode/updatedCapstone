@@ -56,8 +56,8 @@ import {
 import { polygonCoordinates } from "@/util/helper_function/barangayCoordinates";
 import Link from "next/link";
 import { getMyRecentReport } from "@/lib/server_action/report";
-import { RenderNotification } from "../client_component/fallbackComponent";
 import { getMyCropStatusDetail } from "@/lib/server_action/crop";
+import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
 
 export const Button: FC<ButtonPropType> = ({
   children,
@@ -1041,7 +1041,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
           )
         ) : (
           <>
-            <RenderNotification notif={recentReport.notifError} />
+            <RenderRedirectNotification notif={recentReport.notifError} />
 
             <NoContentYet logo={FileX} message="Wala ka pang nagagawang ulat" />
           </>
@@ -1235,7 +1235,7 @@ export const SideComponentMyCropStatus = async () => {
         )
       ) : (
         <>
-          <RenderNotification notif={cropStatus.notifError} />
+          <RenderRedirectNotification notif={cropStatus.notifError} />
 
           <NoContentYet
             message={"Wala ka pang pananim"}

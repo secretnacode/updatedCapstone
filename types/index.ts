@@ -246,8 +246,6 @@ export type GetFarmerReportReturnType =
     }
   | ServerActionFailBaseType;
 
-export type addReportComponentPropType = { openModal?: boolean };
-
 export type RemoveSearchParamsValPropType = { name: string };
 
 export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
@@ -927,7 +925,6 @@ export type GetMyCropInfoReturnType =
 
 export type FarmerCropPagePropType = {
   myCropInfoList: GetMyCropInfoQueryRetrunType[];
-  addCrop?: boolean;
 };
 
 export type FarmerCropPageShowModalStateType = {
@@ -1619,3 +1616,12 @@ export type determineCropStatusReturnType = {
 export type ModalNoticeLogoType =
   | { logo: LucideIcon; logoColor: string; bgColor: string }
   | undefined;
+
+export type searchParamValue = string | boolean | number;
+
+export type renderNotificationPropType = {
+  notif: NotificationBaseType[];
+  paramName?: string;
+};
+
+export type renderRedirectNotification = { notif: NotificationBaseType[] };

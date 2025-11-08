@@ -1,7 +1,4 @@
-import {
-  RemoveSearchParamsVal,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import {
   AddReportComponent,
   ViewUserReportButton,
@@ -19,13 +16,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ addReport?: boolean }>;
-}) {
-  const isAddingReport = (await searchParams).addReport;
-
+export default async function Page() {
   let report: GetFarmerReportReturnType;
 
   try {
@@ -68,19 +59,17 @@ export default async function Page({
       <div className="max-w-7xl mx-auto space-y-6">
         {!report.success ? (
           <>
-            <RenderNotification notif={report.notifError} />
+            <RenderRedirectNotification notif={report.notifError} />
             <TableComponentLoading />
           </>
         ) : (
           <>
-            {isAddingReport && <RemoveSearchParamsVal name={"addReport"} />}
-
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900">
                 Aking mga ulat
               </h1>
 
-              <AddReportComponent openModal={isAddingReport} />
+              <AddReportComponent />
             </div>
 
             <TableComponent

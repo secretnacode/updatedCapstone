@@ -1,4 +1,4 @@
-import { RedirectManager } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GoBackButton } from "@/component/client_component/unauthorizedComponent";
 import { NotificationBaseType } from "@/types";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default async function Page({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
-      {message && <RedirectManager data={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Warning Icon */}
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">

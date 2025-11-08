@@ -1,9 +1,9 @@
 import { FarmerUserProfile } from "@/component/server_component/componentForAllUser";
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
 import { GetViewingFarmerUserProfileInfo } from "@/lib/server_action/farmerUser";
 import { RedirectUnauthorizedWithNotif } from "@/util/helper_function/reusableFunction";
 import { notFound } from "next/navigation";
 import { GetFarmerUserProfileInfoReturnType } from "@/types";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 
 export default async function Page({
   params,
@@ -42,7 +42,7 @@ export default async function Page({
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {!farmerData.success && farmerData.notifError && (
-        <RenderNotification notif={farmerData.notifError} />
+        <RenderRedirectNotification notif={farmerData.notifError} />
       )}
       {farmerData.success && (
         <div className="h-full space-y-5">

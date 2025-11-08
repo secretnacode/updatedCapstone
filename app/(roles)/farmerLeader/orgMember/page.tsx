@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { FarmerOrgMemberAction } from "@/component/server_component/componentForAllUser";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
@@ -26,7 +26,7 @@ export default async function Page() {
   return (
     <>
       {!farmerMember.success ? (
-        <RenderNotification notif={farmerMember.notifError} />
+        <RenderRedirectNotification notif={farmerMember.notifError} />
       ) : (
         <>
           <TableComponent

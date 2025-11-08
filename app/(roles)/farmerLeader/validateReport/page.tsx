@@ -1,4 +1,4 @@
-import { RenderNotification } from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { ViewUserReportButton } from "@/component/client_component/reportComponent";
 import { TableComponent } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
@@ -28,7 +28,7 @@ export default async function Page() {
   return (
     <>
       {!orgReport.success ? (
-        <RenderNotification notif={orgReport.notifError} />
+        <RenderRedirectNotification notif={orgReport.notifError} />
       ) : (
         <TableComponent
           noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"

@@ -1,7 +1,4 @@
-import {
-  RedirectManager,
-  RenderNotification,
-} from "@/component/client_component/fallbackComponent";
+import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { RecentReportWidget } from "@/component/server_component/customComponent";
 import { DashboardComponent } from "@/component/server_component/dashBoard";
 import { getAgriculturistDashboardData } from "@/lib/server_action/user";
@@ -38,7 +35,7 @@ export default async function Page({
 
   return (
     <div>
-      {message && <RedirectManager data={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
 
       {data.success ? (
         <DashboardComponent
@@ -102,7 +99,7 @@ export default async function Page({
           user="agriculturist"
         />
       ) : (
-        <RenderNotification notif={data.notifError} />
+        <RenderRedirectNotification notif={data.notifError} />
       )}
     </div>
   );
