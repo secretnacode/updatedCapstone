@@ -1,6 +1,8 @@
-import { searchParamValue } from "@/types";
+"use client";
+
+import { searchParamValue, useFilterSortValueParamType } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 export const useSearchParam = () => {
   const router = useRouter();
@@ -44,3 +46,36 @@ export const useSearchParam = () => {
 
   return { getParams, setParams, deleteParams };
 };
+
+export function useFilterSortValue<T extends Record<string, string>>({
+  obj,
+  searchVal,
+  sortCol,
+}: useFilterSortValueParamType<T>) {
+  const search = useMemo(() => {
+    if (!searchVal) return obj;
+
+    return obj.filter((objVal) =>
+      Object.keys(objVal).some((colVal) =>
+        String(objVal[colVal]).toLowerCase().includes(searchVal.toLowerCase())
+      )
+    );
+  }, [searchVal, obj]);
+
+  const sort = useMemo(() => {
+    if (!sortCol) return search;
+
+    return [...search].sort((a, b) => {
+      const aV = a[sortCol.column];
+      const bV = b[sortCol.column];
+
+      if (aV < bV) return sortCol.sortType === "asc" ? -1 : 1;
+
+      if (aV > bV) return sortCol.sortType === "asc" ? 1 : -1;
+
+      return 0;
+    });
+  }, [sortCol, search]);
+
+  return sort;
+}

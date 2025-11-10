@@ -1187,25 +1187,21 @@ export const AutoOpenMyReport: FC<autoOpenMyReportPropType> = ({
 }) => {
   //will remove the param after the
   const { deleteParams } = useSearchParam();
-  const [showModal, setShowModal] = useState(false);
-  const [reportToView, setReportToView] = useState<string>();
-
-  useEffect(() => {
-    setReportToView(reportId);
-    setShowModal(true);
-  }, [reportId]);
+  const [showModal, setShowModal] = useState(true);
 
   const handleCloseModal = () => {
-    deleteParams("viewReport");
-
     setShowModal(false);
+
+    setTimeout(() => deleteParams("viewReport"), 300);
   };
+
+  if (!showModal) return null;
 
   return (
     <>
-      {reportToView && showModal && (
+      {showModal && (
         <UserReportModal
-          reportId={reportToView}
+          reportId={reportId}
           closeModal={handleCloseModal}
           myReport={true}
         />

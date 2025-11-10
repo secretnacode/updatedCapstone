@@ -18,6 +18,8 @@ import {
   MyPreviousReportPropType,
   NoContentYetPropType,
   RecentReportWidgetReturnType,
+  reportStatusPropType,
+  reportTypePropType,
   reportTypeStateType,
   seeAllValButtonPropType,
   TableComponentLoadingPropType,
@@ -48,6 +50,7 @@ import {
 } from "lucide-react";
 import {
   baranggayList,
+  capitalizeFirstLetter,
   farmAreaMeasurementValue,
   getInitials,
   intoFeaturePolygon,
@@ -510,7 +513,7 @@ export const TableComponent: FC<TableComponentPropType> = ({
             </div>
           )}
           <div
-            className={`div  rounded-lg border border-gray-200 overflow-hidden ${tableClassName}`}
+            className={`div rounded-lg border border-gray-200 overflow-hidden ${tableClassName}`}
           >
             <div className="div overflow-x-auto">
               <table className="table-style farmerReportTable">
@@ -1401,3 +1404,49 @@ export const SeeAllValButton: FC<seeAllValButtonPropType> = ({ link }) => (
     <ChevronRight className="w-4 h-4" />
   </Link>
 );
+
+export const ReportType: FC<reportTypePropType> = ({
+  type,
+  className = "",
+}) => {
+  const colorScheme = () => {
+    switch (type) {
+      case "damage":
+        return "bg-red-100 text-red-800";
+
+      case "harvesting":
+        return "bg-amber-100 text-amber-800";
+
+      case "planting":
+        return "bg-green-100 text-green-800";
+
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  return (
+    <span
+      className={`px-3 py-1 rounded-2xl very-small-text tracking-wide ${colorScheme()} ${className}`}
+    >
+      {capitalizeFirstLetter(type)}
+    </span>
+  );
+};
+
+export const ReportStatus: FC<reportStatusPropType> = ({
+  verificationStatus,
+  className = "",
+}) => {
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full very-small-text font-medium ${
+        verificationStatus
+          ? "bg-green-100 text-green-800"
+          : "bg-yellow-100 text-yellow-800"
+      } ${className}`}
+    >
+      {verificationStatus ? "Naipasa" : "Kumpirmahin"}
+    </span>
+  );
+};

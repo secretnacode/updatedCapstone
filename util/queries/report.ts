@@ -160,7 +160,7 @@ export const GetOrgMemberReportQuery = async (
   try {
     return (
       await pool.query(
-        `select r."reportId", r."verificationStatus", r."dayReported", r."title", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 and f."orgRole" = $2 order by case when r."verificationStatus" = $3 then $4 else $5 end asc`,
+        `select r."reportId", r."verificationStatus", r."dayReported", r."title", r."reportType", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 and f."orgRole" = $2 order by case when r."verificationStatus" = $3 then $4 else $5 end asc`,
         [orgId, "member", false, 1, 2]
       )
     ).rows;

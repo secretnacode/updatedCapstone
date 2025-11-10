@@ -324,12 +324,13 @@ export type GetFarmerReportDetailReturnType =
 
 export type GetOrgMemberReportQueryType = {
   reportId: string;
-  verificationStatus: string;
+  verificationStatus: boolean;
   dayReported: Date;
   title: string;
   farmerFirstName: string;
   farmerLastName: string;
   farmerAlias: string;
+  reportType: reportTypeStateType;
 }[];
 
 export type GetOrgMemberReportReturnType =
@@ -1641,3 +1642,19 @@ export type renderNotificationPropType = {
 };
 
 export type renderRedirectNotification = { notif: NotificationBaseType[] };
+
+export type reportTypePropType = {
+  type: reportTypeStateType;
+  className?: string;
+};
+
+export type reportStatusPropType = {
+  verificationStatus: boolean;
+  className?: string;
+};
+
+export type useFilterSortValueParamType<T> = {
+  obj: T[];
+  searchVal: string | null;
+  sortCol: { column: keyof T; sortType: "asc" | "desc" } | null;
+};

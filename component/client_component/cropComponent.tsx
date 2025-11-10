@@ -11,6 +11,7 @@ import {
   FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -32,9 +33,11 @@ import {
   AllFarmerCropPropType,
   cropStatusType,
   determineCropStatusReturnType,
+  tableWithFilterPropType,
+  tableWithFilterStortTypeState,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
-import { ClipboardPlus, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardPlus, Minus, X } from "lucide-react";
 import {
   determineCropStatus,
   intoFeatureCollection,
@@ -726,3 +729,104 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
     </div>
   );
 };
+
+// export function TableWithFilter<T extends Record<string, string>>({
+//   tableColumn,
+//   tableData,
+// }: tableWithFilterPropType<T>) {
+// const [search, setSearch] = useState<string>();
+// const [sortType, setSortType] =
+//   useState<tableWithFilterStortTypeState<T>>(null);
+
+// const searchData = useMemo(() => {
+//   if (!search) return tableData;
+
+//   return tableData.filter((val) =>
+//     tableColumn.some((col) =>
+//       val[col].toLowerCase().includes(search.toLowerCase())
+//     )
+//   );
+// }, [search, tableData, tableColumn]);
+
+// const sortData = useMemo(() => {
+//   if (!sortType) return searchData;
+
+//   return [...searchData].sort((a, b) => {
+//     const aVal = a[sortType.column];
+//     const bVal = b[sortType.column];
+
+//     if (aVal > bVal) return sortType.sortType === "asc" ? 1 : -1;
+
+//     if (aVal < bVal) return sortType.sortType === "asc" ? -1 : 1;
+
+//     return 0;
+//   });
+// }, [sortType, searchData]);
+
+// const handleSortColumn = (column: keyof T) => {
+//   if (sortType?.sortType === "asc" && sortType.column === column)
+//     return setSortType({ column: column, sortType: "desc" });
+
+//   if (sortType?.sortType === "desc" && sortType.column === column)
+//     return setSortType(null);
+
+//   return setSortType({ column: column, sortType: "asc" });
+// };
+
+//   return (
+//     <>
+//       <div className="rounded-lg border border-gray-200 p-4">
+//         <div>
+//           <input
+//             type="text"
+//             onChange={(e: ChangeEvent<HTMLInputElement>) =>
+//               setSearch(e.target.value)
+//             }
+//           />
+//         </div>
+//       </div>
+
+//       <div className="div overflow-x-auto">
+//         <table className="table-style farmerReportTable">
+//           <thead>
+//             <tr>
+//               {tableColumn.map((val, index) => (
+//                 <th
+//                   key={String(val) + index}
+//                   onClick={() => handleSortColumn(String(val))}
+//                 >
+//                   <div>
+//                     {String(val)}
+//                     <span className="inline-block ml-3">
+//                       {sortType?.column === String(val) ? (
+//                         sortType.sortType === "asc" ? (
+//                           <ChevronUp />
+//                         ) : (
+//                           <ChevronDown />
+//                         )
+//                       ) : (
+//                         <Minus />
+//                       )}
+//                     </span>
+//                   </div>
+//                 </th>
+//               ))}
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {sortData.map((trVal, trIndex) => (
+//               <tr key={`tr-${trIndex}`}>
+//                 {tableColumn.map((tdVal, tdIndex) => (
+//                   <td key={`td-${trIndex}-${tdIndex}`}>
+//                     <div>{String(trVal[tdVal])}</div>
+//                   </td>
+//                 ))}
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//     </>
+//   );
+// }

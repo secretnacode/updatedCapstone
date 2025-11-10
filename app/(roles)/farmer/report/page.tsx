@@ -5,15 +5,13 @@ import {
   ViewUserReportButton,
 } from "@/component/client_component/reportComponent";
 import {
+  ReportType,
   TableComponent,
   TableComponentLoading,
 } from "@/component/server_component/customComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
-import { GetFarmerReportReturnType, reportTypeStateType } from "@/types";
-import {
-  capitalizeFirstLetter,
-  DateToYYMMDD,
-} from "@/util/helper_function/reusableFunction";
+import { GetFarmerReportReturnType } from "@/types";
+import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -36,35 +34,10 @@ export default async function Page({
     };
   }
 
-  const handleReportStatus = (type: reportTypeStateType) => {
-    const colorScheme = () => {
-      switch (type) {
-        case "damage":
-          return "bg-red-100 text-red-800";
-
-        case "harvesting":
-          return "bg-amber-100 text-amber-800";
-
-        case "planting":
-          return "bg-green-100 text-green-800";
-
-        default:
-          return "bg-gray-100 text-gray-800";
-      }
-    };
-
-    return (
-      <span
-        className={`px-3 py-1 rounded-2xl very-small-text ${colorScheme()}`}
-      >
-        {capitalizeFirstLetter(type)}
-      </span>
-    );
-  };
-
   return (
     <div className="component">
-      <div className="max-w-7xl mx-auto space-y-6">
+      {/* max-w-7xl mx-auto (style below)*/}
+      <div className="space-y-6">
         {!report.success ? (
           <>
             <RenderRedirectNotification notif={report.notifError} />
@@ -124,15 +97,15 @@ export default async function Page({
                         </td>
 
                         <td className="text-gray-500">
-                          {DateToYYMMDD(new Date(report.dayReported))}
+                          {ReadableDateFomat(new Date(report.dayReported))}
                         </td>
 
                         <td className="text-gray-500">
-                          {DateToYYMMDD(new Date(report.dayHappen))}
+                          {ReadableDateFomat(new Date(report.dayHappen))}
                         </td>
 
                         <td scope="col">
-                          {handleReportStatus(report.reportType)}
+                          <ReportType type={report.reportType} />
                         </td>
 
                         <td className="text-center">
