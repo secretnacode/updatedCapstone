@@ -72,11 +72,12 @@ import {
  */
 export const GetFarmerReport = async (): Promise<GetFarmerReportReturnType> => {
   try {
-    const userId = (await ProtectedAction("read:report")).userId;
+    const { userId, work } = await ProtectedAction("read:report");
 
     return {
       success: true,
       userReport: await GetUserReport(userId),
+      work,
     };
   } catch (error) {
     const err = error as Error;

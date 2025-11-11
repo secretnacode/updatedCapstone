@@ -263,7 +263,7 @@ body {
     @apply text-[14px];
   }
   .very-very-small-text {
-    @apply text-[12px];
+    @apply text-[12px] tracking-wider;
   }
   .card-value {
     @apply font-bold text-4xl;

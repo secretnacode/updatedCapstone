@@ -36,7 +36,7 @@ export const reportType = async (): Promise<
 
 export const GetUserReport = async (
   userId: string
-): Promise<GetUserReportReturnType> => {
+): Promise<GetUserReportReturnType[]> => {
   try {
     return (
       await pool.query(

@@ -242,7 +242,7 @@ export const GetAgriRole = async (
  */
 export const GetFarmerOrgMemberQuery = async (
   leaderId: string
-): Promise<GetFarmerOrgMemberQueryReturnType> => {
+): Promise<GetFarmerOrgMemberQueryReturnType[]> => {
   try {
     return (
       await pool.query(

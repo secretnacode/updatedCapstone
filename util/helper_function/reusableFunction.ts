@@ -6,6 +6,9 @@ import {
   getPointCoordinateReturnType,
   intoFeatureCollectionDataParam,
   NotificationBaseType,
+  reportStatusParamType,
+  reportTypeStateType,
+  translateReportTypeParamType,
 } from "@/types";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
@@ -686,3 +689,76 @@ export const determineCropStatus = ({
  */
 export const getInitials = (firstName: string, lastName: string) =>
   (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+
+/**
+ * function that returns a style base on the report type
+ * @param type type of the report
+ * @returns
+ */
+export const reportTypeColor = (type: reportTypeStateType): string => {
+  switch (type) {
+    case "damage":
+      return "bg-red-100 text-red-900";
+
+    case "planting":
+      return "bg-green-100 text-green-900";
+
+    case "harvesting":
+      return "bg-amber-100 text-amber-900";
+
+    default:
+      return "bg-gray-100 text-gray-900";
+  }
+};
+
+/**
+ * function for translating the report type into either tagalog or english
+ * @param param0
+ * @returns
+ */
+export const translateReportType = ({
+  type,
+  isEnglish = false,
+}: translateReportTypeParamType) => {
+  switch (type) {
+    case "damage":
+      return isEnglish ? "Damage" : "Pagkasira";
+
+    case "harvesting":
+      return isEnglish ? "Harvesting" : "Pagaani";
+
+    case "planting":
+      return isEnglish ? "Planting" : "Pagtatanim";
+
+    default:
+      return isEnglish ? "Can't determine" : "Hindi matukoy";
+  }
+};
+
+/**
+ * function for handling the farmer number because the database accepts a format of 09** *** **** and +63*** *** ****
+ * @param number number to be handle
+ * @returns
+ */
+export const handleFarmerNumber = (number: string): string => {
+  if (number.charAt(0) === "+") return number;
+
+  return `0${number}`;
+};
+
+/**
+ *
+ * @param val
+ * @returns
+ */
+export const reportStatus = ({
+  val,
+  isEnglish = false,
+}: reportStatusParamType) =>
+  val
+    ? isEnglish
+      ? "Verified"
+      : "Naipasa"
+    : isEnglish
+    ? "Not Verified"
+    : "Kumpirmahin";

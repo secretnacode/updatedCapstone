@@ -207,7 +207,7 @@ export const OrganizationMemberList: FC<{
     <TableComponent
       noContentMessage="There's no organization that was listed yet"
       listCount={memberList.length}
-      tableTitle="Member of the organization"
+      // tableTitle="Member of the organization"
       tableHeaderCell={
         <>
           <th>#</th>

@@ -37,6 +37,11 @@ import {
   filteType,
   tableWithFilterPropType,
   sortColByPropType,
+  GetFarmerOrgMemberQueryReturnType,
+  orgMemberTablePropType,
+  reportTypeStateType,
+  myReportTablePropType,
+  GetUserReportReturnType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -67,7 +72,10 @@ import {
   baranggayList,
   capitalizeFirstLetter,
   DateToYYMMDD,
+  handleFarmerNumber,
   ReadableDateFomat,
+  reportStatus,
+  translateReportType,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
 import {
@@ -88,6 +96,7 @@ import {
 } from "@/lib/server_action/link";
 import { ViewUserReportButton } from "./reportComponent";
 import { useFilterSortTable, useSortColumnHandler } from "./customHook";
+import { FarmerOrgMemberAction } from "../server_component/componentForAllUser";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -1193,9 +1202,9 @@ export function TableWithFilter<
               Filter by:
             </span>
 
-            {Object.keys(additionalFilter).map((col, index) => (
+            {Object.keys(additionalFilter.filterBy).map((col, index) => (
               <div key={`${col}-${index}`} className="flex gap-2 flex-wrap">
-                {additionalFilter[col]!.map((option, index) => (
+                {additionalFilter.filterBy[col]!.map((option, index) => (
                   <button
                     key={`${option}-${index}`}
                     onClick={() =>
@@ -1205,17 +1214,19 @@ export function TableWithFilter<
                           : { col: col, val: option }
                       )
                     }
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
                       filterCol?.val === option
                         ? "bg-green-500 text-white"
-                        : "bg-muted text-foreground hover:bg-green-100/70 ring ring-gray-500"
+                        : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
                     }`}
                   >
-                    {handleFilterOptionLabel(option)}
+                    {additionalFilter.handleFilterLabel[col]!(
+                      handleFilterOptionLabel(option)
+                    )}
                   </button>
                 ))}
 
-                {Object.keys(additionalFilter).length > index + 1 && (
+                {Object.keys(additionalFilter.filterBy).length > index + 1 && (
                   <div className="border-l border-border" />
                 )}
               </div>
@@ -1228,7 +1239,7 @@ export function TableWithFilter<
                   setFilterCol(null);
                   setSortCol(null);
                 }}
-                className="ml-auto text-destructive hover:bg-destructive/10"
+                className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
               >
                 <X className="w-4 h-4 mr-1" />
                 Clear
@@ -1243,12 +1254,8 @@ export function TableWithFilter<
   );
 }
 
-export const SortColBy = <T,>({
-  col,
-  handleSortCol,
-  sortCol,
-}: sortColByPropType<T>) => (
-  <span onClick={() => handleSortCol(col)} className="inline-block">
+export const SortColBy = <T,>({ col, sortCol }: sortColByPropType<T>) => (
+  <span className="inline-block [&>svg]:w-4 [&>svg]:h-4">
     {sortCol?.column === col ? (
       sortCol.sortType === "asc" ? (
         <ChevronUp className="logo text-gray-500" />
@@ -1271,13 +1278,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
 
   const SortType: FC<{ col: keyof GetOrgMemberReportQueryType }> = ({
     col,
-  }) => (
-    <SortColBy<GetOrgMemberReportQueryType>
-      sortCol={sortCol}
-      handleSortCol={handleSortCol}
-      col={col}
-    />
-  );
+  }) => <SortColBy<GetOrgMemberReportQueryType> sortCol={sortCol} col={col} />;
 
   return (
     <TableWithFilter<GetOrgMemberReportQueryType>
@@ -1286,12 +1287,24 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
       setSortCol={setSortCol}
       obj={memberReport}
       additionalFilter={{
-        reportType: Array.from(
-          new Set(memberReport.map((val) => val.reportType))
-        ),
-        verificationStatus: Array.from(
-          new Set(memberReport.map((val) => val.verificationStatus))
-        ),
+        filterBy: {
+          reportType: Array.from(
+            new Set(memberReport.map((val) => val.reportType))
+          ),
+          verificationStatus: Array.from(
+            new Set(memberReport.map((val) => val.verificationStatus))
+          ),
+        },
+        handleFilterLabel: {
+          reportType: (val: string) => {
+            const forceType = val as reportTypeStateType;
+
+            return translateReportType({ type: forceType, isEnglish: false });
+          },
+
+          verificationStatus: (label) =>
+            reportStatus({ val: label === "true" }),
+        },
       }}
       table={
         <TableComponent
@@ -1299,49 +1312,62 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
           listCount={memberReport.length}
           tableHeaderCell={
             <>
-              <th scope="col" className="center-th">
-                <div>
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerFirstName")}
+                  className="cursor-pointer"
+                >
                   Unang pangalan
                   <SortType col={"farmerFirstName"} />
                 </div>
               </th>
-              <th scope="col">
-                <div>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerLastName")}
+                  className="cursor-pointer"
+                >
                   Apelyido
                   <SortType col={"farmerLastName"} />
                 </div>
               </th>
-              <th scope="col">
-                <div>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
                   Alyas
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
-              <th scope="col">
-                <div>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("title")}
+                  className="cursor-pointer"
+                >
                   Pamagat ng ulat
                   <SortType col={"title"} />
                 </div>
               </th>
+
               <th scope="col">
-                <div>
+                <div
+                  onClick={() => handleSortCol("dayReported")}
+                  className="cursor-pointer"
+                >
                   Araw Ipinasa
                   <SortType col={"dayReported"} />
                 </div>
               </th>
               <th scope="col">
-                <div>
-                  Uri ng ulat
-                  <SortType col={"reportType"} />
-                </div>
+                <div>Uri ng ulat</div>
               </th>
               <th scope="col">
-                <div>
-                  Estado ng ulat
-                  <SortType col={"verificationStatus"} />
-                </div>
+                <div>Estado ng ulat</div>
               </th>
-              <th scope="col">
+              <th scope="col" className="!w-[16.5%]">
                 <div>Aksyon</div>
               </th>
             </>
@@ -1351,35 +1377,345 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
               {tableList.map((report) => (
                 <tr key={report.reportId}>
                   <td className=" text-gray-900 font-medium">
-                    {report.farmerFirstName}
+                    <div>{report.farmerFirstName}</div>
                   </td>
 
-                  <td className="text-gray-500">{report.farmerLastName}</td>
+                  <td className="text-gray-500">
+                    <div>{report.farmerLastName}</div>
+                  </td>
 
-                  <td className="text-gray-500">{report.farmerAlias}</td>
+                  <td className="text-gray-500">
+                    <div>{report.farmerAlias}</div>
+                  </td>
 
-                  <td className="text-gray-500">{report.title}</td>
+                  <td className="text-gray-500">
+                    <div>{report.title}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <ReportType type={report.reportType} />
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <ReportStatus
+                        verificationStatus={report.verificationStatus}
+                      />
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <ViewUserReportButton
+                        reportId={report.reportId}
+                        farmerName={
+                          report.farmerFirstName + " " + report.farmerLastName
+                        }
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetFarmerOrgMemberQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<GetFarmerOrgMemberQueryReturnType[]>(orgMember);
+
+  const SortType: FC<{ col: keyof GetFarmerOrgMemberQueryReturnType }> = ({
+    col,
+  }) => (
+    <SortColBy<GetFarmerOrgMemberQueryReturnType> sortCol={sortCol} col={col} />
+  );
+
+  return (
+    <TableWithFilter<GetFarmerOrgMemberQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={orgMember}
+      additionalFilter={{
+        filterBy: {
+          verified: Array.from(new Set(orgMember.map((val) => val.verified))),
+          cropNum: Array.from(new Set(orgMember.map((val) => val.cropNum))),
+        },
+        handleFilterLabel: {
+          verified: (val) => (val === "true" ? "Kumpirmahin" : "Kumpirmado"),
+          cropNum: (val) => `pananim ${val}`,
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang miyembro sa iyong organisasyon"
+          listCount={orgMember.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer w-[75%]"
+                >
+                  Pangalan ng magsasaka
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  Alyas ng magsasaka
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>Numero ng telepono</div>
+              </th>
+              <th scope="col" className="!w-[13%]">
+                <div
+                  onClick={() => handleSortCol("barangay")}
+                  className="cursor-pointer"
+                >
+                  Baranggay na tinitirhan
+                  <SortType col={"barangay"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>Estado ng account</div>
+              </th>
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("cropNum")}
+                  className="cursor-pointer"
+                >
+                  Bilang ng pananim
+                  <SortType col={"cropNum"} />
+                </div>
+              </th>
+              <th scope="col" className="!w-[25.5%]">
+                <div>Aksyon</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((member) => (
+                <tr key={member.farmerId}>
+                  <td className=" text-gray-900 font-medium">
+                    {member.farmerName}
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.farmerAlias}</div>
+                  </td>
+
+                  <td className=" text-gray-900 font-medium">
+                    <div>{handleFarmerNumber(member.mobileNumber)}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.barangay}</div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <span
+                        className={`table-verify-cell ${
+                          member.verified
+                            ? "table-verified"
+                            : "table-unverified"
+                        }`}
+                      >
+                        {!member.verified ? "Kumpirmahin" : "Kumpirmado"}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.cropNum}</div>
+                  </td>
+
+                  <td className="text-center">
+                    <FarmerOrgMemberAction
+                      farmerId={member.farmerId}
+                      verificationStatus={member.verified}
+                      farmerName={member.farmerName}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetUserReportReturnType>();
+  const [tableList, setTableList] = useState<GetUserReportReturnType[]>(report);
+
+  const SortType: FC<{ col: keyof GetUserReportReturnType }> = ({ col }) => (
+    <SortColBy<GetUserReportReturnType> sortCol={sortCol} col={col} />
+  );
+
+  const leaderFilter = () => {
+    if (work === "leader")
+      return {
+        filterBy: {
+          reportType: Array.from(new Set(report.map((val) => val.reportType))),
+        },
+        handleFilterLabel: {
+          reportType: (val: string) => {
+            const forceType = val as reportTypeStateType;
+
+            return translateReportType({ type: forceType, isEnglish: false });
+          },
+        },
+      };
+
+    return {
+      filterBy: {
+        reportType: Array.from(new Set(report.map((val) => val.reportType))),
+        verificationStatus: Array.from(
+          new Set(report.map((val) => val.verificationStatus))
+        ),
+      },
+      handleFilterLabel: {
+        reportType: (val: string) => {
+          const forceType = val as reportTypeStateType;
+
+          return translateReportType({ type: forceType, isEnglish: false });
+        },
+
+        verificationStatus: (label: string) =>
+          reportStatus({ val: label === "true" }),
+      },
+    };
+  };
+
+  return (
+    <TableWithFilter<GetUserReportReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={report}
+      additionalFilter={{ ...leaderFilter() }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={report.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[15%]">
+                <div
+                  onClick={() => handleSortCol("title")}
+                  className="cursor-pointer"
+                >
+                  Pamagat ng ulat
+                  <SortType col={"title"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("cropName")}
+                  className="cursor-pointer"
+                >
+                  Pangalan ng pananim
+                  <SortType col={"cropName"} />
+                </div>
+              </th>
+
+              {work === "leader" ? null : (
+                <th scope="col">
+                  <div className="cursor-pointer">Estado ng ulat</div>
+                </th>
+              )}
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayReported")}
+                  className="cursor-pointer"
+                >
+                  Araw na ipinasa
+                  <SortType col={"dayReported"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayHappen")}
+                  className="cursor-pointer"
+                >
+                  Araw na naganap
+                  <SortType col={"dayHappen"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>Uri ng ulat</div>
+              </th>
+
+              <th scope="col" className="!w-[16.5%]">
+                <div>Aksyon</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((report) => (
+                <tr key={report.reportId}>
+                  <td className=" text-gray-900 font-medium">{report.title}</td>
+
+                  <td className="text-gray-500">{report.cropName}</td>
+
+                  {work === "leader" ? null : (
+                    <td>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          report.verificationStatus
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {report.verificationStatus ? "Naipasa" : "kinukumpirma"}
+                      </span>
+                    </td>
+                  )}
 
                   <td className="text-gray-500">
                     {ReadableDateFomat(new Date(report.dayReported))}
                   </td>
 
-                  <td>
+                  <td className="text-gray-500">
+                    {ReadableDateFomat(new Date(report.dayHappen))}
+                  </td>
+
+                  <td scope="col">
                     <ReportType type={report.reportType} />
                   </td>
 
-                  <td>
-                    <ReportStatus
-                      verificationStatus={report.verificationStatus}
-                    />
-                  </td>
-
-                  <td>
+                  <td className="text-center">
                     <ViewUserReportButton
                       reportId={report.reportId}
-                      farmerName={
-                        report.farmerFirstName + " " + report.farmerLastName
-                      }
+                      myReport={true}
                     />
                   </td>
                 </tr>

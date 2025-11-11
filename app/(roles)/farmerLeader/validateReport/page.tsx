@@ -42,12 +42,6 @@ export default async function Page() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 p-4">
-            <div>
-              <input type="text" />
-            </div>
-          </div>
-
           <ValidateReportTable memberReport={orgReport.memberReport} />
         </>
       )}

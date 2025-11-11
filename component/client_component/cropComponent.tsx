@@ -333,49 +333,81 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           listCount={myCropInfoList.length}
           tableHeaderCell={
             <>
-              <th>Pangalan</th>
-              <th>Lokasyon</th>
-              <th>Sukat(HA)</th>
-              <th>Estado ng pananim</th>
-              <th>Araw ng kaganapan</th>
-              <th></th>
+              <th scope="col" className="!w-[15%]">
+                <div>Pangalan</div>
+              </th>
+
+              <th scope="col">
+                <div>Lokasyon</div>
+              </th>
+
+              <th scope="col">
+                <div>Sukat(HA)</div>
+              </th>
+
+              <th scope="col">
+                <div>Estado ng pananim</div>
+              </th>
+
+              <th scope="col">
+                <div>Araw ng kaganapan</div>
+              </th>
+
+              <th scope="col" className="!w-[21.5%]">
+                Aksyon
+              </th>
             </>
           }
           tableCell={myCropInfoList.map((crop) => (
             <tr key={crop.cropId}>
-              <td className="text-color">{crop.cropName}</td>
-              <td className="text-color">{crop.cropLocation}</td>
-              <td className="text-color">{crop.farmAreaMeasurement}</td>
               <td className="text-color">
-                <span
-                  className={`py-1 px-3 rounded-2xl ${
-                    cropStatus(
-                      crop.cropStatus,
-                      crop.datePlanted,
-                      crop.dateHarvested
-                    ).className
-                  }`}
-                >
-                  {
-                    cropStatus(
-                      crop.cropStatus,
-                      crop.datePlanted,
-                      crop.dateHarvested
-                    ).status
-                  }
-                </span>
+                <div>{crop.cropName}</div>
               </td>
+
               <td className="text-color">
-                {!crop.cropStatus
-                  ? "Wala pang ulat"
-                  : ReadableDateFomat(
-                      crop.cropStatus === "planted"
-                        ? crop.datePlanted
-                        : crop.dateHarvested
-                    )}
+                <div>{crop.cropLocation}</div>
               </td>
+
+              <td className="text-color">
+                <div>{crop.farmAreaMeasurement}</div>
+              </td>
+
+              <td className="text-color ">
+                <div>
+                  <span
+                    className={`py-1 px-3 rounded-2xl very-very-small-text ${
+                      cropStatus(
+                        crop.cropStatus,
+                        crop.datePlanted,
+                        crop.dateHarvested
+                      ).className
+                    }`}
+                  >
+                    {
+                      cropStatus(
+                        crop.cropStatus,
+                        crop.datePlanted,
+                        crop.dateHarvested
+                      ).status
+                    }
+                  </span>
+                </div>
+              </td>
+
+              <td className="text-color">
+                <div>
+                  {!crop.cropStatus
+                    ? "Wala pang ulat"
+                    : ReadableDateFomat(
+                        crop.cropStatus === "planted"
+                          ? crop.datePlanted
+                          : crop.dateHarvested
+                      )}
+                </div>
+              </td>
+
               <td>
-                <div className="flex flex-row gap-2">
+                <div className="flex justify-center flex-row gap-2">
                   <SubmitButton
                     type="button"
                     className="slimer-button"

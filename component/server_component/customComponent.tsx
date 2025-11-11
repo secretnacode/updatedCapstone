@@ -20,7 +20,6 @@ import {
   RecentReportWidgetReturnType,
   reportStatusPropType,
   reportTypePropType,
-  reportTypeStateType,
   seeAllValButtonPropType,
   TableComponentLoadingPropType,
   TableComponentPropType,
@@ -55,6 +54,9 @@ import {
   getInitials,
   intoFeaturePolygon,
   ReadableDateFomat,
+  reportStatus,
+  reportTypeColor,
+  translateReportType,
   UnexpectedErrorMessage,
   viewFarmerReportPath,
 } from "@/util/helper_function/reusableFunction";
@@ -506,16 +508,16 @@ export const TableComponent: FC<TableComponentPropType> = ({
         </div>
       ) : (
         <div
-          className={`div rounded-lg border border-gray-200 overflow-hidden ${tableClassName}`}
+          className={`div rounded-lg border border-gray-200 overflow-hidden w-full ${tableClassName}`}
         >
           <div className="div overflow-x-auto">
-            <table className="table-style farmerReportTable">
+            <table className="table-style farmerReportTable table-fixed">
               <thead>
-                <tr className="[&_th_div]:flex [&_th_div]:flex-row [&_th_div]:justify-center [&_th_div]:items-center [&_th_div]:gap-3">
+                <tr className="[&>th>div]:inline-flex [&>th>div]:flex-row [&>th>div]:justify-start [&>th>div]:items-center [&>th>div]:gap-2 [&_th]:last-of-type:[&>div]:!justify-center w-full">
                   {tableHeaderCell}
                 </tr>
               </thead>
-              <tbody>{tableCell}</tbody>
+              <tbody className="[&_tr_td_div]:truncate">{tableCell}</tbody>
             </table>
           </div>
         </div>
@@ -978,38 +980,6 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
     };
   }
 
-  const getTypeColor = (type: reportTypeStateType): string => {
-    switch (type) {
-      case "damage":
-        return "bg-red-100 text-red-800";
-
-      case "planting":
-        return "bg-green-100 text-green-800";
-
-      case "harvesting":
-        return "bg-amber-100 text-amber-800";
-
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const translatedReportType = (type: reportTypeStateType) => {
-    switch (type) {
-      case "damage":
-        return "Pagkasira";
-
-      case "harvesting":
-        return "Pagaani";
-
-      case "planting":
-        return "Pagtatanim";
-
-      default:
-        return "Hindi matukoy";
-    }
-  };
-
   return (
     <div className="component !p-0">
       <div className="p-6 border-b border-gray-100">
@@ -1029,11 +999,11 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${getTypeColor(
+                        className={`px-2 py-1 rounded text-xs font-semibold ${reportTypeColor(
                           report.reportType
                         )}`}
                       >
-                        {translatedReportType(report.reportType)}
+                        {translateReportType({ type: report.reportType })}
                       </span>
 
                       <h3 className="font-medium text-gray-900">
@@ -1401,32 +1371,17 @@ export const SeeAllValButton: FC<seeAllValButtonPropType> = ({ link }) => (
 
 export const ReportType: FC<reportTypePropType> = ({
   type,
+  isEnglish = false,
   className = "",
-}) => {
-  const colorScheme = () => {
-    switch (type) {
-      case "damage":
-        return "bg-red-100 text-red-800";
-
-      case "harvesting":
-        return "bg-amber-100 text-amber-800";
-
-      case "planting":
-        return "bg-green-100 text-green-800";
-
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-2xl very-small-text tracking-wide ${colorScheme()} ${className}`}
-    >
-      {capitalizeFirstLetter(type)}
-    </span>
-  );
-};
+}) => (
+  <span
+    className={`px-3 py-1 rounded-2xl very-very-small-text tracking-wide ${reportTypeColor(
+      type
+    )} ${className}`}
+  >
+    {capitalizeFirstLetter(translateReportType({ type, isEnglish }))}
+  </span>
+);
 
 export const ReportStatus: FC<reportStatusPropType> = ({
   verificationStatus,
@@ -1434,13 +1389,13 @@ export const ReportStatus: FC<reportStatusPropType> = ({
 }) => {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full very-small-text font-medium ${
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full very-very-small-text font-medium ${
         verificationStatus
           ? "bg-green-100 text-green-800"
           : "bg-yellow-100 text-yellow-800"
       } ${className}`}
     >
-      {verificationStatus ? "Naipasa" : "Kumpirmahin"}
+      {reportStatus({ val: verificationStatus })}
     </span>
   );
 };

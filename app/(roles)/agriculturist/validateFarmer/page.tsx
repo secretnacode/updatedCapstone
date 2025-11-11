@@ -38,7 +38,7 @@ export default async function Page() {
         <TableComponent
           noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"
           listCount={unvalidatedUser.notValidatedFarmer.length}
-          tableTitle="Unverfied Farmer Leaders and Farmer W/O Organization"
+          // tableTitle="Unverfied Farmer Leaders and Farmer W/O Organization"
           tableHeaderCell={
             <>
               <th>#</th>

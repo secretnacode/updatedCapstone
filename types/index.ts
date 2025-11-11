@@ -223,16 +223,15 @@ export type NavbarType =
       logo: LucideIcon;
     }[];
 
-export type GetUserReportReturnType =
-  | {
-      reportId: string;
-      cropName: string;
-      verificationStatus: string;
-      dayReported: string;
-      dayHappen: string;
-      title: string;
-      reportType: reportTypeStateType;
-    }[];
+export type GetUserReportReturnType = {
+  reportId: string;
+  cropName: string;
+  verificationStatus: string;
+  dayReported: string;
+  dayHappen: string;
+  title: string;
+  reportType: reportTypeStateType;
+};
 
 export type ServerActionFailBaseType = {
   success: false;
@@ -242,7 +241,8 @@ export type ServerActionFailBaseType = {
 export type GetFarmerReportReturnType =
   | {
       success: true;
-      userReport: GetUserReportReturnType;
+      userReport: GetUserReportReturnType[];
+      work: allUserRoleType;
     }
   | ServerActionFailBaseType;
 
@@ -365,12 +365,12 @@ export type GetFarmerOrgMemberQueryReturnType = {
   barangay: string;
   verified: boolean;
   cropNum: number;
-}[];
+};
 
 export type GetFarmerOrgMemberReturnType =
   | {
       success: true;
-      farmerMember: GetFarmerOrgMemberQueryReturnType;
+      farmerMember: GetFarmerOrgMemberQueryReturnType[];
     }
   | ServerActionFailBaseType;
 
@@ -1644,6 +1644,7 @@ export type renderRedirectNotification = { notif: NotificationBaseType[] };
 
 export type reportTypePropType = {
   type: reportTypeStateType;
+  isEnglish?: boolean;
   className?: string;
 };
 
@@ -1660,7 +1661,10 @@ export type tableWithFilterPropType<T> = filterSortBaseType<T> &
   Pick<useSortColumnHandlerReturnType<T>, "sortCol" | "setSortCol"> & {
     setTableList: Dispatch<SetStateAction<T[]>>;
     table: ChildrenType;
-    additionalFilter?: { [key in keyof T]?: allType[] };
+    additionalFilter?: {
+      filterBy: { [key in keyof T]?: allType[] }; // how will the table be filter by (e.g. all is not verified)
+      handleFilterLabel: { [key in keyof T]?: (label: string) => string }; // how will it be labeled as (e.g. instead of not verified, it will be verify base on the function's logic that will be passed)
+    };
   };
 
 export type sortColType<T> = {
@@ -1689,9 +1693,29 @@ export type validateReportTablePropType = {
   memberReport: GetOrgMemberReportQueryType[];
 };
 
+export type orgMemberTablePropType = {
+  orgMember: GetFarmerOrgMemberQueryReturnType[];
+};
 export type allType = string | number | boolean | Date;
 
 export type sortColByPropType<T> = Pick<
   useSortColumnHandlerReturnType<T>,
-  "sortCol" | "handleSortCol"
+  "sortCol"
 > & { col: keyof T };
+
+export type translateReportTypeParamType = {
+  type: reportTypeStateType;
+  isEnglish?: boolean;
+};
+
+export type reportStatusParamType = { val: boolean; isEnglish?: boolean };
+
+export type myReportTablePropType = {
+  report: GetUserReportReturnType[];
+  work: allUserRoleType;
+};
+
+export type myReportTableLeaderFilterReturnType = {
+  filterBy: { GetUserReportReturnType?: allType[] };
+  handleFilterLabel: { GetUserReportReturnType?: (label: string) => string };
+};

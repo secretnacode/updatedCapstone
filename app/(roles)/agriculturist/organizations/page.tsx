@@ -24,7 +24,7 @@ export default async function Page() {
         <TableComponent
           noContentMessage="There's no organization that was listed yet"
           listCount={availableOrgs.orgList.length}
-          tableTitle="Unverfied Farmer Leaders and Farmer W/O Organization"
+          // tableTitle="Unverfied Farmer Leaders and Farmer W/O Organization"
           tableHeaderCell={
             <>
               <th>#</th>
