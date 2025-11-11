@@ -808,7 +808,8 @@ export function TableWithFilter({
 }: tableWithFilterPropType<Product>) {
   const [searchVal, setSearchVal] = useState<string | null>(null);
   const [filterCol, setFilterCol] = useState<filteType<Product>>(null);
-  const { sortCol, handleSortCol } = useSortColumnHandler<Product>();
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<Product>();
   const sortedObj = useFilterSortTable<Product>({
     obj,
     sortCol,
@@ -884,7 +885,7 @@ export function TableWithFilter({
                   setFilterCol(
                     filterCol?.val === status
                       ? null
-                      : { col: "category", val: status }
+                      : { col: "status", val: status }
                   )
                 }
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
@@ -899,11 +900,12 @@ export function TableWithFilter({
           </div>
 
           {/* Clear Filters */}
-          {(searchVal || filterCol) && (
+          {(searchVal || filterCol || sortCol) && (
             <Button
               onClick={() => {
                 setSearchVal("");
                 setFilterCol(null);
+                setSortCol(null);
               }}
               className="ml-auto text-destructive hover:bg-destructive/10"
             >

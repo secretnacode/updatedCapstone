@@ -114,16 +114,17 @@ export function useSortColumnHandler<T>(): useSortColumnHandlerReturnType<T> {
 
   const handleSortCol = useCallback(
     (col: keyof T) => {
-      if (!sortCol) return setSortCol({ column: col, sortType: "asc" });
-
-      if (sortCol.sortType === "asc" && sortCol.column === col)
+      console.log(col);
+      if (sortCol?.sortType === "asc" && sortCol.column === col)
         return setSortCol({ column: col, sortType: "desc" });
 
-      if (sortCol.sortType === "desc" && sortCol.column === col)
+      if (sortCol?.sortType === "desc" && sortCol.column === col)
         return setSortCol(null);
+
+      return setSortCol({ column: col, sortType: "asc" });
     },
     [sortCol]
   );
 
-  return { sortCol, handleSortCol };
+  return { sortCol, handleSortCol, setSortCol };
 }

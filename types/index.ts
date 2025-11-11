@@ -1681,6 +1681,7 @@ export type useFilterSortValueParamType<T> = filterSortBaseType<T> & {
 
 export type useSortColumnHandlerReturnType<T> = {
   sortCol: sortColType<T>;
+  setSortCol: Dispatch<SetStateAction<sortColType<T>>>;
   handleSortCol: (col: keyof T) => void;
 };
 
