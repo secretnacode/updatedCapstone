@@ -35,6 +35,7 @@ import {
   determineCropStatusReturnType,
   tableWithFilterPropType,
   tableWithFilterStortTypeState,
+  filteType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ChevronDown, ChevronUp, ClipboardPlus, Minus, X } from "lucide-react";
@@ -48,6 +49,7 @@ import {
   ViewCrop,
 } from "@/util/helper_function/reusableFunction";
 import {
+  Button,
   CropForm,
   FormCancelSubmitButton,
   SubmitButton,
@@ -60,7 +62,11 @@ import {
 } from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
-import { useSearchParam } from "./customHook";
+import {
+  useFilterSortTable,
+  useSearchParam,
+  useSortColumnHandler,
+} from "./customHook";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -730,103 +736,231 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
   );
 };
 
-// export function TableWithFilter<T extends Record<string, string>>({
-//   tableColumn,
-//   tableData,
-// }: tableWithFilterPropType<T>) {
-// const [search, setSearch] = useState<string>();
-// const [sortType, setSortType] =
-//   useState<tableWithFilterStortTypeState<T>>(null);
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  status: string;
+  price: number;
+};
 
-// const searchData = useMemo(() => {
-//   if (!search) return tableData;
+const SAMPLE_DATA: Product[] = [
+  {
+    id: 1,
+    name: "Laptop Pro",
+    category: "Electronics",
+    status: "Active",
+    price: 1299,
+  },
+  {
+    id: 2,
+    name: "Wireless Mouse",
+    category: "Accessories",
+    status: "Active",
+    price: 29,
+  },
+  {
+    id: 3,
+    name: "USB Cable",
+    category: "Accessories",
+    status: "Inactive",
+    price: 9,
+  },
+  {
+    id: 4,
+    name: "Monitor 4K",
+    category: "Electronics",
+    status: "Active",
+    price: 599,
+  },
+  {
+    id: 5,
+    name: "Keyboard",
+    category: "Accessories",
+    status: "Active",
+    price: 89,
+  },
+  {
+    id: 6,
+    name: "Desk Lamp",
+    category: "Furniture",
+    status: "Active",
+    price: 45,
+  },
+  {
+    id: 7,
+    name: "Chair Pro",
+    category: "Furniture",
+    status: "Inactive",
+    price: 299,
+  },
+  {
+    id: 8,
+    name: "Headphones",
+    category: "Electronics",
+    status: "Active",
+    price: 199,
+  },
+];
 
-//   return tableData.filter((val) =>
-//     tableColumn.some((col) =>
-//       val[col].toLowerCase().includes(search.toLowerCase())
-//     )
-//   );
-// }, [search, tableData, tableColumn]);
+export function TableWithFilter({
+  obj = SAMPLE_DATA, // was here because of testing, this should be an actual data and not undefined
+}: tableWithFilterPropType<Product>) {
+  const [searchVal, setSearchVal] = useState<string | null>(null);
+  const [filterCol, setFilterCol] = useState<filteType<Product>>(null);
+  const { sortCol, handleSortCol } = useSortColumnHandler<Product>();
+  const sortedObj = useFilterSortTable<Product>({
+    obj,
+    sortCol,
+    searchVal,
+    filterCol,
+  });
 
-// const sortData = useMemo(() => {
-//   if (!sortType) return searchData;
+  const SortType: FC<{ col: keyof Product }> = ({ col }) => (
+    <span onClick={() => handleSortCol(col)} className="inline-block">
+      {sortCol?.column === col ? (
+        sortCol.sortType === "asc" ? (
+          <ChevronUp className="logo text-gray-500" />
+        ) : (
+          <ChevronDown className="logo text-gray-500" />
+        )
+      ) : (
+        <Minus className="logo text-gray-500" />
+      )}
+    </span>
+  );
 
-//   return [...searchData].sort((a, b) => {
-//     const aVal = a[sortType.column];
-//     const bVal = b[sortType.column];
+  const categories = Array.from(
+    new Set(SAMPLE_DATA.map((val) => val.category))
+  );
 
-//     if (aVal > bVal) return sortType.sortType === "asc" ? 1 : -1;
+  const statuses = Array.from(new Set(SAMPLE_DATA.map((val) => val.status)));
 
-//     if (aVal < bVal) return sortType.sortType === "asc" ? -1 : 1;
+  return (
+    <div className="space-y-4">
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+        <div className="flex gap-2">
+          <input
+            placeholder="Search products..."
+            value={searchVal ?? ""}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="flex-1"
+          />
+        </div>
 
-//     return 0;
-//   });
-// }, [sortType, searchData]);
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-muted-foreground">
+            Filter by:
+          </span>
 
-// const handleSortColumn = (column: keyof T) => {
-//   if (sortType?.sortType === "asc" && sortType.column === column)
-//     return setSortType({ column: column, sortType: "desc" });
+          <div className="flex gap-1 flex-wrap">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() =>
+                  setFilterCol(
+                    filterCol?.val === cat
+                      ? null
+                      : { col: "category", val: cat }
+                  )
+                }
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  filterCol?.val === cat
+                    ? "bg-green-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
 
-//   if (sortType?.sortType === "desc" && sortType.column === column)
-//     return setSortType(null);
+          {/* Status Tabs */}
+          <div className="flex gap-1 flex-wrap border-l border-border pl-2 ml-2">
+            {statuses.map((status) => (
+              <button
+                key={status}
+                onClick={() =>
+                  setFilterCol(
+                    filterCol?.val === status
+                      ? null
+                      : { col: "category", val: status }
+                  )
+                }
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  filterCol?.val === status
+                    ? "bg-green-500 text-white"
+                    : "bg-muted text-foreground hover:bg-muted/80"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
 
-//   return setSortType({ column: column, sortType: "asc" });
-// };
+          {/* Clear Filters */}
+          {(searchVal || filterCol) && (
+            <Button
+              onClick={() => {
+                setSearchVal("");
+                setFilterCol(null);
+              }}
+              className="ml-auto text-destructive hover:bg-destructive/10"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
 
-//   return (
-//     <>
-//       <div className="rounded-lg border border-gray-200 p-4">
-//         <div>
-//           <input
-//             type="text"
-//             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-//               setSearch(e.target.value)
-//             }
-//           />
-//         </div>
-//       </div>
+      <TableComponent
+        noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
+        listCount={SAMPLE_DATA.length}
+        tableHeaderCell={
+          <>
+            <th scope="col" className="center-th">
+              <div>
+                Name
+                <SortType col={"name"} />
+              </div>
+            </th>
+            <th scope="col" className="center-th [&>div]:!justify-start">
+              <div>
+                Category
+                <SortType col={"category"} />
+              </div>
+            </th>
+            <th scope="col" className="center-th [&>div]:!justify-start">
+              <div>
+                Status
+                <SortType col={"status"} />
+              </div>
+            </th>
+            <th scope="col" className="center-th">
+              <div>
+                Price
+                <SortType col={"price"} />
+              </div>
+            </th>
+          </>
+        }
+        tableCell={
+          <>
+            {sortedObj.map((report) => (
+              <tr key={report.id}>
+                <td className=" text-gray-900 font-medium">{report.name}</td>
 
-//       <div className="div overflow-x-auto">
-//         <table className="table-style farmerReportTable">
-//           <thead>
-//             <tr>
-//               {tableColumn.map((val, index) => (
-//                 <th
-//                   key={String(val) + index}
-//                   onClick={() => handleSortColumn(String(val))}
-//                 >
-//                   <div>
-//                     {String(val)}
-//                     <span className="inline-block ml-3">
-//                       {sortType?.column === String(val) ? (
-//                         sortType.sortType === "asc" ? (
-//                           <ChevronUp />
-//                         ) : (
-//                           <ChevronDown />
-//                         )
-//                       ) : (
-//                         <Minus />
-//                       )}
-//                     </span>
-//                   </div>
-//                 </th>
-//               ))}
-//             </tr>
-//           </thead>
+                <td className="text-gray-500">{report.category}</td>
 
-//           <tbody>
-//             {sortData.map((trVal, trIndex) => (
-//               <tr key={`tr-${trIndex}`}>
-//                 {tableColumn.map((tdVal, tdIndex) => (
-//                   <td key={`td-${trIndex}-${tdIndex}`}>
-//                     <div>{String(trVal[tdVal])}</div>
-//                   </td>
-//                 ))}
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     </>
-//   );
-// }
+                <td className="text-gray-500">{report.status}</td>
+
+                <td className="text-gray-500">{report.price}</td>
+              </tr>
+            ))}
+          </>
+        }
+      />
+    </div>
+  );
+}

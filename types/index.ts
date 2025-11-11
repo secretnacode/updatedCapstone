@@ -764,7 +764,6 @@ export type TableCellPropType = ChildrenPropType & {
 };
 
 export type TableComponentPropType = {
-  tableTitle?: string;
   tableClassName?: string;
   noContentMessage: string;
   listCount: number;
@@ -1653,8 +1652,38 @@ export type reportStatusPropType = {
   className?: string;
 };
 
-export type useFilterSortValueParamType<T> = {
-  obj: T[];
-  searchVal: string | null;
-  sortCol: { column: keyof T; sortType: "asc" | "desc" } | null;
+type filterSortBaseType<T> = {
+  obj?: T[];
+  // sortCol: sortColType<T>
 };
+
+export type tableWithFilterPropType<T> = filterSortBaseType<T> & {
+  // handleSetTableData: (data: T[]) => void;
+  // table: ChildrenType;
+  // additionalFilter?: ChildrenType;
+};
+
+export type sortColType<T> = {
+  column: keyof T;
+  sortType: "asc" | "desc";
+} | null;
+
+export type filteType<T> = {
+  col: keyof T;
+  val: string;
+} | null;
+
+export type useFilterSortValueParamType<T> = filterSortBaseType<T> & {
+  searchVal: string | null;
+  filterCol: filteType<T>;
+  sortCol: sortColType<T>; // should be removed(was here because of testing)
+};
+
+export type useSortColumnHandlerReturnType<T> = {
+  sortCol: sortColType<T>;
+  handleSortCol: (col: keyof T) => void;
+};
+
+// export type useSortColumnParamType<T> = {
+//   col: keyof T;
+// };

@@ -1,9 +1,21 @@
 "use client";
 
-import { searchParamValue, useFilterSortValueParamType } from "@/types";
+import {
+  searchParamValue,
+  sortColType,
+  useFilterSortValueParamType,
+  useSortColumnHandlerReturnType,
+  useSortColumnParamType,
+} from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+/**
+ * custom hook about the param /home?name=john
+ *
+ *
+ * @returns
+ */
 export const useSearchParam = () => {
   const router = useRouter();
   const params = useSearchParams();
@@ -47,20 +59,32 @@ export const useSearchParam = () => {
   return { getParams, setParams, deleteParams };
 };
 
-export function useFilterSortValue<T extends Record<string, string>>({
+/**
+ * custom hook for sorting and filtering the table value
+ * @param param0
+ * @returns sorted, filterized, normal value
+ */
+export function useFilterSortTable<T extends Record<string, string | number>>({
   obj,
+  filterCol,
   searchVal,
   sortCol,
-}: useFilterSortValueParamType<T>) {
-  const search = useMemo(() => {
-    if (!searchVal) return obj;
+}: useFilterSortValueParamType<T>): T[] {
+  const filter = useMemo(() => {
+    if (!filterCol) return obj;
 
-    return obj.filter((objVal) =>
+    return obj.filter((objVal) => objVal[filterCol.col] === filterCol.val);
+  }, [filterCol, obj]);
+
+  const search = useMemo(() => {
+    if (!searchVal) return filter;
+
+    return filter.filter((objVal) =>
       Object.keys(objVal).some((colVal) =>
         String(objVal[colVal]).toLowerCase().includes(searchVal.toLowerCase())
       )
     );
-  }, [searchVal, obj]);
+  }, [searchVal, filter]);
 
   const sort = useMemo(() => {
     if (!sortCol) return search;
@@ -78,4 +102,28 @@ export function useFilterSortValue<T extends Record<string, string>>({
   }, [sortCol, search]);
 
   return sort;
+}
+
+/**
+ * custom hook for setting how the table will be sorted(asc or desc, what column of the table)
+ * @param param0
+ * @returns
+ */
+export function useSortColumnHandler<T>(): useSortColumnHandlerReturnType<T> {
+  const [sortCol, setSortCol] = useState<sortColType<T>>(null);
+
+  const handleSortCol = useCallback(
+    (col: keyof T) => {
+      if (!sortCol) return setSortCol({ column: col, sortType: "asc" });
+
+      if (sortCol.sortType === "asc" && sortCol.column === col)
+        return setSortCol({ column: col, sortType: "desc" });
+
+      if (sortCol.sortType === "desc" && sortCol.column === col)
+        return setSortCol(null);
+    },
+    [sortCol]
+  );
+
+  return { sortCol, handleSortCol };
 }

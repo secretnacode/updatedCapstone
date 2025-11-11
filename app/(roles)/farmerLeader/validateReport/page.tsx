@@ -1,14 +1,8 @@
+import { TableWithFilter } from "@/component/client_component/cropComponent";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { ViewUserReportButton } from "@/component/client_component/reportComponent";
-import {
-  ReportStatus,
-  ReportType,
-  TableComponent,
-  TableComponentLoading,
-} from "@/component/server_component/customComponent";
+import { TableComponentLoading } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
-import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +48,7 @@ export default async function Page() {
             </div>
           </div>
 
-          <TableComponent
+          {/* <TableComponent
             noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
             listCount={orgReport.memberReport.length}
             tableHeaderCell={
@@ -110,7 +104,9 @@ export default async function Page() {
                   ))}
               </>
             }
-          />
+          /> */}
+
+          <TableWithFilter />
         </>
       )}
     </div>
