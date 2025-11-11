@@ -5,7 +5,6 @@ import {
   sortColType,
   useFilterSortValueParamType,
   useSortColumnHandlerReturnType,
-  useSortColumnParamType,
 } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -64,14 +63,13 @@ export const useSearchParam = () => {
  * @param param0
  * @returns sorted, filterized, normal value
  */
-export function useFilterSortTable<T extends Record<string, string | number>>({
-  obj,
-  filterCol,
-  searchVal,
-  sortCol,
-}: useFilterSortValueParamType<T>): T[] {
+export function useFilterSortTable<
+  T extends Record<string, string | number | Date | boolean>
+>({ obj, filterCol, searchVal, sortCol }: useFilterSortValueParamType<T>): T[] {
   const filter = useMemo(() => {
     if (!filterCol) return obj;
+
+    // console.log(filterCol.col);
 
     return obj.filter((objVal) => objVal[filterCol.col] === filterCol.val);
   }, [filterCol, obj]);

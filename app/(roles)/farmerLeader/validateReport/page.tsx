@@ -1,4 +1,4 @@
-import { TableWithFilter } from "@/component/client_component/cropComponent";
+import { ValidateReportTable } from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { TableComponentLoading } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
@@ -48,65 +48,7 @@ export default async function Page() {
             </div>
           </div>
 
-          {/* <TableComponent
-            noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
-            listCount={orgReport.memberReport.length}
-            tableHeaderCell={
-              <>
-                <th scope="col">Unang pangalan</th>
-                <th scope="col">Apelyido</th>
-                <th scope="col">Alyas</th>
-                <th scope="col">Pamagat ng ulat</th>
-                <th scope="col">Araw Ipinasa</th>
-                <th scope="col">Uri ng ulat</th>
-                <th scope="col">Estado ng ulat</th>
-                <th scope="col">Aksyon</th>
-              </>
-            }
-            tableCell={
-              <>
-                {orgReport.success &&
-                  orgReport.memberReport.map((report) => (
-                    <tr key={report.reportId}>
-                      <td className=" text-gray-900 font-medium">
-                        {report.farmerFirstName}
-                      </td>
-
-                      <td className="text-gray-500">{report.farmerLastName}</td>
-
-                      <td className="text-gray-500">{report.farmerAlias}</td>
-
-                      <td className="text-gray-500">{report.title}</td>
-
-                      <td className="text-gray-500">
-                        {ReadableDateFomat(new Date(report.dayReported))}
-                      </td>
-
-                      <td>
-                        <ReportType type={report.reportType} />
-                      </td>
-
-                      <td>
-                        <ReportStatus
-                          verificationStatus={report.verificationStatus}
-                        />
-                      </td>
-
-                      <td>
-                        <ViewUserReportButton
-                          reportId={report.reportId}
-                          farmerName={
-                            report.farmerFirstName + " " + report.farmerLastName
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ))}
-              </>
-            }
-          /> */}
-
-          <TableWithFilter />
+          <ValidateReportTable memberReport={orgReport.memberReport} />
         </>
       )}
     </div>

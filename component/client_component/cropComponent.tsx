@@ -11,7 +11,6 @@ import {
   FormEvent,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -33,12 +32,9 @@ import {
   AllFarmerCropPropType,
   cropStatusType,
   determineCropStatusReturnType,
-  tableWithFilterPropType,
-  tableWithFilterStortTypeState,
-  filteType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
-import { ChevronDown, ChevronUp, ClipboardPlus, Minus, X } from "lucide-react";
+import { ClipboardPlus, X } from "lucide-react";
 import {
   determineCropStatus,
   intoFeatureCollection,
@@ -49,7 +45,6 @@ import {
   ViewCrop,
 } from "@/util/helper_function/reusableFunction";
 import {
-  Button,
   CropForm,
   FormCancelSubmitButton,
   SubmitButton,
@@ -62,11 +57,7 @@ import {
 } from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
-import {
-  useFilterSortTable,
-  useSearchParam,
-  useSortColumnHandler,
-} from "./customHook";
+import { useSearchParam } from "./customHook";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -735,234 +726,3 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
     </div>
   );
 };
-
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  status: string;
-  price: number;
-};
-
-const SAMPLE_DATA: Product[] = [
-  {
-    id: 1,
-    name: "Laptop Pro",
-    category: "Electronics",
-    status: "Active",
-    price: 1299,
-  },
-  {
-    id: 2,
-    name: "Wireless Mouse",
-    category: "Accessories",
-    status: "Active",
-    price: 29,
-  },
-  {
-    id: 3,
-    name: "USB Cable",
-    category: "Accessories",
-    status: "Inactive",
-    price: 9,
-  },
-  {
-    id: 4,
-    name: "Monitor 4K",
-    category: "Electronics",
-    status: "Active",
-    price: 599,
-  },
-  {
-    id: 5,
-    name: "Keyboard",
-    category: "Accessories",
-    status: "Active",
-    price: 89,
-  },
-  {
-    id: 6,
-    name: "Desk Lamp",
-    category: "Furniture",
-    status: "Active",
-    price: 45,
-  },
-  {
-    id: 7,
-    name: "Chair Pro",
-    category: "Furniture",
-    status: "Inactive",
-    price: 299,
-  },
-  {
-    id: 8,
-    name: "Headphones",
-    category: "Electronics",
-    status: "Active",
-    price: 199,
-  },
-];
-
-export function TableWithFilter({
-  obj = SAMPLE_DATA, // was here because of testing, this should be an actual data and not undefined
-}: tableWithFilterPropType<Product>) {
-  const [searchVal, setSearchVal] = useState<string | null>(null);
-  const [filterCol, setFilterCol] = useState<filteType<Product>>(null);
-  const { sortCol, setSortCol, handleSortCol } =
-    useSortColumnHandler<Product>();
-  const sortedObj = useFilterSortTable<Product>({
-    obj,
-    sortCol,
-    searchVal,
-    filterCol,
-  });
-
-  const SortType: FC<{ col: keyof Product }> = ({ col }) => (
-    <span onClick={() => handleSortCol(col)} className="inline-block">
-      {sortCol?.column === col ? (
-        sortCol.sortType === "asc" ? (
-          <ChevronUp className="logo text-gray-500" />
-        ) : (
-          <ChevronDown className="logo text-gray-500" />
-        )
-      ) : (
-        <Minus className="logo text-gray-500" />
-      )}
-    </span>
-  );
-
-  const categories = Array.from(
-    new Set(SAMPLE_DATA.map((val) => val.category))
-  );
-
-  const statuses = Array.from(new Set(SAMPLE_DATA.map((val) => val.status)));
-
-  return (
-    <div className="space-y-4">
-      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-        <div className="flex gap-2">
-          <input
-            placeholder="Search products..."
-            value={searchVal ?? ""}
-            onChange={(e) => setSearchVal(e.target.value)}
-            className="flex-1"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-medium text-muted-foreground">
-            Filter by:
-          </span>
-
-          <div className="flex gap-1 flex-wrap">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() =>
-                  setFilterCol(
-                    filterCol?.val === cat
-                      ? null
-                      : { col: "category", val: cat }
-                  )
-                }
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  filterCol?.val === cat
-                    ? "bg-green-500 text-white"
-                    : "bg-muted text-foreground hover:bg-muted/80"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Status Tabs */}
-          <div className="flex gap-1 flex-wrap border-l border-border pl-2 ml-2">
-            {statuses.map((status) => (
-              <button
-                key={status}
-                onClick={() =>
-                  setFilterCol(
-                    filterCol?.val === status
-                      ? null
-                      : { col: "status", val: status }
-                  )
-                }
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  filterCol?.val === status
-                    ? "bg-green-500 text-white"
-                    : "bg-muted text-foreground hover:bg-muted/80"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
-
-          {/* Clear Filters */}
-          {(searchVal || filterCol || sortCol) && (
-            <Button
-              onClick={() => {
-                setSearchVal("");
-                setFilterCol(null);
-                setSortCol(null);
-              }}
-              className="ml-auto text-destructive hover:bg-destructive/10"
-            >
-              <X className="w-4 h-4 mr-1" />
-              Clear
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <TableComponent
-        noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
-        listCount={SAMPLE_DATA.length}
-        tableHeaderCell={
-          <>
-            <th scope="col" className="center-th">
-              <div>
-                Name
-                <SortType col={"name"} />
-              </div>
-            </th>
-            <th scope="col" className="center-th [&>div]:!justify-start">
-              <div>
-                Category
-                <SortType col={"category"} />
-              </div>
-            </th>
-            <th scope="col" className="center-th [&>div]:!justify-start">
-              <div>
-                Status
-                <SortType col={"status"} />
-              </div>
-            </th>
-            <th scope="col" className="center-th">
-              <div>
-                Price
-                <SortType col={"price"} />
-              </div>
-            </th>
-          </>
-        }
-        tableCell={
-          <>
-            {sortedObj.map((report) => (
-              <tr key={report.id}>
-                <td className=" text-gray-900 font-medium">{report.name}</td>
-
-                <td className="text-gray-500">{report.category}</td>
-
-                <td className="text-gray-500">{report.status}</td>
-
-                <td className="text-gray-500">{report.price}</td>
-              </tr>
-            ))}
-          </>
-        }
-      />
-    </div>
-  );
-}

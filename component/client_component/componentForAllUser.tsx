@@ -31,6 +31,12 @@ import {
   approvedButtonProp,
   deleteMyOrgMemberPropType,
   PieChartCardPropType,
+  validateReportTablePropType,
+  GetOrgMemberReportQueryType,
+  allType,
+  filteType,
+  tableWithFilterPropType,
+  sortColByPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -46,7 +52,10 @@ import {
   FormDivLabelInput,
   FormDivLabelSelect,
   ModalNotice,
+  ReportStatus,
+  ReportType,
   SubmitButton,
+  TableComponent,
 } from "../server_component/customComponent";
 import {
   DeleteFarmerUser,
@@ -58,15 +67,27 @@ import {
   baranggayList,
   capitalizeFirstLetter,
   DateToYYMMDD,
+  ReadableDateFomat,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
-import { ChevronDown, Frown, Key, Search, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Frown,
+  Key,
+  Minus,
+  Search,
+  User,
+  X,
+} from "lucide-react";
 import { useDebounce } from "./customHook/debounceHook";
 import {
   createResetPassWordLink,
   createSignUpLinkForAgri,
   deleteLink,
 } from "@/lib/server_action/link";
+import { ViewUserReportButton } from "./reportComponent";
+import { useFilterSortTable, useSortColumnHandler } from "./customHook";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -1120,6 +1141,253 @@ export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
         },
       ]}
       height={100}
+    />
+  );
+};
+
+export function TableWithFilter<
+  T extends Record<string, string | number | Date | boolean>
+>({
+  obj,
+  table,
+  additionalFilter,
+  sortCol,
+  setSortCol,
+  setTableList,
+}: tableWithFilterPropType<T>) {
+  const [searchVal, setSearchVal] = useState<string | null>(null);
+  const [filterCol, setFilterCol] = useState<filteType<T>>(null);
+  const sortedObj = useFilterSortTable<T>({
+    obj,
+    sortCol,
+    searchVal,
+    filterCol,
+  });
+
+  useEffect(() => setTableList(sortedObj), [sortedObj, setTableList]);
+
+  const handleFilterOptionLabel = (data: allType): string => {
+    if (data === typeof "number" || data === typeof "boolean")
+      return String(data);
+
+    if (data instanceof Date) return ReadableDateFomat(data);
+
+    return String(data);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+        <div className="flex gap-2">
+          <input
+            placeholder="Search products..."
+            value={searchVal ?? ""}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="flex-1 input"
+          />
+        </div>
+
+        {additionalFilter && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-muted-foreground">
+              Filter by:
+            </span>
+
+            {Object.keys(additionalFilter).map((col, index) => (
+              <div key={`${col}-${index}`} className="flex gap-2 flex-wrap">
+                {additionalFilter[col]!.map((option, index) => (
+                  <button
+                    key={`${option}-${index}`}
+                    onClick={() =>
+                      setFilterCol(
+                        filterCol?.val === option
+                          ? null
+                          : { col: col, val: option }
+                      )
+                    }
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      filterCol?.val === option
+                        ? "bg-green-500 text-white"
+                        : "bg-muted text-foreground hover:bg-green-100/70 ring ring-gray-500"
+                    }`}
+                  >
+                    {handleFilterOptionLabel(option)}
+                  </button>
+                ))}
+
+                {Object.keys(additionalFilter).length > index + 1 && (
+                  <div className="border-l border-border" />
+                )}
+              </div>
+            ))}
+
+            {(searchVal || filterCol || sortCol) && (
+              <Button
+                onClick={() => {
+                  setSearchVal("");
+                  setFilterCol(null);
+                  setSortCol(null);
+                }}
+                className="ml-auto text-destructive hover:bg-destructive/10"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {table}
+    </div>
+  );
+}
+
+export const SortColBy = <T,>({
+  col,
+  handleSortCol,
+  sortCol,
+}: sortColByPropType<T>) => (
+  <span onClick={() => handleSortCol(col)} className="inline-block">
+    {sortCol?.column === col ? (
+      sortCol.sortType === "asc" ? (
+        <ChevronUp className="logo text-gray-500" />
+      ) : (
+        <ChevronDown className="logo text-gray-500" />
+      )
+    ) : (
+      <Minus className="logo text-gray-500" />
+    )}
+  </span>
+);
+
+export const ValidateReportTable: FC<validateReportTablePropType> = ({
+  memberReport,
+}) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetOrgMemberReportQueryType>();
+  const [tableList, setTableList] =
+    useState<GetOrgMemberReportQueryType[]>(memberReport);
+
+  const SortType: FC<{ col: keyof GetOrgMemberReportQueryType }> = ({
+    col,
+  }) => (
+    <SortColBy<GetOrgMemberReportQueryType>
+      sortCol={sortCol}
+      handleSortCol={handleSortCol}
+      col={col}
+    />
+  );
+
+  return (
+    <TableWithFilter<GetOrgMemberReportQueryType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={memberReport}
+      additionalFilter={{
+        reportType: Array.from(
+          new Set(memberReport.map((val) => val.reportType))
+        ),
+        verificationStatus: Array.from(
+          new Set(memberReport.map((val) => val.verificationStatus))
+        ),
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
+          listCount={memberReport.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="center-th">
+                <div>
+                  Unang pangalan
+                  <SortType col={"farmerFirstName"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Apelyido
+                  <SortType col={"farmerLastName"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Alyas
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Pamagat ng ulat
+                  <SortType col={"title"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Araw Ipinasa
+                  <SortType col={"dayReported"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Uri ng ulat
+                  <SortType col={"reportType"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>
+                  Estado ng ulat
+                  <SortType col={"verificationStatus"} />
+                </div>
+              </th>
+              <th scope="col">
+                <div>Aksyon</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((report) => (
+                <tr key={report.reportId}>
+                  <td className=" text-gray-900 font-medium">
+                    {report.farmerFirstName}
+                  </td>
+
+                  <td className="text-gray-500">{report.farmerLastName}</td>
+
+                  <td className="text-gray-500">{report.farmerAlias}</td>
+
+                  <td className="text-gray-500">{report.title}</td>
+
+                  <td className="text-gray-500">
+                    {ReadableDateFomat(new Date(report.dayReported))}
+                  </td>
+
+                  <td>
+                    <ReportType type={report.reportType} />
+                  </td>
+
+                  <td>
+                    <ReportStatus
+                      verificationStatus={report.verificationStatus}
+                    />
+                  </td>
+
+                  <td>
+                    <ViewUserReportButton
+                      reportId={report.reportId}
+                      farmerName={
+                        report.farmerFirstName + " " + report.farmerLastName
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
     />
   );
 };

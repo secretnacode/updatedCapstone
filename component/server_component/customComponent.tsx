@@ -511,7 +511,9 @@ export const TableComponent: FC<TableComponentPropType> = ({
           <div className="div overflow-x-auto">
             <table className="table-style farmerReportTable">
               <thead>
-                <tr>{tableHeaderCell}</tr>
+                <tr className="[&_th_div]:flex [&_th_div]:flex-row [&_th_div]:justify-center [&_th_div]:items-center [&_th_div]:gap-3">
+                  {tableHeaderCell}
+                </tr>
               </thead>
               <tbody>{tableCell}</tbody>
             </table>

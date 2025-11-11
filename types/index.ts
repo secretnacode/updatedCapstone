@@ -331,12 +331,12 @@ export type GetOrgMemberReportQueryType = {
   farmerLastName: string;
   farmerAlias: string;
   reportType: reportTypeStateType;
-}[];
+};
 
 export type GetOrgMemberReportReturnType =
   | {
       success: true;
-      memberReport: GetOrgMemberReportQueryType;
+      memberReport: GetOrgMemberReportQueryType[];
     }
   | ServerActionFailBaseType;
 
@@ -1653,15 +1653,15 @@ export type reportStatusPropType = {
 };
 
 type filterSortBaseType<T> = {
-  obj?: T[];
-  // sortCol: sortColType<T>
+  obj: T[];
 };
 
-export type tableWithFilterPropType<T> = filterSortBaseType<T> & {
-  // handleSetTableData: (data: T[]) => void;
-  // table: ChildrenType;
-  // additionalFilter?: ChildrenType;
-};
+export type tableWithFilterPropType<T> = filterSortBaseType<T> &
+  Pick<useSortColumnHandlerReturnType<T>, "sortCol" | "setSortCol"> & {
+    setTableList: Dispatch<SetStateAction<T[]>>;
+    table: ChildrenType;
+    additionalFilter?: { [key in keyof T]?: allType[] };
+  };
 
 export type sortColType<T> = {
   column: keyof T;
@@ -1670,13 +1670,13 @@ export type sortColType<T> = {
 
 export type filteType<T> = {
   col: keyof T;
-  val: string;
+  val: allType;
 } | null;
 
 export type useFilterSortValueParamType<T> = filterSortBaseType<T> & {
+  sortCol: sortColType<T>;
   searchVal: string | null;
   filterCol: filteType<T>;
-  sortCol: sortColType<T>; // should be removed(was here because of testing)
 };
 
 export type useSortColumnHandlerReturnType<T> = {
@@ -1685,6 +1685,13 @@ export type useSortColumnHandlerReturnType<T> = {
   handleSortCol: (col: keyof T) => void;
 };
 
-// export type useSortColumnParamType<T> = {
-//   col: keyof T;
-// };
+export type validateReportTablePropType = {
+  memberReport: GetOrgMemberReportQueryType[];
+};
+
+export type allType = string | number | boolean | Date;
+
+export type sortColByPropType<T> = Pick<
+  useSortColumnHandlerReturnType<T>,
+  "sortCol" | "handleSortCol"
+> & { col: keyof T };

@@ -156,7 +156,7 @@ export const GetFarmerReportDetailQuery = async (
  */
 export const GetOrgMemberReportQuery = async (
   orgId: string
-): Promise<GetOrgMemberReportQueryType> => {
+): Promise<GetOrgMemberReportQueryType[]> => {
   try {
     return (
       await pool.query(
