@@ -1,8 +1,14 @@
 import { AllFarmerCrop } from "@/component/client_component/cropComponent";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
+import {
+  CropCountPerBrgy,
+  CropStatusCount,
+  ReportCountPerCropLoading,
+} from "@/component/server_component/componentForAllUser";
 import { GetAllCropInfo } from "@/lib/server_action/crop";
 import { GetAllCropInfoReturnType } from "@/types";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +34,16 @@ export default async function Page() {
           <div className="col-span-3">
             <AllFarmerCrop cropInfo={cropVal.allCropInfo} />
           </div>
-          <div>side view</div>
+
+          <div className="side-bar-wrapper ">
+            <Suspense fallback={<ReportCountPerCropLoading />}>
+              <CropCountPerBrgy />
+            </Suspense>
+
+            <Suspense fallback={<ReportCountPerCropLoading />}>
+              <CropStatusCount />
+            </Suspense>
+          </div>
         </div>
       )}
     </div>

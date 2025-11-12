@@ -51,7 +51,7 @@ export const MapComponent: FC<MapComponentPropType> = ({
 }) => {
   return (
     <div
-      className={`rounded-xl overflow-hidden input !p-0 ${divClassName}`}
+      className={`rounded-xl overflow-hidden input !p-0 shadow-sm ${divClassName}`}
       id="mapCanvas"
     >
       <Map

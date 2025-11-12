@@ -88,8 +88,8 @@ export function useFilterSortTable<
     if (!sortCol) return search;
 
     return [...search].sort((a, b) => {
-      const aV = a[sortCol.column];
-      const bV = b[sortCol.column];
+      const aV = String(a[sortCol.column]);
+      const bV = String(b[sortCol.column]);
 
       if (aV < bV) return sortCol.sortType === "asc" ? -1 : 1;
 

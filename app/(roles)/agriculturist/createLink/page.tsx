@@ -32,15 +32,15 @@ export default async function Page() {
     };
   }
 
-  console.log(linkData);
-
   const tableCount = (): number => {
     if (!linkData.success) return 0;
 
-    if (linkData.work === "admin" && linkData.createAgriLink)
-      return linkData.createAgriLink.length;
+    const resetPassLength = linkData.resetPassLink.length;
 
-    return linkData.resetPassLink.length;
+    if (linkData.work === "admin")
+      return linkData.createAgriLink.length + resetPassLength;
+
+    return resetPassLength;
   };
 
   return (

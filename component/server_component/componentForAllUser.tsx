@@ -1,7 +1,6 @@
 import {
   AvailableOrgReturnType,
   DynamicLinkPropType,
-  GetAllOrgMemberListQueryReturnType,
   FarmerUserProfilePropType,
   UserProFilePropType,
   ViewUserProfileFormPropType,
@@ -11,6 +10,8 @@ import {
   getReportCountPerCropReturnType,
   getLatestReportReturnType,
   reportTypeStateType,
+  getCropCountPerBrgyReturnType,
+  getCropStatusCountReturnType,
 } from "@/types";
 import {
   AlertCircle,
@@ -38,11 +39,7 @@ import {
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
-import {
-  FormDivLabelInput,
-  SeeAllValButton,
-  TableComponent,
-} from "./customComponent";
+import { FormDivLabelInput, SeeAllValButton } from "./customComponent";
 import {
   capitalizeFirstLetter,
   converTimeToAMPM,
@@ -61,6 +58,10 @@ import {
   getReportCountPerCrop,
 } from "@/lib/server_action/report";
 import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
+import {
+  getCropCountPerBrgy,
+  getCropStatusCount,
+} from "@/lib/server_action/crop";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   userFarmerInfo,
@@ -197,60 +198,6 @@ export const DynamicLink: FC<DynamicLinkPropType> = ({
     >
       {label}
     </Link>
-  );
-};
-
-export const OrganizationMemberList: FC<{
-  memberList: GetAllOrgMemberListQueryReturnType[];
-}> = ({ memberList }) => {
-  return (
-    <TableComponent
-      noContentMessage="There's no organization that was listed yet"
-      listCount={memberList.length}
-      // tableTitle="Member of the organization"
-      tableHeaderCell={
-        <>
-          <th>#</th>
-          <th>Farmer Name</th>
-          <th>Farmer Alias</th>
-          <th>Barangay</th>
-          <th>Organization Role</th>
-          <th>Verifieed</th>
-          <th>Actions</th>
-        </>
-      }
-      tableCell={
-        <>
-          {memberList.map((member, index) => (
-            <tr key={member.farmerId}>
-              <td>{index + 1}</td>
-              <td>{member.farmerName}</td>
-              <td>{member.farmerAlias}</td>
-              <td>{member.barangay}</td>
-              <td>{member.orgRole}</td>
-              <td>
-                <span
-                  className={`table-verify-cell ${
-                    member.verified ? "table-verified" : "table-unverified"
-                  }`}
-                >
-                  {member.verified ? "Verified" : "Unverified"}
-                </span>
-              </td>
-              <td>
-                <div className="table-action">
-                  <DynamicLink
-                    baseLink="farmerUser"
-                    dynamicId={member.farmerId}
-                    label="View Profile"
-                  />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </>
-      }
-    />
   );
 };
 
@@ -608,6 +555,114 @@ export const ReportCountPerCrop: FC = async () => {
           <>
             <RenderRedirectNotification notif={reportCount.notifError} />
             <NoValueInPieChart hasCrop={false} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const CropCountPerBrgy: FC = async () => {
+  let cropCount: getCropCountPerBrgyReturnType;
+
+  try {
+    cropCount = await getCropCountPerBrgy();
+  } catch (error) {
+    console.error((error as Error).message);
+    cropCount = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  const NoValueInPieChart: FC = () => (
+    <div className="no-val">
+      <WheatOff className="!size-10 text-gray-400 mb-4" />
+
+      <p className="text-xl font-semibold text-gray-700 mb-1">
+        Wala ka pang pananim
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="component ">
+      <div className=" space-y-4">
+        <div className="font-semibold">
+          <p>Count of crop per Barangay</p>
+        </div>
+
+        {cropCount.success ? (
+          cropCount.cropCount.length > 0 ? (
+            <PieChartCard
+              data={cropCount.cropCount.map((val, index) => ({
+                id: `${val.cropLocation}-${index}`,
+                value: val.cropCount,
+                label: val.cropLocation,
+              }))}
+            />
+          ) : (
+            <NoValueInPieChart />
+          )
+        ) : (
+          <>
+            <RenderRedirectNotification notif={cropCount.notifError} />
+            <NoValueInPieChart />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const CropStatusCount: FC = async () => {
+  let cropCount: getCropStatusCountReturnType;
+
+  try {
+    cropCount = await getCropStatusCount();
+  } catch (error) {
+    console.error((error as Error).message);
+    cropCount = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
+  await getCropStatusCount();
+
+  const NoValueInPieChart: FC = () => (
+    <div className="no-val">
+      <WheatOff className="!size-10 text-gray-400 mb-4" />
+
+      <p className="text-xl font-semibold text-gray-700 mb-1">
+        Wala ka pang pananim
+      </p>
+    </div>
+  );
+  if (cropCount.success) console.log(cropCount.cropStatusCount);
+  return (
+    <div className="component ">
+      <div className=" space-y-4">
+        <div className="font-semibold">
+          <p>Bilang ng ulat kada pananim</p>
+        </div>
+
+        {cropCount.success ? (
+          cropCount.cropStatusCount.length > 0 ? (
+            <PieChartCard
+              data={cropCount.cropStatusCount.map((val, index) => ({
+                id: `${val.status}-${index}`,
+                value: val.count,
+                label: val.status,
+              }))}
+            />
+          ) : (
+            <NoValueInPieChart />
+          )
+        ) : (
+          <>
+            <RenderRedirectNotification notif={cropCount.notifError} />
+            <NoValueInPieChart />
           </>
         )}
       </div>

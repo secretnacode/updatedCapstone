@@ -201,9 +201,11 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
 
         {importantWidget}
 
-        <Suspense fallback={<SideComponentMyCropStatusLoading />}>
-          <SideComponentMyCropStatus />
-        </Suspense>
+        {(user === "leader" || user === "farmer") && (
+          <Suspense fallback={<SideComponentMyCropStatusLoading />}>
+            <SideComponentMyCropStatus />
+          </Suspense>
+        )}
 
         {widget}
 

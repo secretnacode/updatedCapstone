@@ -641,6 +641,18 @@ export const determineCropStatus = ({
   // 5 days in millisecond
   const fiveDaysLater = 1000 * 60 * 60 * 24 * 5;
 
+  if (cropStatus === null)
+    return {
+      status: "Wala ka pang ulat",
+      className: "bg-red-100 text-red-800",
+    };
+
+  if (!datePlanted || !dateHarvested)
+    return {
+      status: isEnglish ? "Vacant" : "Bakante",
+      className: "bg-gray-100 text-gray-800",
+    };
+
   const planted5DaysAgo = new Date(
     new Date(datePlanted).getTime() + fiveDaysLater
   );

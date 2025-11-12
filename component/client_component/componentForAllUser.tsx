@@ -44,6 +44,16 @@ import {
   GetUserReportReturnType,
   agriculturistFarmerReporTablePropType,
   GetAllFarmerReportQueryReturnType,
+  ViewAllVerifiedFarmerUserQueryReturnType,
+  agriculturistFarmerUserTablePropType,
+  ViewAllUnvalidatedFarmerQueryReturnQuery,
+  agriculturistValidateFarmerTablePropType,
+  GetAllOrganizationQueryReturnType,
+  agriculturistFarmerOrgTablePropType,
+  GetAllOrgMemberListQueryReturnType,
+  agriculturistOrgMemberTablePropType,
+  agriculturistCreateLinkTablePropType,
+  getLinkResetPassQueryReturnType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -1937,6 +1947,736 @@ export const AgriculturistFarmerReporTable: FC<
                       <DynamicLink
                         baseLink="farmerUser"
                         dynamicId={report.farmerId}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistFarmerUserTable: FC<
+  agriculturistFarmerUserTablePropType
+> = ({ farmer }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<ViewAllVerifiedFarmerUserQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<ViewAllVerifiedFarmerUserQueryReturnType[]>(farmer);
+
+  const SortType: FC<{
+    col: keyof ViewAllVerifiedFarmerUserQueryReturnType;
+  }> = ({ col }) => (
+    <SortColBy<ViewAllVerifiedFarmerUserQueryReturnType>
+      sortCol={sortCol}
+      col={col}
+    />
+  );
+
+  return (
+    <TableWithFilter<ViewAllVerifiedFarmerUserQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={farmer}
+      additionalFilter={{
+        filterBy: {
+          orgRole: Array.from(
+            new Set(
+              farmer.map((val) => val.orgRole).filter((val) => val !== null)
+            )
+          ),
+          orgName: Array.from(
+            new Set(
+              farmer.map((val) => val.orgName).filter((val) => val !== null)
+            )
+          ),
+        },
+
+        handleFilterLabel: {
+          orgRole: (val) => capitalizeFirstLetter(val),
+          orgName: (val) => capitalizeFirstLetter(val),
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={farmer.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Alias</p>
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[10%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  Created At
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("orgName")}
+                  className="cursor-pointer "
+                >
+                  Organization Name
+                  <SortType col={"orgName"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("orgRole")}
+                  className="cursor-pointer "
+                >
+                  Organization Role
+                  <SortType col={"orgRole"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[8%]">
+                <div
+                  onClick={() => handleSortCol("reportCount")}
+                  className="cursor-pointer"
+                >
+                  Report Count
+                  <SortType col={"reportCount"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[8%]">
+                <div
+                  onClick={() => handleSortCol("cropCount")}
+                  className="cursor-pointer"
+                >
+                  Crop Count
+                  <SortType col={"cropCount"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[18.5%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((farmer) => (
+                <tr key={farmer.farmerId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{farmer.farmerName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{farmer.farmerAlias}</div>
+                  </td>
+
+                  <td>
+                    <div>{ReadableDateFomat(farmer.dateCreated)}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      {farmer.orgName ? farmer.orgName : "No organization"}
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      {capitalizeFirstLetter(
+                        farmer.orgRole ?? "No organization"
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{farmer.reportCount}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{farmer.cropCount}</div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="flex flex-row justify-center items-center gap-2">
+                      <ViewUserReportButton
+                        reportId={farmer.farmerId}
+                        className="slimer-button"
+                        label="View Report"
+                      />
+
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={farmer.farmerId}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistValidateFarmerTable: FC<
+  agriculturistValidateFarmerTablePropType
+> = ({ farmer }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<ViewAllUnvalidatedFarmerQueryReturnQuery>();
+  const [tableList, setTableList] =
+    useState<ViewAllUnvalidatedFarmerQueryReturnQuery[]>(farmer);
+
+  const SortType: FC<{
+    col: keyof ViewAllUnvalidatedFarmerQueryReturnQuery;
+  }> = ({ col }) => (
+    <SortColBy<ViewAllUnvalidatedFarmerQueryReturnQuery>
+      sortCol={sortCol}
+      col={col}
+    />
+  );
+
+  return (
+    <TableWithFilter<ViewAllUnvalidatedFarmerQueryReturnQuery>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={farmer}
+      additionalFilter={{
+        filterBy: {
+          orgRole: Array.from(
+            new Set(
+              farmer.map((val) => val.orgRole).filter((val) => val !== null)
+            )
+          ),
+          orgName: Array.from(
+            new Set(
+              farmer.map((val) => val.orgName).filter((val) => val !== null)
+            )
+          ),
+        },
+
+        handleFilterLabel: {
+          orgRole: (val) => capitalizeFirstLetter(val),
+          orgName: (val) => capitalizeFirstLetter(val),
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={farmer.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Alias</p>
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[10%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  Created At
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[10%]">
+                <div>Verified</div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("orgName")}
+                  className="cursor-pointer "
+                >
+                  Organization Name
+                  <SortType col={"orgName"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>Organization Role</div>
+              </th>
+
+              <th scope="col" className="!w-[18.5%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((farmer) => (
+                <tr key={farmer.farmerId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{farmer.farmerName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{farmer.farmerAlias}</div>
+                  </td>
+
+                  <td>
+                    <div>{ReadableDateFomat(farmer.dateCreated)}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{farmer.orgName ?? "No organization"}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      {capitalizeFirstLetter(
+                        farmer.orgRole ?? "No organization"
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="table-action">
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={farmer.farmerId}
+                      />
+
+                      <ApprovedFarmerButton farmerId={farmer.farmerId} />
+
+                      <DeleteFarmerButton
+                        farmerId={farmer.farmerId}
+                        farmerName={farmer.farmerName}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistFarmerOrgTable: FC<
+  agriculturistFarmerOrgTablePropType
+> = ({ orgVal }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetAllOrganizationQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<GetAllOrganizationQueryReturnType[]>(orgVal);
+
+  const SortType: FC<{
+    col: keyof GetAllOrganizationQueryReturnType;
+  }> = ({ col }) => (
+    <SortColBy<GetAllOrganizationQueryReturnType> sortCol={sortCol} col={col} />
+  );
+
+  return (
+    <TableWithFilter<GetAllOrganizationQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={orgVal}
+      additionalFilter={{
+        filterBy: {
+          orgName: Array.from(
+            new Set(
+              orgVal.map((val) => val.orgName).filter((val) => val !== null)
+            )
+          ),
+        },
+
+        handleFilterLabel: {
+          orgName: (val) => capitalizeFirstLetter(val),
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={orgVal.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerLeaderName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerLeaderName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerLeaderAlias")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Alias</p>
+                  <SortType col={"farmerLeaderAlias"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("orgName")}
+                  className="cursor-pointer "
+                >
+                  Organization Name
+                  <SortType col={"orgName"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("totalMember")}
+                  className="cursor-pointer "
+                >
+                  Total Member
+                  <SortType col={"totalMember"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[19%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((orgVal) => (
+                <tr key={orgVal.farmerId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{orgVal.farmerLeaderName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{orgVal.farmerLeaderAlias}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{orgVal.orgName ?? "No organization"}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{orgVal.totalMember}</div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="table-action">
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={orgVal.farmerId}
+                        label="View Leader"
+                      />
+                      <DynamicLink
+                        baseLink="agriculturist/organizations"
+                        dynamicId={orgVal.orgId}
+                        label="View Org"
+                        className="submit-button"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistOrgMemberTable: FC<
+  agriculturistOrgMemberTablePropType
+> = ({ orgMem }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetAllOrgMemberListQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<GetAllOrgMemberListQueryReturnType[]>(orgMem);
+
+  const SortType: FC<{
+    col: keyof GetAllOrgMemberListQueryReturnType;
+  }> = ({ col }) => (
+    <SortColBy<GetAllOrgMemberListQueryReturnType>
+      sortCol={sortCol}
+      col={col}
+    />
+  );
+
+  return (
+    <TableWithFilter<GetAllOrgMemberListQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={orgMem}
+      additionalFilter={{
+        filterBy: {
+          orgRole: Array.from(new Set(orgMem.map((val) => val.orgRole))),
+          verified: Array.from(new Set(orgMem.map((val) => val.verified))),
+        },
+
+        handleFilterLabel: {
+          orgRole: (val) => capitalizeFirstLetter(val),
+          verified: (val) => (val === "true" ? "Verified" : "Unverified"),
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={orgMem.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Alias</p>
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("barangay")}
+                  className="cursor-pointer "
+                >
+                  Baranggay
+                  <SortType col={"barangay"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>Organization Role</div>
+              </th>
+
+              <th scope="col">
+                <div>Verification Status</div>
+              </th>
+
+              <th scope="col" className="!w-[11%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((member) => (
+                <tr key={member.farmerId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{member.farmerName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.farmerAlias}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.barangay}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.orgRole}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div
+                      className={`table-verify-cell ${
+                        member.verified ? "table-verified" : "table-unverified"
+                      }`}
+                    >
+                      {member.verified ? "Verified" : "Unverified"}
+                    </div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="table-action">
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={member.farmerId}
+                        label="View Profile"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistCreateLinkTable: FC<
+  agriculturistCreateLinkTablePropType
+> = (prop) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<getLinkResetPassQueryReturnType>();
+  const [tableList, setTableList] = useState<getLinkResetPassQueryReturnType[]>(
+    prop.work === "admin" ? prop.resetPassLink : prop.resetPassLink
+  );
+
+  const SortType: FC<{
+    col: keyof getLinkResetPassQueryReturnType;
+  }> = ({ col }) => (
+    <SortColBy<getLinkResetPassQueryReturnType> sortCol={sortCol} col={col} />
+  );
+
+  return (
+    <TableWithFilter<getLinkResetPassQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={orgMem}
+      additionalFilter={{
+        filterBy: {
+          orgRole: Array.from(new Set(orgMem.map((val) => val.orgRole))),
+          verified: Array.from(new Set(orgMem.map((val) => val.verified))),
+        },
+
+        handleFilterLabel: {
+          orgRole: (val) => capitalizeFirstLetter(val),
+          verified: (val) => (val === "true" ? "Verified" : "Unverified"),
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={orgMem.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("farmerAlias")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Alias</p>
+                  <SortType col={"farmerAlias"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("barangay")}
+                  className="cursor-pointer "
+                >
+                  Baranggay
+                  <SortType col={"barangay"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>Organization Role</div>
+              </th>
+
+              <th scope="col">
+                <div>Verification Status</div>
+              </th>
+
+              <th scope="col" className="!w-[11%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((member) => (
+                <tr key={member.farmerId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{member.farmerName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.farmerAlias}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.barangay}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{member.orgRole}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div
+                      className={`table-verify-cell ${
+                        member.verified ? "table-verified" : "table-unverified"
+                      }`}
+                    >
+                      {member.verified ? "Verified" : "Unverified"}
+                    </div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="table-action">
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={member.farmerId}
+                        label="View Profile"
                       />
                     </div>
                   </td>

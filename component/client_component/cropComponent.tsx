@@ -32,10 +32,12 @@ import {
   AllFarmerCropPropType,
   cropStatusType,
   determineCropStatusReturnType,
+  GetAllCropInfoQueryReturnType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus, X } from "lucide-react";
 import {
+  capitalizeFirstLetter,
   determineCropStatus,
   intoFeatureCollection,
   pickBrgyFirst,
@@ -57,7 +59,8 @@ import {
 } from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
-import { useSearchParam } from "./customHook";
+import { useSearchParam, useSortColumnHandler } from "./customHook";
+import { SortColBy, TableWithFilter } from "./componentForAllUser";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   cropInfo,
@@ -263,20 +266,13 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     status: cropStatusType,
     datePlanted: Date,
     dateHarvested: Date
-  ): determineCropStatusReturnType => {
-    if (status === null)
-      return {
-        status: "Wala ka pang ulat",
-        className: "bg-red-100 text-red-800",
-      };
-
-    return determineCropStatus({
+  ): determineCropStatusReturnType =>
+    determineCropStatus({
       cropStatus: status,
       dateHarvested: dateHarvested,
       datePlanted: datePlanted,
       isEnglish: false,
     });
-  };
 
   const handleCloseAddModal = () => {
     deleteParams(paramName);
@@ -292,10 +288,8 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             mapHeight={400}
             ref={mapRef}
             cityToHighlight={intoFeatureCollection(handleCityToLight())}
-            divClassName="shadow-sm"
           >
-            {myCropInfoList[0].cropLat &&
-              myCropInfoList[0].cropLat &&
+            {myCropInfoList[0] &&
               myCropInfoList.map((coor) => (
                 <MapMarkerComponent
                   key={coor.cropId}
@@ -305,7 +299,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
               ))}
           </MapComponent>
         ) : (
-          <MapComponent mapHeight={400} ref={mapRef} divClassName="shadow-sm" />
+          <MapComponent mapHeight={400} ref={mapRef} />
         )}
       </div>
 
@@ -678,6 +672,17 @@ const EditCropModal: FC<EditCropModalPropType> = ({
 
 export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
   const mapRef = useRef<MapRef>(null);
+
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetAllCropInfoQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<GetAllCropInfoQueryReturnType[]>(cropInfo);
+
+  const SortType: FC<{ col: keyof GetAllCropInfoQueryReturnType }> = ({
+    col,
+  }) => (
+    <SortColBy<GetAllCropInfoQueryReturnType> sortCol={sortCol} col={col} />
+  );
   const cityToHighlight = (): intoFeatureCollectionDataParam[] => {
     return cropInfo.reduce((acc: intoFeatureCollectionDataParam[], crop) => {
       if (acc.some((cropVal) => cropVal.name === crop.cropLocation)) return acc;
@@ -692,67 +697,192 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
       ] as intoFeatureCollectionDataParam[];
     }, []);
   };
+
+  const cropStatus = (
+    status: cropStatusType,
+    datePlanted: Date,
+    dateHarvested: Date
+  ): determineCropStatusReturnType =>
+    determineCropStatus({
+      cropStatus: status,
+      dateHarvested: dateHarvested,
+      datePlanted: datePlanted,
+      isEnglish: true,
+    });
+
   return (
     <div className="flex flex-col gap-5">
-      <MapComponent
-        mapHeight={400}
-        cityToHighlight={intoFeatureCollection(cityToHighlight())}
-        ref={mapRef}
-      >
-        {cropInfo.map((crop) => (
-          <MapMarkerComponent
-            key={crop.cropId}
-            markerLng={crop.cropLng}
-            markerLat={crop.cropLat}
-          />
-        ))}
-      </MapComponent>
-      <TableComponent
-        noContentMessage="There's no farmer user that list their farmer info"
-        listCount={cropInfo.length}
-        tableHeaderCell={
-          <>
-            <th>Farmer</th>
-            <th>Alias</th>
-            <th>Crop Name</th>
-            <th>Location</th>
-            <th>Area(Ha)</th>
-            <th></th>
-          </>
-        }
-        tableCell={cropInfo.map((crop) => (
-          <tr key={crop.cropId}>
-            <td className="straight-text">{crop.farmerName}</td>
-            <td>{crop.farmerAlias}</td>
-            <td>{crop.cropName}</td>
-            <td>{crop.cropLocation}</td>
-            <td>{crop.farmAreaMeasurement}</td>
-            <td>
-              <div className="flex flex-row justify-center items-centers gap-2">
-                <SubmitButton
-                  type="button"
-                  className="slimer-button"
-                  onClick={() =>
-                    ViewCrop(
-                      crop.cropLng,
-                      crop.cropLat,
-                      crop.cropLocation as barangayType,
-                      mapRef
-                    )
-                  }
-                >
-                  View
-                </SubmitButton>
-                <DynamicLink
-                  baseLink="farmerUser"
-                  dynamicId={crop.farmerId}
-                  label="Profile"
-                />
-              </div>
-            </td>
-          </tr>
-        ))}
-      />
+      {cropInfo.length > 0 ? (
+        <MapComponent
+          mapHeight={400}
+          ref={mapRef}
+          cityToHighlight={intoFeatureCollection(cityToHighlight())}
+        >
+          {cropInfo[0] &&
+            cropInfo.map((coor) => (
+              <MapMarkerComponent
+                key={coor.cropId}
+                markerLng={coor.cropLng}
+                markerLat={coor.cropLat}
+              />
+            ))}
+        </MapComponent>
+      ) : (
+        <MapComponent mapHeight={400} ref={mapRef} divClassName="shadow-sm" />
+      )}
+
+      <div className="component space-y-4">
+        <div>
+          <h1 className="table-title">Farmer&apos;s Crop</h1>
+        </div>
+
+        <TableWithFilter<GetAllCropInfoQueryReturnType>
+          setTableList={setTableList}
+          sortCol={sortCol}
+          setSortCol={setSortCol}
+          obj={cropInfo}
+          additionalFilter={{
+            filterBy: {
+              cropStatus: Array.from(
+                new Set(cropInfo.map((val) => val.cropLocation))
+              ),
+              cropLocation: Array.from(
+                new Set(cropInfo.map((val) => val.cropLocation))
+              ),
+            },
+
+            handleFilterLabel: {
+              cropLocation: (val) => capitalizeFirstLetter(val),
+            },
+          }}
+          table={
+            <TableComponent
+              noContentMessage="There's no crop"
+              listCount={cropInfo.length}
+              tableHeaderCell={
+                <>
+                  <th scope="col" className="!w-[22%]">
+                    <div
+                      onClick={() => handleSortCol("farmerName")}
+                      className="cursor-pointer"
+                    >
+                      Farmer Name
+                      <SortType col={"farmerName"} />
+                    </div>
+                  </th>
+
+                  <th scope="col" className="!w-[13%]">
+                    <div
+                      onClick={() => handleSortCol("farmerAlias")}
+                      className="cursor-pointer"
+                    >
+                      Alias
+                      <SortType col={"farmerAlias"} />
+                    </div>
+                  </th>
+
+                  <th scope="col">
+                    <div>Location</div>
+                  </th>
+
+                  <th scope="col">
+                    <div
+                      onClick={() => handleSortCol("farmAreaMeasurement")}
+                      className="cursor-pointer"
+                    >
+                      Area(Ha)
+                      <SortType col={"farmAreaMeasurement"} />
+                    </div>
+                  </th>
+
+                  <th scope="col">
+                    <div
+                      onClick={() => handleSortCol("farmAreaMeasurement")}
+                      className="cursor-pointer"
+                    >
+                      Crop Status
+                      <SortType col={"farmAreaMeasurement"} />
+                    </div>
+                  </th>
+
+                  <th scope="col" className="!w-[18.5%]">
+                    <div>Action</div>
+                  </th>
+                </>
+              }
+              tableCell={
+                <>
+                  {tableList.map((crop) => (
+                    <tr key={crop.cropId}>
+                      <td className=" text-gray-900 font-medium ">
+                        <div>{crop.farmerName}</div>
+                      </td>
+
+                      <td className="text-gray-500">
+                        <div>{crop.farmerAlias}</div>
+                      </td>
+
+                      <td className="text-gray-500">
+                        <div>{crop.cropLocation}</div>
+                      </td>
+
+                      <td className="text-gray-500">
+                        <div>{crop.farmAreaMeasurement}</div>
+                      </td>
+
+                      <td className="text-color ">
+                        <div>
+                          <span
+                            className={`py-1 px-3 rounded-2xl very-very-small-text ${
+                              cropStatus(
+                                crop.cropStatus,
+                                crop.datePlanted,
+                                crop.dateHarvested
+                              ).className
+                            }`}
+                          >
+                            {
+                              cropStatus(
+                                crop.cropStatus,
+                                crop.datePlanted,
+                                crop.dateHarvested
+                              ).status
+                            }
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className="text-center">
+                        <div className="flex flex-row justify-center items-centers gap-2">
+                          <SubmitButton
+                            type="button"
+                            className="slimer-button"
+                            onClick={() =>
+                              ViewCrop(
+                                crop.cropLng,
+                                crop.cropLat,
+                                crop.cropLocation as barangayType,
+                                mapRef
+                              )
+                            }
+                          >
+                            View
+                          </SubmitButton>
+                          <DynamicLink
+                            baseLink="farmerUser"
+                            dynamicId={crop.farmerId}
+                            label="Profile"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              }
+            />
+          }
+        />
+      </div>
     </div>
   );
 };

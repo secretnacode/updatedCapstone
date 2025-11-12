@@ -3,9 +3,11 @@
 import {
   cropStatusType,
   GetAllCropInfoQueryReturnType,
+  getCropCountPerBrgyQueryReturnType,
   getCropNameQueryReturnType,
   getCropStatusAndExpectedHarvestReturnType,
   getCropStatusAndPlantedDateReturnType,
+  getCropStatusCountQueryReturnType,
   getCropStatusReturnType,
   GetFarmerCropInfoQueryReturnType,
   getFarmerCropNameQueryReturnType,
@@ -193,7 +195,7 @@ export const GetAllCropInfoQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select c."cropId", c."cropLocation", c."farmerId", c."farmAreaMeasurement", c."cropName", c."cropLng", c."cropLat", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias" from capstone.crop c join capstone.farmer f on c."farmerId" = f."farmerId"`
+        `select c."cropId", c."cropStatus", c."datePlanted", c."dateHarvested", c."cropLocation", c."farmerId", c."farmAreaMeasurement", c."cropLng", c."cropLat", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias" from capstone.crop c join capstone.farmer f on c."farmerId" = f."farmerId"`
       )
     ).rows;
   } catch (error) {
@@ -436,6 +438,48 @@ export const getMyCropStatusDetailQuery = async (
     );
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
+    );
+  }
+};
+
+export const getCropCountPerBrgyQuery = async (): Promise<
+  getCropCountPerBrgyQueryReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select count("cropId") as "cropCount", "cropLocation" from capstone.crop group by "cropLocation"`
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `Unexpected error happen while getting the crop count per baranggay: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `Unexpected error happen while getting the crop count per baranggay`
+    );
+  }
+};
+
+export const getAllCropStatusAndPlantedDate = async (): Promise<
+  getCropStatusCountQueryReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select "cropStatus", "datePlanted", "dateHarvested" from capstone.crop`
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `Unexpected error happen while getting the crop status count: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `Unexpected error happen while getting the crop status count`
     );
   }
 };

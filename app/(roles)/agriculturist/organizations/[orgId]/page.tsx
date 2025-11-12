@@ -1,5 +1,5 @@
+import { AgriculturistOrgMemberTable } from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { OrganizationMemberList } from "@/component/server_component/componentForAllUser";
 import { GetAllOrgMemberList } from "@/lib/server_action/org";
 import { GetAllOrgMemberListReturnType } from "@/types";
 import { notFound } from "next/navigation";
@@ -29,7 +29,13 @@ export default async function Page({
       {!orgMemberList.success ? (
         <RenderRedirectNotification notif={orgMemberList.notifError} />
       ) : (
-        <OrganizationMemberList memberList={orgMemberList.memberList} />
+        <div className="component space-y-4">
+          <div>
+            <h1 className="table-title">Member of the organization</h1>
+          </div>
+
+          <AgriculturistOrgMemberTable orgMem={orgMemberList.memberList} />
+        </div>
       )}
     </>
   );

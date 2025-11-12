@@ -1,6 +1,5 @@
+import { AgriculturistFarmerOrgTable } from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { DynamicLink } from "@/component/server_component/componentForAllUser";
-import { TableComponent } from "@/component/server_component/customComponent";
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
 export const dynamic = "force-dynamic";
@@ -21,47 +20,13 @@ export default async function Page() {
       {!availableOrgs.success ? (
         <RenderRedirectNotification notif={availableOrgs.notifError} />
       ) : (
-        <TableComponent
-          noContentMessage="There's no organization that was listed yet"
-          listCount={availableOrgs.orgList.length}
-          // tableTitle="Unverfied Farmer Leaders and Farmer W/O Organization"
-          tableHeaderCell={
-            <>
-              <th>#</th>
-              <th>Farmer Leader Name</th>
-              <th>Organization Name</th>
-              <th>Total Member</th>
-              <th>Actions</th>
-            </>
-          }
-          tableCell={
-            <>
-              {availableOrgs.orgList.map((orgVal, index) => (
-                <tr key={orgVal.orgId}>
-                  <td>{index + 1}</td>
-                  <td>{orgVal.farmerLeaderName}</td>
-                  <td>{orgVal.orgName}</td>
-                  <td>{orgVal.totalMember}</td>
-                  <td>
-                    <div className="table-action">
-                      <DynamicLink
-                        baseLink="farmerUser"
-                        dynamicId={orgVal.farmerId}
-                        label="View Leader"
-                      />
-                      <DynamicLink
-                        baseLink="agriculturist/organizations"
-                        dynamicId={orgVal.orgId}
-                        label="View Org"
-                        className="submit-button"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </>
-          }
-        />
+        <div className="component space-y-4">
+          <div>
+            <h1 className="table-title">Farmer Organization</h1>
+          </div>
+
+          <AgriculturistFarmerOrgTable orgVal={availableOrgs.orgList} />
+        </div>
       )}
     </>
   );

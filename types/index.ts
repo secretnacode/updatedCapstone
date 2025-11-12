@@ -821,6 +821,7 @@ export type GetAllOrganizationQueryReturnType = {
   orgId: string;
   orgName: string;
   farmerLeaderName: string;
+  farmerLeaderAlias: string;
   farmerId: string;
   totalMember: number;
 };
@@ -1045,11 +1046,13 @@ export type GetAllCropInfoQueryReturnType = {
   cropLocation: string;
   farmerId: string;
   farmAreaMeasurement: string;
-  cropName: string;
   cropLng: number;
   cropLat: number;
   farmerName: string;
   farmerAlias: string;
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
 };
 
 export type GetAllCropInfoReturnType =
@@ -1525,8 +1528,8 @@ export type cropStatusType = "planted" | "harvested";
 
 export type determineCropStatusParamType = {
   cropStatus: cropStatusType;
-  datePlanted: Date;
-  dateHarvested: Date;
+  datePlanted?: Date;
+  dateHarvested?: Date;
   isEnglish: boolean;
 };
 
@@ -1724,3 +1727,53 @@ export type myReportTableLeaderFilterReturnType = {
   filterBy: { GetUserReportReturnType?: allType[] };
   handleFilterLabel: { GetUserReportReturnType?: (label: string) => string };
 };
+
+export type getCropCountPerBrgyQueryReturnType = {
+  cropCount: number;
+  cropLocation: string;
+};
+
+export type getCropCountPerBrgyReturnType =
+  | { success: true; cropCount: getCropCountPerBrgyQueryReturnType[] }
+  | ServerActionFailBaseType;
+
+export type getCropStatusCountQueryReturnType = {
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
+};
+
+export type getCropStatusCountCropStatusAccType = {
+  status: string;
+  count: number;
+};
+
+export type getCropStatusCountReturnType =
+  | { success: true; cropStatusCount: getCropStatusCountCropStatusAccType[] }
+  | ServerActionFailBaseType;
+
+export type agriculturistFarmerUserTablePropType = {
+  farmer: ViewAllVerifiedFarmerUserQueryReturnType[];
+};
+
+export type agriculturistValidateFarmerTablePropType = {
+  farmer: ViewAllUnvalidatedFarmerQueryReturnQuery[];
+};
+
+export type agriculturistFarmerOrgTablePropType = {
+  orgVal: GetAllOrganizationQueryReturnType[];
+};
+
+export type agriculturistOrgMemberTablePropType = {
+  orgMem: GetAllOrgMemberListQueryReturnType[];
+};
+
+export type agriculturistCreateLinkTablePropType = {
+  resetPassLink: getLinkResetPassQueryReturnType[];
+} & (
+  | {
+      work: "admin";
+      createAgriLink: getLinkQueryReturnTyepe[];
+    }
+  | { work: "agriculturist" }
+);

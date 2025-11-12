@@ -119,7 +119,7 @@ export const GetAllOrganizationQuery = async (): Promise<
   try {
     return (
       await pool.query(
-        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerLeaderName", f."farmerId", count(m."orgId") as "totalMember" from capstone.org o join capstone.farmer f on o."farmerLeadId" = f."farmerId" join capstone.farmer m on o."orgId" = m."orgId" group by o."orgId", o."orgName", f."farmerFirstName", f."farmerLastName", f."farmerId"`
+        `select o."orgId", o."orgName", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerLeaderName", f."farmerAlias" as "farmerLeaderAlias", f."farmerId", count(m."orgId") as "totalMember" from capstone.org o join capstone.farmer f on o."farmerLeadId" = f."farmerId" join capstone.farmer m on o."orgId" = m."orgId" group by o."orgId", o."orgName", f."farmerFirstName", f."farmerLastName", f."farmerId"`
       )
     ).rows;
   } catch (error) {

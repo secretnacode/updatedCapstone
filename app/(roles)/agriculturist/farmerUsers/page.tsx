@@ -1,10 +1,7 @@
+import { AgriculturistFarmerUserTable } from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { DynamicLink } from "@/component/server_component/componentForAllUser";
-import { TableComponent } from "@/component/server_component/customComponent";
 import { ViewAllValidatedFarmerUser } from "@/lib/server_action/farmerUser";
 import { ViewAllValidatedFarmerUserReturnType } from "@/types";
-import { ReadableDateFomat } from "@/util/helper_function/reusableFunction";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -30,63 +27,13 @@ export default async function Page() {
       {!farmers.success ? (
         <RenderRedirectNotification notif={farmers.notifError} />
       ) : (
-        <TableComponent
-          noContentMessage="There's no user that's been verified yet or there's no user that's signing in yet"
-          listCount={farmers.validatedFarmer.length}
-          // tableTitle="Verified Farmer Users"
-          tableHeaderCell={
-            <>
-              <th>#</th>
-              <th>Name</th>
-              <th>Alias</th>
-              <th>Created At</th>
-              <th>Organization Name</th>
-              <th>Organization Role</th>
-              <th>Report Count</th>
-              <th>Crop Count</th>
-              <th>Actions</th>
-            </>
-          }
-          tableCell={
-            <>
-              {farmers.validatedFarmer.map((farmVal, index) => (
-                <tr key={farmVal.farmerId}>
-                  <td>{index + 1}</td>
-                  <td>{farmVal.farmerName}</td>
-                  <td>{farmVal.farmerAlias}</td>
-                  <td>{ReadableDateFomat(farmVal.dateCreated)}</td>
-                  <td>{farmVal.orgName}</td>
-                  <td>{farmVal.orgRole}</td>
-                  <td>{farmVal.reportCount}</td>
-                  <td>{farmVal.cropCount}</td>
-                  <td>
-                    <div className="table-action">
-                      <DynamicLink
-                        baseLink="farmerUser"
-                        dynamicId={farmVal.farmerId}
-                        label="Profile"
-                      />
+        <div className="component space-y-4">
+          <div>
+            <h1 className="table-title">Verified Farmer Users</h1>
+          </div>
 
-                      <Link
-                        href="/"
-                        className="button blue-button slimer-button text-white"
-                      >
-                        Reports
-                      </Link>
-
-                      <Link
-                        href="/"
-                        className="button submit-button slimer-button"
-                      >
-                        Crops
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </>
-          }
-        />
+          <AgriculturistFarmerUserTable farmer={farmers.validatedFarmer} />
+        </div>
       )}
     </>
   );

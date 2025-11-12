@@ -4,6 +4,8 @@ import {
   checkIfFarmerCrop,
   CreateNewCropAfterSignUp,
   GetAllCropInfoQuery,
+  getAllCropStatusAndPlantedDate,
+  getCropCountPerBrgyQuery,
   GetFarmerCropInfoQuery,
   getFarmerCropNameQuery,
   GetMyCropInfoQuery,
@@ -15,6 +17,10 @@ import {
   AddUserCropInfoReturnType,
   FarmerSecondDetailFormType,
   GetAllCropInfoReturnType,
+  getCropCountPerBrgyReturnType,
+  getCropStatusCountCropStatusAccType,
+  getCropStatusCountQueryReturnType,
+  getCropStatusCountReturnType,
   GetFarmerCropInfoReturnType,
   getFarmerCropNameReturnType,
   GetMyCropInfoReturnType,
@@ -26,29 +32,12 @@ import { farmerSecondDetailFormSchema } from "@/util/helper_function/validation/
 import {
   ConvertMeassurement,
   CreateUUID,
+  determineCropStatus,
   missingFormValNotif,
   redirectWithNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-
-// export const GetFarmerNameCrop = async () => {
-//   try {
-//     return { success: true };
-//   } catch (error) {
-//     const err = error as Error;
-//     console.log(`Error in getting the farmer crop: ${err.message}`);
-//     return {
-//       success: false,
-//       notifError: [
-//         {
-//           message: `Error in getting the farmer crop: ${err.message}`,
-//           type: "error",
-//         },
-//       ],
-//     };
-//   }
-// };
 
 export const GetFarmerCropInfo = async (
   cropId: string,
@@ -280,6 +269,81 @@ export const getMyCropStatusDetail =
       const err = error as Error;
       console.log(
         `May pagkakamali sa pag kuha ng impormasyon ng iyong pananim: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getCropCountPerBrgy =
+  async (): Promise<getCropCountPerBrgyReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:crop");
+
+      return { success: true, cropCount: await getCropCountPerBrgyQuery() };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Unexpected error happen while getting the crop count per baranggay: ${err.message}`
+      );
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const getCropStatusCount =
+  async (): Promise<getCropStatusCountReturnType> => {
+    try {
+      await ProtectedAction("read:farmer:crop");
+
+      const crop = await getAllCropStatusAndPlantedDate();
+
+      const cropStatusCount = crop.reduce(
+        (
+          acc: getCropStatusCountCropStatusAccType[],
+          cur: getCropStatusCountQueryReturnType
+        ): getCropStatusCountCropStatusAccType[] => {
+          const cropStatus = determineCropStatus({
+            cropStatus: cur.cropStatus,
+            datePlanted: cur.datePlanted,
+            dateHarvested: cur.dateHarvested,
+            isEnglish: true,
+          }).status;
+
+          if (acc.some((val) => val.status === cropStatus))
+            return acc.map((val) =>
+              val.status === cropStatus
+                ? { status: val.status, count: val.count + 1 }
+                : { ...val }
+            );
+
+          return [...acc, { status: cropStatus, count: 1 }];
+        },
+        []
+      );
+
+      return {
+        success: true,
+        cropStatusCount: cropStatusCount,
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.log(
+        `Unexpected error happen while getting the crop status count: ${err.message}`
       );
       return {
         success: false,
