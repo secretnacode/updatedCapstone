@@ -42,6 +42,8 @@ import {
   reportTypeStateType,
   myReportTablePropType,
   GetUserReportReturnType,
+  agriculturistFarmerReporTablePropType,
+  GetAllFarmerReportQueryReturnType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -96,7 +98,10 @@ import {
 } from "@/lib/server_action/link";
 import { ViewUserReportButton } from "./reportComponent";
 import { useFilterSortTable, useSortColumnHandler } from "./customHook";
-import { FarmerOrgMemberAction } from "../server_component/componentForAllUser";
+import {
+  DynamicLink,
+  FarmerOrgMemberAction,
+} from "../server_component/componentForAllUser";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -1173,6 +1178,7 @@ export function TableWithFilter<
     filterCol,
   });
 
+  // will always update the state in the parent of this component after the sorting of data
   useEffect(() => setTableList(sortedObj), [sortedObj, setTableList]);
 
   const handleFilterOptionLabel = (data: allType): string => {
@@ -1197,12 +1203,12 @@ export function TableWithFilter<
         </div>
 
         {additionalFilter && (
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex gap-2 flex-wrap items-center w-full">
+            <span className="text-xs font-medium text-muted-foreground text-nowrap inline-block">
               Filter by:
             </span>
 
-            {Object.keys(additionalFilter.filterBy).map((col, index) => (
+            {/* {Object.keys(additionalFilter.filterBy).map((col, index) => (
               <div key={`${col}-${index}`} className="flex gap-2 flex-wrap">
                 {additionalFilter.filterBy[col]!.map((option, index) => (
                   <button
@@ -1230,21 +1236,55 @@ export function TableWithFilter<
                   <div className="border-l border-border" />
                 )}
               </div>
-            ))}
+            ))} */}
 
-            {(searchVal || filterCol || sortCol) && (
-              <Button
-                onClick={() => {
-                  setSearchVal("");
-                  setFilterCol(null);
-                  setSortCol(null);
-                }}
-                className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
-              >
-                <X className="w-4 h-4 mr-1" />
-                Clear
-              </Button>
-            )}
+            <div className={`flex flex-wrap gap-2 items-center flex-1`}>
+              {Object.keys(additionalFilter.filterBy).map((col, colIndex) =>
+                additionalFilter.filterBy[col]!.map((option, optIndex) => (
+                  <div key={`${option}-${optIndex}`} className="flex">
+                    <button
+                      onClick={() =>
+                        setFilterCol(
+                          filterCol?.val === option
+                            ? null
+                            : { col: col, val: option }
+                        )
+                      }
+                      className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
+                        filterCol?.val === option
+                          ? "bg-green-500 text-white"
+                          : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
+                      }`}
+                    >
+                      {additionalFilter.handleFilterLabel[col]!(
+                        handleFilterOptionLabel(option)
+                      )}
+                    </button>
+
+                    {Object.keys(additionalFilter.filterBy).length >
+                      colIndex + 1 &&
+                      optIndex ===
+                        additionalFilter.filterBy[col]!.length - 1 && (
+                        <div className="ml-2 border-l" />
+                      )}
+                  </div>
+                ))
+              )}
+
+              {(searchVal || filterCol || sortCol) && (
+                <Button
+                  onClick={() => {
+                    setSearchVal("");
+                    setFilterCol(null);
+                    setSortCol(null);
+                  }}
+                  className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -1361,12 +1401,15 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   <SortType col={"dayReported"} />
                 </div>
               </th>
+
               <th scope="col">
                 <div>Uri ng ulat</div>
               </th>
+
               <th scope="col">
                 <div>Estado ng ulat</div>
               </th>
+
               <th scope="col" className="!w-[16.5%]">
                 <div>Aksyon</div>
               </th>
@@ -1473,6 +1516,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   <SortType col={"farmerName"} />
                 </div>
               </th>
+
               <th scope="col" className="!w-[12%]">
                 <div
                   onClick={() => handleSortCol("farmerAlias")}
@@ -1482,9 +1526,11 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
+
               <th scope="col">
                 <div>Numero ng telepono</div>
               </th>
+
               <th scope="col" className="!w-[13%]">
                 <div
                   onClick={() => handleSortCol("barangay")}
@@ -1494,9 +1540,11 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   <SortType col={"barangay"} />
                 </div>
               </th>
+
               <th scope="col">
                 <div>Estado ng account</div>
               </th>
+
               <th scope="col">
                 <div
                   onClick={() => handleSortCol("cropNum")}
@@ -1506,6 +1554,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   <SortType col={"cropNum"} />
                 </div>
               </th>
+
               <th scope="col" className="!w-[25.5%]">
                 <div>Aksyon</div>
               </th>
@@ -1682,34 +1731,44 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
             <>
               {tableList.map((report) => (
                 <tr key={report.reportId}>
-                  <td className=" text-gray-900 font-medium">{report.title}</td>
+                  <td className=" text-gray-900 font-medium">
+                    <div>{report.title}</div>
+                  </td>
 
-                  <td className="text-gray-500">{report.cropName}</td>
+                  <td className="text-gray-500">
+                    <div>{report.cropName}</div>
+                  </td>
 
                   {work === "leader" ? null : (
                     <td>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          report.verificationStatus
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {report.verificationStatus ? "Naipasa" : "kinukumpirma"}
-                      </span>
+                      <div>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            report.verificationStatus
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {report.verificationStatus
+                            ? "Naipasa"
+                            : "kinukumpirma"}
+                        </span>
+                      </div>
                     </td>
                   )}
 
                   <td className="text-gray-500">
-                    {ReadableDateFomat(new Date(report.dayReported))}
+                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
                   </td>
 
                   <td className="text-gray-500">
-                    {ReadableDateFomat(new Date(report.dayHappen))}
+                    <div>{ReadableDateFomat(new Date(report.dayHappen))}</div>
                   </td>
 
                   <td scope="col">
-                    <ReportType type={report.reportType} />
+                    <div>
+                      <ReportType type={report.reportType} />
+                    </div>
                   </td>
 
                   <td className="text-center">
@@ -1717,6 +1776,169 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                       reportId={report.reportId}
                       myReport={true}
                     />
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
+  );
+};
+
+export const AgriculturistFarmerReporTable: FC<
+  agriculturistFarmerReporTablePropType
+> = ({ report }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetAllFarmerReportQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<GetAllFarmerReportQueryReturnType[]>(report);
+
+  const SortType: FC<{ col: keyof GetAllFarmerReportQueryReturnType }> = ({
+    col,
+  }) => (
+    <SortColBy<GetAllFarmerReportQueryReturnType> sortCol={sortCol} col={col} />
+  );
+
+  return (
+    <TableWithFilter<GetAllFarmerReportQueryReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={report}
+      additionalFilter={{
+        filterBy: {
+          verificationStatus: Array.from(
+            new Set(report.map((val) => val.verificationStatus))
+          ),
+        },
+
+        handleFilterLabel: {
+          verificationStatus: (val) =>
+            val === "true" ? "Verified" : "Not Verified",
+        },
+      }}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          listCount={report.length}
+          tableHeaderCell={
+            <>
+              <th scope="col" className="!w-[17%]">
+                <div
+                  onClick={() => handleSortCol("farmerName")}
+                  className="cursor-pointer"
+                >
+                  Farmer Name
+                  <SortType col={"farmerName"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[12%]">
+                <div
+                  onClick={() => handleSortCol("cropLocation")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-2/3">Crop location</p>
+                  <SortType col={"cropLocation"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[10%]">
+                <div className="cursor-pointer">Verified</div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("orgName")}
+                  className="cursor-pointer "
+                >
+                  Organization Name
+                  <SortType col={"orgName"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayReported")}
+                  className="cursor-pointer"
+                >
+                  <p className="w-3/5">Date was passed</p>
+                  <SortType col={"dayReported"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayHappen")}
+                  className="cursor-pointer"
+                >
+                  Date it happen
+                  <SortType col={"dayHappen"} />
+                </div>
+              </th>
+
+              <th scope="col" className="!w-[18.5%]">
+                <div>Action</div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((report) => (
+                <tr key={report.reportId}>
+                  <td className=" text-gray-900 font-medium ">
+                    <div>{report.farmerName}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{report.cropLocation}</div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
+                          report.verificationStatus
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {report.verificationStatus
+                          ? "Verified"
+                          : "Not verified"}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      {report.orgName ? report.orgName : "No organization"}
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>{ReadableDateFomat(new Date(report.dayHappen))}</div>
+                  </td>
+
+                  <td className="text-center">
+                    <div className="flex flex-row justify-center items-center gap-2">
+                      <ViewUserReportButton
+                        reportId={report.reportId}
+                        className="slimer-button"
+                        label="View Report"
+                      />
+
+                      <DynamicLink
+                        baseLink="farmerUser"
+                        dynamicId={report.farmerId}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

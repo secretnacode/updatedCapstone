@@ -42,9 +42,7 @@ export default async function Page({
           <>
             <div>
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Aking mga ulat
-                </h1>
+                <h1 className="table-title">Aking mga ulats</h1>
 
                 <AddReportComponent openModal={isAddingReport === "true"} />
               </div>

@@ -36,9 +36,7 @@ export default async function Page() {
         <>
           <div>
             <div className="flex justify-start items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Mga ulat ng ka-miyembro
-              </h1>
+              <h1 className="table-title">Mga ulat ng ka-miyembro</h1>
             </div>
           </div>
 

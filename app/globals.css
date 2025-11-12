@@ -314,9 +314,9 @@ body {
   .component {
     @apply bg-white rounded-lg p-4 shadow-sm;
   }
-  /* .center-th {
-    @apply [&>div]:flex [&>div]:flex-row [&>div]:justify-center [&>div]:items-center [&>div]:gap-3;
-  } */
+  .table-title {
+    @apply text-2xl font-bold text-gray-900;
+  }
 }
 
 /* loading style */

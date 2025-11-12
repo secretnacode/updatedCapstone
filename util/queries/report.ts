@@ -205,26 +205,27 @@ export const ApprovedOrgMemberQuery = async (
  * server action for getting all the farmer report information where the status of it is pending or is null
  * @returns farmer report information
  */
-export const GetAllFarmerReportQuery =
-  async (): Promise<GetAllFarmerReportQueryReturnType> => {
-    try {
-      return (
-        await pool.query(
-          `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null order by case when r."isSeenByAgri" = $2 and r."verificationStatus" = $3 then $4 when r."isSeenByAgri" = $5 and r."verificationStatus" = $6 then $7 else $8 end`,
-          [true, false, true, 1, false, false, 2, 3]
-        )
-      ).rows;
-    } catch (error) {
-      console.error(
-        `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
-          (error as Error).message
-        }`
-      );
-      throw new Error(
-        `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
-      );
-    }
-  };
+export const GetAllFarmerReportQuery = async (): Promise<
+  GetAllFarmerReportQueryReturnType[]
+> => {
+  try {
+    return (
+      await pool.query(
+        `select r."reportId", c."cropLocation", r."verificationStatus", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerId", r."dayReported", r."dayHappen", o."orgName" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.org o on r."orgId" = o."orgId" left join capstone.crop c on r."cropId" = c."cropId" where r."verificationStatus" = $1 or f."orgId" is null order by r."verificationStatus" desc`,
+        [true]
+      )
+    ).rows;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga ulat`
+    );
+  }
+};
 
 /**
  * function for getting all the report count that was passed to the farmer leader today
@@ -431,12 +432,12 @@ export const getRecentReport = async (
   try {
     const dynamicFilterAndParam: {
       filter: string;
-      param: [string | boolean, boolean];
+      param: (string | boolean)[];
     } =
       param.userRole === "agriculturist"
         ? {
-            filter: `r."verificationStatus" = $1 or r."isSeenByAgri" = $2`,
-            param: [true, false],
+            filter: `r."verificationStatus" = $1`,
+            param: [true],
           }
         : {
             filter: `o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
@@ -547,8 +548,8 @@ export const getTotalNewFarmerReportToday = async (): Promise<number> => {
   try {
     return (
       await pool.query(
-        `select count("reportId") from capstone.report where ("verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null) and date("dayReported") = current_date and "isSeenByAgri" = $3`,
-        [true, false, false]
+        `select count("reportId") from capstone.report where ("verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null) and date("dayReported") = current_date`,
+        [true, false]
       )
     ).rows[0].count;
   } catch (error) {

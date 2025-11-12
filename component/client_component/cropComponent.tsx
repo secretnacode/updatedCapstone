@@ -311,9 +311,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
 
       <div className="component">
         <div className="mb-4 flex flex-row justify-between items-center">
-          <p className=" font-semibold text-lg">
-            Impormasyon ng iyong mga pananim
-          </p>
+          <p className="table-title">Impormasyon ng iyong mga pananim</p>
 
           <SubmitButton
             type="button"

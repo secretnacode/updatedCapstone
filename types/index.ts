@@ -342,18 +342,19 @@ export type GetOrgMemberReportReturnType =
 
 export type GetAllFarmerReportQueryReturnType = {
   reportId: string;
+  farmerId: string;
   cropLocation: string;
   verificationStatus: string;
   farmerName: string;
   dayReported: Date;
   dayHappen: Date;
   orgName: string;
-}[];
+};
 
 export type GetAllFarmerReportReturnType =
   | {
       success: true;
-      validatedReport: GetAllFarmerReportQueryReturnType;
+      validatedReport: GetAllFarmerReportQueryReturnType[];
     }
   | ServerActionFailBaseType;
 
@@ -1713,6 +1714,10 @@ export type reportStatusParamType = { val: boolean; isEnglish?: boolean };
 export type myReportTablePropType = {
   report: GetUserReportReturnType[];
   work: allUserRoleType;
+};
+
+export type agriculturistFarmerReporTablePropType = {
+  report: GetAllFarmerReportQueryReturnType[];
 };
 
 export type myReportTableLeaderFilterReturnType = {

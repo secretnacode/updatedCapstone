@@ -30,9 +30,7 @@ export default async function Page() {
         <>
           <div>
             <div className="flex justify-start items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Mga Miyembro sa Organisasyon
-              </h1>
+              <h1 className="table-title">Mga Miyembro sa Organisasyon</h1>
             </div>
           </div>
 

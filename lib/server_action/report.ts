@@ -620,11 +620,9 @@ export const GetAllFarmerReport =
     try {
       await ProtectedAction("read:farmer:report:list");
 
-      const val = await GetAllFarmerReportQuery();
-
       return {
         success: true,
-        validatedReport: val,
+        validatedReport: await GetAllFarmerReportQuery(),
       };
     } catch (error) {
       const err = error as Error;
