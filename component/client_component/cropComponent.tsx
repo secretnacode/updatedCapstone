@@ -42,7 +42,7 @@ import {
   intoFeatureCollection,
   pickBrgyFirst,
   pointIsInsidePolygon,
-  ReadableDateFomat,
+  ReadableDateFormat,
   UnexpectedErrorMessage,
   ViewCrop,
 } from "@/util/helper_function/reusableFunction";
@@ -181,7 +181,7 @@ export const ViewCropModal: FC<{
                   <label className="text-sm text-gray-500">Araw Itinanim</label>
                   <p className="font-medium">
                     {cropInfo.dayPlanted
-                      ? ReadableDateFomat(cropInfo.dayPlanted)
+                      ? ReadableDateFormat(cropInfo.dayPlanted)
                       : "Hindi pa naitala"}
                   </p>
                 </div>
@@ -390,7 +390,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                 <div>
                   {!crop.cropStatus
                     ? "Wala pang ulat"
-                    : ReadableDateFomat(
+                    : ReadableDateFormat(
                         crop.cropStatus === "planted"
                           ? crop.datePlanted
                           : crop.dateHarvested

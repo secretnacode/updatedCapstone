@@ -52,8 +52,7 @@ import {
   agriculturistFarmerOrgTablePropType,
   GetAllOrgMemberListQueryReturnType,
   agriculturistOrgMemberTablePropType,
-  agriculturistCreateLinkTablePropType,
-  getLinkResetPassQueryReturnType,
+  dateWithTimeStampPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -85,8 +84,9 @@ import {
   capitalizeFirstLetter,
   DateToYYMMDD,
   handleFarmerNumber,
-  ReadableDateFomat,
+  ReadableDateFormat,
   reportStatus,
+  timeStampAmPmFormat,
   translateReportType,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
@@ -1085,7 +1085,7 @@ export const ShowIsExpired: FC<ShowIsExpiredPropType> = ({ expiredAt }) => {
   }, [expiredAt]);
 
   return (
-    <div className="grid place-items-center">
+    <div className="grid place-items-start">
       <p
         className={`py-1 px-3 rounded-md very-small-text ${
           status === "Expired"
@@ -1195,7 +1195,7 @@ export function TableWithFilter<
     if (data === typeof "number" || data === typeof "boolean")
       return String(data);
 
-    if (data instanceof Date) return ReadableDateFomat(data);
+    if (data instanceof Date) return ReadableDateFormat(data);
 
     return String(data);
   };
@@ -1446,7 +1446,9 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
+                    <div>
+                      {ReadableDateFormat(new Date(report.dayReported))}
+                    </div>
                   </td>
 
                   <td>
@@ -1768,11 +1770,13 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                   )}
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
+                    <div>
+                      {ReadableDateFormat(new Date(report.dayReported))}
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFomat(new Date(report.dayHappen))}</div>
+                    <div>{ReadableDateFormat(new Date(report.dayHappen))}</div>
                   </td>
 
                   <td scope="col">
@@ -1929,11 +1933,13 @@ export const AgriculturistFarmerReporTable: FC<
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFomat(new Date(report.dayReported))}</div>
+                    <div>
+                      {ReadableDateFormat(new Date(report.dayReported))}
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFomat(new Date(report.dayHappen))}</div>
+                    <div>{ReadableDateFormat(new Date(report.dayHappen))}</div>
                   </td>
 
                   <td className="text-center">
@@ -2096,7 +2102,7 @@ export const AgriculturistFarmerUserTable: FC<
                   </td>
 
                   <td>
-                    <div>{ReadableDateFomat(farmer.dateCreated)}</div>
+                    <div>{ReadableDateFormat(farmer.dateCreated)}</div>
                   </td>
 
                   <td className="text-gray-500">
@@ -2259,7 +2265,7 @@ export const AgriculturistValidateFarmerTable: FC<
                   </td>
 
                   <td>
-                    <div>{ReadableDateFomat(farmer.dateCreated)}</div>
+                    <div>{ReadableDateFormat(farmer.dateCreated)}</div>
                   </td>
 
                   <td className="text-gray-500">
@@ -2560,132 +2566,9 @@ export const AgriculturistOrgMemberTable: FC<
   );
 };
 
-export const AgriculturistCreateLinkTable: FC<
-  agriculturistCreateLinkTablePropType
-> = (prop) => {
-  const { sortCol, setSortCol, handleSortCol } =
-    useSortColumnHandler<getLinkResetPassQueryReturnType>();
-  const [tableList, setTableList] = useState<getLinkResetPassQueryReturnType[]>(
-    prop.work === "admin" ? prop.resetPassLink : prop.resetPassLink
-  );
-
-  const SortType: FC<{
-    col: keyof getLinkResetPassQueryReturnType;
-  }> = ({ col }) => (
-    <SortColBy<getLinkResetPassQueryReturnType> sortCol={sortCol} col={col} />
-  );
-
-  return (
-    <TableWithFilter<getLinkResetPassQueryReturnType>
-      setTableList={setTableList}
-      sortCol={sortCol}
-      setSortCol={setSortCol}
-      obj={orgMem}
-      additionalFilter={{
-        filterBy: {
-          orgRole: Array.from(new Set(orgMem.map((val) => val.orgRole))),
-          verified: Array.from(new Set(orgMem.map((val) => val.verified))),
-        },
-
-        handleFilterLabel: {
-          orgRole: (val) => capitalizeFirstLetter(val),
-          verified: (val) => (val === "true" ? "Verified" : "Unverified"),
-        },
-      }}
-      table={
-        <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
-          listCount={orgMem.length}
-          tableHeaderCell={
-            <>
-              <th scope="col" className="!w-[17%]">
-                <div
-                  onClick={() => handleSortCol("farmerName")}
-                  className="cursor-pointer"
-                >
-                  Farmer Name
-                  <SortType col={"farmerName"} />
-                </div>
-              </th>
-
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("farmerAlias")}
-                  className="cursor-pointer"
-                >
-                  <p className="w-2/3">Alias</p>
-                  <SortType col={"farmerAlias"} />
-                </div>
-              </th>
-
-              <th scope="col">
-                <div
-                  onClick={() => handleSortCol("barangay")}
-                  className="cursor-pointer "
-                >
-                  Baranggay
-                  <SortType col={"barangay"} />
-                </div>
-              </th>
-
-              <th scope="col">
-                <div>Organization Role</div>
-              </th>
-
-              <th scope="col">
-                <div>Verification Status</div>
-              </th>
-
-              <th scope="col" className="!w-[11%]">
-                <div>Action</div>
-              </th>
-            </>
-          }
-          tableCell={
-            <>
-              {tableList.map((member) => (
-                <tr key={member.farmerId}>
-                  <td className=" text-gray-900 font-medium ">
-                    <div>{member.farmerName}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{member.farmerAlias}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{member.barangay}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{member.orgRole}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div
-                      className={`table-verify-cell ${
-                        member.verified ? "table-verified" : "table-unverified"
-                      }`}
-                    >
-                      {member.verified ? "Verified" : "Unverified"}
-                    </div>
-                  </td>
-
-                  <td className="text-center">
-                    <div className="table-action">
-                      <DynamicLink
-                        baseLink="farmerUser"
-                        dynamicId={member.farmerId}
-                        label="View Profile"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </>
-          }
-        />
-      }
-    />
-  );
-};
+export const DateWithTimeStamp: FC<dateWithTimeStampPropType> = ({ date }) => (
+  <div className="flex flex-col justify-center items-center w-fit very-small-text text-gray-600">
+    {ReadableDateFormat(date)}
+    <span className="!text-xs text-gray-500">{timeStampAmPmFormat(date)}</span>
+  </div>
+);

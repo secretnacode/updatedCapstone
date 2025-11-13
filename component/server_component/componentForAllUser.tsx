@@ -46,7 +46,7 @@ import {
   DateToYYMMDD,
   getInitials,
   makeWeatherIcon,
-  ReadableDateFomat,
+  ReadableDateFormat,
   translateWeatherConditionToTagalog,
   UnexpectedErrorMessage,
   viewFarmerReportPath,
@@ -421,7 +421,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
           <div className="mt-4 very-small-text text-gray-600 flex justify-between items-center">
             <p>
               <span className="">{isEnglish ? "Now" : "Ngayong"}: </span>
-              {ReadableDateFomat(
+              {ReadableDateFormat(
                 new Date(currentWeather.weatherData.last_updated.split(" ")[0])
               )}
             </p>
@@ -782,7 +782,7 @@ export const LatestReport = async () => {
 
                       <div className="flex justify-start items-center text-xs text-gray-500">
                         <Calendar className="w-3.5 h-3.5 mr-1" />
-                        <span>{ReadableDateFomat(val.dayReported)}</span>
+                        <span>{ReadableDateFormat(val.dayReported)}</span>
                       </div>
                     </div>
 

@@ -147,18 +147,24 @@ export const getAllLinkData = async (): Promise<getAllLinkDataReturnType> => {
 
     const resetPassLink = await getRestPasswordLinkQuery();
 
-    if (work === "admin")
+    if (work === "agriculturist")
       return {
         success: true,
         work,
-        createAgriLink: await getCreateAgriLink(),
-        resetPassLink,
+        links: resetPassLink,
       };
 
     return {
       success: true,
-      work: "agriculturist",
-      resetPassLink,
+      work: "admin",
+      links: [
+        ...resetPassLink,
+        ...(await getCreateAgriLink()).map((val) => ({
+          ...val,
+          farmerName: null,
+          username: null,
+        })),
+      ],
     };
   } catch (error) {
     const err = error as Error;

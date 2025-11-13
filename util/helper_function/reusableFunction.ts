@@ -112,13 +112,28 @@ export function Date10YearsAgo() {
  * @param date date type the you want to tranform
  * @returns human readable date
  */
-export function ReadableDateFomat(date: Date) {
-  return date.toLocaleDateString("en-PH", {
+export const ReadableDateFormat = (date: Date) =>
+  date.toLocaleDateString("en-PH", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-}
+
+/**
+ * transforming the date into a time stamp in am or pm format
+ * @param date data to be transformed
+ * @returns
+ */
+export const timeStampAmPmFormat = (date: Date) => {
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  return `${hours}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
+};
 
 export const baranggayList = [
   "balayhangin",

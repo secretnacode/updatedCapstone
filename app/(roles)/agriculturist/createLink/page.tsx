@@ -2,6 +2,7 @@ import {
   CopyTextButton,
   CreateResetPassOrCreateAgriButton,
   CreateResetPasswordButton,
+  DateWithTimeStamp,
   DeleteLinkButton,
   ShowIsExpired,
 } from "@/component/client_component/componentForAllUser";
@@ -11,10 +12,7 @@ import {
 } from "@/component/server_component/customComponent";
 import { getAllLinkData } from "@/lib/server_action/link";
 import { getAllLinkDataReturnType } from "@/types";
-import {
-  ReadableDateFomat,
-  UnexpectedErrorMessageEnglish,
-} from "@/util/helper_function/reusableFunction";
+import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
 
 export const dynamic = "force-dynamic";
 
@@ -32,21 +30,10 @@ export default async function Page() {
     };
   }
 
-  const tableCount = (): number => {
-    if (!linkData.success) return 0;
-
-    const resetPassLength = linkData.resetPassLink.length;
-
-    if (linkData.work === "admin")
-      return linkData.createAgriLink.length + resetPassLength;
-
-    return resetPassLength;
-  };
-
   return (
-    <div className="p-4 shadow-sm rounded-xl bg-white">
+    <div className="component space-y-4">
       <div className=" flex flex-row justify-between items-center mb-4">
-        <p className="title !text-2xl !font-bold">List of Links</p>
+        <p className="table-title">List of Links</p>
 
         {linkData.success && linkData.work === "admin" ? (
           <CreateResetPassOrCreateAgriButton />
@@ -59,47 +46,96 @@ export default async function Page() {
         {linkData.success ? (
           <TableComponent
             noContentMessage="There's no link has been created yet"
-            listCount={tableCount()}
+            listCount={linkData.links.length}
             tableClassName="!shadow-none"
             tableHeaderCell={
               <>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Created At</th>
-                <th>Expires in</th>
-                {linkData.work === "admin" && <th>Url for</th>}
-                <th>Url</th>
-                <th>Action</th>
+                <th scope="col" className="!w-[17%]">
+                  <div>Name</div>
+                </th>
+
+                <th scope="col">
+                  <div>Status</div>
+                </th>
+
+                <th scope="col">
+                  <div>Created At</div>
+                </th>
+
+                <th scope="col">
+                  <div>Expires in</div>
+                </th>
+
+                {linkData.work === "admin" && (
+                  <th scope="col">
+                    <div>Url for</div>
+                  </th>
+                )}
+
+                <th scope="col">
+                  <div>Url</div>
+                </th>
+
+                <th scope="col" className="!w-[15%]">
+                  <div>Action</div>
+                </th>
               </>
             }
             tableCell={
               <>
-                {linkData.resetPassLink.map((linkVal) => (
+                {linkData.links.map((linkVal) => (
                   <tr key={linkVal.linkId}>
                     <td>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 truncate">
-                            {linkVal.farmerName}
-                          </h3>
-                        </div>
+                      <div className=" text-gray-900">
+                        {linkVal.farmerName ? (
+                          <div className="flex-1 min-w-0">
+                            <h3 className="truncate">{linkVal.farmerName}</h3>
 
-                        <p className="text-sm text-gray-500 truncate">
-                          {linkVal.username}
-                        </p>
+                            <p className="text-sm text-gray-500 truncate">
+                              {linkVal.username}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex-1 min-w-0">
+                            <span className="truncate">New Agriculturist</span>
+                          </div>
+                        )}
                       </div>
                     </td>
+
                     <td>
-                      <ShowIsExpired expiredAt={linkVal.dateExpired} />
+                      <div>
+                        <ShowIsExpired expiredAt={linkVal.dateExpired} />
+                      </div>
                     </td>
-                    <td>{ReadableDateFomat(linkVal.dateCreated)}</td>
-                    <td>{ReadableDateFomat(linkVal.dateExpired)}</td>
-                    {linkData.work === "admin" && <td>Reset Password</td>}
+
+                    <td>
+                      <div>
+                        <DateWithTimeStamp date={linkVal.dateCreated} />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div>
+                        <DateWithTimeStamp date={linkVal.dateExpired} />
+                      </div>
+                    </td>
+
+                    {linkData.work === "admin" && (
+                      <td>
+                        {linkVal.farmerName ? (
+                          <div>Farmer Reset Password</div>
+                        ) : (
+                          <div>Create Agri Account</div>
+                        )}
+                      </td>
+                    )}
                     <td>
                       <div className="max-w-[200px] overflow-y-hidden">
                         <p className="link">{linkVal.link}</p>
                       </div>
                     </td>
+
                     <td>
                       <div className="table-action">
                         <CopyTextButton
@@ -119,42 +155,6 @@ export default async function Page() {
                     </td>
                   </tr>
                 ))}
-                {linkData.work === "admin" &&
-                  linkData.createAgriLink.map((agriLink) => (
-                    <tr key={agriLink.linkId}>
-                      <td>New Agriculturist</td>
-                      <td>
-                        <ShowIsExpired expiredAt={agriLink.dateExpired} />
-                      </td>
-                      <td>{ReadableDateFomat(agriLink.dateCreated)}</td>
-                      <td>{ReadableDateFomat(agriLink.dateExpired)}</td>
-                      {linkData.work === "admin" && (
-                        <td>Create Agri Account</td>
-                      )}
-                      <td>
-                        <div className="max-w-[200px] overflow-y-hidden">
-                          <p className="link">{agriLink.link}</p>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="table-action">
-                          <CopyTextButton
-                            textToCopy={agriLink.link}
-                            className="slimer-button submit-button"
-                          >
-                            Copy
-                          </CopyTextButton>
-
-                          <DeleteLinkButton
-                            linkId={agriLink.linkId}
-                            className="slimer-button cancel-button"
-                          >
-                            Delete
-                          </DeleteLinkButton>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
               </>
             }
           />

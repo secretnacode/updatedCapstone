@@ -53,7 +53,7 @@ import {
   farmAreaMeasurementValue,
   getInitials,
   intoFeaturePolygon,
-  ReadableDateFomat,
+  ReadableDateFormat,
   reportStatus,
   reportTypeColor,
   translateReportType,
@@ -1013,7 +1013,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {ReadableDateFomat(report.dayReported)}
+                        {ReadableDateFormat(report.dayReported)}
                       </span>
                     </div>
                   </div>
@@ -1222,7 +1222,9 @@ export const SideComponentMyCropStatus = async () => {
 
                   <div className="text-sm text-gray-500 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>Itinanim: {ReadableDateFomat(crop.datePlanted)}</span>
+                    <span>
+                      Itinanim: {ReadableDateFormat(crop.datePlanted)}
+                    </span>
                   </div>
                 </div>
               ))}

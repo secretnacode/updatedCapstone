@@ -1420,16 +1420,17 @@ export type getLinkResetPassQueryReturnType = getLinkQueryReturnTyepe & {
   username: string;
 };
 
+export type linkResetPassMergeWithLinkCreateAgri = getLinkQueryReturnTyepe & {
+  farmerName: string | null;
+  username: string | null;
+};
+
 export type getAllLinkDataReturnType =
   | ({
       success: true;
-      resetPassLink: getLinkResetPassQueryReturnType[];
     } & (
-      | {
-          work: "admin";
-          createAgriLink: getLinkQueryReturnTyepe[];
-        }
-      | { work: "agriculturist" }
+      | { work: "agriculturist"; links: getLinkResetPassQueryReturnType[] }
+      | { work: "admin"; links: linkResetPassMergeWithLinkCreateAgri[] }
     ))
   | ServerActionFailBaseType;
 
@@ -1768,12 +1769,6 @@ export type agriculturistOrgMemberTablePropType = {
   orgMem: GetAllOrgMemberListQueryReturnType[];
 };
 
-export type agriculturistCreateLinkTablePropType = {
-  resetPassLink: getLinkResetPassQueryReturnType[];
-} & (
-  | {
-      work: "admin";
-      createAgriLink: getLinkQueryReturnTyepe[];
-    }
-  | { work: "agriculturist" }
-);
+export type dateWithTimeStampPropType = {
+  date: Date;
+};
