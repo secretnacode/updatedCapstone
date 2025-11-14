@@ -164,16 +164,20 @@ export const AuthInputPass: FC<AuthFormPropType> = ({
         {required && <span className="text-red-500">*</span>}
       </label>
 
-      <div className="relative">
+      <div className="relative flex justify-center items-center gap-2">
         <input
           type={isHidden ? "password" : "text"}
           name="password"
           placeholder="FarmerPass1"
-          className=" pr-10"
+          className=" input !pr-10"
           required={required}
           {...inputProps}
         />
-        <button type="button" onClick={setIsHidden}>
+        <button
+          type="button"
+          className="button absolute inset-y-0 right-0 flex items-center !px-3 text-gray-500 hover:text-gray-700"
+          onClick={setIsHidden}
+        >
           {isHidden ? <EyeClosed /> : <Eye />}
         </button>
       </div>
@@ -207,18 +211,24 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   inputRequired = false,
   labelOnClick,
   children,
+  logo,
   ...inputProps
 }) => {
   return (
     <div className={`cursor-pointer div form-div ${divClassName}`}>
       <label
         htmlFor={inputName}
-        className={`label ${labelClassName}`}
+        className={`label flex flex-row items-centers gap-2 ${labelClassName}`}
         onClick={labelOnClick}
       >
-        {labelMessage}
-        {inputRequired && <span className="text-red-500">*</span>}
+        {logo && <logo.icon className={`size-5 ${logo.style ?? ""}`} />}
+
+        <p>
+          {labelMessage}
+          {inputRequired && <span className="text-red-500">*</span>}
+        </p>
       </label>
+
       <input
         type={inputType}
         disabled={inputDisable}
@@ -296,12 +306,21 @@ export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
   optionOtherValAndLabel,
   onChange,
   formError,
+  labelClassName,
+  logo,
 }) => {
   return (
     <div className="div form-div">
-      <label htmlFor={selectName} className="label">
-        {labelMessage}
-        {selectRequired && <span className="text-red-500">*</span>}
+      <label
+        htmlFor={selectName}
+        className={`label flex items-centers gap-4 ${labelClassName}`}
+      >
+        {logo && <logo.icon className={`logo ${logo.style ?? ""}`} />}
+
+        <div>
+          {labelMessage}
+          {selectRequired && <span className="text-red-500">*</span>}
+        </div>
       </label>
       <select
         value={selectValue}

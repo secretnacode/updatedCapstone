@@ -63,7 +63,7 @@ export const GetFarmerCropInfoQuery = async (
   try {
     return (
       await pool.query(
-        `select "cropLocation", "farmAreaMeasurement" from capstone.crop where "cropId" = $1`,
+        `select "cropLocation", "farmAreaMeasurement", "cropLng", "cropLat", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "cropId" = $1`,
         [cropId]
       )
     ).rows[0];
@@ -373,7 +373,7 @@ export const updateCropIntoHarvestedStatus = async ({
     const harvested = (await cropStatus()).harvested;
 
     await pool.query(
-      `update capstone.crop set "cropStatus" = $1, "datePlanted" = $2 where "cropId" = $3`,
+      `update capstone.crop set "cropStatus" = $1, "dateHarvested" = $2 where "cropId" = $3`,
       [harvested, datePlanted, cropId]
     );
   } catch (error) {

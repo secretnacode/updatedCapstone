@@ -198,7 +198,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
         return setDefaultReport("damage");
 
       case `harvested`:
-        setDefaultReport("planting");
+        return setDefaultReport("planting");
 
       default:
         return setDefaultReport("planting");
@@ -466,7 +466,8 @@ const DamageReport: FC<ReportContentPropType> = ({
 
         <div>
           <label htmlFor="reportPicture" className="label">
-            Mag lagay ng larawan ng mga nasira
+            Mag lagay ng larawan ng mga nasira:
+            <span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -534,16 +535,6 @@ const DamageReport: FC<ReportContentPropType> = ({
           ))}
         </div>
       )}
-
-      {/* <div className="flex gap-4 pt-6 border-t">
-        <button
-          type="submit"
-          disabled={isPassing}
-          className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-        >
-          {isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
-        </button>
-      </div> */}
 
       <FormCancelSubmitButton
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
@@ -677,6 +668,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
             className="block text-sm font-medium text-gray-700 mb-3"
           >
             Mag lagay ng larawan ng lugar na tinaniman:
+            <span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -758,7 +750,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           message={
             <>
               Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
-              tatanim ? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
+              tatanim? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
               estado ng iyong pananim.
             </>
           }
@@ -781,9 +773,11 @@ const HarvestingReport: FC<ReportContentPropType> = ({
 }) => {
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const [state, formAction] = useActionState(uploadHarvestingReport, {
     success: null,
     notifError: null,
@@ -825,6 +819,8 @@ const HarvestingReport: FC<ReportContentPropType> = ({
   const handleRemovePicture = (picId: string) => {
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
+
+  const handleSubmit = () => formRef.current?.requestSubmit();
 
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -889,7 +885,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
             htmlFor="reportPicture"
             className="block text-sm font-medium text-gray-700 mb-3"
           >
-            Mag lagay ng larawan ng ani:
+            Mag lagay ng larawan ng ani:<span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -957,10 +953,31 @@ const HarvestingReport: FC<ReportContentPropType> = ({
       )}
 
       <FormCancelSubmitButton
+        submitType="button"
+        submitOnClick={() => setOpenModal(true)}
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
         cancelOnClick={() => setOpenReportModal(false)}
       />
+
+      {openModal && (
+        <ModalNotice
+          type="warning"
+          title="Mag ulat tungkol sa pag aani?"
+          message={
+            <>
+              Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
+              aani? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
+              estado ng iyong pananim.
+            </>
+          }
+          onClose={() => setOpenModal(false)}
+          onProceed={handleSubmit}
+          showCancelButton={true}
+          proceed={{ label: "Mag patuloy" }}
+          cancel={{ label: "Kanselahin" }}
+        />
+      )}
     </form>
   );
 };

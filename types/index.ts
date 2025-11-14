@@ -4,6 +4,7 @@ import {
   addPlantingReportSchema,
   authLogInSchema,
   authSignUpSchema,
+  changePasswordSchema,
   farmerSecondDetailFormSchema,
   REPORT_TYPE,
   userProfileInfoUpdateSchema,
@@ -507,9 +508,13 @@ export type GetFarmerUserProfileInfoReturnType =
     };
 
 export type GetFarmerCropInfoQueryReturnType = {
-  dayPlanted: Date;
-  cropLocation: string;
+  cropLocation: barangayType;
   farmAreaMeasurement: string;
+  cropLng: number;
+  cropLat: number;
+  cropStatus: cropStatusType;
+  datePlanted: Date;
+  dateHarvested: Date;
 };
 
 export type GetFarmerCropInfoReturnType =
@@ -626,6 +631,7 @@ export type FormDivLabelInputPropType = ChildrenPropType &
     inputPlaceholder?: string;
     inputRequired?: boolean;
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+    logo?: { icon: LucideIcon; style?: string };
   };
 
 export type FormDivLabelTextAreaPropType =
@@ -649,6 +655,8 @@ export type FormDivLabelSelectType = {
   optionOtherValAndLabel?: { value: string | number; label: string }[];
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
   formError?: string[];
+  labelClassName?: string;
+  logo?: { icon: LucideIcon; style?: string };
 };
 
 export type FormDivInputRadioPropType = {
@@ -1043,7 +1051,7 @@ export type AddUserCropInfoReturnType = {
 
 export type GetAllCropInfoQueryReturnType = {
   cropId: string;
-  cropLocation: string;
+  cropLocation: barangayType;
   farmerId: string;
   farmAreaMeasurement: string;
   cropLng: number;
@@ -1772,3 +1780,12 @@ export type agriculturistOrgMemberTablePropType = {
 export type dateWithTimeStampPropType = {
   date: Date;
 };
+
+export type changePasswordType = z.infer<typeof changePasswordSchema>;
+
+export type changeFarmerPassReturnType = {
+  notifMessage: NotificationBaseType[];
+} & (
+  | { success: false; formError?: FormErrorType<changePasswordType> }
+  | { success: true }
+);

@@ -53,6 +53,7 @@ import {
   GetAllOrgMemberListQueryReturnType,
   agriculturistOrgMemberTablePropType,
   dateWithTimeStampPropType,
+  changePasswordType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -62,6 +63,7 @@ import {
 import { useLoading } from "./provider/loadingProvider";
 import { UpdateUserProfileOrg } from "@/lib/server_action/org";
 import {
+  AuthInputPass,
   Button,
   CancelButton,
   FormCancelSubmitButton,
@@ -74,6 +76,7 @@ import {
   TableComponent,
 } from "../server_component/customComponent";
 import {
+  changeFarmerPass,
   DeleteFarmerUser,
   DeleteMyOrgMember,
   getAllFarmerForResetPass,
@@ -88,14 +91,17 @@ import {
   reportStatus,
   timeStampAmPmFormat,
   translateReportType,
+  UnexpectedErrorMessage,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
 import {
+  CalendarDays,
   ChevronDown,
   ChevronUp,
   Frown,
   Key,
   Minus,
+  Phone,
   Search,
   User,
   X,
@@ -225,13 +231,14 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
         onChange={handleChangeState}
       />
 
-      {/* WALA PA NITO SA DATABASE */}
       <FormDivLabelInput
-        labelMessage="Kasarian"
-        inputDisable={true}
-        inputName={"farmerSex"}
-        inputDefaultValue={`wala pang nakalagay sa database`}
-        inputPlaceholder="Hal. lalaki"
+        labelMessage={"Bilang ng pamilya"}
+        inputName={"familyMemberCount"}
+        inputType={"text"}
+        inputDisable={false}
+        inputValue={userInfoState.familyMemberCount}
+        formError={formError?.familyMemberCount}
+        onChange={handleChangeState}
       />
 
       <FormDivLabelSelect
@@ -256,6 +263,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
         inputValue={userInfoState.mobileNumber}
         formError={formError?.mobileNumber}
         onChange={handleChangeState}
+        logo={{ icon: Phone }}
       />
 
       <FormDivLabelInput
@@ -270,16 +278,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
         }
         formError={formError?.birthdate}
         onChange={handleChangeState}
-      />
-
-      <FormDivLabelInput
-        labelMessage={"Bilang ng pamilya"}
-        inputName={"familyMemberCount"}
-        inputType={"text"}
-        inputDisable={false}
-        inputValue={userInfoState.familyMemberCount}
-        formError={formError?.familyMemberCount}
-        onChange={handleChangeState}
+        logo={{ icon: CalendarDays }}
       />
 
       {isChangingVal && (
@@ -2572,3 +2571,122 @@ export const DateWithTimeStamp: FC<dateWithTimeStampPropType> = ({ date }) => (
     <span className="!text-xs text-gray-500">{timeStampAmPmFormat(date)}</span>
   </div>
 );
+
+export const ChangeMyPassword = () => {
+  const { handleSetNotification } = useNotification();
+  const { handleDoneLoading, handleIsLoading } = useLoading();
+  const [hidePass, setHidePass] = useState<boolean>(true);
+  const [hasChange, setHasChange] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [formError, setFormError] =
+    useState<FormErrorType<changePasswordType>>();
+  const defaultVal = {
+    currentPass: "",
+    newPass: "",
+    confirmNewPass: "",
+  };
+  const [passVal, setPassVal] = useState<changePasswordType>(defaultVal);
+
+  const handleChangeVal = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setHasChange(true);
+  };
+
+  const handleResetForm = () => {
+    setPassVal(defaultVal);
+    setHasChange(false);
+  };
+
+  const handleFormSubmit = async () => {
+    try {
+      handleIsLoading("Binabago na ang iyong password");
+
+      const res = await changeFarmerPass(passVal);
+
+      handleSetNotification(res.notifMessage);
+
+      if (res.success) return handleResetForm;
+
+      setFormError(res.formError);
+    } catch (error) {
+      console.log((error as Error).message);
+
+      handleSetNotification([
+        { message: UnexpectedErrorMessage(), type: "error" },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <>
+      <AuthInputPass
+        label="Kasalukuyang password:"
+        isHidden={hidePass}
+        setIsHidden={() => setHidePass(!hidePass)}
+        name="currentPass"
+        placeholder="FarmerPass123"
+        value={passVal.currentPass}
+        onChange={handleChangeVal}
+        formError={formError?.currentPass}
+        required={hasChange}
+      />
+
+      <FormDivLabelInput
+        labelMessage="Bagong password:"
+        inputName="newPass"
+        placeholder="NewPasswordPalay123"
+        value={passVal.newPass}
+        onChange={handleChangeVal}
+        formError={formError?.newPass}
+        required={hasChange}
+      />
+
+      <FormDivLabelInput
+        labelMessage="Kumpirmahin ang panibagong password:"
+        inputName="confirmNewPass"
+        placeholder="NewPasswordPalay123"
+        value={passVal.confirmNewPass}
+        onChange={handleChangeVal}
+        formError={formError?.confirmNewPass}
+        required={hasChange}
+      />
+
+      {hasChange && (
+        <div className="col-span-full">
+          <FormCancelSubmitButton
+            submitButtonLabel="Ipasa"
+            submitType="button"
+            submitOnClick={() => setShowModal(true)}
+            cancelButtonLabel="Kanselahin"
+            cancelOnClick={handleResetForm}
+          />
+        </div>
+      )}
+
+      {showModal && (
+        <ModalNotice
+          type={"warning"}
+          title="Mag babago ng organisasyon?"
+          showCancelButton={true}
+          onClose={() => setShowModal(false)}
+          onProceed={() => handleFormSubmit}
+          message={
+            <>
+              <span className="p block font-bold !text-lg mb-4">
+                Kapag nagpalit ka ng organisasyon, kailangang maaprubahan muna
+                ang iyong account bago ulit ka makapagsumite ng ulat.
+              </span>
+              <span className="p block !text-[17px] tracking-wide">
+                Magpatuloy sa pagpapalit ng organisasyon?
+              </span>
+            </>
+          }
+          proceed={{ label: "Mag Patuloy" }}
+          cancel={{ label: "Bumalik" }}
+        />
+      )}
+    </>
+  );
+};

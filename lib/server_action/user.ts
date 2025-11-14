@@ -5,16 +5,20 @@ import {
   DelteUserAccountQuery,
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
+  getPassword,
   getUserLocation,
   isAdminAgri,
   isAgriculturist,
   isFarmer,
   isFarmerLeader,
   isFarmerVerified,
+  updatePassword,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
 import {
   allUserRoleType,
+  changeFarmerPassReturnType,
+  changePasswordType,
   checkFarmerRoleReturnType,
   getAgriculturistDashboardDataReturnType,
   getAllFarmerForResetPassReturnType,
@@ -42,6 +46,10 @@ import {
   farmerLeaderValidationForImportantAction,
 } from "./farmerUser";
 import { revalidatePath } from "next/cache";
+import { ComparePassword } from "../reusableFunctions";
+import { missingFormValNotif } from "@/util/helper_function/reusableFunction";
+import { ZodValidateForm } from "../validation/authValidation";
+import { changePasswordSchema } from "@/util/helper_function/validation/validationSchema";
 
 /**
  * server action when the farmer leader want to delete a farmer account
@@ -671,3 +679,72 @@ export const adminAgriAuthorization =
       };
     }
   };
+
+export const changeFarmerPass = async ({
+  currentPass,
+  newPass,
+  confirmNewPass,
+}: changePasswordType): Promise<changeFarmerPassReturnType> => {
+  try {
+    const { userId, work } = await ProtectedAction("update:user");
+
+    if (work !== "farmer" && work !== "leader")
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "Only farmer can change their password",
+            type: "warning",
+          },
+        ],
+      };
+
+    const { valid, formError } = ZodValidateForm(
+      { currentPass, newPass, confirmNewPass },
+      changePasswordSchema
+    );
+    if (!valid)
+      return { success: false, formError, notifMessage: missingFormValNotif() };
+
+    // the password that pass and the password that is in the db is not matching
+    if (
+      !(await ComparePassword(
+        currentPass,
+        (
+          await getPassword(userId)
+        ).password
+      ))
+    )
+      return {
+        success: false,
+        formError: { currentPass: ["Mali ang nailagay mong password"] },
+        notifMessage: missingFormValNotif(),
+      };
+
+    await updatePassword(userId, newPass);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay na nabago ang iyong password!!!",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `Error occured while checking if the user is authorized: ${err.message}`
+    );
+    return {
+      success: false,
+      notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

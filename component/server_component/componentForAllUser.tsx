@@ -16,15 +16,22 @@ import {
 import {
   AlertCircle,
   AlertTriangle,
+  Building,
   Calendar,
+  CalendarDays,
+  CircleCheck,
   ClipboardX,
   CloudOff,
   FileText,
+  KeyRound,
   LucideIcon,
   MapPinHouse,
   Package,
   Pencil,
+  Phone,
   Sprout,
+  TriangleAlert,
+  User,
   Wheat,
   WheatOff,
 } from "lucide-react";
@@ -36,6 +43,7 @@ import {
   MyOrganizationForm,
   ApprovedOrgMemberButton,
   PieChartCard,
+  ChangeMyPassword,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
@@ -85,67 +93,76 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
         <RenderRedirectNotification notif={AvailOrg.notifError} />
       )}
       <div>
-        {/* Profile Picture */}
-        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
-          <div className="flex flex-col items-center">
-            <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-              <span className="text-4xl text-green-700 font-bold">
-                {getInitials(
-                  userFarmerInfo.farmerInfo.farmerFirstName,
-                  userFarmerInfo.farmerInfo.farmerLastName
+        <div className="sticky top-8">
+          <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
+            <div className="flex flex-col items-center">
+              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                <span className="text-4xl text-green-700 font-bold">
+                  {getInitials(
+                    userFarmerInfo.farmerInfo.farmerFirstName,
+                    userFarmerInfo.farmerInfo.farmerLastName
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
+                  {userFarmerInfo.farmerInfo.farmerLastName}
+                </h2>
+                {userFarmerInfo.farmerInfo.farmerAlias && (
+                  <p className="text-gray-500 text-sm">
+                    &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
+                  </p>
                 )}
-              </span>
-            </div>
-          </div>
+              </div>
 
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
-                {userFarmerInfo.farmerInfo.farmerLastName}
-              </h2>
-              {userFarmerInfo.farmerInfo.farmerAlias && (
-                <p className="text-gray-500 text-sm">
-                  &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
+              <div className="flex items-start gap-2 text-gray-600">
+                <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
+              </div>
+
+              <div className="flex justify-center items-center">
+                <p
+                  className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${
+                    userFarmerInfo.farmerInfo.verified
+                      ? "bg-green-50 text-green-700 border-green-500"
+                      : "bg-yellow-50 text-yellow-700 border-yellow-900"
+                  }`}
+                >
+                  {userFarmerInfo.farmerInfo.verified ? (
+                    <>
+                      <CircleCheck className="size-5" />
+                      Verified Account
+                    </>
+                  ) : (
+                    <>
+                      <TriangleAlert className="size-5" />
+                      Pending Verification
+                    </>
+                  )}
                 </p>
-              )}
+              </div>
             </div>
 
-            <div className="flex items-start gap-2 text-gray-600">
-              <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
-            </div>
-
-            {/* Verification Badge */}
-            <div
-              className={`rounded-lg p-3 text-center text-sm font-medium ${
-                userFarmerInfo.farmerInfo.verified
-                  ? "bg-green-50 text-green-700"
-                  : "bg-yellow-50 text-yellow-700"
-              }`}
-            >
-              {userFarmerInfo.farmerInfo.verified
-                ? "✓ Verified Account"
-                : "⚠ Pending Verification"}
-            </div>
-          </div>
-
-          {/* Crops Section */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
-            <div className="grid gap-2">
-              <ViewCropModalButton
-                cropInfo={userFarmerInfo.cropInfo}
-                isViewing={isViewing}
-              />
+            {/* Crops Section */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
+              <div className="grid gap-2">
+                <ViewCropModalButton
+                  cropInfo={userFarmerInfo.cropInfo}
+                  isViewing={isViewing}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right Column - Detailed Info */}
-      <div className="md:col-span-3 bg-white rounded-lg shadow-sm p-6">
+      <div className="md:col-span-3">
         {AvailOrg.success && (
           <UserProFile
             userFarmerInfo={userFarmerInfo.farmerInfo}
@@ -209,37 +226,50 @@ export const UserProFile: FC<UserProFilePropType> = ({
   isViewing,
 }) => {
   return (
-    <div className="div">
-      <div className="div grid gap-6">
-        <div>
-          <h1 className="title form-title">Personal na impormasyon</h1>
-
-          <div className="user-profile-form">
-            {isViewing ? (
-              <ViewUserProfileInfo userInfo={userFarmerInfo} />
-            ) : (
-              <MyProfileForm userInfo={userFarmerInfo} />
-            )}
-          </div>
+    <div className="div grid gap-6 [&>div]:!p-8">
+      <div className="component">
+        <div className="flex justify-start items-center gap-2 mb-6">
+          <User className="size-6" />
+          <h1 className="title text-2xl !m-0">Personal na Impormasyon</h1>
         </div>
 
-        <div className="border-t pt-6">
-          <h1 className="title text-lg font-semibold text-gray-900 mb-4">
-            Organisasyon na kasali
-          </h1>
-
-          <div className="form-div grid sm:grid-cols-2 gap-4">
-            {isViewing ? (
-              <ViewUserOrganizationInfo userOrgInfo={orgInfo} />
-            ) : (
-              <MyOrganizationForm
-                availOrgList={orgList}
-                userOrgInfo={orgInfo}
-              />
-            )}
-          </div>
+        {/* user-profile-form default design  */}
+        <div className="grid grid-cols-2 gap-6 [&>div]:nth-of-type-[n+7]:col-span-2">
+          {isViewing ? (
+            <ViewUserProfileInfo userInfo={userFarmerInfo} />
+          ) : (
+            <MyProfileForm userInfo={userFarmerInfo} />
+          )}
         </div>
       </div>
+
+      <div className="component">
+        <div className="flex justify-start items-center gap-2 mb-6">
+          <Building className="size-6" />
+          <h1 className="title text-2xl !m-0">Organisasyon na Kasali</h1>
+        </div>
+
+        <div className="form-div grid sm:grid-cols-2 gap-4">
+          {isViewing ? (
+            <ViewUserOrganizationInfo userOrgInfo={orgInfo} />
+          ) : (
+            <MyOrganizationForm availOrgList={orgList} userOrgInfo={orgInfo} />
+          )}
+        </div>
+      </div>
+
+      {!isViewing && (
+        <div className="component">
+          <div className="flex justify-start items-center gap-2 mb-6">
+            <KeyRound className="size-6" />
+            <h1 className="title text-2xl !m-0">Mag Palit ng Password</h1>
+          </div>
+
+          <div className="form-div grid gap-4">
+            <ChangeMyPassword />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -247,7 +277,6 @@ export const UserProFile: FC<UserProFilePropType> = ({
 export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
   userInfo,
 }) => {
-  console.log(userInfo);
   return (
     <>
       <FormDivLabelInput
@@ -290,13 +319,12 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
         inputDefaultValue={userInfo.farmerAlias}
       />
 
-      {/* WALA PA NITO SA DATABASE */}
       <FormDivLabelInput
-        labelMessage="Kasarian"
+        labelMessage={"Alyas"}
+        inputName={"familyMemberCount"}
+        inputPlaceholder={"Hal. Mang Kanor"}
         inputDisable={true}
-        inputName={"farmerSex"}
-        inputDefaultValue={`wala pang nakalagay sa database`}
-        inputPlaceholder="Hal. lalaki"
+        inputDefaultValue={userInfo.familyMemberCount}
       />
 
       <FormDivLabelInput
@@ -313,6 +341,7 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
         inputPlaceholder={"Hal. 09** *** ****"}
         inputDisable={true}
         inputDefaultValue={userInfo.mobileNumber}
+        logo={{ icon: Phone }}
       />
 
       <FormDivLabelInput
@@ -324,6 +353,7 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
             ? DateToYYMMDD(userInfo.birthdate)
             : String(userInfo.birthdate)
         }
+        logo={{ icon: CalendarDays }}
       />
     </>
   );

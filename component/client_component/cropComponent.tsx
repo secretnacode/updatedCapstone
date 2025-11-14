@@ -25,7 +25,6 @@ import {
   FarmerSecondDetailFormType,
   FormErrorType,
   barangayType,
-  intoFeatureCollectionDataParam,
   FarmerCropPageHandleOpenModalParamType,
   FormCropModalPropType,
   AddCropModalPropType,
@@ -35,11 +34,11 @@ import {
   GetAllCropInfoQueryReturnType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
-import { ClipboardPlus, X } from "lucide-react";
+import { Calendar, ClipboardPlus, MapPin, Ruler, Wheat, X } from "lucide-react";
 import {
   capitalizeFirstLetter,
+  cityToHighLightInMap,
   determineCropStatus,
-  intoFeatureCollection,
   pickBrgyFirst,
   pointIsInsidePolygon,
   ReadableDateFormat,
@@ -49,14 +48,12 @@ import {
 import {
   CropForm,
   FormCancelSubmitButton,
+  ModalLoading,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
 import { MapComponent, MapMarkerComponent } from "./mapComponent";
-import {
-  pointCoordinates,
-  polygonCoordinates,
-} from "@/util/helper_function/barangayCoordinates";
+import { pointCoordinates } from "@/util/helper_function/barangayCoordinates";
 import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
 import { useSearchParam, useSortColumnHandler } from "./customHook";
@@ -87,13 +84,15 @@ export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
             key={crop.cropId}
             type="button"
             onClick={() => handleViewCrop(crop.cropId)}
-            className="!w-full!px-3 !py-2 !text-sm !bg-green-50 !hover:bg-green-100 !text-green-700 rounded-lg transition-colors"
+            className="!w-full !px-3 !py-2 !text-sm !bg-green-50 !text-green-800 !rounded-sm shadow-sm hover:!bg-green-100 hover:shadow-md"
           >
             {crop.cropName}
           </SubmitButton>
         ))
       ) : (
-        <p>Wala ka pang pananim</p>
+        <div className="flex items-center justify-center p-3 bg-gray-100 rounded-sm shadow-sm">
+          <p>Wala ka pang pananim</p>
+        </div>
       )}
 
       {viewCrop &&
@@ -115,98 +114,157 @@ export const ViewCropModal: FC<{
   removeModal: () => void;
   isViewing: boolean;
 }> = ({ cropId, removeModal, isViewing }) => {
+  const mapRef = useRef<MapRef>(null);
   const { handleSetNotification } = useNotification();
-  const { handleIsLoading, handleDoneLoading } = useLoading();
   const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>();
 
   useEffect(() => {
     const GetCrop = async (cropId: string, isViewing: boolean) => {
       try {
-        handleIsLoading("Kinukuha ang impormasyon ng pananim....");
         const res = await GetFarmerCropInfo(cropId, isViewing);
 
         if (!res.success) {
           removeModal();
-          handleSetNotification(res.notifError);
+          return handleSetNotification(res.notifError);
         }
 
-        if (res.success && res.cropData) setCropInfo(res.cropData);
+        setCropInfo(res.cropData);
+
+        ViewCrop(
+          res.cropData.cropLng,
+          res.cropData.cropLat,
+          res.cropData.cropLocation,
+          mapRef
+        );
       } catch (error) {
         const err = error as Error;
         handleSetNotification([{ message: err.message, type: "error" }]);
         removeModal();
-      } finally {
-        handleDoneLoading();
       }
     };
 
     GetCrop(cropId, isViewing);
-  }, [
-    cropId,
-    isViewing,
-    handleSetNotification,
-    handleIsLoading,
-    handleDoneLoading,
-    removeModal,
-  ]);
+  }, [cropId, isViewing, handleSetNotification, removeModal]);
+
+  let cropStatus: determineCropStatusReturnType = { className: "", status: "" };
+
+  if (cropInfo)
+    cropStatus = determineCropStatus({
+      cropStatus: cropInfo.cropStatus,
+      datePlanted: cropInfo.datePlanted,
+      dateHarvested: cropInfo.dateHarvested,
+      isEnglish: false,
+    });
 
   return (
-    <>
-      {cropInfo && (
+    <div>
+      {cropInfo ? (
         <div className="modal-form">
           <div className="absolute inset-0" onClick={removeModal} />
-          <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Impormasyon ng Pananim
-              </h2>
-              <button
-                onClick={removeModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="p-6 space-y-4">
-              <div className="grid gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">
-                    Lokasyon ng Pananim
-                  </label>
-                  <p className="font-medium">{cropInfo.cropLocation}</p>
-                </div>
+          <div className="relative bg-white rounded-xl shadow-xl flex">
+            <MapComponent
+              mapHeight={"100%"}
+              mapWidth={"600px"}
+              ref={mapRef}
+              divClassName="flex-1"
+              cityToHighlight={cityToHighLightInMap([cropInfo.cropLocation])}
+            >
+              <MapMarkerComponent
+                markerLng={cropInfo.cropLng}
+                markerLat={cropInfo.cropLat}
+              />
+            </MapComponent>
 
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">Araw Itinanim</label>
-                  <p className="font-medium">
-                    {cropInfo.dayPlanted
-                      ? ReadableDateFormat(cropInfo.dayPlanted)
-                      : "Hindi pa naitala"}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">
-                    Sukat ng Taniman
-                  </label>
-                  <p className="font-medium">
-                    {cropInfo.farmAreaMeasurement} ektarya
-                  </p>
-                </div>
+            <div>
+              <div className="flex items-center justify-between gap-4 p-4 border-b">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Impormasyon ng Pananim
+                </h2>
+                <button
+                  onClick={removeModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              <button
-                onClick={removeModal}
-                className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Isara
-              </button>
+              <div className="p-6">
+                <div
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${cropStatus.className}  border border-current/20`}
+                >
+                  <span className="text-sm font-semibold">
+                    {cropStatus.status}
+                  </span>
+                </div>
+
+                <div className="grid gap-3 mt-6">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <MapPin className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Lokasyon
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {cropInfo.cropLocation}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+                    <Calendar className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Araw Itinanim
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {ReadableDateFormat(cropInfo.datePlanted) ||
+                          "Hindi pa naitala"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {cropInfo.cropStatus === "harvested" && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors">
+                      <Wheat className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Araw Inani
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {ReadableDateFormat(cropInfo.dateHarvested)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+                    <Ruler className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Sukat ng Taniman
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {cropInfo.farmAreaMeasurement} ektarya
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={removeModal}
+                  className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  Isara
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      ) : (
+        <ModalLoading />
       )}
-    </>
+    </div>
   );
 };
 
@@ -242,25 +300,25 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   };
 
   // make this to avoid multiple layer in the map because the crop info can have multiple same location
-  const handleCityToLight = (): intoFeatureCollectionDataParam[] => {
-    return myCropInfoList.reduce(
-      (acc: intoFeatureCollectionDataParam[], info) => {
-        if (acc.some((val) => val.name === info.cropLocation)) {
-          return acc;
-        }
+  // const handleCityToLight = (): intoFeatureCollectionDataParam[] => {
+  //   return myCropInfoList.reduce(
+  //     (acc: intoFeatureCollectionDataParam[], info) => {
+  //       if (acc.some((val) => val.name === info.cropLocation)) {
+  //         return acc;
+  //       }
 
-        return [
-          ...acc,
-          {
-            type: "polygon",
-            coordinates: polygonCoordinates[info.cropLocation],
-            name: info.cropLocation,
-          },
-        ] as intoFeatureCollectionDataParam[];
-      },
-      []
-    );
-  };
+  //       return [
+  //         ...acc,
+  //         {
+  //           type: "polygon",
+  //           coordinates: polygonCoordinates[info.cropLocation],
+  //           name: info.cropLocation,
+  //         },
+  //       ] as intoFeatureCollectionDataParam[];
+  //     },
+  //     []
+  //   );
+  // };
 
   const cropStatus = (
     status: cropStatusType,
@@ -287,7 +345,9 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           <MapComponent
             mapHeight={400}
             ref={mapRef}
-            cityToHighlight={intoFeatureCollection(handleCityToLight())}
+            cityToHighlight={cityToHighLightInMap(
+              myCropInfoList.map((val) => val.cropLocation)
+            )}
           >
             {myCropInfoList[0] &&
               myCropInfoList.map((coor) => (
@@ -683,20 +743,21 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
   }) => (
     <SortColBy<GetAllCropInfoQueryReturnType> sortCol={sortCol} col={col} />
   );
-  const cityToHighlight = (): intoFeatureCollectionDataParam[] => {
-    return cropInfo.reduce((acc: intoFeatureCollectionDataParam[], crop) => {
-      if (acc.some((cropVal) => cropVal.name === crop.cropLocation)) return acc;
 
-      return [
-        ...acc,
-        {
-          type: "polygon",
-          name: crop.cropLocation,
-          coordinates: polygonCoordinates[crop.cropLocation as barangayType],
-        },
-      ] as intoFeatureCollectionDataParam[];
-    }, []);
-  };
+  // const cityToHighlight = (): intoFeatureCollectionDataParam[] => {
+  //   return cropInfo.reduce((acc: intoFeatureCollectionDataParam[], crop) => {
+  //     if (acc.some((cropVal) => cropVal.name === crop.cropLocation)) return acc;
+
+  //     return [
+  //       ...acc,
+  //       {
+  //         type: "polygon",
+  //         name: crop.cropLocation,
+  //         coordinates: polygonCoordinates[crop.cropLocation as barangayType],
+  //       },
+  //     ] as intoFeatureCollectionDataParam[];
+  //   }, []);
+  // };
 
   const cropStatus = (
     status: cropStatusType,
@@ -716,7 +777,9 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
         <MapComponent
           mapHeight={400}
           ref={mapRef}
-          cityToHighlight={intoFeatureCollection(cityToHighlight())}
+          cityToHighlight={cityToHighLightInMap(
+            cropInfo.map((val) => val.cropLocation)
+          )}
         >
           {cropInfo[0] &&
             cropInfo.map((coor) => (

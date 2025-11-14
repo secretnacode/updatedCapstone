@@ -46,7 +46,7 @@ export const addHarvestedCrop = async ({
 }: addHarvestedCropParamType) => {
   try {
     await pool.query(
-      `insert into capstone.harvested ("harvestId", "reportId", "cropId", "totalKgHarvested", "dateHarvested", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
+      `insert into capstone.harvested ("harvestId", "reportId", "cropId", "totalKgHarvest", "dateHarvested", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
       [harvestId, reportId, cropId, totalKgHarvested, dateHarvested, farmerId]
     );
   } catch (error) {

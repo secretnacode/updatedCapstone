@@ -422,8 +422,6 @@ export function ViewCrop(
     zoom: mapZoomValByBarangay(brgy),
   });
 
-  console.log(document.getElementById("mapCanvas"));
-
   document
     .getElementById("mapCanvas")
     ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -789,3 +787,26 @@ export const reportStatus = ({
     : isEnglish
     ? "Not Verified"
     : "Kumpirmahin";
+
+/**
+ * function that returns a featureCollection Type that can be passed in the map component
+ * @param data array of map location
+ * @returns transformed featureCollection
+ */
+export const cityToHighLightInMap = (data: barangayType[]) =>
+  intoFeatureCollection(
+    data.reduce((acc: intoFeatureCollectionDataParam[], cur) => {
+      if (acc.some((val) => val.name === cur)) {
+        return acc;
+      }
+
+      return [
+        ...acc,
+        {
+          type: "polygon",
+          coordinates: polygonCoordinates[cur],
+          name: cur,
+        },
+      ];
+    }, [])
+  );

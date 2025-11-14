@@ -46,12 +46,14 @@ export const authSignUpSchema = z
       .regex(/[0-9]/, {
         message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
       }),
-    confirmPassword: z.string(),
+    confirmPassword: z
+      .string()
+      .min(8, { message: `Ilagay ulit ang password mo` }),
   })
   // like a conditional statement that compares the value of confirmPassword and password that was define, and will return the message if there's an error, the error will be returned base on the value that you put in the path
   .refine((data) => data.confirmPassword === data.password, {
     message: `Ang password mo at ang nilagay mo sa confirm password ay hindi tugma`,
-    path: ["confirmPassword"],
+    path: ["password", "confirmPassword"],
   });
 
 /**
@@ -330,3 +332,39 @@ export const addHarvestingReportSchema = addFarmerReportSchema.extend({
     .number()
     .min(1, { error: "Mag lagay kung gano kadami ang naani(kg)" }),
 });
+
+export const changePasswordSchema = z
+  .object({
+    currentPass: z
+      .string()
+      .min(1, { error: "Ilagay kung ano ang kasalukuyan mong password" }),
+    newPass: z
+      .string()
+      .min(1, { error: "Ilagay kung ano ang panibago mong password" })
+      .regex(/[a-z]/, {
+        message: `Lagyan ng kahit isang maliit na letra (a-z) ang iyong password`,
+      })
+      .regex(/[A-Z]/, {
+        message: `Lagyan ng kahit isang malaki na letra (A-Z) ang iyong password`,
+      })
+      .regex(/[0-9]/, {
+        message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
+      }),
+    confirmNewPass: z
+      .string()
+      .min(1, { error: "Ilagay ulit kung ano ang panibago mong password" })
+      .regex(/[a-z]/, {
+        message: `Lagyan ng kahit isang maliit na letra (a-z) ang iyong password`,
+      })
+      .regex(/[A-Z]/, {
+        message: `Lagyan ng kahit isang malaki na letra (A-Z) ang iyong password`,
+      })
+      .regex(/[0-9]/, {
+        message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
+      }),
+  })
+  .refine((data) => data.newPass === data.confirmNewPass, {
+    error:
+      "Ang password mo at ang nilagay mo sa confirm password ay hindi tugma",
+    path: ["newPass", "confirmNewPass"],
+  });

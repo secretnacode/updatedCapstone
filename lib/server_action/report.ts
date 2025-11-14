@@ -483,7 +483,8 @@ export const uploadHarvestingReport = async (
 
     await Promise.all([
       // did this because the 3 report types uses the same query and their only difference is the reportType,
-      // so after the insertion of new report, this is needed to be executed
+      // so after the insertion of new report, this is needed to be executed to
+      // make the report about the harvest because by default its damage report
       updateReportType("harvesting", reportId),
       updateCropIntoHarvestedStatus({
         datePlanted: reportVal.dateHappen,

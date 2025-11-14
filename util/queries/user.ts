@@ -747,3 +747,45 @@ export const agriAuthQuery = async ({
     );
   }
 };
+
+/**
+ * function for getting the password of the user
+ * @param userId id of the user that wants to get its password
+ * @returns password object
+ */
+export const getPassword = async (
+  userId: string
+): Promise<{ password: string }> => {
+  try {
+    return (
+      await pool.query(
+        `select "password" from capstone.auth where "authId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong password`
+    );
+  }
+};
+
+/**
+ * query for changing the password of the user
+ * @param userId id of the user that will change its password
+ * @param newPass new password that will replace the current password
+ */
+export const updatePassword = async (userId: string, newPass: string) => {
+  try {
+    await pool.query(
+      `update capstone.auth set "password" = $1 where "authId" = $2`,
+      [newPass, userId]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`
+    );
+  }
+};
