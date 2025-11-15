@@ -641,6 +641,11 @@ export const missingFormValNotif = (): NotificationBaseType[] => [
 ];
 
 /**
+ * variable that returns a path to crop page but the user want to add a crop immediately
+ */
+export const pathCropAddingCrop = "/farmer/crop?addCrop=true";
+
+/**
  * returns a crop status base on the passed value
  * @param param0 necessary data
  * @returns crop status

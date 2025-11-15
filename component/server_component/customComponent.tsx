@@ -53,6 +53,7 @@ import {
   farmAreaMeasurementValue,
   getInitials,
   intoFeaturePolygon,
+  pathCropAddingCrop,
   ReadableDateFormat,
   reportStatus,
   reportTypeColor,
@@ -218,10 +219,10 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
     <div className={`cursor-pointer div form-div ${divClassName}`}>
       <label
         htmlFor={inputName}
-        className={`label flex flex-row items-centers gap-2 ${labelClassName}`}
+        className={`label flex flex-row items-centers gap-1 ${labelClassName}`}
         onClick={labelOnClick}
       >
-        {logo && <logo.icon className={`size-5 ${logo.style ?? ""}`} />}
+        {logo && <logo.icon className={`size-4 ${logo.style ?? ""}`} />}
 
         <p>
           {labelMessage}
@@ -1259,10 +1260,7 @@ export const SideComponentMyCropStatus = async () => {
             logoClassName="!size-10"
             textWrapperDivClassName="!gap-0"
           >
-            <Link
-              href={`/farmer/crop?addReport=true`}
-              className="button submit-button"
-            >
+            <Link href={pathCropAddingCrop} className="button submit-button">
               <Wheat className="logo !size-5" />
               <span>Mag dagdag</span>
             </Link>

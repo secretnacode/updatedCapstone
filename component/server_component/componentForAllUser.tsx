@@ -12,6 +12,9 @@ import {
   reportTypeStateType,
   getCropCountPerBrgyReturnType,
   getCropStatusCountReturnType,
+  GetFarmerCropInfoReturnType,
+  cropStatusType,
+  viewUserCropInfoPropType,
 } from "@/types";
 import {
   AlertCircle,
@@ -26,9 +29,11 @@ import {
   KeyRound,
   LucideIcon,
   MapPinHouse,
+  MapPinIcon,
   Package,
   Pencil,
   Phone,
+  Ruler,
   Sprout,
   TriangleAlert,
   User,
@@ -47,13 +52,19 @@ import {
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
-import { FormDivLabelInput, SeeAllValButton } from "./customComponent";
+import {
+  FormDivLabelInput,
+  NoContentYet,
+  SeeAllValButton,
+} from "./customComponent";
 import {
   capitalizeFirstLetter,
   converTimeToAMPM,
   DateToYYMMDD,
+  determineCropStatus,
   getInitials,
   makeWeatherIcon,
+  pathCropAddingCrop,
   ReadableDateFormat,
   translateWeatherConditionToTagalog,
   UnexpectedErrorMessage,
@@ -65,10 +76,14 @@ import {
   getLatestReport,
   getReportCountPerCrop,
 } from "@/lib/server_action/report";
-import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
+import {
+  RenderNotification,
+  RenderRedirectNotification,
+} from "../client_component/provider/notificationProvider";
 import {
   getCropCountPerBrgy,
   getCropStatusCount,
+  GetFarmerCropInfo,
 } from "@/lib/server_action/crop";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
@@ -149,13 +164,10 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
             </div>
 
             {/* Crops Section */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900">Mga Pananim</h3>
-              <div className="grid gap-2">
-                <ViewCropModalButton
-                  cropInfo={userFarmerInfo.cropInfo}
-                  isViewing={isViewing}
-                />
+            <div className="space-y-5">
+              <h3 className="font-semibold text-gray-900">Tingnan:</h3>
+              <div className="grid gap-5 [&_button]:shadow-sm [&_button]:hover:shadow-md [&_button]:!px-0 [&_button]:!rounded-sm text-gray-700 text-sm">
+                <ViewCropModalButton isViewing={isViewing} />
               </div>
             </div>
           </div>
@@ -218,23 +230,34 @@ export const DynamicLink: FC<DynamicLinkPropType> = ({
   );
 };
 
-//FIX: add sexual of the user
-export const UserProFile: FC<UserProFilePropType> = ({
+export const UserProFile: FC<UserProFilePropType> = async ({
   userFarmerInfo,
   orgInfo,
   orgList,
   isViewing,
 }) => {
+  let cropInfo: GetFarmerCropInfoReturnType;
+
+  try {
+    cropInfo = await GetFarmerCropInfo(userFarmerInfo.farmerId, isViewing);
+  } catch (error) {
+    console.log((error as Error).message);
+    cropInfo = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
   return (
-    <div className="div grid gap-6 [&>div]:!p-8">
+    <div className="profile-component">
+      {!cropInfo.success && <RenderNotification notif={cropInfo.notifError} />}
       <div className="component">
-        <div className="flex justify-start items-center gap-2 mb-6">
-          <User className="size-6" />
-          <h1 className="title text-2xl !m-0">Personal na Impormasyon</h1>
+        <div>
+          <User />
+          <h1>Personal na Impormasyon</h1>
         </div>
 
-        {/* user-profile-form default design  */}
-        <div className="grid grid-cols-2 gap-6 [&>div]:nth-of-type-[n+7]:col-span-2">
+        <div className="personal-info-component">
           {isViewing ? (
             <ViewUserProfileInfo userInfo={userFarmerInfo} />
           ) : (
@@ -244,12 +267,12 @@ export const UserProFile: FC<UserProFilePropType> = ({
       </div>
 
       <div className="component">
-        <div className="flex justify-start items-center gap-2 mb-6">
-          <Building className="size-6" />
-          <h1 className="title text-2xl !m-0">Organisasyon na Kasali</h1>
+        <div>
+          <Building />
+          <h1>Organisasyon na Kasali</h1>
         </div>
 
-        <div className="form-div grid sm:grid-cols-2 gap-4">
+        <div className="default-style-info">
           {isViewing ? (
             <ViewUserOrganizationInfo userOrgInfo={orgInfo} />
           ) : (
@@ -258,14 +281,45 @@ export const UserProFile: FC<UserProFilePropType> = ({
         </div>
       </div>
 
+      <div className="component">
+        <div>
+          <Wheat />
+          <h1>Mga pananim</h1>
+        </div>
+
+        <div>
+          {cropInfo.success ? (
+            <div className="default-style-info [&>div]:nth-last-of-type-[2]:bg-red-400 [&>div]:last-of-type:[&>div]:nth-of-type-[2]:!grid-cols-2">
+              <ViewUserCropInfo cropData={cropInfo.cropData} isViewing />
+            </div>
+          ) : (
+            <NoContentYet
+              message="Wala pang pananim"
+              logo={WheatOff}
+              parentDiv="!m-0"
+            >
+              {!isViewing && (
+                <Link
+                  href={pathCropAddingCrop}
+                  className="button submit-button"
+                >
+                  <Pencil className="size-5" />
+                  Mag dagdag ng pananim
+                </Link>
+              )}
+            </NoContentYet>
+          )}
+        </div>
+      </div>
+
       {!isViewing && (
         <div className="component">
-          <div className="flex justify-start items-center gap-2 mb-6">
-            <KeyRound className="size-6" />
-            <h1 className="title text-2xl !m-0">Mag Palit ng Password</h1>
+          <div>
+            <KeyRound />
+            <h1>Mag Palit ng Password</h1>
           </div>
 
-          <div className="form-div grid gap-4">
+          <div>
             <ChangeMyPassword />
           </div>
         </div>
@@ -387,6 +441,152 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         inputDefaultValue={userOrgInfo.orgRole}
         inputPlaceholder="Miyembro"
       />
+    </>
+  );
+};
+
+export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
+  cropData,
+  isViewing,
+}) => {
+  const cropStatus = (
+    crop: cropStatusType,
+    datePlanted: Date,
+    dateHarvested: Date
+  ) =>
+    determineCropStatus({
+      cropStatus: crop,
+      datePlanted: datePlanted,
+      dateHarvested: dateHarvested,
+      isEnglish: isViewing,
+    });
+
+  const gradientStyle = (
+    crop: cropStatusType,
+    datePlanted: Date,
+    dateHarvested: Date
+  ) => {
+    const fiveDaysLater = 1000 * 60 * 60 * 24 * 5;
+
+    const planted5DaysAgo = new Date(
+      new Date(datePlanted).getTime() + fiveDaysLater
+    );
+    const harvested5DaysAgo = new Date(
+      new Date(dateHarvested).getTime() + fiveDaysLater
+    );
+
+    if (!datePlanted || !dateHarvested) return "from-gray-100";
+
+    switch (crop) {
+      case `planted`:
+        if (new Date() >= planted5DaysAgo) return "from-green-100";
+
+        return "from-lime-100";
+
+      case `harvested`:
+        if (new Date() >= harvested5DaysAgo) return "from-gray-100";
+
+        return "from-yellow-100";
+
+      default:
+        return "from-red-100";
+    }
+  };
+
+  return (
+    <>
+      {cropData.map((crop) => (
+        <div
+          key={crop.cropId}
+          className={`border border-gray-300/70 rounded-md p-6 bg-gradient-to-br ${gradientStyle(
+            crop.cropStatus,
+            crop.datePlanted,
+            crop.dateHarvested
+          )} to-white hover:shadow-md transition-shadow`}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <h4 className="text-lg font-bold text-sage-900">{crop.cropName}</h4>
+
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                cropStatus(
+                  crop.cropStatus,
+                  crop.datePlanted,
+                  crop.dateHarvested
+                ).className
+              }`}
+            >
+              {
+                cropStatus(
+                  crop.cropStatus,
+                  crop.datePlanted,
+                  crop.dateHarvested
+                ).status
+              }
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-start gap-3">
+              <MapPinIcon className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+              <div>
+                <p className="text-xs font-semibold text-sage-600 uppercase">
+                  Lokasyon
+                </p>
+
+                <p className="text-sage-900 font-medium">{crop.cropLocation}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Ruler className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+              <div>
+                <p className="text-xs font-semibold text-sage-600 uppercase">
+                  Sukat ng Lupain
+                </p>
+
+                <p className="text-sage-900 font-medium">
+                  {crop.farmAreaMeasurement}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+              <div>
+                <p className="text-xs font-semibold text-sage-600 uppercase">
+                  Nagtanim Noong
+                </p>
+
+                <p className="text-sage-900 font-medium">
+                  {ReadableDateFormat(crop.datePlanted)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+              <div>
+                <p className="text-xs font-semibold text-sage-600 uppercase">
+                  Ani
+                </p>
+
+                <p className="text-sage-900 font-medium">
+                  {crop.dateHarvested
+                    ? ReadableDateFormat(crop.dateHarvested)
+                    : "Hindi pa na-aani"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <div className="col-span-2">Tingnan lahat</div>
     </>
   );
 };
@@ -522,7 +722,7 @@ export const FarmerQuickActionComponent: FC = () => {
         </Link>
 
         <Link
-          href={"/farmer/crop?addCrop=true"}
+          href={pathCropAddingCrop}
           className="text-green-700 border-green-500 hover:bg-green-50 hover:border-green-800"
         >
           <Wheat className="logo !size-5  " />

@@ -58,15 +58,15 @@ export const CreateNewCropAfterSignUp = async (
 };
 
 export const GetFarmerCropInfoQuery = async (
-  cropId: string
-): Promise<GetFarmerCropInfoQueryReturnType> => {
+  farmerId: string
+): Promise<GetFarmerCropInfoQueryReturnType[]> => {
   try {
     return (
       await pool.query(
-        `select "cropLocation", "farmAreaMeasurement", "cropLng", "cropLat", "cropStatus", "datePlanted", "dateHarvested" from capstone.crop where "cropId" = $1`,
-        [cropId]
+        `select "cropId", "cropLocation", "farmAreaMeasurement",  "cropStatus", "datePlanted", "dateHarvested", "cropName" from capstone.crop where "farmerId" = $1`,
+        [farmerId]
       )
-    ).rows[0];
+    ).rows;
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng pananim sa database: ${

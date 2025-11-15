@@ -25,6 +25,7 @@ import {
   getFarmerCropNameReturnType,
   GetMyCropInfoReturnType,
   getMyCropStatusDetailReturnType,
+  SessionValueType,
   UpdateUserCropInfoReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
@@ -34,20 +35,45 @@ import {
   CreateUUID,
   determineCropStatus,
   missingFormValNotif,
+  NotAMemberErrorMessage,
   redirectWithNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { CheckMyMemberquery } from "@/util/queries/user";
 
 export const GetFarmerCropInfo = async (
-  cropId: string,
+  farmerId: string,
   isViewing: boolean
 ): Promise<GetFarmerCropInfoReturnType> => {
   try {
-    if (isViewing) await ProtectedAction("read:farmer:crop");
-    else await ProtectedAction("read:crop");
+    let validate: SessionValueType | null = null;
 
-    return { success: true, cropData: await GetFarmerCropInfoQuery(cropId) };
+    if (isViewing) {
+      validate = await ProtectedAction("read:farmer:crop");
+
+      // checks if the user that is viewing the farmer profile is a leader and if the leader and the farmer is in the same organization
+      if (
+        validate.work === "leader" &&
+        !(await CheckMyMemberquery(farmerId, validate.userId))
+      )
+        return {
+          success: false,
+          notifError: [
+            {
+              message: NotAMemberErrorMessage(),
+              type: "error",
+            },
+          ],
+        };
+    }
+
+    if (!validate) validate = await ProtectedAction("read:crop");
+
+    return {
+      success: true,
+      cropData: await GetFarmerCropInfoQuery(farmerId),
+    };
   } catch (error) {
     const err = error as Error;
     console.log(`May pag kakamali sa pag gawa ng mga pananim: ${err.message}`);

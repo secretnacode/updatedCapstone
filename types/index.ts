@@ -508,19 +508,19 @@ export type GetFarmerUserProfileInfoReturnType =
     };
 
 export type GetFarmerCropInfoQueryReturnType = {
+  cropId: string;
   cropLocation: barangayType;
   farmAreaMeasurement: string;
-  cropLng: number;
-  cropLat: number;
   cropStatus: cropStatusType;
   datePlanted: Date;
   dateHarvested: Date;
+  cropName: string;
 };
 
 export type GetFarmerCropInfoReturnType =
   | {
       success: true;
-      cropData: GetFarmerCropInfoQueryReturnType;
+      cropData: GetFarmerCropInfoQueryReturnType[];
     }
   | ServerActionFailBaseType;
 
@@ -866,7 +866,6 @@ export type FarmerUserProfilePropType = {
 };
 
 export type ViewCropModalButtonPropType = {
-  cropInfo: getFarmerCropNameQueryReturnType[];
   isViewing: boolean;
 };
 
@@ -1789,3 +1788,8 @@ export type changeFarmerPassReturnType = {
   | { success: false; formError?: FormErrorType<changePasswordType> }
   | { success: true }
 );
+
+export type viewUserCropInfoPropType = {
+  cropData: GetFarmerCropInfoQueryReturnType[];
+  isViewing: boolean;
+};

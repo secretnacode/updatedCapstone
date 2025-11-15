@@ -317,6 +317,37 @@ body {
   .table-title {
     @apply text-2xl font-bold text-gray-900;
   }
+  /* component in the profile page(e.g. personal info component) */
+  .profile-component {
+    @apply grid gap-6;
+  }
+  /* component itself */
+  .profile-component > div {
+    @apply !p-8;
+  }
+  /* logo in the component  */
+  .profile-component > div > div:first-of-type > svg {
+    @apply size-6 text-gray-700/90;
+  }
+  /* title of the component(beside the logo)  */
+  .profile-component > div > div:first-of-type > h1 {
+    @apply text-xl text-gray-800 font-bold;
+  }
+  /* div wrapper of logo and title of the component */
+  .profile-component > div > div:first-of-type {
+    @apply flex justify-start items-center gap-2 mb-10;
+  }
+  .profile-component .personal-info-component {
+    @apply grid grid-cols-2 gap-6 [&>div]:nth-of-type-[n+7]:col-span-2;
+  }
+  /* default style of the info wrapper inside the component (e.g. all component except personal info and change pass) */
+  .profile-component .default-style-info {
+    @apply space-y-1 grid sm:grid-cols-2 gap-4;
+  }
+  /* change pass component  */
+  .profile-component > div:last-of-type > div:nth-child(2) {
+    @apply grid gap-4;
+  }
 }
 
 /* loading style */

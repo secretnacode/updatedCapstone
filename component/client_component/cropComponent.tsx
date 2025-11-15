@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  AddUserCropInfo,
-  GetFarmerCropInfo,
-  UpdateUserCropInfo,
-} from "@/lib/server_action/crop";
+import { AddUserCropInfo, UpdateUserCropInfo } from "@/lib/server_action/crop";
 import {
   ChangeEvent,
   FC,
@@ -14,12 +10,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import { useNotification } from "./provider/notificationProvider";
 import {
   FarmerCropPagePropType,
   FarmerCropPageShowModalStateType,
-  GetFarmerCropInfoQueryReturnType,
   EditCropModalPropType,
   ViewCropModalButtonPropType,
   FarmerSecondDetailFormType,
@@ -34,7 +28,7 @@ import {
   GetAllCropInfoQueryReturnType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
-import { Calendar, ClipboardPlus, MapPin, Ruler, Wheat, X } from "lucide-react";
+import { ClipboardPlus } from "lucide-react";
 import {
   capitalizeFirstLetter,
   cityToHighLightInMap,
@@ -46,9 +40,9 @@ import {
   ViewCrop,
 } from "@/util/helper_function/reusableFunction";
 import {
+  Button,
   CropForm,
   FormCancelSubmitButton,
-  ModalLoading,
   SubmitButton,
   TableComponent,
 } from "../server_component/customComponent";
@@ -60,213 +54,189 @@ import { useSearchParam, useSortColumnHandler } from "./customHook";
 import { SortColBy, TableWithFilter } from "./componentForAllUser";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
-  cropInfo,
   isViewing,
 }) => {
-  const [viewCrop, setViewCrop] = useState<boolean>(false);
-  const [cropIdToView, setCropIdToView] = useState<string | null>(null);
-
-  const handleViewCrop = (cropId: string) => {
-    setViewCrop(true);
-    setCropIdToView(cropId);
-  };
-
-  const handleCancelViewCrop = useCallback(() => {
-    setViewCrop(true);
-    setCropIdToView(null);
-  }, []);
-
   return (
     <>
-      {cropInfo.length > 0 ? (
-        cropInfo.map((crop) => (
-          <SubmitButton
-            key={crop.cropId}
-            type="button"
-            onClick={() => handleViewCrop(crop.cropId)}
-            className="!w-full !px-3 !py-2 !text-sm !bg-green-50 !text-green-800 !rounded-sm shadow-sm hover:!bg-green-100 hover:shadow-md"
-          >
-            {crop.cropName}
-          </SubmitButton>
-        ))
-      ) : (
-        <div className="flex items-center justify-center p-3 bg-gray-100 rounded-sm shadow-sm">
-          <p>Wala ka pang pananim</p>
-        </div>
-      )}
+      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+        Personal na impormasyon
+      </Button>
 
-      {viewCrop &&
-        cropIdToView &&
-        createPortal(
-          <ViewCropModal
-            cropId={cropIdToView}
-            removeModal={handleCancelViewCrop}
-            isViewing={isViewing}
-          />,
-          document.body
-        )}
+      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+        Organisasyon
+      </Button>
+
+      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+        Mga Pananim
+      </Button>
+
+      {isViewing && (
+        <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+          Mag palit ng password
+        </Button>
+      )}
     </>
   );
 };
 
-export const ViewCropModal: FC<{
-  cropId: string;
-  removeModal: () => void;
-  isViewing: boolean;
-}> = ({ cropId, removeModal, isViewing }) => {
-  const mapRef = useRef<MapRef>(null);
-  const { handleSetNotification } = useNotification();
-  const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>();
+// export const ViewCropModal: FC<{
+//   cropId: string;
+//   removeModal: () => void;
+//   isViewing: boolean;
+// }> = ({ cropId, removeModal, isViewing }) => {
+//   const mapRef = useRef<MapRef>(null);
+//   const { handleSetNotification } = useNotification();
+//   const [cropInfo, setCropInfo] = useState<GetFarmerCropInfoQueryReturnType>();
 
-  useEffect(() => {
-    const GetCrop = async (cropId: string, isViewing: boolean) => {
-      try {
-        const res = await GetFarmerCropInfo(cropId, isViewing);
+//   useEffect(() => {
+//     const GetCrop = async (cropId: string, isViewing: boolean) => {
+//       try {
+//         const res = await GetFarmerCropInfo(cropId, isViewing);
 
-        if (!res.success) {
-          removeModal();
-          return handleSetNotification(res.notifError);
-        }
+//         if (!res.success) {
+//           removeModal();
+//           return handleSetNotification(res.notifError);
+//         }
 
-        setCropInfo(res.cropData);
+//         setCropInfo(res.cropData);
 
-        ViewCrop(
-          res.cropData.cropLng,
-          res.cropData.cropLat,
-          res.cropData.cropLocation,
-          mapRef
-        );
-      } catch (error) {
-        const err = error as Error;
-        handleSetNotification([{ message: err.message, type: "error" }]);
-        removeModal();
-      }
-    };
+//         ViewCrop(
+//           res.cropData.cropLng,
+//           res.cropData.cropLat,
+//           res.cropData.cropLocation,
+//           mapRef
+//         );
+//       } catch (error) {
+//         const err = error as Error;
+//         handleSetNotification([{ message: err.message, type: "error" }]);
+//         removeModal();
+//       }
+//     };
 
-    GetCrop(cropId, isViewing);
-  }, [cropId, isViewing, handleSetNotification, removeModal]);
+//     GetCrop(cropId, isViewing);
+//   }, [cropId, isViewing, handleSetNotification, removeModal]);
 
-  let cropStatus: determineCropStatusReturnType = { className: "", status: "" };
+//   let cropStatus: determineCropStatusReturnType = { className: "", status: "" };
 
-  if (cropInfo)
-    cropStatus = determineCropStatus({
-      cropStatus: cropInfo.cropStatus,
-      datePlanted: cropInfo.datePlanted,
-      dateHarvested: cropInfo.dateHarvested,
-      isEnglish: false,
-    });
+//   if (cropInfo)
+//     cropStatus = determineCropStatus({
+//       cropStatus: cropInfo.cropStatus,
+//       datePlanted: cropInfo.datePlanted,
+//       dateHarvested: cropInfo.dateHarvested,
+//       isEnglish: false,
+//     });
 
-  return (
-    <div>
-      {cropInfo ? (
-        <div className="modal-form">
-          <div className="absolute inset-0" onClick={removeModal} />
+//   return (
+//     <div>
+//       {cropInfo ? (
+//         <div className="modal-form">
+//           <div className="absolute inset-0" onClick={removeModal} />
 
-          <div className="relative bg-white rounded-xl shadow-xl flex">
-            <MapComponent
-              mapHeight={"100%"}
-              mapWidth={"600px"}
-              ref={mapRef}
-              divClassName="flex-1"
-              cityToHighlight={cityToHighLightInMap([cropInfo.cropLocation])}
-            >
-              <MapMarkerComponent
-                markerLng={cropInfo.cropLng}
-                markerLat={cropInfo.cropLat}
-              />
-            </MapComponent>
+//           <div className="relative bg-white rounded-xl shadow-xl flex">
+//             <MapComponent
+//               mapHeight={"100%"}
+//               mapWidth={"600px"}
+//               ref={mapRef}
+//               divClassName="flex-1"
+//               cityToHighlight={cityToHighLightInMap([cropInfo.cropLocation])}
+//             >
+//               <MapMarkerComponent
+//                 markerLng={cropInfo.cropLng}
+//                 markerLat={cropInfo.cropLat}
+//               />
+//             </MapComponent>
 
-            <div>
-              <div className="flex items-center justify-between gap-4 p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Impormasyon ng Pananim
-                </h2>
-                <button
-                  onClick={removeModal}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+//             <div>
+//               <div className="flex items-center justify-between gap-4 p-4 border-b">
+//                 <h2 className="text-lg font-semibold text-gray-900">
+//                   Impormasyon ng Pananim
+//                 </h2>
+//                 <button
+//                   onClick={removeModal}
+//                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+//                 >
+//                   <X className="h-5 w-5" />
+//                 </button>
+//               </div>
 
-              <div className="p-6">
-                <div
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${cropStatus.className}  border border-current/20`}
-                >
-                  <span className="text-sm font-semibold">
-                    {cropStatus.status}
-                  </span>
-                </div>
+//               <div className="p-6">
+//                 <div
+//                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${cropStatus.className}  border border-current/20`}
+//                 >
+//                   <span className="text-sm font-semibold">
+//                     {cropStatus.status}
+//                   </span>
+//                 </div>
 
-                <div className="grid gap-3 mt-6">
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <MapPin className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Lokasyon
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        {cropInfo.cropLocation}
-                      </p>
-                    </div>
-                  </div>
+//                 <div className="grid gap-3 mt-6">
+//                   <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+//                     <MapPin className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+//                     <div className="flex-1 min-w-0">
+//                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+//                         Lokasyon
+//                       </p>
+//                       <p className="text-sm font-semibold text-gray-900 truncate">
+//                         {cropInfo.cropLocation}
+//                       </p>
+//                     </div>
+//                   </div>
 
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
-                    <Calendar className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Araw Itinanim
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {ReadableDateFormat(cropInfo.datePlanted) ||
-                          "Hindi pa naitala"}
-                      </p>
-                    </div>
-                  </div>
+//                   <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+//                     <Calendar className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+//                     <div className="flex-1 min-w-0">
+//                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+//                         Araw Itinanim
+//                       </p>
+//                       <p className="text-sm font-semibold text-gray-900">
+//                         {ReadableDateFormat(cropInfo.datePlanted) ||
+//                           "Hindi pa naitala"}
+//                       </p>
+//                     </div>
+//                   </div>
 
-                  {cropInfo.cropStatus === "harvested" && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors">
-                      <Wheat className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                          Araw Inani
-                        </p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {ReadableDateFormat(cropInfo.dateHarvested)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+//                   {cropInfo.cropStatus === "harvested" && (
+//                     <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors">
+//                       <Wheat className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+//                       <div className="flex-1 min-w-0">
+//                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+//                           Araw Inani
+//                         </p>
+//                         <p className="text-sm font-semibold text-gray-900">
+//                           {ReadableDateFormat(cropInfo.dateHarvested)}
+//                         </p>
+//                       </div>
+//                     </div>
+//                   )}
 
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
-                    <Ruler className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Sukat ng Taniman
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {cropInfo.farmAreaMeasurement} ektarya
-                      </p>
-                    </div>
-                  </div>
-                </div>
+//                   <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+//                     <Ruler className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+//                     <div className="flex-1 min-w-0">
+//                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+//                         Sukat ng Taniman
+//                       </p>
+//                       <p className="text-sm font-semibold text-gray-900">
+//                         {cropInfo.farmAreaMeasurement} ektarya
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
 
-                <button
-                  onClick={removeModal}
-                  className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-                >
-                  Isara
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <ModalLoading />
-      )}
-    </div>
-  );
-};
+//                 <button
+//                   onClick={removeModal}
+//                   className="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+//                 >
+//                   Isara
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       ) : (
+//         <ModalLoading />
+//       )}
+//     </div>
+//   );
+// };
 
 export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
   myCropInfoList,

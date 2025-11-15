@@ -391,17 +391,6 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
         formError={formError?.orgId}
       />
 
-      {otherOrg && (
-        <FormDivLabelInput
-          labelMessage="Mag lagay ng panibagong organisasyon"
-          inputName={"otherOrgName"}
-          inputValue={orgInfo.otherOrgName ?? ""}
-          inputPlaceholder="e.g. Kataniman"
-          onChange={handleUserOrgChange}
-          formError={formError?.otherOrgName}
-        />
-      )}
-
       <FormDivLabelInput
         labelMessage="Leader ng Organisasyon"
         inputDisable={true}
@@ -410,13 +399,28 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
         inputPlaceholder="Miyembro"
       />
 
-      <FormDivLabelInput
-        labelMessage="Posisyon"
-        inputDisable={true}
-        inputName={"orgRole"}
-        inputDefaultValue={userOrgInfo.orgRole}
-        inputPlaceholder="Miyembro"
-      />
+      <div className="col-span-2">
+        <FormDivLabelInput
+          labelMessage="Posisyon"
+          inputDisable={true}
+          inputName={"orgRole"}
+          inputDefaultValue={userOrgInfo.orgRole}
+          inputPlaceholder="Miyembro"
+        />
+      </div>
+
+      {otherOrg && (
+        <div className="col-span-2">
+          <FormDivLabelInput
+            labelMessage="Mag lagay ng panibagong organisasyon"
+            inputName={"otherOrgName"}
+            inputValue={orgInfo.otherOrgName ?? ""}
+            inputPlaceholder="e.g. Kataniman"
+            onChange={handleUserOrgChange}
+            formError={formError?.otherOrgName}
+          />
+        </div>
+      )}
 
       {isChangingVal && (
         <div className="col-span-full">
