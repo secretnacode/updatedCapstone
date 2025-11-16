@@ -717,8 +717,11 @@ export const determineCropStatus = ({
  * @param lastName of the user
  * @returns initial of both first and last name
  */
-export const getInitials = (firstName: string, lastName?: string) =>
-  (firstName.charAt(0) + lastName?.charAt(0)).toUpperCase();
+export const getInitials = (firstName: string, lastName?: string) => {
+  if (!lastName) return firstName.charAt(0).toUpperCase();
+
+  return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+};
 
 /**
  * function that returns a style base on the report type

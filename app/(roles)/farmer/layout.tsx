@@ -28,6 +28,7 @@ export default async function Layout({
   return (
     <div className="min-h-screen flex">
       <NavbarComponent />
+
       <main className="p-8">{children}</main>
     </div>
   );

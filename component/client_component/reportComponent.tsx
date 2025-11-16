@@ -621,7 +621,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
+    <form onSubmit={handleFormSubmit} ref={formRef} className="space-y-6">
       <div className="space-y-4">
         <FormDivLabelInput
           labelMessage="Pamagat ng ulat ng pagtatanim:"
@@ -840,7 +840,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
+    <form onSubmit={handleFormSubmit} ref={formRef} className="space-y-6">
       <div className="space-y-4">
         <FormDivLabelInput
           labelMessage="Pamagat ng ulat ng pag-aani:"

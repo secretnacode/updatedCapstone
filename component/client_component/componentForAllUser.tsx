@@ -54,7 +54,6 @@ import {
   agriculturistOrgMemberTablePropType,
   dateWithTimeStampPropType,
   changePasswordType,
-  dropDownTopNavbarButtonReturnType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -87,7 +86,6 @@ import {
   baranggayList,
   capitalizeFirstLetter,
   DateToYYMMDD,
-  getInitials,
   handleFarmerNumber,
   ReadableDateFormat,
   reportStatus,
@@ -102,7 +100,6 @@ import {
   ChevronUp,
   Frown,
   Key,
-  LogOut,
   Minus,
   Phone,
   Search,
@@ -2698,42 +2695,29 @@ export const ChangeMyPassword = () => {
   );
 };
 
-export const DropDownTopNavbarButton: FC<dropDownTopNavbarButtonReturnType> = ({
-  name,
-  email,
-}) => {
-  const [isOpenDropDown, setIsOpenDropDown] = useState<boolean>(false);
+// export const LogoutButton = () => {
+//   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpenDropDown(!isOpenDropDown)}
-        className="flex items-center gap-3 pl-4 pr-2 py-2 border border-gray-200 rounded-full hover:border-emerald-300 transition group"
-      >
-        <span className="text-sm font-medium text-gray-700 group-hover:text-emerald-600">
-          {name}
-        </span>
+//   return (
+//     <>
+//       <Button>Log out</Button>
 
-        <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-          {getInitials(name)}
-        </div>
-      </button>
-
-      {/* Dropdown */}
-      {isOpenDropDown && (
-        <div className="absolute right-0 mt-3 w-52 bg-white border-2 border-emerald-100 rounded-xl shadow-lg z-50">
-          <div className="px-4 py-3 border-b border-emerald-100 bg-emerald-50/50">
-            <p className="font-semibold text-gray-900">{name}</p>
-
-            <p className="text-xs text-gray-600 mt-1">{email}</p>
-          </div>
-
-          <button className="w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-red-50 flex items-center gap-2 transition border-t border-emerald-100">
-            <LogOut size={18} />
-            Sign Out
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+//       {isLoggingOut && <ModalNotice
+//           type="warning"
+//           title="Mag ulat tungkol sa pag tatanim?"
+//           message={
+//             <>
+//               Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
+//               tatanim? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
+//               estado ng iyong pananim.
+//             </>
+//           }
+//           onClose={() => setOpenModal(false)}
+//           onProceed={handleSubmit}
+//           showCancelButton={true}
+//           proceed={{ label: "Mag patuloy" }}
+//           cancel={{ label: "Kanselahin" }}
+//         />}
+//     </>
+//   );
+// };

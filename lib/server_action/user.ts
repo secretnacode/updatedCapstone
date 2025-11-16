@@ -12,8 +12,6 @@ import {
   isFarmer,
   isFarmerLeader,
   isFarmerVerified,
-  topNavBarValueAgriQuery,
-  topNavBarValueFarmerQuery,
   updatePassword,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
@@ -30,7 +28,6 @@ import {
   reportSequenceAndUserLocReturnType,
   serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
-  topNavBarValueReturnType,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
@@ -743,35 +740,6 @@ export const changeFarmerPass = async ({
     return {
       success: false,
       notifMessage: [
-        {
-          message: err.message,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
-
-export const topNavBarValue = async (): Promise<topNavBarValueReturnType> => {
-  try {
-    const { work, userId } = await ProtectedAction("read:user");
-
-    if (work === "admin" || work === "agriculturist")
-      return {
-        success: true,
-        navVal: await topNavBarValueAgriQuery(userId),
-      };
-
-    return {
-      success: true,
-      navVal: await topNavBarValueFarmerQuery(userId),
-    };
-  } catch (error) {
-    const err = error as Error;
-    console.log(`Error occured while getting top navbar value: ${err.message}`);
-    return {
-      success: false,
-      notifError: [
         {
           message: err.message,
           type: "error",

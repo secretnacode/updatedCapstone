@@ -563,7 +563,9 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
                   </p>
 
                   <p className="text-sage-900 font-medium">
-                    {ReadableDateFormat(crop.datePlanted)}
+                    {crop.dateHarvested
+                      ? ReadableDateFormat(crop.datePlanted)
+                      : "Hindi pa nakakapag tanim"}
                   </p>
                 </div>
               </div>

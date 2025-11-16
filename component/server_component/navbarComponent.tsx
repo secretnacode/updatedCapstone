@@ -13,14 +13,8 @@ import {
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
-import {
-  RedirectLoginWithNotif,
-  UnexpectedErrorMessageEnglish,
-} from "@/util/helper_function/reusableFunction";
-import { AgriculturistNavLinkType, topNavBarValueReturnType } from "@/types";
-import { topNavBarValue } from "@/lib/server_action/user";
-import { RenderNotification } from "../client_component/provider/notificationProvider";
-import { DropDownTopNavbarButton } from "../client_component/componentForAllUser";
+import { RedirectLoginWithNotif } from "@/util/helper_function/reusableFunction";
+import { AgriculturistNavLinkType } from "@/types";
 
 export const NavbarComponent: FC = async () => {
   const session = await GetSession();
@@ -55,16 +49,17 @@ export const NavbarComponent: FC = async () => {
     );
 
   return (
-    <div className="xl:w-64 w-50 min-h-full bg-white border-r border-gray-200">
+    <div className="xl:w-64 w-50 min-h-full bg-white">
       <div className="flex flex-col sticky top-0">
         <Link
           href={`/${session?.work}`}
-          className="p-6 border-b border-gray-200"
+          className="p-6 border-b border-gray-200 "
         >
           <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
             AgroFarm
           </h1>
         </Link>
+
         {navbar}
       </div>
     </div>
@@ -107,6 +102,11 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
           </Link>
         </>
       )}
+
+      <Link href={`${basePage}/profile`} className="group nav-link">
+        <UserPen className="logo" />
+        <span className="nav-span">Profile</span>
+      </Link>
 
       <Link href={`${basePage}/profile`} className="group nav-link">
         <UserPen className="logo" />
@@ -172,44 +172,5 @@ const Navbar: FC<{ children: ReactNode }> = ({ children }) => {
     <nav className="flex-1 py-4">
       <div className="px-3 space-y-1">{children}</div>
     </nav>
-  );
-};
-
-export const TopNavbar = async () => {
-  let navVal: topNavBarValueReturnType;
-
-  try {
-    navVal = await topNavBarValue();
-  } catch (error) {
-    console.log((error as Error).message);
-
-    navVal = {
-      success: false,
-      notifError: [{ message: UnexpectedErrorMessageEnglish(), type: "error" }],
-    };
-  }
-
-  return (
-    <>
-      {navVal.success ? (
-        <nav className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-6 py-4 flex items-center justify-between">
-            {/* Left: Logo & Role */}
-            <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-              {navVal.navVal.role === "leader"
-                ? "Organization Leader"
-                : navVal.navVal.role}
-            </div>
-
-            <DropDownTopNavbarButton
-              name={navVal.navVal.name}
-              email={navVal.navVal.email}
-            />
-          </div>
-        </nav>
-      ) : (
-        <RenderNotification notif={navVal.notifError} />
-      )}
-    </>
   );
 };

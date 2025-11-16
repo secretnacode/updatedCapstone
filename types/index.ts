@@ -1799,21 +1799,3 @@ export type profileButtonIdType =
   | "profile-org-info"
   | "profile-crop-info"
   | "profile-change-pass";
-
-export type topNavBarValueQueryReturnType = {
-  role: allUserRoleType;
-  email: string;
-  name: string;
-};
-
-export type topNavBarValueReturnType =
-  | {
-      success: true;
-      navVal: topNavBarValueQueryReturnType;
-    }
-  | ServerActionFailBaseType;
-
-export type dropDownTopNavbarButtonReturnType = {
-  name: string;
-  email: string;
-};

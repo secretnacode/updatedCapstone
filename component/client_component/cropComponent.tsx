@@ -371,7 +371,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                 <div>Sukat(HA)</div>
               </th>
 
-              <th scope="col">
+              <th scope="col" className="!w-[20%]">
                 <div>Estado ng pananim</div>
               </th>
 
@@ -400,8 +400,8 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
 
               <td className="text-color ">
                 <div>
-                  <span
-                    className={`py-1 px-3 rounded-2xl very-very-small-text ${
+                  <p
+                    className={`py-1 px-3 rounded-2xl w-fit very-very-small-text ${
                       cropStatus(
                         crop.cropStatus,
                         crop.datePlanted,
@@ -416,7 +416,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                         crop.dateHarvested
                       ).status
                     }
-                  </span>
+                  </p>
                 </div>
               </td>
 
