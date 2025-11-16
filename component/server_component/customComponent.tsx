@@ -689,28 +689,33 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
   link,
 }) => {
   return (
-    <div className="component space-y-2 ">
-      <div className="flex justify-between items-start [&>svg]:!size-8 mb-3">
-        <div
-          className={`p-2 inline-block rounded-md shadow-md ${logo.iconWrapperStyle}`}
-        >
-          <logo.icon className={`logo ${logo.iconStyle}`} />
+    <div className="component">
+      <div className="flex flex-col justify-between gap-2">
+        <div className="flex justify-between items-start mb-3 gap-4">
+          <div
+            className={`p-2 inline-block rounded-md shadow-md ${logo.iconWrapperStyle}`}
+          >
+            <logo.icon className={`size-8 ${logo.iconStyle}`} />
+          </div>
+
+          <p
+            className={`text-sm text-end w-fit px-3 py-1 rounded-2xl tracking-wide opacity-90 ${cardLabel.className}`}
+          >
+            {cardLabel.label}
+          </p>
         </div>
-        <p
-          className={`very-small-text px-3 py-1 rounded-2xl tracking-wide opacity-90   ${cardLabel.className}`}
-        >
-          {cardLabel.label}
-        </p>
-      </div>
 
-      <p className="card-value">{cardContent}</p>
+        <p className="card-value">{cardContent}</p>
 
-      <div>
-        <div className="flex justify-between items-center">
-          <p className="card-label">{contentLabel}</p>
-          <Link href={link} className="card-link">
-            Tingnan
-          </Link>
+        <div>
+          <div className="flex xl:justify-between lg:justify-end justify-between items-center gap-4">
+            <p className="card-label min-w-0 truncate text-nowrap ">
+              {contentLabel}
+            </p>
+            <Link href={link} className="card-link xl:block lg:hidden block">
+              Tingnan
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -809,12 +814,12 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
       </div>
 
       {recentReport.length > 0 ? (
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-200">
           {recentReport.map((val) => (
             <Link
               href={`/farmerLeader/validateReport?reportId=${val.reportId}`}
               key={val.reportId}
-              className="block hover:bg-gray-50 transition-all duration-200 group cursor-pointer pl-2 py-2"
+              className="block hover:bg-gray-100/80 transition-all duration-200 group cursor-pointer pl-2 py-2"
             >
               <div className="flex items-center gap-4">
                 <div
@@ -828,19 +833,21 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
                     {val.farmerFirstName} {val.farmerLastName}
                   </p>
 
-                  <p className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
-                    <span className="capitalize">{val.barangay}</span>
+                  <p className="flex items-center 2xl:gap-2 xl:gap-1 lg:gap-3 mt-0.5 text-xs text-gray-500">
+                    <span className="capitalize block truncate flex-nowrap">
+                      {val.barangay}
+                    </span>
 
                     <span>•</span>
 
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 truncate flex-nowrap">
                       <Clock className="w-3 h-3" />
                       {timePass(val.pastTime)}
                     </span>
                   </p>
                 </div>
 
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all flex-shrink-0  " />
               </div>
             </Link>
           ))}
@@ -1001,19 +1008,18 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
   }
 
   return (
-    <div className="component !p-0">
-      <div className="p-6 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Kamakailang mga Ulat
-        </h2>
+    <div className="component">
+      <div className="card-title-wrapper">
+        <p className="">Kamakailang Ulat na Aking Pinasa</p>
       </div>
+
       <div className="divide-y divide-gray-100">
         {recentReport.success ? (
           recentReport.recentReport.length > 0 ? (
             recentReport.recentReport.map((report) => (
               <div
                 key={report.reportId}
-                className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -1219,7 +1225,7 @@ export const SideComponentMyCropStatus = async () => {
                         <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
                           <MapPin className="w-3.5 h-3.5" />
                           <span>
-                            {crop.farmAreaMeasurement}{" "}
+                            {crop.farmAreaMeasurement}
                             {parseFloat(crop.farmAreaMeasurement) === 1
                               ? "hectare"
                               : "hectares"}

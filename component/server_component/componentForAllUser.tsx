@@ -637,7 +637,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
             <p>{isEnglish ? "Weather Today" : "Panahon ngayon"}</p>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-4">
             <div>
               <p className="card-value">
                 {currentWeather.weatherData.temp_c}°C
@@ -659,19 +659,26 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
             />
           </div>
 
-          <div className="mt-4 very-small-text text-gray-600 flex justify-between items-center">
-            <p>
-              <span className="">{isEnglish ? "Now" : "Ngayong"}: </span>
-              {ReadableDateFormat(
-                new Date(currentWeather.weatherData.last_updated.split(" ")[0])
-              )}
-            </p>
+          <div className="mt-4 very-small-text text-gray-600 w-full">
+            <div className="flex justify-between items-end gap-4">
+              <p className="flex flex-wrap gap-1">
+                <span className="">{isEnglish ? "Now" : "Ngayong"}: </span>
 
-            <p>
-              {converTimeToAMPM(
-                currentWeather.weatherData.last_updated.split(" ")[1]
-              )}
-            </p>
+                <span className="text-gray-700">
+                  {ReadableDateFormat(
+                    new Date(
+                      currentWeather.weatherData.last_updated.split(" ")[0]
+                    )
+                  )}
+                </span>
+              </p>
+
+              <span className="text-nowrap inline-flex">
+                {converTimeToAMPM(
+                  currentWeather.weatherData.last_updated.split(" ")[1]
+                )}
+              </span>
+            </div>
           </div>
         </div>
       ) : (

@@ -36,14 +36,13 @@ export default async function Page({
       {message && <RenderRedirectNotification notif={message} />}
 
       {userRole.success ? (
-        <div className="grid grid-cols-4 gap-4"></div>
+        userRole.role === "leader" ? (
+          <FarmerLeadDashBoard />
+        ) : (
+          <FarmerDashBoard />
+        )
       ) : (
         <RenderRedirectNotification notif={userRole.notifError} />
-      )}
-      {userRole.success && userRole.role === "leader" ? (
-        <FarmerLeadDashBoard />
-      ) : (
-        <FarmerDashBoard />
       )}
     </div>
   );

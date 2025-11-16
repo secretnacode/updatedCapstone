@@ -175,14 +175,20 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   showQuickAction = true,
 }) => {
   return (
-    <div className="grid grid-cols-4 gap-4">
-      <div className="col-span-3 flex flex-col gap-4">
-        <div className="grid grid-cols-3 gap-4 [&>div]:shadow-sm">
+    <div className="grid xl:grid-cols-4 grid-cols-1 xl:gap-4 gap-6">
+      <div className="xl:col-span-3 lg:col-span-1 flex flex-col xl:gap-4 gap-6">
+        <div className="grid xl:grid-cols-3 grid-cols-2 xl:gap-4 gap-6 [&>div]:shadow-sm ">
           <DashboardCard {...card1} />
 
           <DashboardCard {...card2} />
 
           <DashboardCard {...card3} />
+
+          <div className="xl:hidden block">
+            <Suspense fallback={<WeatherSideComponentLoading />}>
+              <WeatherComponent userLocation={userLocation} user={user} />
+            </Suspense>
+          </div>
         </div>
 
         <LineChartComponent {...lineChart} />
@@ -194,22 +200,30 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
         )}
       </div>
 
-      <div className="side-bar-wrapper ">
-        <Suspense fallback={<WeatherSideComponentLoading />}>
-          <WeatherComponent userLocation={userLocation} user={user} />
-        </Suspense>
+      <div className="flex flex-col gap-4 ">
+        <div className="xl:block hidden">
+          <Suspense fallback={<WeatherSideComponentLoading />}>
+            <WeatherComponent userLocation={userLocation} user={user} />
+          </Suspense>
+        </div>
 
         {importantWidget}
 
         {(user === "leader" || user === "farmer") && (
-          <Suspense fallback={<SideComponentMyCropStatusLoading />}>
-            <SideComponentMyCropStatus />
-          </Suspense>
+          <div className="[&>div]:!p-6">
+            <Suspense fallback={<SideComponentMyCropStatusLoading />}>
+              <SideComponentMyCropStatus />
+            </Suspense>
+          </div>
         )}
 
         {widget}
 
-        {showQuickAction && <FarmerQuickActionComponent />}
+        {showQuickAction && (
+          <div className="[&>div]:!p-6">
+            <FarmerQuickActionComponent />
+          </div>
+        )}
       </div>
     </div>
   );

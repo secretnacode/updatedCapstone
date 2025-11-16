@@ -15,6 +15,7 @@ import {
   insertNewAgriculturistParamType,
   NewUserType,
   QueryUserLoginReturnType,
+  topNavBarValueQueryReturnType,
   ViewAllUnvalidatedFarmerQueryReturnQuery,
   ViewAllVerifiedFarmerUserQueryReturnType,
 } from "@/types";
@@ -786,6 +787,50 @@ export const updatePassword = async (userId: string, newPass: string) => {
     console.log((error as Error).message);
     throw new Error(
       `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`
+    );
+  }
+};
+
+/**
+ * query for getting the value for the navbar of the agriculturist
+ * @param userId id of the agriculturist
+ */
+export const topNavBarValueAgriQuery = async (
+  userId: string
+): Promise<topNavBarValueQueryReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select "agriRole" as "role", "email", "name" from capstone.agriculturist where "agriId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `Unexpected error in geting a value for the top nav bar of the agri`
+    );
+  }
+};
+
+/**
+ * query for getting the value for the navbar of the farmer
+ * @param userId id of the agriculturist
+ */
+export const topNavBarValueFarmerQuery = async (
+  userId: string
+): Promise<topNavBarValueQueryReturnType> => {
+  try {
+    return (
+      await pool.query(
+        `select a."username" as "email", f."orgRole" as "role", f."farmerFirstName" as "name" from capstone.auth a join capstone.farmer f on a."authId" = f."farmerId" where a."authId" = $1`,
+        [userId]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `Unexpected error in geting a value for the top nav bar of the agri`
     );
   }
 };

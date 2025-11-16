@@ -348,6 +348,9 @@ body {
   .profile-component > div:last-of-type > div:nth-child(2) {
     @apply grid gap-4;
   }
+  main {
+    @apply w-full;
+  }
 }
 
 /* loading style */
