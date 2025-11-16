@@ -26,6 +26,7 @@ import {
   getFarmerDashboardDataReturnType,
   newUserValNeedInfoReturnType,
   reportSequenceAndUserLocReturnType,
+  ServerActionFailBaseType,
   serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
 } from "@/types";
@@ -47,9 +48,15 @@ import {
 } from "./farmerUser";
 import { revalidatePath } from "next/cache";
 import { ComparePassword } from "../reusableFunctions";
-import { missingFormValNotif } from "@/util/helper_function/reusableFunction";
+import {
+  missingFormValNotif,
+  NotifToUriComponent,
+} from "@/util/helper_function/reusableFunction";
 import { ZodValidateForm } from "../validation/authValidation";
 import { changePasswordSchema } from "@/util/helper_function/validation/validationSchema";
+import { DeleteSession } from "../session";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { redirect } from "next/navigation";
 
 /**
  * server action when the farmer leader want to delete a farmer account
@@ -740,6 +747,34 @@ export const changeFarmerPass = async ({
     return {
       success: false,
       notifMessage: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const userLogout = async (): Promise<ServerActionFailBaseType> => {
+  try {
+    await DeleteSession();
+
+    redirect(
+      `/?notif=${NotifToUriComponent([
+        { message: "Matagumpay ang iyong pag lologout", type: "success" },
+      ])}`
+    );
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+
+    console.log(`Error occured while logging out: ${err.message}`);
+
+    return {
+      success: false,
+      notifError: [
         {
           message: err.message,
           type: "error",

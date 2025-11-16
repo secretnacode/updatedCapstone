@@ -1,10 +1,12 @@
-import { MyReportTable } from "@/component/client_component/componentForAllUser";
+import {
+  MyReportTable,
+  TableComponentLoading,
+} from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import {
   AddReportComponent,
   AutoOpenMyReport,
 } from "@/component/client_component/reportComponent";
-import { TableComponentLoading } from "@/component/server_component/customComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
 import { GetFarmerReportReturnType } from "@/types";
 

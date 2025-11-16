@@ -1,6 +1,8 @@
-import { ValidateReportTable } from "@/component/client_component/componentForAllUser";
+import {
+  TableComponentLoading,
+  ValidateReportTable,
+} from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { TableComponentLoading } from "@/component/server_component/customComponent";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
 

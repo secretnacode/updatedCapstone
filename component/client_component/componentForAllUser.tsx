@@ -4,6 +4,7 @@ import {
   ChangeEvent,
   FC,
   FormEvent,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -54,6 +55,8 @@ import {
   agriculturistOrgMemberTablePropType,
   dateWithTimeStampPropType,
   changePasswordType,
+  BurgerNavPropType,
+  TableComponentLoadingPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -80,6 +83,7 @@ import {
   DeleteFarmerUser,
   DeleteMyOrgMember,
   getAllFarmerForResetPass,
+  userLogout,
 } from "@/lib/server_action/user";
 import { LineChart, PieChart } from "@mui/x-charts";
 import {
@@ -100,6 +104,8 @@ import {
   ChevronUp,
   Frown,
   Key,
+  LogOut,
+  Menu,
   Minus,
   Phone,
   Search,
@@ -118,6 +124,8 @@ import {
   DynamicLink,
   FarmerOrgMemberAction,
 } from "../server_component/componentForAllUser";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { createPortal } from "react-dom";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -2695,29 +2703,130 @@ export const ChangeMyPassword = () => {
   );
 };
 
-// export const LogoutButton = () => {
-//   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+export const LogoutButton: FC = () => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
-//   return (
-//     <>
-//       <Button>Log out</Button>
+  const handleLogout = async () => {
+    try {
+      handleIsLoading("Logging out!!!");
 
-//       {isLoggingOut && <ModalNotice
-//           type="warning"
-//           title="Mag ulat tungkol sa pag tatanim?"
-//           message={
-//             <>
-//               Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
-//               tatanim? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
-//               estado ng iyong pananim.
-//             </>
-//           }
-//           onClose={() => setOpenModal(false)}
-//           onProceed={handleSubmit}
-//           showCancelButton={true}
-//           proceed={{ label: "Mag patuloy" }}
-//           cancel={{ label: "Kanselahin" }}
-//         />}
-//     </>
-//   );
-// };
+      const res = await userLogout();
+
+      handleSetNotification(res.notifError);
+    } catch (error) {
+      if (!isRedirectError(error)) {
+        console.log((error as Error).message);
+
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      }
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <>
+      <button
+        className="group nav-link w-full"
+        onClick={() => setIsLoggingOut(true)}
+      >
+        <LogOut className="size-5" />
+
+        <span className="nav-span">Log out</span>
+      </button>
+
+      {isLoggingOut &&
+        createPortal(
+          <ModalNotice
+            type="warning"
+            title="Mag log out ng account"
+            showCloseButton={false}
+            message={<>Mag log out ng account?</>}
+            onClose={() => setIsLoggingOut(false)}
+            onProceed={handleLogout}
+            showCancelButton={true}
+            proceed={{ label: "Mag patuloy" }}
+            cancel={{ label: "Kanselahin" }}
+          />,
+          document.body
+        )}
+    </>
+  );
+};
+
+const ColCell = memo(
+  ({ cols, uniqueName }: { cols: unknown[]; uniqueName: string }) =>
+    cols.map((_, index) => (
+      <th key={index + "cell" + uniqueName} scope="col" className="p-4">
+        <div className="" />
+      </th>
+    ))
+);
+ColCell.displayName = "ColCell";
+
+const RowCell = memo(({ rows, cols }: { rows: unknown[]; cols: unknown[] }) =>
+  rows.map((_, index) => (
+    <tr
+      className="animate-pulse [&_div]:bg-gray-200 [&_div]:rounded [&_div]:h-4"
+      key={index}
+    >
+      <ColCell cols={cols} uniqueName="rowNum" />
+    </tr>
+  ))
+);
+RowCell.displayName = "RowCell";
+
+export const TableComponentLoading: FC<TableComponentLoadingPropType> = ({
+  col = 7,
+  row = 5,
+}) => {
+  const rows = useMemo(() => Array.from({ length: row }), [row]);
+  const cols = useMemo(() => Array.from({ length: col }), [col]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center animate-pulse">
+        <div className="h-8 w-48 bg-gray-300 rounded"></div>
+
+        <div className="h-10 w-32 bg-green-500 rounded-lg"></div>
+      </div>
+
+      <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 [&_div]:bg-gray-300 [&_div]:rounded [&_div]:animate-pulse [&_div]:w-full [&_div]:h-5">
+                <ColCell cols={cols} uniqueName="tableHead" />
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200 bg-white">
+              <RowCell rows={rows} cols={cols} />
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const BurgerNav: FC<BurgerNavPropType> = ({ children }) => {
+  const [viewNav, setViewNav] = useState<boolean>(false);
+
+  return (
+    <div>
+      <Menu className="size-10" onClick={() => setViewNav(!viewNav)} />
+
+      {viewNav && (
+        <div className="com">
+          <div onClick={() => setViewNav(false)} />
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};

@@ -150,6 +150,9 @@ export const UpdateSessionRole = async (role: "leader" | "farmer") => {
   }
 };
 
+/**
+ * function for deleting the session of the use(e.g. logging out)
+ */
 export const DeleteSession = async () => {
   try {
     const cookie = await GetCookieId();
@@ -163,6 +166,8 @@ export const DeleteSession = async () => {
     if (!sessionVal) throw new Error(`${noSessionDetectedMessage("deleting")}`);
 
     await redis.del(sessionWord);
+
+    (await cookies()).delete(cookieName);
   } catch (error) {
     throw new Error(
       `${UnexpectedErrorMessageEnglish()} while updating the session: ${

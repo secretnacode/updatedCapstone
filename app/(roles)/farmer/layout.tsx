@@ -26,7 +26,7 @@ export default async function Layout({
     RedirectUnauthorizedWithNotif(authorization.notifError);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen md:flex ">
       <NavbarComponent />
 
       <main className="p-8">{children}</main>

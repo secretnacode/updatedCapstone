@@ -698,6 +698,7 @@ export type ModalNoticePropType = {
   message: ChildrenType;
   onClose: () => void;
   onProceed?: () => void;
+  showCloseButton?: boolean;
   showCancelButton: boolean;
   cancel?: { label: string; className?: string };
   proceed?: {
@@ -1792,3 +1793,5 @@ export type profileButtonIdType =
   | "profile-org-info"
   | "profile-crop-info"
   | "profile-change-pass";
+
+export type BurgerNavPropType = ChildrenPropType;

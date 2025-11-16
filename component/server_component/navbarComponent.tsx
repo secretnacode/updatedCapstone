@@ -15,6 +15,10 @@ import Link from "next/link";
 import { FC, ReactNode } from "react";
 import { RedirectLoginWithNotif } from "@/util/helper_function/reusableFunction";
 import { AgriculturistNavLinkType } from "@/types";
+import {
+  BurgerNav,
+  LogoutButton,
+} from "../client_component/componentForAllUser";
 
 export const NavbarComponent: FC = async () => {
   const session = await GetSession();
@@ -49,24 +53,28 @@ export const NavbarComponent: FC = async () => {
     );
 
   return (
-    <div className="xl:w-64 w-50 min-h-full bg-white">
-      <div className="flex flex-col sticky top-0">
+    <div className="md:w-64 w-full min-h-full bg-white">
+      <div className="md:sticky top-0 relative">
         <Link
           href={`/${session?.work}`}
-          className="p-6 border-b border-gray-200 "
+          className="p-6 md:border-b md:border-gray-200 inline-block w-full"
         >
           <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
             AgroFarm
           </h1>
         </Link>
 
-        {navbar}
+        <div className="md:block hidden">{navbar}</div>
+
+        <div className="md:hidden block absolute left-0 top-0">
+          <BurgerNav>{navbar}</BurgerNav>
+        </div>
       </div>
     </div>
   );
 };
 
-const FarmerNav: FC<{ role: string }> = ({ role }) => {
+export const FarmerNav: FC<{ role: string }> = ({ role }) => {
   const basePage = "/farmer";
 
   const Links = (
@@ -108,10 +116,7 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
         <span className="nav-span">Profile</span>
       </Link>
 
-      {/* <Link href={`${basePage}/profile`} className="group nav-link">
-        <UserPen className="logo" />
-        <span className="nav-span">Profile</span>
-      </Link> */}
+      <LogoutButton />
     </>
   );
 
