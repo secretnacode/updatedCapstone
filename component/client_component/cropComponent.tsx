@@ -26,6 +26,7 @@ import {
   cropStatusType,
   determineCropStatusReturnType,
   GetAllCropInfoQueryReturnType,
+  profileButtonIdType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
 import { ClipboardPlus } from "lucide-react";
@@ -56,30 +57,33 @@ import { SortColBy, TableWithFilter } from "./componentForAllUser";
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   isViewing,
 }) => {
+  const handleGoToComponent = (id: profileButtonIdType) =>
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+
   return (
-    <>
-      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+    <div className="grid gap-5 [&_button]:shadow-sm [&_button]:hover:shadow-md [&_button]:!px-0 [&_button]:!rounded-sm [&_button]:bg-green-50 [&_button]:border [&_button]:border-green-400 [&_button]:hover:bg-green-200 [&_button]:hover:border-green-700 text-gray-700 text-sm ">
+      <Button onClick={() => handleGoToComponent("profile-user-info")}>
         Personal na impormasyon
       </Button>
 
-      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+      <Button onClick={() => handleGoToComponent("profile-org-info")}>
         Organisasyon
       </Button>
 
-      <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+      <Button onClick={() => handleGoToComponent("profile-crop-info")}>
         Mga Pananim
       </Button>
 
-      {isViewing && (
-        <Button className=" bg-green-50 border border-green-400 hover:bg-green-200 hover:border-green-700">
+      {!isViewing && (
+        <Button onClick={() => handleGoToComponent("profile-change-pass")}>
           Mag palit ng password
         </Button>
       )}
-    </>
+    </div>
   );
 };
-
-// export const ViewCropModal: FC<{
 //   cropId: string;
 //   removeModal: () => void;
 //   isViewing: boolean;
@@ -517,8 +521,6 @@ const FormCropModal: FC<FormCropModalPropType> = ({
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setCropVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-    console.log(document.getElementById("mapCanvas"));
 
     if (e.target.name === "cropBaranggay") {
       const coor = pointCoordinates[e.target.value as barangayType];

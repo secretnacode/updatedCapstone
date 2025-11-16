@@ -163,12 +163,10 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
               </div>
             </div>
 
-            {/* Crops Section */}
             <div className="space-y-5">
               <h3 className="font-semibold text-gray-900">Tingnan:</h3>
-              <div className="grid gap-5 [&_button]:shadow-sm [&_button]:hover:shadow-md [&_button]:!px-0 [&_button]:!rounded-sm text-gray-700 text-sm">
-                <ViewCropModalButton isViewing={isViewing} />
-              </div>
+
+              <ViewCropModalButton isViewing={isViewing} />
             </div>
           </div>
         </div>
@@ -251,7 +249,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
   return (
     <div className="profile-component">
       {!cropInfo.success && <RenderNotification notif={cropInfo.notifError} />}
-      <div className="component">
+      <div className="component" id="profile-user-info">
         <div>
           <User />
           <h1>Personal na Impormasyon</h1>
@@ -266,7 +264,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
         </div>
       </div>
 
-      <div className="component">
+      <div className="component" id="profile-org-info">
         <div>
           <Building />
           <h1>Organisasyon na Kasali</h1>
@@ -281,7 +279,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
         </div>
       </div>
 
-      <div className="component">
+      <div className="component" id="profile-crop-info">
         <div>
           <Wheat />
           <h1>Mga pananim</h1>
@@ -289,9 +287,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
 
         <div>
           {cropInfo.success ? (
-            <div className="default-style-info [&>div]:nth-last-of-type-[2]:bg-red-400 [&>div]:last-of-type:[&>div]:nth-of-type-[2]:!grid-cols-2">
-              <ViewUserCropInfo cropData={cropInfo.cropData} isViewing />
-            </div>
+            <ViewUserCropInfo cropData={cropInfo.cropData} isViewing />
           ) : (
             <NoContentYet
               message="Wala pang pananim"
@@ -313,7 +309,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
       </div>
 
       {!isViewing && (
-        <div className="component">
+        <div className="component" id="profile-change-pass">
           <div>
             <KeyRound />
             <h1>Mag Palit ng Password</h1>
@@ -495,98 +491,113 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
 
   return (
     <>
-      {cropData.map((crop) => (
-        <div
-          key={crop.cropId}
-          className={`border border-gray-300/70 rounded-md p-6 bg-gradient-to-br ${gradientStyle(
-            crop.cropStatus,
-            crop.datePlanted,
-            crop.dateHarvested
-          )} to-white hover:shadow-md transition-shadow`}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <h4 className="text-lg font-bold text-sage-900">{crop.cropName}</h4>
+      <div className="default-style-info [&>div]:last-of-type:col-span-2 [&>div]:last-of-type:[&>div]:nth-of-type-[2]:!grid-cols-2 mb-4">
+        {cropData.map((crop) => (
+          <div
+            key={crop.cropId}
+            className={`border border-gray-300/70 rounded-md p-6 bg-gradient-to-br ${gradientStyle(
+              crop.cropStatus,
+              crop.datePlanted,
+              crop.dateHarvested
+            )} to-white hover:shadow-md transition-shadow`}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <h4 className="text-lg font-bold text-sage-900">
+                {crop.cropName}
+              </h4>
 
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                cropStatus(
-                  crop.cropStatus,
-                  crop.datePlanted,
-                  crop.dateHarvested
-                ).className
-              }`}
-            >
-              {
-                cropStatus(
-                  crop.cropStatus,
-                  crop.datePlanted,
-                  crop.dateHarvested
-                ).status
-              }
-            </span>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  cropStatus(
+                    crop.cropStatus,
+                    crop.datePlanted,
+                    crop.dateHarvested
+                  ).className
+                }`}
+              >
+                {
+                  cropStatus(
+                    crop.cropStatus,
+                    crop.datePlanted,
+                    crop.dateHarvested
+                  ).status
+                }
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-start gap-3">
+                <MapPinIcon className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+                <div>
+                  <p className="text-xs font-semibold text-sage-600 uppercase">
+                    Lokasyon
+                  </p>
+
+                  <p className="text-sage-900 font-medium">
+                    {crop.cropLocation}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Ruler className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+                <div>
+                  <p className="text-xs font-semibold text-sage-600 uppercase">
+                    Sukat ng Lupain
+                  </p>
+
+                  <p className="text-sage-900 font-medium">
+                    {crop.farmAreaMeasurement}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+                <div>
+                  <p className="text-xs font-semibold text-sage-600 uppercase">
+                    Nagtanim Noong
+                  </p>
+
+                  <p className="text-sage-900 font-medium">
+                    {ReadableDateFormat(crop.datePlanted)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
+
+                <div>
+                  <p className="text-xs font-semibold text-sage-600 uppercase">
+                    Ani
+                  </p>
+
+                  <p className="text-sage-900 font-medium">
+                    {crop.dateHarvested
+                      ? ReadableDateFormat(crop.dateHarvested)
+                      : "Hindi pa na-aani"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+        ))}
+      </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-start gap-3">
-              <MapPinIcon className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
-
-              <div>
-                <p className="text-xs font-semibold text-sage-600 uppercase">
-                  Lokasyon
-                </p>
-
-                <p className="text-sage-900 font-medium">{crop.cropLocation}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Ruler className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
-
-              <div>
-                <p className="text-xs font-semibold text-sage-600 uppercase">
-                  Sukat ng Lupain
-                </p>
-
-                <p className="text-sage-900 font-medium">
-                  {crop.farmAreaMeasurement}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
-
-              <div>
-                <p className="text-xs font-semibold text-sage-600 uppercase">
-                  Nagtanim Noong
-                </p>
-
-                <p className="text-sage-900 font-medium">
-                  {ReadableDateFormat(crop.datePlanted)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-sage-600 flex-shrink-0 mt-0.5" />
-
-              <div>
-                <p className="text-xs font-semibold text-sage-600 uppercase">
-                  Ani
-                </p>
-
-                <p className="text-sage-900 font-medium">
-                  {crop.dateHarvested
-                    ? ReadableDateFormat(crop.dateHarvested)
-                    : "Hindi pa na-aani"}
-                </p>
-              </div>
-            </div>
-          </div>
+      {isViewing && (
+        <div className="w-full flex justify-end items-center">
+          <Link
+            className="button submit-button slimer-button text-sm"
+            href={"/farmer/crop"}
+          >
+            Tignan
+          </Link>
         </div>
-      ))}
-
-      <div className="col-span-2">Tingnan lahat</div>
+      )}
     </>
   );
 };

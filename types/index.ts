@@ -1793,3 +1793,9 @@ export type viewUserCropInfoPropType = {
   cropData: GetFarmerCropInfoQueryReturnType[];
   isViewing: boolean;
 };
+
+export type profileButtonIdType =
+  | "profile-user-info"
+  | "profile-org-info"
+  | "profile-crop-info"
+  | "profile-change-pass";
