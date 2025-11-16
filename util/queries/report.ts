@@ -16,7 +16,6 @@ import {
   getReportCountThisYearReturnType,
   GetUserReportReturnType,
   reportTypeStateType,
-  verificationStatusType,
 } from "@/types";
 import { pool } from "../configuration";
 import {
@@ -180,14 +179,11 @@ export const GetOrgMemberReportQuery = async (
  * query for approving the farmer org member
  * @param reportId id that you want to approved
  */
-export const ApprovedOrgMemberQuery = async (
-  reportId: string,
-  verificationStatus: verificationStatusType
-) => {
+export const ApprovedOrgMemberQuery = async (reportId: string) => {
   try {
     await pool.query(
       `update capstone.report set "verificationStatus" = $1, "orgId" = (select f."orgId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" where r."reportId" = $2), "dayVerified" = $3 where "reportId" = $4`,
-      [verificationStatus, reportId, new Date(), reportId]
+      [true, reportId, new Date(), reportId]
     );
   } catch (error) {
     console.error(

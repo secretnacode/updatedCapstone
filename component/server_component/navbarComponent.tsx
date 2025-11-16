@@ -108,10 +108,10 @@ const FarmerNav: FC<{ role: string }> = ({ role }) => {
         <span className="nav-span">Profile</span>
       </Link>
 
-      <Link href={`${basePage}/profile`} className="group nav-link">
+      {/* <Link href={`${basePage}/profile`} className="group nav-link">
         <UserPen className="logo" />
         <span className="nav-span">Profile</span>
-      </Link>
+      </Link> */}
     </>
   );
 

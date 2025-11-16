@@ -292,7 +292,7 @@ export type AddNewFarmerReportImageType = {
 
 type GetFarmerReportDetailBaseType = {
   cropName: string;
-  verificationStatus: verificationStatusType;
+  verificationStatus: boolean;
   dayReported: Date;
   dayHappen: Date;
   title: string;
@@ -1302,13 +1302,6 @@ export type DashboardComponentPropType = {
 export type RecentReportWidgetReturnType = {
   recentReport: getRecentReportReturnType[];
   widgetTitle: string;
-};
-
-export type verificationStatusType = "false" | "pending";
-
-export type getTotalFarmerStatusType = {
-  pending: verificationStatusType;
-  false: verificationStatusType;
 };
 
 export type getRecentReportParamType =

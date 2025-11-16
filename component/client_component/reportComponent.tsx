@@ -1397,15 +1397,13 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
 
   const reportStatus = () => {
     if (work === "leader" || work === "farmer") {
-      return userReport.verificationStatus === "false"
+      return !userReport.verificationStatus
         ? "Hindi pa naaprubahan"
         : "Naaprubahan na";
     }
 
     // work is admin or agriculturist
-    return userReport.verificationStatus === "false"
-      ? "Not yet validated"
-      : "Validated";
+    return !userReport.verificationStatus ? "Not yet validated" : "Validated";
   };
 
   return (
@@ -1455,7 +1453,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
           <div className="space-y-5">
             <div
               className={`px-3 py-1 w-fit rounded-lg text-sm tracking-wide font-semibold ${
-                userReport.verificationStatus === "false"
+                !userReport.verificationStatus
                   ? "bg-yellow-100 text-yellow-900"
                   : "bg-green-100 text-green-900"
               }`}
@@ -1506,7 +1504,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
             </div>
 
             <div>
-              {!isView && userReport.verificationStatus !== "pending" ? (
+              {!isView && !userReport.verificationStatus ? (
                 <FormDivLabelTextArea
                   labelMessage={`${
                     isEnglish ? "Report description:" : "Deskripsyon ng ulat:"
@@ -1571,7 +1569,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
         </div>
 
         <div className="border-t border-gray-200 [&>div]:!p-4">
-          {!isView && userReport.verificationStatus !== "pending" ? (
+          {!isView && !userReport.verificationStatus ? (
             <FormCancelSubmitButton
               submitButtonLabel={"Aprubahan"}
               submitOnClick={proceedOnClick}

@@ -714,7 +714,7 @@ export const changeApproveOrJustApproveReport = async ({
     if (isChange) console.log("description changed");
 
     await Promise.all([
-      ApprovedOrgMemberQuery(reportId, "pending"),
+      ApprovedOrgMemberQuery(reportId),
       isChange ? changeTheReportDescription(newDesc, reportId) : undefined,
     ]);
 
