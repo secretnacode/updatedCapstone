@@ -1243,7 +1243,10 @@ export const SideComponentMyCropStatus = async () => {
                   <div className="text-sm text-gray-500 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>
-                      Itinanim: {ReadableDateFormat(crop.datePlanted)}
+                      Itinanim:{" "}
+                      {crop.datePlanted
+                        ? ReadableDateFormat(crop.datePlanted)
+                        : "Hindi pa naitatala"}
                     </span>
                   </div>
                 </div>
