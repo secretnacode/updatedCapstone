@@ -57,6 +57,7 @@ import { changePasswordSchema } from "@/util/helper_function/validation/validati
 import { DeleteSession } from "../session";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 /**
  * server action when the farmer leader want to delete a farmer account
@@ -756,7 +757,7 @@ export const changeFarmerPass = async ({
   }
 };
 
-export const userLogout = async (): Promise<ServerActionFailBaseType> => {
+export const farmerLogout = async (): Promise<ServerActionFailBaseType> => {
   try {
     await DeleteSession();
 
@@ -783,3 +784,36 @@ export const userLogout = async (): Promise<ServerActionFailBaseType> => {
     };
   }
 };
+
+export const agriLogout =
+  async (): Promise<serverActionOptionalNotifMessage> => {
+    try {
+      const { sessionId } = await auth();
+
+      await DeleteSession();
+
+      if (sessionId) (await clerkClient()).sessions.revokeSession(sessionId);
+
+      redirect(
+        `/?notif=${NotifToUriComponent([
+          { message: "Matagumpay ang iyong pag lologout", type: "success" },
+        ])}`
+      );
+    } catch (error) {
+      if (isRedirectError(error)) throw error;
+
+      const err = error as Error;
+
+      console.log(`Error occured while logging out: ${err.message}`);
+
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };

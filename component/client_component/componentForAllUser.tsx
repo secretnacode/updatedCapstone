@@ -83,7 +83,8 @@ import {
   DeleteFarmerUser,
   DeleteMyOrgMember,
   getAllFarmerForResetPass,
-  userLogout,
+  farmerLogout,
+  agriLogout,
 } from "@/lib/server_action/user";
 import { LineChart, PieChart } from "@mui/x-charts";
 import {
@@ -2703,16 +2704,16 @@ export const ChangeMyPassword = () => {
   );
 };
 
-export const LogoutButton: FC = () => {
+export const FarmerLogoutButton = () => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
-  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
   const handleLogout = async () => {
     try {
       handleIsLoading("Logging out!!!");
 
-      const res = await userLogout();
+      const res = await farmerLogout();
 
       handleSetNotification(res.notifError);
     } catch (error) {
@@ -2732,21 +2733,76 @@ export const LogoutButton: FC = () => {
     <>
       <button
         className="group nav-link w-full"
-        onClick={() => setIsLoggingOut(true)}
+        onClick={() => setOpenModal(true)}
       >
-        <LogOut className="size-5" />
+        <LogOut className="logo" />
 
         <span className="nav-span">Log out</span>
       </button>
 
-      {isLoggingOut &&
+      {openModal &&
         createPortal(
           <ModalNotice
             type="warning"
             title="Mag log out ng account"
             showCloseButton={false}
             message={<>Mag log out ng account?</>}
-            onClose={() => setIsLoggingOut(false)}
+            onClose={() => setOpenModal(false)}
+            onProceed={handleLogout}
+            showCancelButton={true}
+            proceed={{ label: "Mag patuloy" }}
+            cancel={{ label: "Kanselahin" }}
+          />,
+          document.body
+        )}
+    </>
+  );
+};
+
+export const AgriLogoutButton = () => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [openModal, setOpenModal] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    try {
+      handleIsLoading("Logging out!!!");
+
+      const res = await agriLogout();
+
+      if (!res.success) handleSetNotification(res.notifError);
+    } catch (error) {
+      if (!isRedirectError(error)) {
+        console.log((error as Error).message);
+
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      }
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <>
+      <button
+        className="group nav-link w-full"
+        onClick={() => setOpenModal(true)}
+      >
+        <LogOut className="logo" />
+
+        <span className="nav-span">Log out</span>
+      </button>
+
+      {openModal &&
+        createPortal(
+          <ModalNotice
+            type="warning"
+            title="Log out your account?"
+            showCloseButton={false}
+            message={<>Are you sure you want to log out?</>}
+            onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}
             proceed={{ label: "Mag patuloy" }}

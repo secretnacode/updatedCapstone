@@ -16,8 +16,9 @@ import { FC, ReactNode } from "react";
 import { RedirectLoginWithNotif } from "@/util/helper_function/reusableFunction";
 import { AgriculturistNavLinkType } from "@/types";
 import {
+  AgriLogoutButton,
   BurgerNav,
-  LogoutButton,
+  FarmerLogoutButton,
 } from "../client_component/componentForAllUser";
 
 export const NavbarComponent: FC = async () => {
@@ -129,7 +130,7 @@ export const FarmerNav: FC<{ role: string }> = ({ role }) => {
         <span className="nav-span">Profile</span>
       </Link>
 
-      <LogoutButton />
+      <FarmerLogoutButton />
     </>
   );
 
@@ -181,6 +182,8 @@ const AgriculturistNav: FC = () => {
           <span className="nav-span">{link.linkName}</span>
         </Link>
       ))}
+
+      <AgriLogoutButton />
     </Navbar>
   );
 };

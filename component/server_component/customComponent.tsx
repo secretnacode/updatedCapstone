@@ -453,39 +453,46 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
     <div className="modal-form">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
             {logo && (
               <div
-                className={`p-3 grid place-items-center rounded-full ${logo.bgColor}`}
+                className={`p-3 grid place-items-center rounded-xl ${logo.bgColor} shadow-sm transition-transform hover:scale-105`}
               >
                 <logo.logo className={`logo ${logo.logoColor}`} />
               </div>
             )}
-            <h1 className="title !text-[18px] !text-gray-800 !mb-0">{title}</h1>
+            <h1 className="title !text-[20px] !text-gray-900 !mb-0 !font-semibold">
+              {title}
+            </h1>
           </div>
 
           {showCloseButton && (
             <button
               onClick={onClose}
-              className="button !p-2 hover:bg-gray-100 !rounded-full transition-colors"
+              className="button !p-2 hover:bg-gray-100 !rounded-full transition-all duration-200 hover:rotate-90 active:scale-95"
+              aria-label="Close modal"
             >
-              <X className="logo !size-4" />
+              <X className="logo !size-5 text-gray-500" />
             </button>
           )}
         </div>
 
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-6" />
+
         <div>
-          <p className="font-light text-gray-800 tracking-wide leading-relaxed mb-5">
+          <p className="font-normal text-gray-600 tracking-wide leading-relaxed mb-6 text-[15px]">
             {message}
           </p>
-          {/* use 2 seperate button instead of single component(FormCancelSubmitButton) because the modal component can still be called for just an important notification  */}
+
           <div className={`grid grid-cols-2 gap-3`} dir="rtl">
             <SubmitButton
               onClick={onProceed}
               type="button"
-              className={`${proceed.className ?? ""} !rounded-md ${
+              className={`${
+                proceed.className ?? ""
+              } !rounded-lg shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 ${
                 showCancelButton ? "modal-red-button" : "modal-green-button"
               }`}
             >
@@ -497,7 +504,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
                 onClick={onClose}
                 className={`${
                   cancel.className ?? ""
-                } !rounded-md modal-green-button`}
+                } !rounded-lg modal-green-button shadow-sm hover:shadow-md transition-all duration-200 active:scale-95`}
               >
                 {cancel.label}
               </CancelButton>

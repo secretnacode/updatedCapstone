@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
 import { NotifToUriComponent } from "./util/helper_function/reusableFunction";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`farmer`, [`/farmer`]);
@@ -11,7 +12,7 @@ authorizedPath.set(`leader`, [`/farmer`, `/farmerLeader`, `/farmerUser`]);
 authorizedPath.set(`newUser`, [`/farmerDetails`]);
 const publicPath = [`/unauthorized`, `/agriAuth`, `/resetPassword`];
 
-export default async function Middleware(req: NextRequest) {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   try {
     const res = NextResponse.next();
     // logging all the incoming requests for debugging purposes
@@ -62,7 +63,7 @@ export default async function Middleware(req: NextRequest) {
       )
     );
   }
-}
+});
 
 export const config = {
   matcher: [
