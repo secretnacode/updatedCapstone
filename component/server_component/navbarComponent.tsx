@@ -52,11 +52,24 @@ export const NavbarComponent: FC = async () => {
       <AgriculturistNav />
     );
 
+  const logoLink = (): string => {
+    if (session?.work === "admin" || session?.work === "agriculturist")
+      return "/agriculturist";
+
+    if (session?.work === "farmer" || session?.work === "leader")
+      return "/farmer";
+
+    console.error(
+      "no session detected that's why if the logo was presssed it will redirect you to "
+    );
+    return "/";
+  };
+
   return (
     <div className="md:w-64 w-full min-h-full bg-white">
       <div className="md:sticky top-0 relative">
         <Link
-          href={`/${session?.work}`}
+          href={logoLink()}
           className="p-6 md:border-b md:border-gray-200 inline-block w-full"
         >
           <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">

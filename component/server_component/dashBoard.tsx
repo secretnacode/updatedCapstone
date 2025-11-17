@@ -90,6 +90,7 @@ export const FarmerLeadDashBoard = async () => {
             <RecentReportWidget
               recentReport={data.recentReport}
               widgetTitle={"Mga nag pasa ng ulat"}
+              linkFor="farmer"
             />
           }
           user="leader"

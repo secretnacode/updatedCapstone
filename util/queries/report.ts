@@ -688,3 +688,32 @@ export const getMyRecentReportQuery = async (
     );
   }
 };
+
+/**
+ * query to check if the report was own by the user
+ * @param farmerId id of the farmer
+ * @param reportId id of the report that will be checked if owned
+ * @returns boolean
+ */
+export const checkIfMyReport = async (
+  farmerId: string,
+  reportId: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select exists(select 1 from capstone.report where "farmerId" = $1 and "reportId" = $2)`,
+        [farmerId, reportId]
+      )
+    ).rows[0].exists;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung ang report ay iyo: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung ang report ay iyo`
+    );
+  }
+};

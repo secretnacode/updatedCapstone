@@ -65,7 +65,7 @@ export default async function Page({
             },
             cardContent: String(data.cardValue.totalFarmerReport),
             contentLabel: "Count of total report",
-            link: "/agriculturist/farmerReprots",
+            link: "/agriculturist/farmerReports",
           }}
           card3={{
             logo: {
@@ -92,6 +92,7 @@ export default async function Page({
               <RecentReportWidget
                 recentReport={data.recentReport}
                 widgetTitle={"Current passed report"}
+                linkFor="agri"
               />
             </>
           }

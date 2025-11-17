@@ -17,7 +17,7 @@ import {
   ModalNoticePropType,
   MyPreviousReportPropType,
   NoContentYetPropType,
-  RecentReportWidgetReturnType,
+  RecentReportWidgetPropType,
   reportStatusPropType,
   reportTypePropType,
   seeAllValButtonPropType,
@@ -795,9 +795,10 @@ export const ClerkModalLoading = () => {
   );
 };
 
-export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
+export const RecentReportWidget: FC<RecentReportWidgetPropType> = ({
   recentReport,
   widgetTitle,
+  linkFor,
 }) => {
   const timePass = (pastTime: timeStampzType) => {
     if ((pastTime.days ?? 0) > 0) {
@@ -821,9 +822,13 @@ export const RecentReportWidget: FC<RecentReportWidgetReturnType> = ({
         <div className="divide-y divide-gray-200">
           {recentReport.map((val) => (
             <Link
-              href={`/farmerLeader/validateReport?reportId=${val.reportId}`}
+              href={`${
+                linkFor === "agri"
+                  ? "/agriculturist/farmerReports"
+                  : "/farmerLeader/validateReport"
+              }?reportId=${val.reportId}`}
               key={val.reportId}
-              className="block hover:bg-gray-100/80 transition-all duration-200 group cursor-pointer pl-2 py-2"
+              className="block hover:bg-gray-100/80 transition-all duration-200 group cursor-pointer pl-2 py-3"
             >
               <div className="flex items-center gap-4">
                 <div

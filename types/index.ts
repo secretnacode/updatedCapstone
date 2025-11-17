@@ -1300,9 +1300,10 @@ export type DashboardComponentPropType = {
   showQuickAction?: boolean;
 };
 
-export type RecentReportWidgetReturnType = {
+export type RecentReportWidgetPropType = {
   recentReport: getRecentReportReturnType[];
   widgetTitle: string;
+  linkFor: "agri" | "farmer";
 };
 
 export type getRecentReportParamType =

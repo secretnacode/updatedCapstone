@@ -4,6 +4,7 @@ import {
   addNewReport,
   ApprovedOrgMemberQuery,
   changeTheReportDescription,
+  checkIfMyReport,
   GetAllFarmerReportQuery,
   getFarmerIdOfReport,
   GetFarmerReportDetailQuery,
@@ -552,7 +553,27 @@ export const GetFarmerReportDetail = async (
   reportId: string
 ): Promise<GetFarmerReportDetailReturnType> => {
   try {
-    const { work } = await ProtectedAction("read:report");
+    const { work, userId } = await ProtectedAction("read:report");
+
+    // nested if for so it wouldnt fetch unnecessarry
+    if (work === "leader")
+      if (await checkIfMyReport(userId, reportId))
+        if (
+          !(await CheckMyMemberquery(
+            await getFarmerIdOfReport(reportId),
+            userId
+          ))
+        )
+          return {
+            success: false,
+            notifError: [
+              {
+                message:
+                  "Ikinansela sapagkat hindi mo kamiyembro and nag pasa nito!!!",
+                type: "warning",
+              },
+            ],
+          };
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
 

@@ -85,6 +85,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_FARMER_USER,
+    Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
@@ -106,6 +107,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.READ_FARMER_REPORT,
     Actions.READ_FARMER_REPORT_LIST,
     Actions.READ_FARMER_USER,
+    Actions.READ_REPORT,
     Actions.READ_LINK,
     Actions.READ_ORG,
     Actions.READ_ORG_LIST,
@@ -152,7 +154,11 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_MY_ORG,
     Actions.UPDATE_USER,
   ],
-  newUser: [Actions.CREATE_CROP, Actions.CREATE_USER, Actions.READ_ORG],
+  newUser: [
+    // Actions.CREATE_CROP
+    Actions.CREATE_USER,
+    Actions.READ_ORG,
+  ],
 };
 
 /**
