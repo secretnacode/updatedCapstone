@@ -717,3 +717,21 @@ export const checkIfMyReport = async (
     );
   }
 };
+
+export const getToBeDownloadReportQuery = async () => {
+  try {
+    return await pool.query(
+      `select f."farmerFirstName", f."farmerLastName", f."farmerMiddleName", f."farmerExtensionName", c."cropLocation", c."farmAreaMeasurement", c.""`
+    );
+  } catch (error) {
+    console.error(
+      `Unexpected report while getting all the report that will be downloaded: ${
+        (error as Error).message
+      }`
+    );
+
+    throw new Error(
+      `Unexpected report while getting all the report that will be downloaded`
+    );
+  }
+};

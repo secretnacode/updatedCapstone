@@ -38,6 +38,7 @@ import {
   uploadPlantingReportType,
   reportTypeStateType,
   getMyRecentReportReturnType,
+  reportDownloadType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -839,3 +840,32 @@ export const getMyRecentReport =
       };
     }
   };
+
+const getToBeDownloadReport = async (type: reportDownloadType) => {
+  try {
+    await ProtectedAction("read:farmer:report:list");
+
+    const report = async () => {
+      switch (type) {
+        case "damage":
+        case "harvesting":
+        case "planting":
+        case "all":
+      }
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `Unexpected error while downloading the reports: ${err.message}`
+    );
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

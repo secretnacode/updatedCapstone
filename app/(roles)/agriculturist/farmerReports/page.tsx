@@ -25,15 +25,7 @@ export default async function Page() {
       {!farmerReport.success ? (
         <RenderRedirectNotification notif={farmerReport.notifError} />
       ) : (
-        <div className="component space-y-4">
-          <div>
-            <h1 className="table-title">Farmer Reports</h1>
-          </div>
-
-          <AgriculturistFarmerReporTable
-            report={farmerReport.validatedReport}
-          />
-        </div>
+        <AgriculturistFarmerReporTable report={farmerReport.validatedReport} />
       )}
     </>
   );

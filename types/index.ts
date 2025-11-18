@@ -1796,3 +1796,13 @@ export type profileButtonIdType =
   | "profile-change-pass";
 
 export type BurgerNavPropType = ChildrenPropType;
+
+export type reportDownloadType = reportTypeStateType | "all";
+
+export type optionsDownloadListType = {
+  id: reportDownloadType;
+  label: string;
+  icon: LucideIcon;
+  color: string;
+  bgHover: string;
+}[];
