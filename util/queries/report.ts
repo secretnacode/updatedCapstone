@@ -14,7 +14,9 @@ import {
   getReportCountThisAndPrevMonthReturnType,
   getReportCountThisWeekReturnType,
   getReportCountThisYearReturnType,
+  getToBeDownloadReportQueryReturnType,
   GetUserReportReturnType,
+  reportDownloadType,
   reportTypeStateType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -718,11 +720,27 @@ export const checkIfMyReport = async (
   }
 };
 
-export const getToBeDownloadReportQuery = async () => {
+export const getToBeDownloadReportQuery = async (
+  type: reportDownloadType
+): Promise<getToBeDownloadReportQueryReturnType[]> => {
   try {
-    return await pool.query(
-      `select f."farmerFirstName", f."farmerLastName", f."farmerMiddleName", f."farmerExtensionName", c."cropLocation", c."farmAreaMeasurement", c.""`
-    );
+    const {
+      condition,
+      val,
+    }: {
+      condition: string;
+      val: [reportDownloadType] | [];
+    } =
+      type === "all"
+        ? { condition: "", val: [] }
+        : { condition: `and r."reportType" = $3`, val: [type] };
+
+    return (
+      await pool.query(
+        `select f."farmerFirstName" as "FIRST NAME", f."farmerLastName" as "SURNAME", f."farmerMiddleName" as "MIDDLE NAME", f."farmerExtensionName" as "EXTENSION NAME", TO_CHAR(f."birthdate", 'Month DD, YYYY') as "DATE OF BIRTH", c."cropLocation" "FARM LOCATION", c."farmAreaMeasurement" as "FARM AREA" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.crop c on r."cropId" = c."cropId" where (r."verificationStatus" = $1 or (r."verificationStatus" = $2 and r."orgId" is null)) ${condition}`,
+        [true, false, ...val]
+      )
+    ).rows;
   } catch (error) {
     console.error(
       `Unexpected report while getting all the report that will be downloaded: ${

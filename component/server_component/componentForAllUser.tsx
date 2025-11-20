@@ -418,7 +418,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         labelMessage="Pangalan ng Organisasyon"
         inputDisable={true}
         inputName={"orgId"}
-        inputDefaultValue={userOrgInfo.orgName}
+        inputDefaultValue={userOrgInfo?.orgName ?? "Wala sa organisasyon"}
         inputPlaceholder="Pangalan ng organisasyon"
       />
 
@@ -426,7 +426,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         labelMessage="Leader ng Organisasyon"
         inputDisable={true}
         inputName={"leaderName"}
-        inputDefaultValue={userOrgInfo.farmerLeader}
+        inputDefaultValue={userOrgInfo?.farmerLeader ?? "Wala sa organisasyon"}
         inputPlaceholder="Miyembro"
       />
 
@@ -434,7 +434,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         labelMessage="Posisyon"
         inputDisable={true}
         inputName={"orgRole"}
-        inputDefaultValue={userOrgInfo.orgRole}
+        inputDefaultValue={userOrgInfo?.orgRole ?? "Wala sa organisasyon"}
         inputPlaceholder="Miyembro"
       />
     </>

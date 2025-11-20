@@ -627,7 +627,6 @@ const PlantingReport: FC<ReportContentPropType> = ({
           labelMessage="Pamagat ng ulat ng pagtatanim:"
           inputName={"reportTitle"}
           formError={state.formError?.reportTitle}
-          inputRequired
           inputPlaceholder="Hal: Bagong tanim na palay sa dayap"
           inputClassName="input-green-ring"
         />
@@ -636,7 +635,6 @@ const PlantingReport: FC<ReportContentPropType> = ({
           labelMessage="Araw ng pagtatanim:"
           inputName={"dateHappen"}
           formError={state.formError?.dateHappen}
-          inputRequired
           inputType="date"
           inputMax={MaxDateToday()}
           inputClassName="input-green-ring"
@@ -646,7 +644,6 @@ const PlantingReport: FC<ReportContentPropType> = ({
           labelMessage="Dami ng binhi na ginamit (kg):"
           inputName={"totalCropPlanted"}
           formError={state.formError?.totalCropPlanted}
-          inputRequired
           inputType="number"
           inputPlaceholder="Hal: 500"
           inputClassName="input-green-ring"
@@ -657,7 +654,6 @@ const PlantingReport: FC<ReportContentPropType> = ({
           labelMessage="Karagdagang detalye:"
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
-          required
           placeholder="Hal: Naitanim na ang mga palay dine sa lamot 1"
           className="input-green-ring"
         />
@@ -737,7 +733,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
 
       <FormCancelSubmitButton
         submitType="button"
-        submitOnClick={() => setOpenModal(true)}
+        submitOnClick={handleSubmit}
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
         cancelOnClick={() => setOpenReportModal(false)}
@@ -846,7 +842,6 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Pamagat ng ulat ng pag-aani:"
           inputName={"reportTitle"}
           formError={state.formError?.reportTitle}
-          inputRequired
           inputPlaceholder="Hal: Pag aani sa taniman sa may lamot 1"
           inputClassName="input-amber-ring"
         />
@@ -855,7 +850,6 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Araw ng pag-aani:"
           inputName={"dateHappen"}
           formError={state.formError?.dateHappen}
-          inputRequired
           inputType="date"
           inputMax={MaxDateToday()}
           inputClassName="input-amber-ring"
@@ -865,7 +859,6 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Dami ng naaning ani (kg):"
           inputName={"totalHarvest"}
           formError={state.formError?.totalHarvest}
-          inputRequired
           inputType="decimal"
           inputPlaceholder="Hal: 500"
           inputClassName="input-amber-ring"
@@ -875,7 +868,6 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Karagdagang detalye:"
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
-          required
           placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
           className="input-amber-ring"
         />

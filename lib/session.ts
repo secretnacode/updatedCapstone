@@ -112,11 +112,12 @@ export const GetSession = async (): Promise<SessionValueType | null> => {
 
     return sessionVal;
   } catch (error) {
-    throw new Error(
+    console.log(
       `${UnexpectedErrorMessageEnglish()} while getting the current sesion: ${
         (error as Error).message
       }`
     );
+    throw new Error(UnexpectedErrorMessageEnglish());
   }
 };
 

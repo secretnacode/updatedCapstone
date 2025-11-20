@@ -20,13 +20,9 @@ export default async function Page() {
     };
   }
 
-  return (
-    <>
-      {!farmerReport.success ? (
-        <RenderRedirectNotification notif={farmerReport.notifError} />
-      ) : (
-        <AgriculturistFarmerReporTable report={farmerReport.validatedReport} />
-      )}
-    </>
+  return !farmerReport.success ? (
+    <RenderRedirectNotification notif={farmerReport.notifError} />
+  ) : (
+    <AgriculturistFarmerReporTable report={farmerReport.validatedReport} />
   );
 }

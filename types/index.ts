@@ -468,11 +468,11 @@ export type selectElementReturnPropType =
 
 export type MyOrganizationFormPropType = {
   availOrgList: QueryAvailableOrgReturnType[];
-  userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+  userOrgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
 };
 
 export type UserOrganizationInfoFormPropType = {
-  userOrgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+  userOrgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
 };
 // | {
 //     isViewing: false;
@@ -527,7 +527,7 @@ export type GetFarmerCropInfoReturnType =
 export type ProfileInfoReturnType = {
   cropInfo: getFarmerCropNameQueryReturnType[];
   farmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
-  orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+  orgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
 };
 
 export type SuccessGetMyProfileInfoReturnType = ProfileInfoReturnType & {
@@ -872,7 +872,7 @@ export type ViewCropModalButtonPropType = {
 
 export type UserProFilePropType = {
   userFarmerInfo: GetFarmerProfilePersonalInfoQueryReturnType;
-  orgInfo: GetFarmerProfileOrgInfoQueryReturnType;
+  orgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
   isViewing: boolean;
 };
@@ -1806,3 +1806,19 @@ export type optionsDownloadListType = {
   color: string;
   bgHover: string;
 }[];
+
+export type getToBeDownloadReportQueryReturnType = {
+  "FIRST NAME": string;
+  SURNAME: string;
+  "MIDDLE NAME": string;
+  "EXTENSION NAME": string;
+  "DATE OF BIRTH": string;
+  "FARM LOCATION": barangayType;
+  "FARM AREA": string;
+};
+
+export type keyOfReportToDowload = [keyof getToBeDownloadReportQueryReturnType];
+
+export type getToBeDownloadReportReturnType =
+  | { success: true; csvType: string }
+  | ServerActionFailBaseType;

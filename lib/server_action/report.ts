@@ -15,6 +15,7 @@ import {
   getReportCountThisAndPrevMonth,
   getReportCountThisWeek,
   getReportCountThisYear,
+  getToBeDownloadReportQuery,
   GetUserReport,
   updateReportType,
 } from "@/util/queries/report";
@@ -39,6 +40,8 @@ import {
   reportTypeStateType,
   getMyRecentReportReturnType,
   reportDownloadType,
+  keyOfReportToDowload,
+  getToBeDownloadReportReturnType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -841,18 +844,40 @@ export const getMyRecentReport =
     }
   };
 
-const getToBeDownloadReport = async (type: reportDownloadType) => {
+export const getToBeDownloadReport = async (
+  type: reportDownloadType
+): Promise<getToBeDownloadReportReturnType> => {
   try {
     await ProtectedAction("read:farmer:report:list");
 
-    const report = async () => {
-      switch (type) {
-        case "damage":
-        case "harvesting":
-        case "planting":
-        case "all":
-      }
+    const reports = await getToBeDownloadReportQuery(type);
+
+    const toCsvType = () => {
+      if (!reports || reports.length === 0) return "";
+
+      const header = Object.keys(reports[0]) as keyOfReportToDowload;
+
+      const headRow = header.join(",");
+
+      const dataRow = reports.map((row) =>
+        header.map((header) => {
+          const val = row[header];
+
+          if (
+            typeof val === "string" &&
+            (val.includes(",") || val.includes('"'))
+          ) {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+
+          return val;
+        })
+      );
+
+      return [headRow, ...dataRow].join(`\n`);
     };
+
+    return { success: true, csvType: toCsvType() };
   } catch (error) {
     const err = error as Error;
     console.log(

@@ -94,6 +94,7 @@ import {
   capitalizeFirstLetter,
   DateToYYMMDD,
   handleFarmerNumber,
+  NotifToUriComponent,
   ReadableDateFormat,
   reportStatus,
   timeStampAmPmFormat,
@@ -134,6 +135,8 @@ import {
 } from "../server_component/componentForAllUser";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { createPortal } from "react-dom";
+import { getToBeDownloadReport } from "@/lib/server_action/report";
+import { useClerk } from "@clerk/nextjs";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -351,9 +354,9 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
   }, []);
 
   const handleResetForm = useCallback(() => {
-    setOrgInfo({ orgId: userOrgInfo.orgId, otherOrgName: "" });
+    setOrgInfo({ orgId: userOrgInfo?.orgId ?? "", otherOrgName: "" });
     handleReset();
-  }, [userOrgInfo.orgId, handleReset]);
+  }, [userOrgInfo?.orgId, handleReset]);
 
   const handleFormSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -396,7 +399,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
         labelMessage={"Pangalan ng Organisasyon"}
         selectName={"orgId"}
         selectOrganization={true}
-        selectValue={orgInfo.orgId ?? ""}
+        selectValue={userOrgInfo?.orgId ?? "none"}
         onChange={handleUserOrgChange}
         selectDisable={false}
         childrenOption={availOrgList.map((org) => (
@@ -411,7 +414,9 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
         labelMessage="Leader ng Organisasyon"
         inputDisable={true}
         inputName={"leaderName"}
-        inputDefaultValue={userOrgInfo.farmerLeader}
+        inputDefaultValue={
+          userOrgInfo?.farmerLeader ?? "Wala kang organisasyon"
+        }
         inputPlaceholder="Miyembro"
       />
 
@@ -420,7 +425,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
           labelMessage="Posisyon"
           inputDisable={true}
           inputName={"orgRole"}
-          inputDefaultValue={userOrgInfo.orgRole}
+          inputDefaultValue={userOrgInfo?.orgRole ?? "Wala kang organisasyon"}
           inputPlaceholder="Miyembro"
         />
       </div>
@@ -1825,7 +1830,7 @@ export const AgriculturistFarmerReporTable: FC<
 > = ({ report }) => {
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
-  const [openOpt, setOpenOpt] = useState<boolean>(false)
+  const [openOpt, setOpenOpt] = useState<boolean>(false);
   const { sortCol, setSortCol, handleSortCol } =
     useSortColumnHandler<GetAllFarmerReportQueryReturnType>();
   const [tableList, setTableList] =
@@ -1838,18 +1843,63 @@ export const AgriculturistFarmerReporTable: FC<
   );
 
   const options: optionsDownloadListType = [
-    { id: 'planting', label: 'Planting', icon: Sprout, color: 'text-green-600', bgHover: 'hover:bg-green-50' },
-    { id: 'damage', label: 'Damage', icon: AlertTriangle, color: 'text-red-600', bgHover: 'hover:bg-red-50' },
-    { id: 'harvesting', label: 'Harvest', icon: Package, color: 'text-amber-600', bgHover: 'hover:bg-amber-50' },
-    { id: 'all', label: 'All', icon: List, color: 'text-blue-600', bgHover: 'hover:bg-blue-50' }
+    {
+      id: "planting",
+      label: "Planting",
+      icon: Sprout,
+      color: "text-green-600",
+      bgHover: "hover:bg-green-50",
+    },
+    {
+      id: "damage",
+      label: "Damage",
+      icon: AlertTriangle,
+      color: "text-red-600",
+      bgHover: "hover:bg-red-50",
+    },
+    {
+      id: "harvesting",
+      label: "Harvest",
+      icon: Package,
+      color: "text-amber-600",
+      bgHover: "hover:bg-amber-50",
+    },
+    {
+      id: "all",
+      label: "All",
+      icon: List,
+      color: "text-blue-600",
+      bgHover: "hover:bg-blue-50",
+    },
   ];
 
-
-  const downloadReports = (type: reportDownloadType) => {
+  const downloadReports = async (type: reportDownloadType) => {
     try {
       handleIsLoading("Downloading the report...");
 
-      const res = 
+      const res = await getToBeDownloadReport(type);
+
+      if (!res.success) return handleSetNotification(res.notifError);
+
+      const blob = new Blob([res.csvType], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${type}-report-type-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+
+      return handleSetNotification([
+        {
+          message: `Successfully downloaded the ${type} report`,
+          type: "success",
+        },
+      ]);
     } catch (error) {
       console.error((error as Error).message);
 
@@ -1866,12 +1916,16 @@ export const AgriculturistFarmerReporTable: FC<
       <div className="flex justify-between items-center">
         <h1 className="table-title">Farmer Reports</h1>
 
-        <div><Button className="blue-button slimer-button text-white" onClick={() => setOpenOpt(!openOpt)}>
-          <Download className="size-5" />
-          Export reports
-        </Button>
+        <div className="relative">
+          <Button
+            className="blue-button slimer-button text-white"
+            onClick={() => setOpenOpt(!openOpt)}
+          >
+            <Download className="size-5" />
+            Export reports
+          </Button>
 
-      {openOpt && (
+          {openOpt && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-10 animate-fadeIn">
               {options.map((option) => {
                 const Icon = option.icon;
@@ -1882,14 +1936,16 @@ export const AgriculturistFarmerReporTable: FC<
                     className={`w-full px-6 py-3 flex items-center gap-3 transition-colors ${option.bgHover} border-b border-gray-100 last:border-b-0`}
                   >
                     <Icon size={20} className={option.color} />
-                    <span className="font-medium text-gray-700">{option.label}</span>
+                    <span className="font-medium text-gray-700">
+                      {option.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
-          )}</div>
-
+          )}
         </div>
+      </div>
 
       <TableWithFilter<GetAllFarmerReportQueryReturnType>
         setTableList={setTableList}
@@ -2829,6 +2885,7 @@ export const AgriLogoutButton = () => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const { signOut } = useClerk();
 
   const handleLogout = async () => {
     try {
@@ -2836,7 +2893,13 @@ export const AgriLogoutButton = () => {
 
       const res = await agriLogout();
 
-      if (!res.success) handleSetNotification(res.notifError);
+      if (!res.success) return handleSetNotification(res.notifError);
+
+      await signOut({
+        redirectUrl: `/agriAuth/signIn?notif=${NotifToUriComponent([
+          { message: "Successfully loged out", type: "success" },
+        ])}`,
+      });
     } catch (error) {
       if (!isRedirectError(error)) {
         console.log((error as Error).message);
@@ -2871,8 +2934,8 @@ export const AgriLogoutButton = () => {
             onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}
-            proceed={{ label: "Mag patuloy" }}
-            cancel={{ label: "Kanselahin" }}
+            proceed={{ label: "Confirm, Log Out" }}
+            cancel={{ label: "Cancel" }}
           />,
           document.body
         )}

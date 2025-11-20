@@ -23,6 +23,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   if (!authorization.success)
     RedirectUnauthorizedWithNotif(authorization.notifError);
+
   return (
     <ClerkProvider>
       <div className="min-h-screen flex">

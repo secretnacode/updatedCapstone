@@ -22,6 +22,7 @@ export default async function Page({
   if (notif) message = JSON.parse(notif);
 
   let data: getAgriculturistDashboardDataReturnType;
+
   try {
     data = await getAgriculturistDashboardData();
   } catch (error) {
