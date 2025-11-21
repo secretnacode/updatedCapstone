@@ -1,5 +1,6 @@
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import {
+  DashboardNoValComponent,
   FarmerDashBoard,
   FarmerLeadDashBoard,
 } from "@/component/server_component/dashBoard";
@@ -42,7 +43,10 @@ export default async function Page({
           <FarmerDashBoard />
         )
       ) : (
-        <RenderRedirectNotification notif={userRole.notifError} />
+        <>
+          <RenderRedirectNotification notif={userRole.notifError} />
+          <DashboardNoValComponent />
+        </>
       )}
     </div>
   );

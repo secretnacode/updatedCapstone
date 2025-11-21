@@ -483,3 +483,28 @@ export const getAllCropStatusAndPlantedDate = async (): Promise<
     );
   }
 };
+
+/**
+ * query for getting the farm area meassurement of the crop
+ * @param cropId id of the crop that will be get
+ * @returns string
+ */
+export const getCropFarmArea = async (cropId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "farmAreaMeasurement" from capstone.crop where "cropId" = $1`,
+        [cropId]
+      )
+    ).rows[0].farmAreaMeasurement;
+  } catch (error) {
+    console.error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng sukat ng iyong pananim: ${
+        (error as Error).message
+      }`
+    );
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng sukat ng iyong pananim`
+    );
+  }
+};

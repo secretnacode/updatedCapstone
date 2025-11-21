@@ -1236,91 +1236,64 @@ export function TableWithFilter<
           />
         </div>
 
-        {additionalFilter && (
-          <div className="flex gap-2 flex-wrap items-center w-full">
-            <span className="text-xs font-medium text-muted-foreground text-nowrap inline-block">
-              Filter by:
-            </span>
+        {additionalFilter &&
+          //added this so the "Filter by" can be removed if theres no value to be filtered, can be deleted if cause an error
+          additionalFilter?.filterBy[Object.keys(additionalFilter.filterBy)[0]]!
+            .length > 0 && (
+            <div className="flex gap-2 flex-wrap items-center w-full">
+              <span className="text-xs font-medium text-muted-foreground text-nowrap inline-block">
+                Filter by:
+              </span>
 
-            {/* {Object.keys(additionalFilter.filterBy).map((col, index) => (
-              <div key={`${col}-${index}`} className="flex gap-2 flex-wrap">
-                {additionalFilter.filterBy[col]!.map((option, index) => (
-                  <button
-                    key={`${option}-${index}`}
-                    onClick={() =>
-                      setFilterCol(
-                        filterCol?.val === option
-                          ? null
-                          : { col: col, val: option }
-                      )
-                    }
-                    className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
-                      filterCol?.val === option
-                        ? "bg-green-500 text-white"
-                        : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
-                    }`}
+              <div className={`flex flex-wrap gap-2 items-center flex-1`}>
+                {Object.keys(additionalFilter.filterBy).map((col, colIndex) =>
+                  additionalFilter.filterBy[col]!.map((option, optIndex) => (
+                    <div key={`${option}-${optIndex}`} className="flex">
+                      <button
+                        onClick={() =>
+                          setFilterCol(
+                            filterCol?.val === option
+                              ? null
+                              : { col: col, val: option }
+                          )
+                        }
+                        className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
+                          filterCol?.val === option
+                            ? "bg-green-500 text-white"
+                            : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
+                        }`}
+                      >
+                        {additionalFilter.handleFilterLabel[col]!(
+                          handleFilterOptionLabel(option)
+                        )}
+                      </button>
+
+                      {Object.keys(additionalFilter.filterBy).length >
+                        colIndex + 1 &&
+                        optIndex ===
+                          additionalFilter.filterBy[col]!.length - 1 && (
+                          <div className="ml-2 border-l" />
+                        )}
+                    </div>
+                  ))
+                )}
+
+                {(searchVal || filterCol || sortCol) && (
+                  <Button
+                    onClick={() => {
+                      setSearchVal("");
+                      setFilterCol(null);
+                      setSortCol(null);
+                    }}
+                    className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
                   >
-                    {additionalFilter.handleFilterLabel[col]!(
-                      handleFilterOptionLabel(option)
-                    )}
-                  </button>
-                ))}
-
-                {Object.keys(additionalFilter.filterBy).length > index + 1 && (
-                  <div className="border-l border-border" />
+                    <X className="w-4 h-4 mr-1" />
+                    Clear
+                  </Button>
                 )}
               </div>
-            ))} */}
-
-            <div className={`flex flex-wrap gap-2 items-center flex-1`}>
-              {Object.keys(additionalFilter.filterBy).map((col, colIndex) =>
-                additionalFilter.filterBy[col]!.map((option, optIndex) => (
-                  <div key={`${option}-${optIndex}`} className="flex">
-                    <button
-                      onClick={() =>
-                        setFilterCol(
-                          filterCol?.val === option
-                            ? null
-                            : { col: col, val: option }
-                        )
-                      }
-                      className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
-                        filterCol?.val === option
-                          ? "bg-green-500 text-white"
-                          : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
-                      }`}
-                    >
-                      {additionalFilter.handleFilterLabel[col]!(
-                        handleFilterOptionLabel(option)
-                      )}
-                    </button>
-
-                    {Object.keys(additionalFilter.filterBy).length >
-                      colIndex + 1 &&
-                      optIndex ===
-                        additionalFilter.filterBy[col]!.length - 1 && (
-                        <div className="ml-2 border-l" />
-                      )}
-                  </div>
-                ))
-              )}
-
-              {(searchVal || filterCol || sortCol) && (
-                <Button
-                  onClick={() => {
-                    setSearchVal("");
-                    setFilterCol(null);
-                    setSortCol(null);
-                  }}
-                  className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Clear
-                </Button>
-              )}
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {table}

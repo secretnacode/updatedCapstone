@@ -248,28 +248,6 @@ export const viewFarmerReportPath = (id: string) =>
   `/farmer/report?viewReport=${id}`;
 
 /**
- * used to convert the user farmerAreaMasurement into a hectare value
- * @param measurement of the area (e.g. 200)
- * @param unit of the area (e.g. sqm(square meter))
- * @returns the converted measurements value of the area into a hectare value
- */
-export const ConvertMeassurement = (
-  measurement: string,
-  unit: string
-): string => {
-  switch (unit) {
-    case "ac":
-      return (Number(measurement) / 2.471).toFixed(4);
-    case "sqft":
-      return (Number(measurement) / 107600).toFixed(4);
-    case "sqm":
-      return (Number(measurement) / 10000).toFixed(4);
-    default:
-      return measurement;
-  }
-};
-
-/**
  * function for getting the point coordinate(longitude and latitude) of the brgy
  * @param brgy that you want to get the coordinate
  * @returns longitude and latitude object
@@ -406,12 +384,14 @@ export function pickBrgyFirst(): string {
  * @param lat coordinates of the crop
  * @param brgy barangay where the crop located
  * @param mapRef useRef value of the map
+ * @param goToMap the web will pan in the map component (default val: true)
  */
 export function ViewCrop(
   lng: number,
   lat: number,
   brgy: barangayType,
-  mapRef: RefObject<MapRef | null>
+  mapRef: RefObject<MapRef | null>,
+  goToMap: boolean = true
 ) {
   mapRef.current?.flyTo({
     center: [
@@ -422,9 +402,10 @@ export function ViewCrop(
     zoom: mapZoomValByBarangay(brgy),
   });
 
-  document
-    .getElementById("mapCanvas")
-    ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  if (goToMap)
+    document
+      .getElementById("mapCanvas")
+      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 /**

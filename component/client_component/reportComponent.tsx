@@ -52,7 +52,6 @@ import {
   cropStatusType,
   EditableUserReportDetailsPropType,
   getFarmerCropNameQueryReturnType,
-  GetFarmerReportDetailReturnType,
   openCamPropType,
   ReportContentPropType,
   ReportDetailType,
@@ -455,6 +454,16 @@ const DamageReport: FC<ReportContentPropType> = ({
           inputClassName="input-red-ring"
         />
 
+        <FormDivLabelInput
+          labelMessage="Laki ng sira sa iyong pananim:"
+          inputName={"totalDamageArea"}
+          formError={state.formError?.totalDamageArea}
+          inputType="number"
+          inputMin={0}
+          inputRequired
+          inputClassName="input-red-ring"
+        />
+
         <FormDivLabelTextArea
           labelMessage="Karagdagang detalye:"
           name={"reportDescription"}
@@ -640,6 +649,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           inputClassName="input-green-ring"
         />
 
+        {/* ADDING THE INBRED AND HYBRID TYPE IN THE PLANTING CROP TYPE  */}
         <FormDivLabelInput
           labelMessage="Dami ng binhi na ginamit (kg):"
           inputName={"totalCropPlanted"}
@@ -1231,10 +1241,8 @@ export const UserReportModal: FC<UserReportModalPropType> = ({
 
   useEffect(() => {
     const report = async () => {
-      let report: GetFarmerReportDetailReturnType;
-
       try {
-        report = await GetFarmerReportDetail(reportId);
+        const report = await GetFarmerReportDetail(reportId);
 
         if (!report.success) {
           handleSetNotification(report.notifError);

@@ -229,3 +229,61 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
     </div>
   );
 };
+
+export const DashboardNoValComponent = () => (
+  <DashboardComponent
+    card1={{
+      logo: {
+        icon: FileText,
+        iconStyle: "text-green-700",
+        iconWrapperStyle: "bg-green-200",
+      },
+      cardLabel: {
+        label: "Mga ulat mo",
+        className: "text-green-700 bg-green-100",
+      },
+      cardContent: String(0),
+      contentLabel: "Mga napasang ulat",
+      link: "/farmerLeader/validateReport",
+    }}
+    card2={{
+      logo: {
+        icon: Clock,
+        iconStyle: "text-orange-700",
+        iconWrapperStyle: "bg-orange-200",
+      },
+      cardLabel: {
+        label: "Hindi kumpirmado",
+        className: "text-orange-700 bg-orange-100",
+      },
+      cardContent: String(0),
+      contentLabel: "Hindi kumpirmadong ulat",
+      link: "/farmerLeader/validateReport",
+    }}
+    card3={{
+      logo: {
+        icon: UserRound,
+        iconStyle: "text-red-700",
+        iconWrapperStyle: "bg-red-200",
+      },
+      cardLabel: {
+        label: "Mga hindi beripikado",
+        className: "text-red-700 bg-red-100",
+      },
+      cardContent: String(0),
+      contentLabel: "Hindi beripikadong user",
+      link: "/farmerLeader/orgMember",
+    }}
+    lineChart={{
+      title: "Bilang ng mga ulat sa organisasyon",
+      user: "farmer",
+      data: {
+        week: [{ dayOfWeek: "Monday", reportCount: 0 }],
+        month: [{ weekLabel: "jan 1 - jan 7", reportCount: 0 }],
+        year: [{ month: "January", reportCount: 0 }],
+      },
+    }}
+    userLocation={"silangan"}
+    user="farmer"
+  />
+);

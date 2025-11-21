@@ -36,30 +36,36 @@ export default async function Page({
 
   return (
     <div>
-      {!cropInfo.success ? (
-        <RenderRedirectNotification notif={cropInfo.notifError} />
-      ) : (
-        <div className="grid grid-cols-4 gap-4 h-full">
-          <div className="col-span-3 h-full">
+      {message && <RenderRedirectNotification notif={message} />}
+
+      <div className="grid grid-cols-4 gap-4 h-full">
+        <div className="col-span-3 h-full">
+          {cropInfo.success ? (
             <FarmerCropPage
               myCropInfoList={cropInfo.myCropInfoList}
               addCrop={addCrop === "true"}
             />
-          </div>
-
-          <div className="side-bar-wrapper ">
-            <Suspense fallback={<ReportCountPerCropLoading />}>
-              <ReportCountPerCrop />
-            </Suspense>
-
-            <Suspense fallback={<LatestReportLoading />}>
-              <LatestReport />
-            </Suspense>
-          </div>
+          ) : (
+            <>
+              <RenderRedirectNotification notif={cropInfo.notifError} />
+              <FarmerCropPage
+                myCropInfoList={[]}
+                addCrop={addCrop === "true"}
+              />
+            </>
+          )}
         </div>
-      )}
 
-      {message && <RenderRedirectNotification notif={message} />}
+        <div className="side-bar-wrapper ">
+          <Suspense fallback={<ReportCountPerCropLoading />}>
+            <ReportCountPerCrop />
+          </Suspense>
+
+          <Suspense fallback={<LatestReportLoading />}>
+            <LatestReport />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

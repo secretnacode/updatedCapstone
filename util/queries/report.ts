@@ -131,7 +131,7 @@ export const GetFarmerReportDetailQuery = async (
 ): Promise<GetFarmerReportDetailQueryReturnType> => {
   try {
     const reportInfo = await pool.query(
-      `select c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."cropId", r."verificationStatus", r."dayReported", r."dayHappen", r."title", r."description"`,
+      `select c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."verificationStatus", r."reportType", r."dayReported", r."dayHappen", r."title", r."description", string_agg(i."imageUrl", ', ') as pictures from capstone.report r join capstone.image i on r."reportId" = i."reportId" join capstone.crop c on r."cropId" = c."cropId" where r."reportId" = $1 group by c."cropName", c."cropLng", c."cropLat", c."cropLocation", r."cropId", r."verificationStatus", r."reportType", r."dayReported", r."dayHappen", r."title", r."description"`,
       [reportId]
     );
 
@@ -264,7 +264,7 @@ export const getCountUnvalidatedReport = async (
     return (
       await pool.query(
         `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
-        [farmerLeadId, "false"]
+        [farmerLeadId, false]
       )
     ).rows[0].count;
   } catch (error) {

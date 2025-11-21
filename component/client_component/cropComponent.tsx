@@ -273,27 +273,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     setCropIdToModify(null);
   };
 
-  // make this to avoid multiple layer in the map because the crop info can have multiple same location
-  // const handleCityToLight = (): intoFeatureCollectionDataParam[] => {
-  //   return myCropInfoList.reduce(
-  //     (acc: intoFeatureCollectionDataParam[], info) => {
-  //       if (acc.some((val) => val.name === info.cropLocation)) {
-  //         return acc;
-  //       }
-
-  //       return [
-  //         ...acc,
-  //         {
-  //           type: "polygon",
-  //           coordinates: polygonCoordinates[info.cropLocation],
-  //           name: info.cropLocation,
-  //         },
-  //       ] as intoFeatureCollectionDataParam[];
-  //     },
-  //     []
-  //   );
-  // };
-
   const cropStatus = (
     status: cropStatusType,
     datePlanted: Date,
@@ -505,7 +484,6 @@ const FormCropModal: FC<FormCropModalPropType> = ({
     cropId: cropVal?.cropId ?? "",
     cropName: cropVal?.cropName ?? "",
     cropFarmArea: cropVal?.farmAreaMeasurement ?? "",
-    farmAreaMeasurement: cropVal?.farmAreaMeasurement ? "ha" : "",
     cropBaranggay: cropVal?.cropLocation ?? "",
     cropCoor: {
       lat: cropVal?.cropLat ?? 0,
@@ -525,10 +503,14 @@ const FormCropModal: FC<FormCropModalPropType> = ({
     if (e.target.name === "cropBaranggay") {
       const coor = pointCoordinates[e.target.value as barangayType];
 
-      ViewCrop(coor[0], coor[1], e.target.value as barangayType, mapRef);
+      ViewCrop(coor[0], coor[1], e.target.value as barangayType, mapRef, false);
 
       // restart the coordinates(no mark in the map yet)
       setCropVal((prev) => ({ ...prev, cropCoor: { lat: 0, lng: 0 } }));
+
+      document
+        .getElementById("mapFormComponent")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 

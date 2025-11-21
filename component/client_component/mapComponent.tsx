@@ -17,8 +17,6 @@ import Map, {
   Source,
   ViewState,
 } from "@vis.gl/react-maplibre";
-
-import { MapPin } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { FC } from "react";
 
@@ -47,12 +45,13 @@ export const MapComponent: FC<MapComponentPropType> = ({
   mapWidth = "100%",
   mapHeight,
   divClassName = "",
+  divId = "mapCanvas",
   ...mapProp
 }) => {
   return (
     <div
       className={`rounded-xl overflow-hidden input !p-0 shadow-sm ${divClassName}`}
-      id="mapCanvas"
+      id={divId}
     >
       <Map
         initialViewState={calauanViewState}
@@ -96,10 +95,7 @@ export const MapMarkerComponent: FC<MapMarkerComponentPropType> = ({
     <Marker
       longitude={markerLng}
       latitude={markerLat}
-      anchor="bottom"
       style={{ cursor: "pointer" }}
-    >
-      <MapPin className="logo bg-red-400" />
-    </Marker>
+    />
   );
 };

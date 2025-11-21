@@ -49,7 +49,6 @@ import {
 import {
   baranggayList,
   capitalizeFirstLetter,
-  farmAreaMeasurementValue,
   getInitials,
   intoFeaturePolygon,
   pathCropAddingCrop,
@@ -578,7 +577,7 @@ export const FormMapComponent: FC<FormMapComponentPropType> = ({
   formError,
 }) => {
   return (
-    <div id="mapCanvas">
+    <div id="mapFormComponent">
       <label className="label">{label}</label>
 
       {formError &&
@@ -597,6 +596,7 @@ export const FormMapComponent: FC<FormMapComponentPropType> = ({
             : polygonCoordinates.calauan
         )}
         onClick={mapOnClick}
+        id=""
       >
         {coor.lng && coor.lat && (
           <MapMarkerComponent markerLng={coor.lng} markerLat={coor.lat} />
@@ -625,19 +625,11 @@ export const CropForm: FC<CropFormPropType> = ({
       />
 
       <FormDivLabelInput
-        labelMessage="Sukat ng lote na iyong Pinagtataniman:"
+        labelMessage="Sukat ng lote na iyong Pinagtataniman:(Ektarya)"
         inputName="cropFarmArea"
         onChange={handleChangeVal}
         inputValue={currentCrops.cropFarmArea}
         formError={formError?.cropFarmArea}
-      />
-
-      <FormDivInputRadio
-        radioList={farmAreaMeasurementValue()}
-        inputName="farmAreaMeasurement"
-        inputVal={currentCrops.farmAreaMeasurement}
-        onChange={handleChangeVal}
-        formError={formError?.farmAreaMeasurement}
       />
 
       <FormDivLabelSelect

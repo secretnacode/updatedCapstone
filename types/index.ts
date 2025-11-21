@@ -1,5 +1,5 @@
 import {
-  addFarmerReportSchema,
+  addDamageReportSchema,
   addHarvestingReportSchema,
   addPlantingReportSchema,
   authLogInSchema,
@@ -227,7 +227,7 @@ export type NavbarType =
 export type GetUserReportReturnType = {
   reportId: string;
   cropName: string;
-  verificationStatus: string;
+  verificationStatus: boolean;
   dayReported: string;
   dayHappen: string;
   title: string;
@@ -251,9 +251,10 @@ export type addReportComponentPropType = { openModal: boolean };
 
 export type RemoveSearchParamsValPropType = { name: string };
 
-export type AddReportValType = z.infer<typeof addFarmerReportSchema>;
+export type uploadingDamageReportType = z.infer<typeof addDamageReportSchema>;
 
-export type AddReportActionFormType = FormActionBaseType<AddReportValType>;
+export type UploadDamageReportFormType =
+  FormActionBaseType<uploadingDamageReportType>;
 
 export type uploadPlantingReportType = z.infer<typeof addPlantingReportSchema>;
 
@@ -308,12 +309,28 @@ export type GetFarmerReportDetailQueryReturnType =
       isExist: true;
       reportInfo: GetFarmerReportDetailBaseType & {
         pictures: string;
+        reportType: reportTypeStateType;
       };
     };
 
 export type ReportDetailType = GetFarmerReportDetailBaseType & {
   pictures: string[];
-};
+} & Partial<getDamageInfoReturnType> &
+  Partial<getTotalHarvestReturnType> &
+  Partial<getPlantedCropTypeReturnType>;
+
+// export type reportDetailTypeWithExtraVal = ReportDetailType &
+//   (
+//     | ({
+//         reportType: Extract<reportTypeStateType, "damage">;
+//       } & getDamageInfoReturnType)
+//     | ({
+//         reportType: Extract<reportTypeStateType, "harvesting">;
+//       } & getTotalHarvestReturnType)
+//     | ({
+//         reportType: Extract<reportTypeStateType, "planting">;
+//       } & getPlantedCropTypeReturnType)
+//   );
 
 export type GetFarmerReportDetailReturnType =
   | {
@@ -914,6 +931,7 @@ export type MapComponentPropType = ChildrenPropType &
     mapWidth?: string | number;
     mapHeight: string | number;
     divClassName?: string;
+    divId?: string;
   };
 
 export type getPointCoordinateReturnType = {
@@ -1822,3 +1840,20 @@ export type keyOfReportToDowload = [keyof getToBeDownloadReportQueryReturnType];
 export type getToBeDownloadReportReturnType =
   | { success: true; csvType: string }
   | ServerActionFailBaseType;
+
+export type addDamageReportParamType = {
+  damageId: string;
+  reportId: string;
+  cropId: string;
+  farmerId: string;
+} & Pick<uploadingDamageReportType, "totalDamageArea">;
+
+export type getDamageInfoReturnType = { totalDamageArea: string };
+
+export type getTotalHarvestReturnType = { totalKgHarvest: number };
+
+export const plantedCrop = ["inbred", "hybrid"] as const;
+
+export type plantedCropType = (typeof plantedCrop)[number];
+
+export type getPlantedCropTypeReturnType = { cropType: plantedCropType };

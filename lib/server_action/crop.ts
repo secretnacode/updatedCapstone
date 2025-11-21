@@ -31,7 +31,6 @@ import {
 import { ZodValidateForm } from "../validation/authValidation";
 import { farmerSecondDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import {
-  ConvertMeassurement,
   CreateUUID,
   determineCropStatus,
   missingFormValNotif,
@@ -138,12 +137,12 @@ export const UpdateUserCropInfo = async (
       };
     }
 
-    const { farmAreaMeasurement, cropFarmArea, ...crop } = cropVal;
+    const { cropFarmArea, ...crop } = cropVal;
 
     await UpdateUserCropInfoQuery({
       ...crop,
       userId,
-      farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+      farmArea: cropFarmArea,
     });
 
     revalidatePath("/farmer/crop");
@@ -180,12 +179,11 @@ export const AddUserCropInfo = async (
     const { userId } = await ProtectedAction("create:crop");
 
     // eslint-disable-next-line prefer-const
-    let { cropId, farmAreaMeasurement, cropFarmArea, ...otherCropInfo } =
-      cropVal;
+    let { cropId, cropFarmArea, ...otherCropInfo } = cropVal;
     cropId = CreateUUID();
 
     const validate = ZodValidateForm<FarmerSecondDetailFormType>(
-      { ...otherCropInfo, cropId, farmAreaMeasurement, cropFarmArea },
+      { ...otherCropInfo, cropId, cropFarmArea },
       farmerSecondDetailFormSchema
     );
     if (!validate.valid)
@@ -199,7 +197,7 @@ export const AddUserCropInfo = async (
       cropId,
       userId,
       ...otherCropInfo,
-      farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+      farmArea: cropFarmArea,
     });
 
     revalidatePath("/farmer/crop");

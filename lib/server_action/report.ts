@@ -21,8 +21,7 @@ import {
 } from "@/util/queries/report";
 import { ProtectedAction } from "../protectedActions";
 import {
-  AddReportActionFormType,
-  AddReportValType,
+  UploadDamageReportFormType,
   allUserRoleType,
   changeApproveOrJustApproveReportParamType,
   changeApproveOrJustApproveReportReturnType,
@@ -42,10 +41,12 @@ import {
   reportDownloadType,
   keyOfReportToDowload,
   getToBeDownloadReportReturnType,
+  uploadingDamageReportType,
+  plantedCropType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
-  addFarmerReportSchema,
+  addDamageReportSchema,
   addHarvestingReportSchema,
   addPlantingReportSchema,
 } from "@/util/helper_function/validation/validationSchema";
@@ -60,6 +61,7 @@ import { GetUserOrgId } from "@/util/queries/org";
 import { revalidatePath } from "next/cache";
 import { CheckMyMemberquery } from "@/util/queries/user";
 import {
+  getCropFarmArea,
   getCropStatus,
   getCropStatusAndExpectedHarvest,
   getCropStatusAndPlantedDate,
@@ -67,8 +69,12 @@ import {
   updateCropIntoPlantedStatus,
 } from "@/util/queries/crop";
 import {
+  addDamageReport,
   addHarvestedCrop,
   addPlantedCrop,
+  getCropTotalDamage,
+  getPlantedCropType,
+  getTotalHarvest,
 } from "@/util/queries/plantedHarvested";
 
 /**
@@ -108,17 +114,18 @@ export const GetFarmerReport = async (): Promise<GetFarmerReportReturnType> => {
  * @returns
  */
 export const uploadDamageReport = async (
-  prevState: AddReportActionFormType,
+  prevState: UploadDamageReportFormType,
   formData: FormData
-): Promise<AddReportActionFormType> => {
+): Promise<UploadDamageReportFormType> => {
   try {
-    const reportVal: AddReportValType = {
+    const reportVal: uploadingDamageReportType = {
       cropId: formData.get("cropId") as string,
       reportTitle: formData.get("reportTitle") as string,
       reportDescription: formData.get("reportDescription") as string,
       dateHappen: new Date(formData.get("dateHappen") as string),
       reportPicture: formData.getAll("file") as File[],
       reportType: formData.get("reportType") as reportTypeStateType,
+      totalDamageArea: formData.get("totalDamageArea") as string,
     };
 
     const returnVal = {
@@ -129,7 +136,7 @@ export const uploadDamageReport = async (
 
     const { userId, work } = await ProtectedAction("create:report");
 
-    const validateVal = ZodValidateForm(reportVal, addFarmerReportSchema);
+    const validateVal = ZodValidateForm(reportVal, addDamageReportSchema);
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -141,7 +148,7 @@ export const uploadDamageReport = async (
     if (reportVal.reportType !== "damage")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -158,7 +165,7 @@ export const uploadDamageReport = async (
     if (crop.cropStatus !== "planted")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -171,19 +178,28 @@ export const uploadDamageReport = async (
     if (crop.dateHarvested >= reportVal.dateHappen)
       return {
         ...returnVal,
-        success: true,
+        success: false,
         formError: {
           dateHappen: [
             "Mas maaga ang nailagay na petsa kesa sa araw na ikaw ay nagtanim",
           ],
         },
-        notifError: [
-          {
-            message:
-              "Mas nauna ang petsa ng pagkasira sa iyong ulat kaysa sa petsa ng pagtatanim na iyong isinasaad",
-            type: "warning",
-          },
-        ],
+        notifError: missingFormValNotif(),
+      };
+
+    if (
+      Number(reportVal.totalDamageArea) >=
+      Number(await getCropFarmArea(reportVal.cropId))
+    )
+      return {
+        ...returnVal,
+        success: false,
+        formError: {
+          totalDamageArea: [
+            "Mas malaki ang iyong nailagay na sukat kumpara sa laki ng iyong tinataniman",
+          ],
+        },
+        notifError: missingFormValNotif(),
       };
 
     const reportId = CreateUUID();
@@ -200,32 +216,19 @@ export const uploadDamageReport = async (
       verificationStatus: work === "leader" ? true : false,
     });
 
-    // did this because the 3 report types uses the same query and their only difference is the reportType,
-    // so after the insertion of new report, this is needed to be executed
-    await updateReportType("damage", reportId);
-
-    reportVal.reportPicture.map(async (file) => {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      const uploadResult: UploadApiResponse | undefined = await new Promise(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({}, (error, result) => {
-              if (error) reject(error);
-
-              resolve(result);
-            })
-            .end(buffer);
-        }
-      );
-
-      if (uploadResult)
-        await AddNewFarmerReportImage({
-          picId: CreateUUID(),
-          reportId: reportId,
-          pictureUrl: uploadResult.secure_url,
-        });
-    });
+    await Promise.all([
+      // did this because the 3 report types uses the same query and their only difference is the reportType,
+      // so after the insertion of new report, this is needed to be executed
+      updateReportType("damage", reportId),
+      insertImage(reportVal.reportPicture, reportId),
+      addDamageReport({
+        damageId: CreateUUID(),
+        reportId: reportId,
+        cropId: reportVal.cropId,
+        farmerId: userId,
+        totalDamageArea: reportVal.totalDamageArea,
+      }),
+    ]);
 
     revalidatePath(`/farmer/report`);
 
@@ -266,7 +269,7 @@ export const uploadPlantingReport = async (
       reportDescription: formData.get("reportDescription") as string,
       dateHappen: new Date(formData.get("dateHappen") as string),
       reportPicture: formData.getAll("file") as File[],
-      totalCropPlanted: Number(formData.get("totalCropPlanted")),
+      cropType: formData.get("totalCropPlanted") as plantedCropType,
       reportType: formData.get("reportType") as reportTypeStateType,
     };
 
@@ -275,6 +278,8 @@ export const uploadPlantingReport = async (
       notifError: null,
       formError: null,
     };
+
+    console.log(reportVal);
 
     const { userId, work } = await ProtectedAction("create:report");
 
@@ -290,7 +295,7 @@ export const uploadPlantingReport = async (
     if (reportVal.reportType !== "planting")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -305,7 +310,7 @@ export const uploadPlantingReport = async (
     if ((await getCropStatus(reportVal.cropId)).cropStatus === "planted")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -315,62 +320,40 @@ export const uploadPlantingReport = async (
         ],
       };
 
-    const reportId = CreateUUID();
+    // const reportId = CreateUUID();
 
-    await addNewReport({
-      reportId: reportId,
-      cropId: reportVal.cropId,
-      orgId: (await GetUserOrgId(userId)).orgId,
-      farmerId: userId,
-      reportTitle: reportVal.reportTitle,
-      reportDescription: reportVal.reportDescription,
-      dayHappen: reportVal.dateHappen,
-      dayReported: new Date().toISOString(),
-      verificationStatus: work === "leader" ? true : false,
-    });
+    // await addNewReport({
+    //   reportId: reportId,
+    //   cropId: reportVal.cropId,
+    //   orgId: (await GetUserOrgId(userId)).orgId,
+    //   farmerId: userId,
+    //   reportTitle: reportVal.reportTitle,
+    //   reportDescription: reportVal.reportDescription,
+    //   dayHappen: reportVal.dateHappen,
+    //   dayReported: new Date().toISOString(),
+    //   verificationStatus: work === "leader" ? true : false,
+    // });
 
-    await Promise.all([
-      // did this because the 3 report types uses the same query and their only difference is the reportType,
-      // so after the insertion of new report, this is needed to be executed
-      updateReportType("planting", reportId),
-      updateCropIntoPlantedStatus({
-        datePlanted: reportVal.dateHappen,
-        cropId: reportVal.cropId,
-      }),
-      addPlantedCrop({
-        plantedId: CreateUUID(),
-        reportId: reportId,
-        cropId: reportVal.cropId,
-        cropKgPlanted: reportVal.totalCropPlanted,
-        datePlanted: reportVal.dateHappen,
-        farmerId: userId,
-      }),
-    ]);
+    // await Promise.all([
+    //   // did this because the 3 report types uses the same query and their only difference is the reportType,
+    //   // so after the insertion of new report, this is needed to be executed
+    //   updateReportType("planting", reportId),
+    //   updateCropIntoPlantedStatus({
+    //     datePlanted: reportVal.dateHappen,
+    //     cropId: reportVal.cropId,
+    //   }),
+    //   addPlantedCrop({
+    //     plantedId: CreateUUID(),
+    //     reportId: reportId,
+    //     cropId: reportVal.cropId,
+    //     cropKgPlanted: reportVal.totalCropPlanted,
+    //     datePlanted: reportVal.dateHappen,
+    //     farmerId: userId,
+    //   }),
+    //   insertImage(reportVal.reportPicture, reportId),
+    // ]);
 
-    reportVal.reportPicture.map(async (file) => {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      const uploadResult: UploadApiResponse | undefined = await new Promise(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({}, (error, result) => {
-              if (error) reject(error);
-
-              resolve(result);
-            })
-            .end(buffer);
-        }
-      );
-
-      if (uploadResult)
-        await AddNewFarmerReportImage({
-          picId: CreateUUID(),
-          reportId: reportId,
-          pictureUrl: uploadResult.secure_url,
-        });
-    });
-
-    revalidatePath(`/farmer/report`);
+    // revalidatePath(`/farmer/report`);
 
     return {
       ...returnVal,
@@ -431,7 +414,7 @@ export const uploadHarvestingReport = async (
     if (reportVal.reportType !== "harvesting")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -448,7 +431,7 @@ export const uploadHarvestingReport = async (
     if (crop.cropStatus !== "planted")
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -462,7 +445,7 @@ export const uploadHarvestingReport = async (
     if (new Date() >= crop.expectedHarvest)
       return {
         ...returnVal,
-        success: true,
+        success: false,
         notifError: [
           {
             message:
@@ -503,30 +486,8 @@ export const uploadHarvestingReport = async (
         dateHarvested: reportVal.dateHappen,
         farmerId: userId,
       }),
+      insertImage(reportVal.reportPicture, reportId),
     ]);
-
-    reportVal.reportPicture.map(async (file) => {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      const uploadResult: UploadApiResponse | undefined = await new Promise(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({}, (error, result) => {
-              if (error) reject(error);
-
-              resolve(result);
-            })
-            .end(buffer);
-        }
-      );
-
-      if (uploadResult)
-        await AddNewFarmerReportImage({
-          picId: CreateUUID(),
-          reportId: reportId,
-          pictureUrl: uploadResult.secure_url,
-        });
-    });
 
     revalidatePath(`/farmer/report`);
 
@@ -547,6 +508,36 @@ export const uploadHarvestingReport = async (
     };
   }
 };
+
+/**
+ * function for inserting an image in the database
+ * @param images array file type that contains all the images
+ * @param reportId reportId where the image was for
+ * @returns
+ */
+const insertImage = async (images: File[], reportId: string) =>
+  images.map(async (file) => {
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const uploadResult: UploadApiResponse | undefined = await new Promise(
+      (resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream({}, (error, result) => {
+            if (error) reject(error);
+
+            resolve(result);
+          })
+          .end(buffer);
+      }
+    );
+
+    if (uploadResult)
+      await AddNewFarmerReportImage({
+        picId: CreateUUID(),
+        reportId: reportId,
+        pictureUrl: uploadResult.secure_url,
+      });
+  });
 
 /**
  * server action for geting the detail if the farmer report
@@ -581,19 +572,46 @@ export const GetFarmerReportDetail = async (
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
 
-    if (!reportDetail.isExist) {
-      const message = (): string => {
-        if (work === "admin" || work === "agriculturist")
-          return "The report doesnt exist";
-
-        return "Hindi makita ang ulat";
-      };
-
+    if (!reportDetail.isExist)
       return {
         success: false,
-        notifError: [{ message: message(), type: "warning" }],
+        notifError: [
+          {
+            message:
+              work === "admin" || work === "agriculturist"
+                ? "The report doesnt exist"
+                : "Hindi makita ang ulat",
+            type: "warning",
+          },
+        ],
       };
-    }
+
+    const additionalReportInfo = async () => {
+      switch (reportDetail.reportInfo.reportType) {
+        case "damage":
+          return;
+        case "harvesting":
+          return await getTotalHarvest(reportId);
+        case "planting":
+          return await getPlantedCropType(reportId);
+      }
+    };
+
+    // will return a value if the corresponding report val was presented
+    const totalDamageArea =
+      reportDetail.reportInfo.reportType === "damage"
+        ? (await getCropTotalDamage(reportId)).totalDamageArea
+        : undefined;
+
+    const totalKgHarvest =
+      reportDetail.reportInfo.reportType === "damage"
+        ? (await getTotalHarvest(reportId)).totalKgHarvest
+        : undefined;
+
+    const cropType =
+      reportDetail.reportInfo.reportType === "damage"
+        ? (await getPlantedCropType(reportId)).cropType
+        : undefined;
 
     return {
       success: true,
@@ -601,6 +619,10 @@ export const GetFarmerReportDetail = async (
       reportDetail: {
         ...reportDetail.reportInfo,
         pictures: reportDetail.reportInfo.pictures.split(","),
+        ...(await additionalReportInfo()),
+        totalDamageArea,
+        totalKgHarvest,
+        cropType,
       },
     };
   } catch (error) {

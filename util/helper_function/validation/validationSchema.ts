@@ -4,7 +4,7 @@ import {
   MaxDateToday,
   pointIsInsidePolygon,
 } from "../reusableFunction";
-import { barangayType } from "@/types";
+import { barangayType, plantedCrop, plantedCropType } from "@/types";
 
 /**
  * Defining the object/shape of the auth sign up by adding its
@@ -156,10 +156,6 @@ export const farmerFirstDetailFormSchema = z
     }
   );
 
-/**
- * a zod schema for validating the 2nd detail of the farmer after the sign up
- */
-const MEASSUREMENT = ["ha", "ac", "sqft", "sqm"];
 export const farmerSecondDetailFormSchema = z
   .object({
     cropId: z.string().trim().min(1, { error: "The CropId is missing" }),
@@ -173,13 +169,6 @@ export const farmerSecondDetailFormSchema = z
       .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
         error:
           "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
-      }),
-    farmAreaMeasurement: z
-      .string()
-      .trim()
-      .min(1, { error: "Pumili ng unit ng lupain" })
-      .refine((e) => MEASSUREMENT.includes(e), {
-        error: "Pumili lamang sa pamimilian",
       }),
     cropBaranggay: z.string().trim().min(1, {
       error: "Pumili ng baranggay kung saan ang lugar ng iyong pinagtataniman",
@@ -223,7 +212,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"];
 export const REPORT_TYPE = ["damage", "harvesting", "planting"] as const;
 // to change the value of this, change the value of the REPORT_TYPE first
-export const addFarmerReportSchema = z.object({
+const farmerBaseReportSchema = z.object({
   cropId: z.string().min(1, { error: "Pumili ng pananim na iuulat" }),
   reportTitle: z
     .string()
@@ -256,6 +245,33 @@ export const addFarmerReportSchema = z.object({
     )
     .min(1, { error: "Mag lagay kahit isang imahe" })
     .max(5, { error: "Hanggang limang(5) imahe lang ang pede mong maipasa" }),
+});
+
+// additional object for report type planting
+export const addPlantingReportSchema = farmerBaseReportSchema.extend({
+  cropType: z.enum([...plantedCrop], {
+    error:
+      "Ang puwede mo lamang ipasang ulat ay patungkol sa pagkasira, pag tatanim, at pag aani ng iyong tanim",
+  }),
+});
+
+export const addDamageReportSchema = farmerBaseReportSchema.extend({
+  totalDamageArea: z
+    .string()
+    .min(1, {
+      error: "Mag lagay kung gano kalaki ang nasira sa iyong pananim",
+    })
+    .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
+      error:
+        "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
+    }),
+});
+
+export // additional object for report type harvesting
+const addHarvestingReportSchema = farmerBaseReportSchema.extend({
+  totalHarvest: z
+    .number()
+    .min(1, { error: "Mag lagay kung gano kadami ang naani(kg)" }),
 });
 
 export const userProfileInfoUpdateSchema = z.object({
@@ -318,20 +334,6 @@ export const userProfileOrgUpdateSchema = z
       path: ["otherOrgName"],
     }
   );
-
-// additional object for report type planting
-export const addPlantingReportSchema = addFarmerReportSchema.extend({
-  totalCropPlanted: z
-    .number()
-    .min(1, { error: "Mag lagay kung gano kadami ang tinanim na ani(kg)" }),
-});
-
-// additional object for report type harvesting
-export const addHarvestingReportSchema = addFarmerReportSchema.extend({
-  totalHarvest: z
-    .number()
-    .min(1, { error: "Mag lagay kung gano kadami ang naani(kg)" }),
-});
 
 export const changePasswordSchema = z
   .object({
