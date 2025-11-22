@@ -19,6 +19,7 @@ export default async function Page() {
     cropVal = await GetAllCropInfo();
   } catch (error) {
     console.log((error as Error).message);
+
     cropVal = {
       success: false,
       notifError: [{ message: UnexpectedErrorMessageEnglish(), type: "error" }],

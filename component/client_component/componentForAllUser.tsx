@@ -1867,9 +1867,13 @@ export const AgriculturistFarmerReporTable: FC<
 
       window.URL.revokeObjectURL(url);
 
+      setOpenOpt(false);
+
       return handleSetNotification([
         {
-          message: `Successfully downloaded the ${type} report`,
+          message: `Successfully downloaded the ${
+            type !== "all" ? type : ""
+          } report`,
           type: "success",
         },
       ]);
@@ -1889,13 +1893,17 @@ export const AgriculturistFarmerReporTable: FC<
       <div className="flex justify-between items-center">
         <h1 className="table-title">Farmer Reports</h1>
 
+        {openOpt && (
+          <div className="absolute inset-0" onClick={() => setOpenOpt(false)} />
+        )}
+
         <div className="relative">
           <Button
-            className="blue-button slimer-button text-white"
+            className="blue-button text-white"
             onClick={() => setOpenOpt(!openOpt)}
           >
             <Download className="size-5" />
-            Export reports
+            Download reports
           </Button>
 
           {openOpt && (
@@ -2098,20 +2106,15 @@ export const AgriculturistFarmerUserTable: FC<
       obj={farmer}
       additionalFilter={{
         filterBy: {
-          orgRole: Array.from(
-            new Set(
-              farmer.map((val) => val.orgRole).filter((val) => val !== null)
-            )
-          ),
+          orgRole: Array.from(new Set(farmer.map((val) => val.orgRole))),
           orgName: Array.from(
-            new Set(
-              farmer.map((val) => val.orgName).filter((val) => val !== null)
-            )
+            new Set(farmer.map((val) => val.orgName).filter((val) => val))
           ),
         },
 
         handleFilterLabel: {
-          orgRole: (val) => capitalizeFirstLetter(val),
+          orgRole: (val) =>
+            val !== "null" ? capitalizeFirstLetter(val) : "No Org",
           orgName: (val) => capitalizeFirstLetter(val),
         },
       }}
@@ -2235,16 +2238,20 @@ export const AgriculturistFarmerUserTable: FC<
                   </td>
 
                   <td className="text-center">
-                    <div className="flex flex-row justify-center items-center gap-2">
-                      <ViewUserReportButton
-                        reportId={farmer.farmerId}
-                        className="slimer-button"
-                        label="View Report"
-                      />
+                    <div className="flex flex-row justify-center items-center">
+                      <Button className="slimer-button bg-red-500 hover:bg-red-600 text-white">
+                        Delete
+                      </Button>
+
+                      <Button className="slimer-button bg-amber-500 hover:bg-amber-600 text-white">
+                        Block
+                      </Button>
 
                       <DynamicLink
                         baseLink="farmerUser"
                         dynamicId={farmer.farmerId}
+                        label="Profile"
+                        className="!bg-green-500 hover:!bg-green-600"
                       />
                     </div>
                   </td>
@@ -2334,10 +2341,6 @@ export const AgriculturistValidateFarmerTable: FC<
                   Created At
                   <SortType col={"farmerAlias"} />
                 </div>
-              </th>
-
-              <th scope="col" className="!w-[10%]">
-                <div>Verified</div>
               </th>
 
               <th scope="col">

@@ -746,7 +746,9 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
           additionalFilter={{
             filterBy: {
               cropStatus: Array.from(
-                new Set(cropInfo.map((val) => val.cropLocation))
+                new Set(
+                  cropInfo.map((val) => val.cropStatus).filter((val) => val)
+                )
               ),
               cropLocation: Array.from(
                 new Set(cropInfo.map((val) => val.cropLocation))
@@ -754,6 +756,7 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
             },
 
             handleFilterLabel: {
+              cropStatus: (status) => capitalizeFirstLetter(status),
               cropLocation: (val) => capitalizeFirstLetter(val),
             },
           }}

@@ -219,6 +219,7 @@ export const DynamicLink: FC<DynamicLinkPropType> = ({
   className = "",
 }) => {
   const style = baseLink === "farmerUser" ? "profile-link-button-design" : "";
+
   return (
     <Link
       className={`button slimer-button ${style} ${className}`}
@@ -913,7 +914,7 @@ export const CropStatusCount: FC = async () => {
       </p>
     </div>
   );
-  if (cropCount.success) console.log(cropCount.cropStatusCount);
+
   return (
     <div className="component ">
       <div className=" space-y-4">

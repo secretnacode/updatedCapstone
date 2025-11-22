@@ -22,22 +22,23 @@ export default async function Page() {
     };
   }
   return (
-    <>
-      {!unvalidatedUser.success ? (
-        <RenderRedirectNotification notif={unvalidatedUser.notifError} />
-      ) : (
-        <div className="component space-y-4">
-          <div>
-            <h1 className="table-title">
-              Unverfied Farmer Leaders and Farmer W/O Organization
-            </h1>
-          </div>
+    <div className="component space-y-4">
+      <div>
+        <h1 className="table-title">
+          Unverfied Farmer Leaders and Farmer W/O Organization
+        </h1>
+      </div>
 
-          <AgriculturistValidateFarmerTable
-            farmer={unvalidatedUser.notValidatedFarmer}
-          />
-        </div>
+      {!unvalidatedUser.success ? (
+        <>
+          <RenderRedirectNotification notif={unvalidatedUser.notifError} />
+          <AgriculturistValidateFarmerTable farmer={[]} />
+        </>
+      ) : (
+        <AgriculturistValidateFarmerTable
+          farmer={unvalidatedUser.notValidatedFarmer}
+        />
       )}
-    </>
+    </div>
   );
 }

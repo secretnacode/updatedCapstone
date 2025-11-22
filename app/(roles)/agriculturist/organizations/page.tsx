@@ -16,18 +16,20 @@ export default async function Page() {
   }
 
   return (
-    <>
-      {!availableOrgs.success ? (
-        <RenderRedirectNotification notif={availableOrgs.notifError} />
-      ) : (
-        <div className="component space-y-4">
-          <div>
-            <h1 className="table-title">Farmer Organization</h1>
-          </div>
+    <div className="component space-y-4">
+      <div>
+        <h1 className="table-title">Farmer Organization</h1>
+      </div>
 
-          <AgriculturistFarmerOrgTable orgVal={availableOrgs.orgList} />
-        </div>
+      {!availableOrgs.success ? (
+        <>
+          <RenderRedirectNotification notif={availableOrgs.notifError} />
+
+          <AgriculturistFarmerOrgTable orgVal={[]} />
+        </>
+      ) : (
+        <AgriculturistFarmerOrgTable orgVal={availableOrgs.orgList} />
       )}
-    </>
+    </div>
   );
 }

@@ -23,18 +23,19 @@ export default async function Page() {
   }
 
   return (
-    <>
-      {!farmers.success ? (
-        <RenderRedirectNotification notif={farmers.notifError} />
-      ) : (
-        <div className="component space-y-4">
-          <div>
-            <h1 className="table-title">Verified Farmer Users</h1>
-          </div>
+    <div className="component space-y-4">
+      <div>
+        <h1 className="table-title">Verified Farmer Users</h1>
+      </div>
 
-          <AgriculturistFarmerUserTable farmer={farmers.validatedFarmer} />
-        </div>
+      {!farmers.success ? (
+        <>
+          <RenderRedirectNotification notif={farmers.notifError} />
+          <AgriculturistFarmerUserTable farmer={[]} />
+        </>
+      ) : (
+        <AgriculturistFarmerUserTable farmer={farmers.validatedFarmer} />
       )}
-    </>
+    </div>
   );
 }

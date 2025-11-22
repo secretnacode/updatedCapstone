@@ -2,6 +2,7 @@
 
 import {
   AddNewFarmerReportQueryType,
+  allType,
   allUserRoleType,
   GetAllFarmerReportQueryReturnType,
   GetFarmerReportDetailQueryReturnType,
@@ -522,7 +523,7 @@ export const getTotalFarmerReport = async (): Promise<number> => {
   try {
     return (
       await pool.query(
-        `select count("reportId") from capstone.report where "verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null`,
+        `select count("reportId") from capstone.report where "verificationStatus" = $1 or ("verificationStatus" = $2 and "orgId" is null)`,
         [true, false]
       )
     ).rows[0].count;
@@ -546,7 +547,7 @@ export const getTotalNewFarmerReportToday = async (): Promise<number> => {
   try {
     return (
       await pool.query(
-        `select count("reportId") from capstone.report where ("verificationStatus" = $1 or "verificationStatus" = $2 and "orgId" is null) and date("dayReported") = current_date`,
+        `select count("reportId") from capstone.report where ("verificationStatus" = $1 or ("verificationStatus" = $2 and "orgId" is null)) and date("dayReported") = current_date`,
         [true, false]
       )
     ).rows[0].count;
@@ -724,23 +725,44 @@ export const getToBeDownloadReportQuery = async (
   type: reportDownloadType
 ): Promise<getToBeDownloadReportQueryReturnType[]> => {
   try {
-    const {
-      condition,
-      val,
-    }: {
-      condition: string;
-      val: [reportDownloadType] | [];
-    } =
-      type === "all"
-        ? { condition: "", val: [] }
-        : { condition: `and r."reportType" = $3`, val: [type] };
+    // const {
+    //   condition,
+    //   val,
+    // }: {
+    //   condition: string;
+    //   val: [reportDownloadType] | [];
+    // } =
+    //   type === "all"
+    //     ? { condition: "", val: [] }
+    //     : { condition: `and r."reportType" = $3`, val: [type] };
 
-    return (
-      await pool.query(
-        `select f."farmerFirstName" as "FIRST NAME", f."farmerLastName" as "SURNAME", f."farmerMiddleName" as "MIDDLE NAME", f."farmerExtensionName" as "EXTENSION NAME", TO_CHAR(f."birthdate", 'Month DD, YYYY') as "DATE OF BIRTH", c."cropLocation" "FARM LOCATION", c."farmAreaMeasurement" as "FARM AREA" from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.crop c on r."cropId" = c."cropId" where (r."verificationStatus" = $1 or (r."verificationStatus" = $2 and r."orgId" is null)) ${condition}`,
-        [true, false, ...val]
-      )
-    ).rows;
+    const select = `select f."farmerFirstName" as "FIRST NAME", f."farmerLastName" as "SURNAME", f."farmerMiddleName" as "MIDDLE NAME", f."farmerExtensionName" as "EXTENSION NAME", TO_CHAR(f."birthdate", 'Month DD, YYYY') as "DATE OF BIRTH", c."cropLocation" "FARM LOCATION", c."farmAreaMeasurement" as "FARM AREA"`;
+
+    const from = `from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.crop c on r."cropId" = c."cropId"`;
+
+    const where = `where (r."verificationStatus" = $1 or (r."verificationStatus" = $2 and r."orgId" is null))`;
+
+    const orderBy = `order by c."cropLocation"`;
+
+    let query = `${select} ${from} ${where}`;
+
+    const parameter: allType[] = [true, false];
+
+    if (type === "planting")
+      query = `${select}, p."cropType" as "PLANTED CROP TYPE" ${from} join capstone.planted p on r."reportId" = p."reportId" ${where} and r."reportType" = $3 ${orderBy}`;
+    else if (type === "damage")
+      query = `${select}, d."totalDamageArea" as "TOTALLY DAMAGED AREA" ${from} join capstone.damage d on r."reportId" = d."reportId" ${where} and r."reportType" = $3 ${orderBy}`;
+    else if (type === "harvesting")
+      query = `${select}, h."totalKgHarvest" as "TOTAL HARVEST CROP" ${from} join capstone.harvested h on r."reportId" = h."reportId" ${where} and r."reportType" = $3 ${orderBy}`;
+
+    if (type !== "all") parameter.push(type);
+
+    console.log("query");
+    console.log(query);
+    console.log("parameter");
+    console.log(parameter);
+
+    return (await pool.query(query, parameter)).rows;
   } catch (error) {
     console.error(
       `Unexpected report while getting all the report that will be downloaded: ${

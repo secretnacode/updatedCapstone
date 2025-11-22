@@ -1,6 +1,9 @@
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { RecentReportWidget } from "@/component/server_component/customComponent";
-import { DashboardComponent } from "@/component/server_component/dashBoard";
+import {
+  DashboardComponent,
+  DashboardNoValComponent,
+} from "@/component/server_component/dashBoard";
 import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { getAgriculturistDashboardData } from "@/lib/server_action/user";
 import {
@@ -35,7 +38,7 @@ export default async function Page({
   }
 
   return (
-    <div>
+    <>
       <NavbarComponent forAgri={true} currentPage="Home" />
 
       <main className="flex-1 p-8">
@@ -104,9 +107,12 @@ export default async function Page({
             user="agriculturist"
           />
         ) : (
-          <RenderRedirectNotification notif={data.notifError} />
+          <>
+            <RenderRedirectNotification notif={data.notifError} />
+            <DashboardNoValComponent />
+          </>
         )}
       </main>
-    </div>
+    </>
   );
 }

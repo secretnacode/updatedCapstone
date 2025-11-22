@@ -398,7 +398,7 @@ export const uploadHarvestingReport = async (
       formError: null,
     };
 
-    const userId = (await ProtectedAction("create:report")).userId;
+    const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addHarvestingReportSchema);
     if (!validateVal.valid)
@@ -464,7 +464,7 @@ export const uploadHarvestingReport = async (
       reportDescription: reportVal.reportDescription,
       dayHappen: reportVal.dateHappen,
       dayReported: new Date().toISOString(),
-      verificationStatus: false,
+      verificationStatus: work === "leader" ? true : false,
     });
 
     await Promise.all([

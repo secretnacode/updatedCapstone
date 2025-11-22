@@ -890,7 +890,13 @@ export const RecentReportWidget: FC<RecentReportWidgetPropType> = ({
             </Link>
           ))}
 
-          <SeeAllValButton link="/farmerLeader/validateReport" />
+          <SeeAllValButton
+            link={
+              linkFor === "agri"
+                ? "/agriculturist/farmerReports"
+                : "/farmerLeader/validateReport"
+            }
+          />
         </div>
       ) : (
         // Empty State
