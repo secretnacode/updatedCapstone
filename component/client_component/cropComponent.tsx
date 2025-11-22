@@ -698,21 +698,6 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
     <SortColBy<GetAllCropInfoQueryReturnType> sortCol={sortCol} col={col} />
   );
 
-  // const cityToHighlight = (): intoFeatureCollectionDataParam[] => {
-  //   return cropInfo.reduce((acc: intoFeatureCollectionDataParam[], crop) => {
-  //     if (acc.some((cropVal) => cropVal.name === crop.cropLocation)) return acc;
-
-  //     return [
-  //       ...acc,
-  //       {
-  //         type: "polygon",
-  //         name: crop.cropLocation,
-  //         coordinates: polygonCoordinates[crop.cropLocation as barangayType],
-  //       },
-  //     ] as intoFeatureCollectionDataParam[];
-  //   }, []);
-  // };
-
   const cropStatus = (
     status: cropStatusType,
     datePlanted: Date,

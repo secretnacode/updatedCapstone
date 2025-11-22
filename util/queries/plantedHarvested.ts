@@ -18,14 +18,14 @@ export const addPlantedCrop = async ({
   plantedId,
   reportId,
   cropId,
-  cropKgPlanted,
+  cropType,
   datePlanted,
   farmerId,
 }: addPlantedCropParamType) => {
   try {
     await pool.query(
-      `insert into capstone.planted ("plantedId", "reportId", "cropId", "cropKgPlanted", "datePlanted", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
-      [plantedId, reportId, cropId, cropKgPlanted, datePlanted, farmerId]
+      `insert into capstone.planted ("plantedId", "reportId", "cropId", "cropType", "datePlanted", "farmerId") values ($1, $2, $3, $4, $5, $6)`,
+      [plantedId, reportId, cropId, cropType, datePlanted, farmerId]
     );
   } catch (error) {
     console.error(

@@ -66,6 +66,7 @@ import {
   Button,
   CancelButton,
   FormCancelSubmitButton,
+  FormDivInputRadio,
   FormDivLabelInput,
   FormDivLabelTextArea,
   LoadingReportModal,
@@ -649,15 +650,15 @@ const PlantingReport: FC<ReportContentPropType> = ({
           inputClassName="input-green-ring"
         />
 
-        {/* ADDING THE INBRED AND HYBRID TYPE IN THE PLANTING CROP TYPE  */}
-        <FormDivLabelInput
-          labelMessage="Dami ng binhi na ginamit (kg):"
-          inputName={"totalCropPlanted"}
-          formError={state.formError?.totalCropPlanted}
-          inputType="number"
-          inputPlaceholder="Hal: 500"
-          inputClassName="input-green-ring"
-          step={"any"}
+        <FormDivInputRadio
+          radioList={[
+            { radioLabel: "Inbred", radioValue: "inbred" },
+            { radioLabel: "Hybrid", radioValue: "hybrid" },
+          ]}
+          labelMessage="Uri ng iyong itatanim:"
+          required
+          inputName="cropType"
+          formError={state.formError?.cropType}
         />
 
         <FormDivLabelTextArea

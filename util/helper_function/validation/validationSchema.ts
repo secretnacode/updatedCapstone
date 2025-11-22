@@ -4,7 +4,7 @@ import {
   MaxDateToday,
   pointIsInsidePolygon,
 } from "../reusableFunction";
-import { barangayType, plantedCrop, plantedCropType } from "@/types";
+import { barangayType, plantedCrop } from "@/types";
 
 /**
  * Defining the object/shape of the auth sign up by adding its
@@ -250,8 +250,7 @@ const farmerBaseReportSchema = z.object({
 // additional object for report type planting
 export const addPlantingReportSchema = farmerBaseReportSchema.extend({
   cropType: z.enum([...plantedCrop], {
-    error:
-      "Ang puwede mo lamang ipasang ulat ay patungkol sa pagkasira, pag tatanim, at pag aani ng iyong tanim",
+    error: "Pumili kung anong uri ng pananim ang iyong itatanim",
   }),
 });
 

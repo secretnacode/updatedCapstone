@@ -321,6 +321,7 @@ export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
           {selectRequired && <span className="text-red-500">*</span>}
         </div>
       </label>
+
       <select
         value={selectValue}
         defaultValue={selectDefaultValue}
@@ -379,21 +380,47 @@ export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
   divClassName = "",
   inputClassName = "",
   formError,
+  labelMessage,
+  labelClassName,
+  logo,
+  required = false,
 }) => {
   return (
-    <div>
-      <div className={`${divClassName} grid grid-cols-2 gap-4`}>
+    <div className="div form-div">
+      <label
+        htmlFor={inputName}
+        className={`label flex items-centers gap-4 ${labelClassName}`}
+      >
+        {logo && <logo.icon className={`logo ${logo.style ?? ""}`} />}
+
+        <div>
+          {labelMessage}
+          {required && <span className="text-red-500">*</span>}
+        </div>
+      </label>
+
+      <div className={`${divClassName} flex justify-start items-center gap-4`}>
         {radioList.map((val) => (
           <div key={val.radioLabel}>
-            <input
-              type="radio"
-              name={inputName}
-              id={val.radioValue}
-              onChange={onChange}
-              value={val.radioValue}
-              checked={inputVal === val.radioValue}
-              className={`${inputClassName} text-green-600 focus:ring-green-500 cursor-pointer mr-1`}
-            />
+            {inputVal ? (
+              <input
+                type="radio"
+                name={inputName}
+                id={val.radioValue}
+                onChange={onChange}
+                value={val.radioValue}
+                checked={inputVal === val.radioValue}
+                className={`${inputClassName} text-green-600 focus:ring-green-500 cursor-pointer mr-1`}
+              />
+            ) : (
+              <input
+                type="radio"
+                name={inputName}
+                id={val.radioValue}
+                value={val.radioValue}
+                className={`${inputClassName} text-green-600 focus:ring-green-500 cursor-pointer mr-1`}
+              />
+            )}
 
             <label
               htmlFor={val.radioValue}

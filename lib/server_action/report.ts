@@ -269,7 +269,7 @@ export const uploadPlantingReport = async (
       reportDescription: formData.get("reportDescription") as string,
       dateHappen: new Date(formData.get("dateHappen") as string),
       reportPicture: formData.getAll("file") as File[],
-      cropType: formData.get("totalCropPlanted") as plantedCropType,
+      cropType: formData.get("cropType") as plantedCropType,
       reportType: formData.get("reportType") as reportTypeStateType,
     };
 
@@ -278,8 +278,6 @@ export const uploadPlantingReport = async (
       notifError: null,
       formError: null,
     };
-
-    console.log(reportVal);
 
     const { userId, work } = await ProtectedAction("create:report");
 
@@ -320,40 +318,40 @@ export const uploadPlantingReport = async (
         ],
       };
 
-    // const reportId = CreateUUID();
+    const reportId = CreateUUID();
 
-    // await addNewReport({
-    //   reportId: reportId,
-    //   cropId: reportVal.cropId,
-    //   orgId: (await GetUserOrgId(userId)).orgId,
-    //   farmerId: userId,
-    //   reportTitle: reportVal.reportTitle,
-    //   reportDescription: reportVal.reportDescription,
-    //   dayHappen: reportVal.dateHappen,
-    //   dayReported: new Date().toISOString(),
-    //   verificationStatus: work === "leader" ? true : false,
-    // });
+    await addNewReport({
+      reportId: reportId,
+      cropId: reportVal.cropId,
+      orgId: (await GetUserOrgId(userId)).orgId,
+      farmerId: userId,
+      reportTitle: reportVal.reportTitle,
+      reportDescription: reportVal.reportDescription,
+      dayHappen: reportVal.dateHappen,
+      dayReported: new Date().toISOString(),
+      verificationStatus: work === "leader" ? true : false,
+    });
 
-    // await Promise.all([
-    //   // did this because the 3 report types uses the same query and their only difference is the reportType,
-    //   // so after the insertion of new report, this is needed to be executed
-    //   updateReportType("planting", reportId),
-    //   updateCropIntoPlantedStatus({
-    //     datePlanted: reportVal.dateHappen,
-    //     cropId: reportVal.cropId,
-    //   }),
-    //   addPlantedCrop({
-    //     plantedId: CreateUUID(),
-    //     reportId: reportId,
-    //     cropId: reportVal.cropId,
-    //     cropKgPlanted: reportVal.totalCropPlanted,
-    //     datePlanted: reportVal.dateHappen,
-    //     farmerId: userId,
-    //   }),
-    //   insertImage(reportVal.reportPicture, reportId),
-    // ]);
+    await Promise.all([
+      // did this because the 3 report types uses the same query and their only difference is the reportType,
+      // so after the insertion of new report, this is needed to be executed
+      updateReportType("planting", reportId),
+      updateCropIntoPlantedStatus({
+        datePlanted: reportVal.dateHappen,
+        cropId: reportVal.cropId,
+      }),
+      addPlantedCrop({
+        plantedId: CreateUUID(),
+        reportId: reportId,
+        cropId: reportVal.cropId,
+        cropType: reportVal.cropType,
+        datePlanted: reportVal.dateHappen,
+        farmerId: userId,
+      }),
+      insertImage(reportVal.reportPicture, reportId),
+    ]);
 
-    // revalidatePath(`/farmer/report`);
+    revalidatePath(`/farmer/report`);
 
     return {
       ...returnVal,
@@ -571,6 +569,8 @@ export const GetFarmerReportDetail = async (
           };
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
+
+    console.log(reportDetail);
 
     if (!reportDetail.isExist)
       return {

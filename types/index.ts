@@ -679,11 +679,15 @@ export type FormDivLabelSelectType = {
 export type FormDivInputRadioPropType = {
   radioList: { radioValue: string; radioLabel: string }[];
   inputName: string;
-  inputVal: string;
+  inputVal?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   divClassName?: string;
   inputClassName?: string;
   formError?: string[];
+  labelMessage: string;
+  labelClassName?: string;
+  logo?: { icon: LucideIcon; style?: string };
+  required?: boolean;
 };
 
 export type LogoPropType = {
@@ -1572,7 +1576,7 @@ export type addPlantedCropParamType = {
   plantedId: string;
   reportId: string;
   cropId: string;
-  cropKgPlanted: number;
+  cropType: plantedCropType;
   datePlanted: Date;
   farmerId: string;
 };
