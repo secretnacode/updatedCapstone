@@ -369,3 +369,36 @@ export const changePasswordSchema = z
       "Ang password mo at ang nilagay mo sa confirm password ay hindi tugma",
     path: ["newPass", "confirmNewPass"],
   });
+
+export const resetPasswordSchema = z
+  .object({
+    newPass: z
+      .string()
+      .min(1, { error: "Ilagay kung ano ang panibago mong password" })
+      .regex(/[a-z]/, {
+        message: `Lagyan ng kahit isang maliit na letra (a-z) ang iyong password`,
+      })
+      .regex(/[A-Z]/, {
+        message: `Lagyan ng kahit isang malaki na letra (A-Z) ang iyong password`,
+      })
+      .regex(/[0-9]/, {
+        message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
+      }),
+    confirmNewPass: z
+      .string()
+      .min(1, { error: "Ilagay ulit kung ano ang panibago mong password" })
+      .regex(/[a-z]/, {
+        message: `Lagyan ng kahit isang maliit na letra (a-z) ang iyong password`,
+      })
+      .regex(/[A-Z]/, {
+        message: `Lagyan ng kahit isang malaki na letra (A-Z) ang iyong password`,
+      })
+      .regex(/[0-9]/, {
+        message: `Lagyan ng kahit isang numero (0-9) ang iyong password`,
+      }),
+  })
+  .refine((data) => data.newPass === data.confirmNewPass, {
+    error:
+      "Ang password mo at ang nilagay mo sa confirm password ay hindi tugma",
+    path: ["newPass", "confirmNewPass"],
+  });

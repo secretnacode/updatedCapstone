@@ -59,6 +59,8 @@ import {
   TableComponentLoadingPropType,
   optionsDownloadListType,
   reportDownloadType,
+  resetPasswordFormPropType,
+  resetPasswordType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -123,6 +125,7 @@ import {
 } from "lucide-react";
 import { useDebounce } from "./customHook/debounceHook";
 import {
+  changeNewPass,
   createResetPassWordLink,
   createSignUpLinkForAgri,
   deleteLink,
@@ -2988,6 +2991,92 @@ export const BurgerNav: FC<BurgerNavPropType> = ({ children }) => {
           {children}
         </div>
       )}
+    </div>
+  );
+};
+
+export const ResetPasswordForm: FC<resetPasswordFormPropType> = ({ token }) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [formError, setFormError] =
+    useState<FormErrorType<resetPasswordType>>();
+  const [passwordVal, setPasswordVal] = useState<resetPasswordType>({
+    newPass: "",
+    confirmNewPass: "",
+  });
+  const [hidePass, setHidePass] = useState<{
+    newPass: boolean;
+    confirmNewPass: boolean;
+  }>({
+    newPass: true,
+    confirmNewPass: true,
+  });
+
+  const handleChangeVal = (e: ChangeEvent<HTMLInputElement>) =>
+    setPasswordVal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handeHidePass = (key: "newPass" | "confirmNewPass") =>
+    setHidePass((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleFormSubmit = async () => {
+    try {
+      handleIsLoading("Pinapalta na ang iyong password");
+
+      const res = await changeNewPass({
+        token,
+        newPass: passwordVal.newPass,
+        confirmNewPass: passwordVal.confirmNewPass,
+      });
+
+      if (!res.success) {
+        handleSetNotification(res.notifError);
+
+        if (res.formError) setFormError(res.formError);
+      }
+    } catch (error) {
+      if (!isRedirectError(error)) {
+        console.log((error as Error).message);
+
+        handleSetNotification([
+          { message: UnexpectedErrorMessage(), type: "error" },
+        ]);
+      }
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <div className="auth_form">
+      <h1>Mag gawa ng panibagong password</h1>
+
+      <form onSubmit={handleFormSubmit}>
+        <AuthInputPass
+          label="Panibagong password:"
+          isHidden={hidePass.newPass}
+          setIsHidden={() => handeHidePass("newPass")}
+          name="newPass"
+          placeholder="FarmerPass123"
+          value={passwordVal.newPass}
+          onChange={handleChangeVal}
+          formError={formError?.newPass}
+          required
+        />
+
+        <AuthInputPass
+          label="Kumpirmahin ang panibagong password:"
+          isHidden={hidePass.confirmNewPass}
+          setIsHidden={() => handeHidePass("confirmNewPass")}
+          name="confirmNewPass"
+          placeholder="FarmerPass123"
+          value={passwordVal.confirmNewPass}
+          onChange={handleChangeVal}
+          formError={formError?.confirmNewPass}
+          required
+        />
+
+        <button type="submit">IPASA</button>
+      </form>
     </div>
   );
 };

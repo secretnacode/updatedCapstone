@@ -1,5 +1,6 @@
 import { AuthForm } from "@/component/client_component/authComponent";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
+import { AuthBaserDesign } from "@/component/server_component/customComponent";
 import { checkUserAlreadyLogin } from "@/lib/server_action/user";
 import { checkUserAlreadyLoginReturnType, NotificationBaseType } from "@/types";
 import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
@@ -31,14 +32,16 @@ export default async function Page({
   }
 
   return (
-    <div className="w-[90%] max-w-md">
-      {message && <RenderRedirectNotification notif={message} />}
+    <AuthBaserDesign>
+      <div className="w-[90%] max-w-md">
+        {message && <RenderRedirectNotification notif={message} />}
 
-      {checkSession && !checkSession.success && (
-        <RenderRedirectNotification notif={checkSession.notifError} />
-      )}
+        {checkSession && !checkSession.success && (
+          <RenderRedirectNotification notif={checkSession.notifError} />
+        )}
 
-      <AuthForm />
-    </div>
+        <AuthForm />
+      </div>
+    </AuthBaserDesign>
   );
 }

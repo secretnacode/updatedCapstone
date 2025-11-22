@@ -50,7 +50,7 @@ import {
   farmerLeaderValidationForImportantAction,
 } from "./farmerUser";
 import { revalidatePath } from "next/cache";
-import { ComparePassword } from "../reusableFunctions";
+import { ComparePassword, Hash } from "../reusableFunctions";
 import {
   missingFormValNotif,
   NotifToUriComponent,
@@ -60,7 +60,6 @@ import { changePasswordSchema } from "@/util/helper_function/validation/validati
 import { DeleteSession, GetSession } from "../session";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
-
 /**
  * server action when the farmer leader want to delete a farmer account
  * @param farmerId id that you want to delete
@@ -731,7 +730,7 @@ export const changeFarmerPass = async ({
         notifMessage: missingFormValNotif(),
       };
 
-    await updatePassword(userId, newPass);
+    await updatePassword(userId, await Hash(newPass));
 
     return {
       success: true,

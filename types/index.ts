@@ -7,6 +7,7 @@ import {
   changePasswordSchema,
   farmerSecondDetailFormSchema,
   REPORT_TYPE,
+  resetPasswordSchema,
   userProfileInfoUpdateSchema,
   userProfileOrgUpdateSchema,
 } from "@/util/helper_function/validation/validationSchema";
@@ -1911,3 +1912,15 @@ export type adminOrFarmerNavPropType = { work: allUserRoleType } & (
     }
   | { currentPage: farmerPages; forAgri: false }
 );
+
+export type resetPasswordFormPropType = {
+  token: string;
+};
+
+export type resetPasswordType = z.infer<typeof resetPasswordSchema>;
+
+export type changeNewPassParamType = { token: string } & resetPasswordType;
+
+export type changeNewPassReturnType = ServerActionFailBaseType & {
+  formError?: FormErrorType<resetPasswordType>;
+};

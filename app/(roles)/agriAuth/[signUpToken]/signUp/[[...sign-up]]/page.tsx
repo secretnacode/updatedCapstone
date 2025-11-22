@@ -12,6 +12,7 @@ export default async function Page({
   params: Promise<{ signUpToken: string }>;
 }) {
   let checkToken: serverActionOptionalNotifMessage;
+
   try {
     checkToken = await checkSignUp((await params).signUpToken);
   } catch (error) {

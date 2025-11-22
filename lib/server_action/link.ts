@@ -12,18 +12,32 @@ import {
   linkIsExistInResetPassDb,
   deleteCreateAgriLink,
   checkResetPassToken,
+  checkCreateAgriTokenIfUse,
+  updatResetPassIsUse,
+  checkResetPassTokenIfUse,
+  getFarmerIdOfResetPass,
 } from "@/util/queries/link";
 import { ProtectedAction } from "../protectedActions";
-import { CreateUUID } from "@/util/helper_function/reusableFunction";
+import {
+  CreateUUID,
+  missingFormValNotif,
+  RedirectLoginWithNotif,
+} from "@/util/helper_function/reusableFunction";
 import { headers } from "next/headers";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import {
+  changeNewPassParamType,
+  changeNewPassReturnType,
   getAllLinkDataReturnType,
   serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
 } from "@/types";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { ZodValidateForm } from "../validation/authValidation";
+import { resetPasswordSchema } from "@/util/helper_function/validation/validationSchema";
+import { Hash } from "../reusableFunctions";
+import { updatePassword } from "@/util/queries/user";
 
 const rndmToken = async () => crypto.randomBytes(32).toString("hex");
 const hostName = async () => (await headers()).get("host");
@@ -273,6 +287,17 @@ export const checkSignUp = async (
         ],
       };
 
+    if (await checkCreateAgriTokenIfUse(token))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "The link is already used",
+            type: "warning",
+          },
+        ],
+      };
+
     await updateAgriLinkIsUse(token);
 
     return { success: true };
@@ -293,27 +318,115 @@ export const checkSignUp = async (
   }
 };
 
-export const checkResetPassLink = async (token: string) => {
+export const checkResetPass = async (
+  token: string
+): Promise<serverActionOptionalNotifMessage> => {
   try {
     if (!(await checkResetPassToken(token)))
       return {
         success: false,
         notifError: [
           {
-            message: "Hindi po pwedeng iaccess ang page na ito",
+            message: "Hindi ka pupwedeng mag palit ng password",
             type: "warning",
           },
         ],
       };
 
-    await updateAgriLinkIsUse(token);
+    if (await checkResetPassTokenIfUse(token))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Nagamit na ang link na ito",
+            type: "warning",
+          },
+          {
+            message: "Humingi ng panibagong link sa agriculturist",
+            type: "warning",
+          },
+        ],
+      };
+
+    await updatResetPassIsUse(token);
 
     return { success: true };
   } catch (error) {
     const err = error as Error;
-    console.log(
-      `May Hindi inaasahang pag kakamali habang chinecheck and user: ${err}`
+
+    console.log(`Error occured while logging out: ${err.message}`);
+
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const changeNewPass = async ({
+  token,
+  newPass,
+  confirmNewPass,
+}: changeNewPassParamType): Promise<changeNewPassReturnType> => {
+  try {
+    if (!(await checkResetPassToken(token)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Hindi ka pupwedeng mag palit ng password",
+            type: "warning",
+          },
+        ],
+      };
+
+    if (await checkResetPassTokenIfUse(token))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "Nagamit na ang link na ito",
+            type: "warning",
+          },
+          {
+            message: "Humingi ng panibagong link sa agriculturist",
+            type: "warning",
+          },
+        ],
+      };
+
+    const { valid, formError } = ZodValidateForm(
+      { newPass, confirmNewPass },
+      resetPasswordSchema
     );
+
+    if (!valid)
+      return {
+        success: false,
+        formError: formError,
+        notifError: missingFormValNotif(),
+      };
+
+    await updatePassword(
+      await getFarmerIdOfResetPass(token),
+      await Hash(newPass)
+    );
+
+    return RedirectLoginWithNotif([
+      { message: "Matagumpay ang pag papalit mo ng password", type: "success" },
+    ]);
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+
+    console.log(`Error occured while logging out: ${err.message}`);
+
     return {
       success: false,
       notifError: [

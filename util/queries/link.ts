@@ -274,6 +274,29 @@ export const checkCreateAgriToken = async (token: string): Promise<boolean> => {
 };
 
 /**
+ * query for getting the state of the link if its used or not
+ * @param token value of the tokken
+ * @returns boolean
+ */
+export const checkCreateAgriTokenIfUse = async (
+  token: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select "isUsed" from capstone."${createAgriDbName()}" where "linkToken" = $1`,
+        [token]
+      )
+    ).rows[0].isUsed;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `Error occured while checking the agriculturist's verification`
+    );
+  }
+};
+
+/**
  * query for marking the token in the database that it was used
  * @param token value of token to be deleted
  */
@@ -304,8 +327,68 @@ export const checkResetPassToken = async (token: string): Promise<boolean> => {
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
+    throw new Error(`May Hindi inaasahang pag kakamali habang chinecheck link`);
+  }
+};
+
+/**
+ * query for getting the state of the link if its used or not
+ * @param token value of the tokken
+ * @returns boolean
+ */
+export const checkResetPassTokenIfUse = async (
+  token: string
+): Promise<boolean> => {
+  try {
+    return (
+      await pool.query(
+        `select "isUsed" from capstone."${resetPassDbName()}" where "linkToken" = $1`,
+        [token]
+      )
+    ).rows[0].isUsed;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`May Hindi inaasahang pag kakamali habang chinecheck link`);
+  }
+};
+
+/**
+ * query for marking the token in the database that it was used
+ * @param token value of token to be deleted
+ */
+export const updatResetPassIsUse = async (token: string) => {
+  try {
+    await pool.query(
+      `update capstone."${resetPassDbName()}" set "isUsed" = $1 where "linkToken" = $2`,
+      [true, token]
+    );
+  } catch (error) {
+    console.log((error as Error).message);
     throw new Error(
-      `May Hindi inaasahang pag kakamali habang chinecheck and user`
+      `May Hindi inaasahang pag kakamali habang inuupdate ang link`
+    );
+  }
+};
+
+/**
+ * query for getting the farmerId of the resetPass link
+ * @param token value of the token
+ * @returns farmerId value
+ */
+export const getFarmerIdOfResetPass = async (
+  token: string
+): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "farmerId" from capstone."${resetPassDbName()} where "linkToken" = $1`,
+        [token]
+      )
+    ).rows[0].farmerId;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May Hindi inaasahang pag kakamali habang binabago ang password`
     );
   }
 };
