@@ -4,6 +4,7 @@ import {
   FarmerDashBoard,
   FarmerLeadDashBoard,
 } from "@/component/server_component/dashBoard";
+import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { checkFarmerRole } from "@/lib/server_action/user";
 import { checkFarmerRoleReturnType, NotificationBaseType } from "@/types";
 import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
@@ -33,21 +34,27 @@ export default async function Page({
   }
 
   return (
-    <div>
-      {message && <RenderRedirectNotification notif={message} />}
+    <>
+      <NavbarComponent forAgri={false} currentPage="Home" />
 
-      {userRole.success ? (
-        userRole.role === "leader" ? (
-          <FarmerLeadDashBoard />
-        ) : (
-          <FarmerDashBoard />
-        )
-      ) : (
-        <>
-          <RenderRedirectNotification notif={userRole.notifError} />
-          <DashboardNoValComponent />
-        </>
-      )}
-    </div>
+      <main className="flex-1 p-8">
+        <div>
+          {message && <RenderRedirectNotification notif={message} />}
+
+          {userRole.success ? (
+            userRole.role === "leader" ? (
+              <FarmerLeadDashBoard />
+            ) : (
+              <FarmerDashBoard />
+            )
+          ) : (
+            <>
+              <RenderRedirectNotification notif={userRole.notifError} />
+              <DashboardNoValComponent />
+            </>
+          )}
+        </div>
+      </main>
+    </>
   );
 }

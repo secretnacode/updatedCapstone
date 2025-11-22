@@ -28,11 +28,12 @@ import { GetSession } from "../session";
  */
 export const AvailableOrg = async (): Promise<AvailableOrgReturnType> => {
   try {
-    await ProtectedAction("read:org");
+    const { work } = await ProtectedAction("read:org");
 
     return {
       success: true,
       orgList: await GetAvailableOrgQuery(),
+      work,
     };
   } catch (error) {
     const err = error as Error;

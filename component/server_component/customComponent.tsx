@@ -401,7 +401,10 @@ export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
 
       <div className={`${divClassName} flex justify-start items-center gap-4`}>
         {radioList.map((val) => (
-          <div key={val.radioLabel}>
+          <div
+            key={val.radioLabel}
+            className="flex justify-center items-center gap-1"
+          >
             {inputVal ? (
               <input
                 type="radio"
@@ -424,7 +427,7 @@ export const FormDivInputRadio: FC<FormDivInputRadioPropType> = ({
 
             <label
               htmlFor={val.radioValue}
-              className="text-sm text-gray-700 cursor-pointer"
+              className="text-sm text-gray-700 cursor-pointer text-center grid place-items-center"
             >
               {val.radioLabel}
             </label>

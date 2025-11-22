@@ -1,4 +1,3 @@
-import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { farmerAuthorization } from "@/lib/server_action/user";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
@@ -25,11 +24,5 @@ export default async function Layout({
   if (!authorization.success)
     RedirectUnauthorizedWithNotif(authorization.notifError);
 
-  return (
-    <div className="min-h-screen md:flex ">
-      <NavbarComponent />
-
-      <main className="p-8">{children}</main>
-    </div>
-  );
+  return <div className="min-h-screen md:flex">{children}</div>;
 }

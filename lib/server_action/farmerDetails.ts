@@ -1,30 +1,20 @@
 "use server";
 
 import {
-  CropFormErrorsType,
   FarmerFirstDetailActionReturnType,
   FarmerFirstDetailFormType,
-  FarmerSecondDetailActionReturnType,
-  FarmerSecondDetailFormType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
-import {
-  farmerFirstDetailFormSchema,
-  farmerSecondDetailFormSchema,
-} from "@/util/helper_function/validation/validationSchema";
+import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/validationSchema";
 import { ProtectedAction } from "@/lib/protectedActions";
 import {
   CreateNewOrg,
   organizationNameIsExist,
   UpdateUserOrg,
 } from "@/util/queries/org";
-import { CreateNewCropAfterSignUp } from "@/util/queries/crop";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import {
-  ConvertMeassurement,
-  NotifToUriComponent,
-} from "@/util/helper_function/reusableFunction";
+import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
 import { FarmerFirstDetailQuery } from "@/util/queries/user";
 
 /**
@@ -140,76 +130,76 @@ export const AddFirstFarmerDetails = async (
  * @param cropList
  * @returns redirect the use if the validation was success
  */
-export const AddSecondFarmerDetails = async (
-  cropList: FarmerSecondDetailFormType[]
-): Promise<FarmerSecondDetailActionReturnType> => {
-  try {
-    const userId = (await ProtectedAction("create:crop")).userId;
+// export const AddSecondFarmerDetails = async (
+//   cropList: FarmerSecondDetailFormType[]
+// ): Promise<FarmerSecondDetailActionReturnType> => {
+//   try {
+//     const userId = (await ProtectedAction("create:crop")).userId;
 
-    const validateCropList: CropFormErrorsType[] = cropList.reduce(
-      (acc: CropFormErrorsType[] | [], crop: FarmerSecondDetailFormType) => {
-        const validateCrop = ZodValidateForm(
-          crop,
-          farmerSecondDetailFormSchema
-        );
-        if (!validateCrop.valid)
-          return [
-            ...acc,
-            { cropId: crop.cropId, formError: validateCrop.formError },
-          ];
-        return acc;
-      },
-      []
-    );
+//     const validateCropList: CropFormErrorsType[] = cropList.reduce(
+//       (acc: CropFormErrorsType[] | [], crop: FarmerSecondDetailFormType) => {
+//         const validateCrop = ZodValidateForm(
+//           crop,
+//           farmerSecondDetailFormSchema
+//         );
+//         if (!validateCrop.valid)
+//           return [
+//             ...acc,
+//             { cropId: crop.cropId, formError: validateCrop.formError },
+//           ];
+//         return acc;
+//       },
+//       []
+//     );
 
-    if (validateCropList.length > 0)
-      return {
-        success: false,
-        formList: validateCropList,
-        notifError: [
-          {
-            message:
-              "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
-            type: "warning",
-          },
-        ],
-      };
+//     if (validateCropList.length > 0)
+//       return {
+//         success: false,
+//         formList: validateCropList,
+//         notifError: [
+//           {
+//             message:
+//               "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
+//             type: "warning",
+//           },
+//         ],
+//       };
 
-    // one by one inserting the crop information in the database
-    await Promise.all(
-      cropList.map(async (crop) => {
-        const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
+//     // one by one inserting the crop information in the database
+//     await Promise.all(
+//       cropList.map(async (crop) => {
+//         const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
 
-        return CreateNewCropAfterSignUp({
-          farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
-          userId,
-          ...cropVal,
-        });
-      })
-    );
+//         return CreateNewCropAfterSignUp({
+//           farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
+//           userId,
+//           ...cropVal,
+//         });
+//       })
+//     );
 
-    redirect(
-      `/?notif=${NotifToUriComponent([
-        { message: "Matagumpay ang iyong pag si-sign up", type: "success" },
-        {
-          message: "Mag intay na aprubahan ang account bago ka makapag login",
-          type: "success",
-        },
-      ])}`
-    );
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
+//     redirect(
+//       `/?notif=${NotifToUriComponent([
+//         { message: "Matagumpay ang iyong pag si-sign up", type: "success" },
+//         {
+//           message: "Mag intay na aprubahan ang account bago ka makapag login",
+//           type: "success",
+//         },
+//       ])}`
+//     );
+//   } catch (error) {
+//     if (isRedirectError(error)) throw error;
 
-    const err = error as Error;
-    console.error(`Error in Adding First Farmer Detial: ${err.message}`);
-    return {
-      success: false,
-      notifError: [
-        {
-          message: err.message,
-          type: "error",
-        },
-      ],
-    };
-  }
-};
+//     const err = error as Error;
+//     console.error(`Error in Adding First Farmer Detial: ${err.message}`);
+//     return {
+//       success: false,
+//       notifError: [
+//         {
+//           message: err.message,
+//           type: "error",
+//         },
+//       ],
+//     };
+//   }
+// };

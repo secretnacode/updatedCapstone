@@ -1,7 +1,4 @@
-import {
-  TableComponentLoading,
-  ValidateReportTable,
-} from "@/component/client_component/componentForAllUser";
+import { ValidateReportTable } from "@/component/client_component/componentForAllUser";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
@@ -28,21 +25,19 @@ export default async function Page() {
 
   return (
     <div className="component space-y-6">
-      {!orgReport.success ? (
+      <div>
+        <div className="flex justify-start items-center">
+          <h1 className="table-title">Mga ulat ng ka-miyembro</h1>
+        </div>
+      </div>
+
+      {orgReport.success ? (
+        <ValidateReportTable memberReport={orgReport.memberReport} />
+      ) : (
         <>
           <RenderRedirectNotification notif={orgReport.notifError} />
 
-          <TableComponentLoading />
-        </>
-      ) : (
-        <>
-          <div>
-            <div className="flex justify-start items-center">
-              <h1 className="table-title">Mga ulat ng ka-miyembro</h1>
-            </div>
-          </div>
-
-          <ValidateReportTable memberReport={orgReport.memberReport} />
+          <ValidateReportTable memberReport={[]} />
         </>
       )}
     </div>

@@ -1,6 +1,9 @@
 import { AuthForm } from "@/component/client_component/authComponent";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
-import { NotificationBaseType } from "@/types";
+import { checkUserAlreadyLogin } from "@/lib/server_action/user";
+import { checkUserAlreadyLoginReturnType, NotificationBaseType } from "@/types";
+import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export default async function Page({
   searchParams,
@@ -12,9 +15,29 @@ export default async function Page({
 
   if (notif) message = JSON.parse(notif);
 
+  let checkSession: checkUserAlreadyLoginReturnType | null = null;
+
+  try {
+    checkSession = await checkUserAlreadyLogin();
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    console.error((error as Error).message);
+
+    checkSession = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+
   return (
     <div className="w-[90%] max-w-md">
       {message && <RenderRedirectNotification notif={message} />}
+
+      {checkSession && !checkSession.success && (
+        <RenderRedirectNotification notif={checkSession.notifError} />
+      )}
+
       <AuthForm />
     </div>
   );

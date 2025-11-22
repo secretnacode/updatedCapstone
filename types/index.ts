@@ -116,6 +116,7 @@ export type AvailableOrgReturnType =
   | {
       success: true;
       orgList: QueryAvailableOrgReturnType[];
+      work: allUserRoleType;
     }
   | ServerActionFailBaseType;
 
@@ -879,7 +880,7 @@ export type GetAllOrgMemberListReturnType =
 export type AgriculturistNavLinkType = {
   link: string;
   logo: LucideIcon;
-  linkName: string;
+  linkName: agriPages;
 };
 
 export type FarmerUserProfilePropType = {
@@ -896,6 +897,7 @@ export type UserProFilePropType = {
   orgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
   orgList: QueryAvailableOrgReturnType[];
   isViewing: boolean;
+  work: allUserRoleType;
 };
 
 export type barangayType =
@@ -1809,6 +1811,7 @@ export type changeFarmerPassReturnType = {
 export type viewUserCropInfoPropType = {
   cropData: GetFarmerCropInfoQueryReturnType[];
   isViewing: boolean;
+  work: allUserRoleType;
 };
 
 export type profileButtonIdType =
@@ -1861,3 +1864,50 @@ export const plantedCrop = ["inbred", "hybrid"] as const;
 export type plantedCropType = (typeof plantedCrop)[number];
 
 export type getPlantedCropTypeReturnType = { cropType: plantedCropType };
+
+export type navbarComponentPropType =
+  | {
+      forAgri?: true;
+      currentPage?: agriPages;
+    }
+  | {
+      forAgri?: false;
+      currentPage?: farmerPages;
+    };
+
+type farmerPages =
+  | "Home"
+  | "Ulat"
+  | "Pananim"
+  | "Ulat ng miyembro"
+  | "Mga miyembro"
+  | "Profile";
+
+type agriPages =
+  | "Home"
+  | "Reports"
+  | "Crops"
+  | "Farmer Users"
+  | "Validate Farmer"
+  | "Organizations"
+  | "Create Link";
+
+export type farmerNavPropType = { role: farmerRoleType; pages?: farmerPages };
+
+export type userWorkReturnType =
+  | { success: true; work: allUserRoleType }
+  | ServerActionFailBaseType;
+
+export type agriculturistNavPropType = { pages?: agriPages };
+
+export type checkUserAlreadyLoginReturnType =
+  | { success: true; hasSession: false }
+  | ServerActionFailBaseType;
+
+export type adminOrFarmerNavPropType = { work: allUserRoleType } & (
+  | {
+      currentPage: agriPages;
+      forAgri: true;
+    }
+  | { currentPage: farmerPages; forAgri: false }
+);

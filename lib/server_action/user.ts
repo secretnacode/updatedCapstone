@@ -20,6 +20,7 @@ import {
   changeFarmerPassReturnType,
   changePasswordType,
   checkFarmerRoleReturnType,
+  checkUserAlreadyLoginReturnType,
   getAgriculturistDashboardDataReturnType,
   getAllFarmerForResetPassReturnType,
   getFamerLeaderDashboardDataReturnType,
@@ -29,6 +30,8 @@ import {
   ServerActionFailBaseType,
   serverActionNormalReturnType,
   serverActionOptionalNotifMessage,
+  SessionValueType,
+  userWorkReturnType,
 } from "@/types";
 import { GetAvailableOrgQuery } from "@/util/queries/org";
 import {
@@ -54,7 +57,7 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import { ZodValidateForm } from "../validation/authValidation";
 import { changePasswordSchema } from "@/util/helper_function/validation/validationSchema";
-import { DeleteSession } from "../session";
+import { DeleteSession, GetSession } from "../session";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
@@ -790,6 +793,68 @@ export const agriLogout =
       await DeleteSession();
 
       return { success: true };
+    } catch (error) {
+      const err = error as Error;
+
+      console.log(`Error occured while logging out: ${err.message}`);
+
+      return {
+        success: false,
+        notifError: [
+          {
+            message: err.message,
+            type: "error",
+          },
+        ],
+      };
+    }
+  };
+
+export const userWork = async (): Promise<userWorkReturnType> => {
+  try {
+    const { work } = await ProtectedAction("all:user:action");
+
+    return { success: true, work };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Error occured while logging out: ${err.message}`);
+
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+export const checkUserAlreadyLogin =
+  async (): Promise<checkUserAlreadyLoginReturnType> => {
+    try {
+      let session: SessionValueType | null = null;
+
+      try {
+        session = await GetSession();
+      } catch (error) {
+        console.error((error as Error).message);
+
+        return { success: true, hasSession: false };
+      }
+
+      if (!session) return { success: true, hasSession: false };
+
+      if (session.work === "admin" || session.work === "agriculturist")
+        redirect("/agriAuth/fallback");
+
+      redirect(
+        `/farmer/?notif=${NotifToUriComponent([
+          { message: "Matagumpay ang iyong pag lologin", type: "success" },
+        ])}`
+      );
     } catch (error) {
       if (isRedirectError(error)) throw error;
 

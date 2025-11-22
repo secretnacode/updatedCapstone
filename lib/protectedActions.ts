@@ -68,10 +68,13 @@ const Actions = {
 
   // action for viewing the other farmer crop
   READ_FARMER_CROP: "read:farmer:crop", // action for reading the crop of farmer user
+
+  All_USER_ACTION: "all:user:action",
 } as const;
 
 const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
   admin: [
+    Actions.All_USER_ACTION,
     Actions.AUTHORIZATION_AGRI,
     Actions.AUTHORIZATION_AGRI_ADMIN,
     Actions.CREATE_AGRICULTURIST_LINK,
@@ -96,6 +99,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   agriculturist: [
+    Actions.All_USER_ACTION,
     Actions.AUTHORIZATION_AGRI,
     Actions.CREATE_RESET_PASSWORD_LINK,
     Actions.DELETE_LINK,
@@ -118,6 +122,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   leader: [
+    Actions.All_USER_ACTION,
     Actions.AUTHORIZATION_FARMER,
     Actions.AUTHORIZATION_FARMER_LEADER,
     Actions.CREATE_CROP,
@@ -141,6 +146,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_USER,
   ],
   farmer: [
+    Actions.All_USER_ACTION,
     Actions.AUTHORIZATION_FARMER,
     Actions.CREATE_CROP,
     Actions.CREATE_ORG,
@@ -154,11 +160,7 @@ const ROLE_ACTION_PERMISION: { [key: string]: string[] } = {
     Actions.UPDATE_MY_ORG,
     Actions.UPDATE_USER,
   ],
-  newUser: [
-    // Actions.CREATE_CROP
-    Actions.CREATE_USER,
-    Actions.READ_ORG,
-  ],
+  newUser: [Actions.CREATE_USER, Actions.READ_ORG],
 };
 
 /**

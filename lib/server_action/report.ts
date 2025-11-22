@@ -570,8 +570,6 @@ export const GetFarmerReportDetail = async (
 
     const reportDetail = await GetFarmerReportDetailQuery(reportId);
 
-    console.log(reportDetail);
-
     if (!reportDetail.isExist)
       return {
         success: false,
@@ -586,17 +584,6 @@ export const GetFarmerReportDetail = async (
         ],
       };
 
-    const additionalReportInfo = async () => {
-      switch (reportDetail.reportInfo.reportType) {
-        case "damage":
-          return;
-        case "harvesting":
-          return await getTotalHarvest(reportId);
-        case "planting":
-          return await getPlantedCropType(reportId);
-      }
-    };
-
     // will return a value if the corresponding report val was presented
     const totalDamageArea =
       reportDetail.reportInfo.reportType === "damage"
@@ -604,12 +591,12 @@ export const GetFarmerReportDetail = async (
         : undefined;
 
     const totalKgHarvest =
-      reportDetail.reportInfo.reportType === "damage"
+      reportDetail.reportInfo.reportType === "harvesting"
         ? (await getTotalHarvest(reportId)).totalKgHarvest
         : undefined;
 
     const cropType =
-      reportDetail.reportInfo.reportType === "damage"
+      reportDetail.reportInfo.reportType === "planting"
         ? (await getPlantedCropType(reportId)).cropType
         : undefined;
 
@@ -619,7 +606,6 @@ export const GetFarmerReportDetail = async (
       reportDetail: {
         ...reportDetail.reportInfo,
         pictures: reportDetail.reportInfo.pictures.split(","),
-        ...(await additionalReportInfo()),
         totalDamageArea,
         totalKgHarvest,
         cropType,

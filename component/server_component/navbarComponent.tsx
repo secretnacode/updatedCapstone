@@ -1,4 +1,3 @@
-import { GetSession } from "@/lib/session";
 import {
   Building2,
   ClipboardCheck,
@@ -10,55 +9,58 @@ import {
   UserCheck,
   UserPen,
 } from "lucide-react";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
-import { RedirectLoginWithNotif } from "@/util/helper_function/reusableFunction";
-import { AgriculturistNavLinkType } from "@/types";
+import {
+  NotifToUriComponent,
+  UnexpectedErrorMessageEnglish,
+} from "@/util/helper_function/reusableFunction";
+import {
+  AgriculturistNavLinkType,
+  agriculturistNavPropType,
+  farmerNavPropType,
+  navbarComponentPropType,
+  userWorkReturnType,
+} from "@/types";
 import {
   AgriLogoutButton,
   BurgerNav,
   FarmerLogoutButton,
 } from "../client_component/componentForAllUser";
+import { userWork } from "@/lib/server_action/user";
+import { redirect } from "next/navigation";
 
-export const NavbarComponent: FC = async () => {
-  const session = await GetSession();
-  let role = "";
+export const NavbarComponent: FC<navbarComponentPropType> = async ({
+  currentPage,
+  forAgri,
+}) => {
+  let val: userWorkReturnType;
 
   try {
-    if (session) role = session.work;
-    else
-      RedirectLoginWithNotif([
-        {
-          message: "Nag expired na ang iyong pag lologin. Mag login uli",
-          type: "warning",
-        },
-      ]);
+    val = await userWork();
   } catch (error) {
-    if (isRedirectError(error)) throw error;
+    console.error((error as Error).message);
 
-    const err = error as Error;
-    RedirectLoginWithNotif([
-      {
-        message: err.message,
-        type: "warning",
-      },
-    ]);
+    val = {
+      success: false,
+      notifError: [{ message: UnexpectedErrorMessageEnglish(), type: "error" }],
+    };
   }
 
-  const navbar =
-    session?.work === "farmer" || session?.work === "leader" ? (
-      <FarmerNav role={role} />
-    ) : (
-      <AgriculturistNav />
+  if (!val.success) redirect(`/?notif=${NotifToUriComponent(val.notifError)}`);
+
+  const AgriNavbar = forAgri && <AgriculturistNav pages={currentPage} />;
+
+  const FarmerNavbar = forAgri === false &&
+    (val.work === "farmer" || val.work === "leader") && (
+      <FarmerNav role={val.work} pages={currentPage} />
     );
 
   const logoLink = (): string => {
-    if (session?.work === "admin" || session?.work === "agriculturist")
+    if (val.work === "admin" || val.work === "agriculturist")
       return "/agriculturist";
 
-    if (session?.work === "farmer" || session?.work === "leader")
-      return "/farmer";
+    if (val.work === "farmer" || val.work === "leader") return "/farmer";
 
     console.error(
       "no session detected that's why if the logo was presssed it will redirect you to "
@@ -78,32 +80,55 @@ export const NavbarComponent: FC = async () => {
           </h1>
         </Link>
 
-        <div className="md:block hidden">{navbar}</div>
+        <div className="md:block hidden">
+          {val.work === "admin" || val.work === "agriculturist"
+            ? AgriNavbar
+            : FarmerNavbar}
+        </div>
 
         <div className="md:hidden block absolute left-0 top-0">
-          <BurgerNav>{navbar}</BurgerNav>
+          <BurgerNav>
+            {val.work === "admin" || val.work === "agriculturist"
+              ? AgriNavbar
+              : FarmerNavbar}
+          </BurgerNav>
         </div>
       </div>
     </div>
   );
 };
 
-export const FarmerNav: FC<{ role: string }> = ({ role }) => {
+const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
   const basePage = "/farmer";
 
   const Links = (
     <>
-      <Link href={basePage} className="group nav-link">
+      <Link
+        href={basePage}
+        className={`group nav-link ${
+          pages === "Home" ? "bg-green-50 text-green-700" : ""
+        }`}
+      >
         <Home className="logo" />
         <span className="nav-span">Home</span>
       </Link>
 
-      <Link href={`${basePage}/report`} className="group nav-link">
+      <Link
+        href={`${basePage}/report`}
+        className={`group nav-link ${
+          pages === "Ulat" ? "bg-green-50 text-green-700" : ""
+        }`}
+      >
         <ClipboardPlus className="logo" />
         <span className="nav-span">Ulat</span>
       </Link>
 
-      <Link href={`${basePage}/crop`} className="group nav-link">
+      <Link
+        href={`${basePage}/crop`}
+        className={`group nav-link ${
+          pages === "Pananim" ? "bg-green-50 text-green-700" : ""
+        }`}
+      >
         <Sprout className="logo" />
         <span className="nav-span">Pananim</span>
       </Link>
@@ -112,20 +137,32 @@ export const FarmerNav: FC<{ role: string }> = ({ role }) => {
         <>
           <Link
             href={`${basePage}Leader/validateReport`}
-            className="group nav-link"
+            className={`group nav-link ${
+              pages === "Ulat ng miyembro" ? "bg-green-50 text-green-700" : ""
+            }`}
           >
             <ClipboardCheck className="logo" />
             <span className="nav-span">Ulat ng miyembro</span>
           </Link>
 
-          <Link href={`${basePage}Leader/orgMember`} className="group nav-link">
+          <Link
+            href={`${basePage}Leader/orgMember`}
+            className={`group nav-link ${
+              pages === "Mga miyembro" ? "bg-green-50 text-green-700" : ""
+            }`}
+          >
             <ContactRound className="logo" />
             <span className="nav-span">Mga miyembro</span>
           </Link>
         </>
       )}
 
-      <Link href={`${basePage}/profile`} className="group nav-link">
+      <Link
+        href={`${basePage}/profile`}
+        className={`group nav-link ${
+          pages === "Profile" ? "bg-green-50 text-green-700" : ""
+        }`}
+      >
         <UserPen className="logo" />
         <span className="nav-span">Profile</span>
       </Link>
@@ -137,7 +174,7 @@ export const FarmerNav: FC<{ role: string }> = ({ role }) => {
   return <Navbar>{Links}</Navbar>;
 };
 
-const AgriculturistNav: FC = () => {
+const AgriculturistNav: FC<agriculturistNavPropType> = ({ pages }) => {
   const basePage = "/agriculturist";
 
   const links: AgriculturistNavLinkType[] = [
@@ -177,7 +214,13 @@ const AgriculturistNav: FC = () => {
   return (
     <Navbar>
       {links.map((link) => (
-        <Link key={link.link} href={link.link} className="group nav-link">
+        <Link
+          key={link.link}
+          href={link.link}
+          className={`group nav-link ${
+            pages === link.linkName ? "bg-green-50 text-green-700" : ""
+          }`}
+        >
           <link.logo className="logo"></link.logo>
           <span className="nav-span">{link.linkName}</span>
         </Link>

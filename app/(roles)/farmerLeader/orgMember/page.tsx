@@ -24,17 +24,18 @@ export default async function Page() {
 
   return (
     <div className="component space-y-6">
-      {!farmerMember.success ? (
-        <RenderRedirectNotification notif={farmerMember.notifError} />
+      <div>
+        <div className="flex justify-start items-center">
+          <h1 className="table-title">Mga Miyembro sa Organisasyon</h1>
+        </div>
+      </div>
+
+      {farmerMember.success ? (
+        <OrgMemberTable orgMember={farmerMember.farmerMember} />
       ) : (
         <>
-          <div>
-            <div className="flex justify-start items-center">
-              <h1 className="table-title">Mga Miyembro sa Organisasyon</h1>
-            </div>
-          </div>
-
-          <OrgMemberTable orgMember={farmerMember.farmerMember} />
+          <RenderRedirectNotification notif={farmerMember.notifError} />
+          <OrgMemberTable orgMember={[]} />
         </>
       )}
     </div>

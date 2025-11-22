@@ -8,6 +8,7 @@ import {
   uploadPlantingReport,
 } from "@/lib/server_action/report";
 import {
+  capitalizeFirstLetter,
   CreateUUID,
   intoFeaturePolygon,
   mapZoomValByBarangay,
@@ -659,6 +660,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           required
           inputName="cropType"
           formError={state.formError?.cropType}
+          inputClassName="size-4"
         />
 
         <FormDivLabelTextArea
@@ -1504,7 +1506,34 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
               </div>
             </div>
 
-            <div>
+            <div className="form-div">
+              {userReport.cropType && (
+                <FormDivLabelInput
+                  labelMessage="Uri ng pananim:"
+                  inputName="cropType"
+                  defaultValue={capitalizeFirstLetter(userReport.cropType)}
+                  inputDisable={true}
+                />
+              )}
+
+              {userReport.totalKgHarvest && (
+                <FormDivLabelInput
+                  labelMessage="Kabuuang kilo na naani:"
+                  inputName="totalKgHarvest"
+                  defaultValue={userReport.totalKgHarvest}
+                  inputDisable={true}
+                />
+              )}
+
+              {userReport.totalDamageArea && (
+                <FormDivLabelInput
+                  labelMessage="Laki ng sira:(Ektarya)"
+                  inputName="totalDamageArea"
+                  defaultValue={userReport.totalDamageArea}
+                  inputDisable={true}
+                />
+              )}
+
               {!isView && !userReport.verificationStatus ? (
                 <FormDivLabelTextArea
                   labelMessage={`${
@@ -1525,6 +1554,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                   disabled={true}
                 />
               )}
+
               {isChange && (
                 <div className="flex justify-between items-center">
                   <div className="flex justify-start items-center gap-2 py-1 px-2 bg-blue-100 rounded-md">
