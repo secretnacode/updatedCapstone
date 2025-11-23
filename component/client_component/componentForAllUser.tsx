@@ -2147,6 +2147,7 @@ export const AgriculturistFarmerReporTable: FC<
                         <DynamicLink
                           baseLink="farmerUser"
                           dynamicId={report.farmerId}
+                          label="Profile"
                         />
                       </div>
                     </td>
