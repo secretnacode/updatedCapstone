@@ -51,33 +51,47 @@ export default async function Page() {
             tableHeaderCell={
               <>
                 <th scope="col" className="!w-[17%]">
-                  <div>Name</div>
+                  <div>
+                    <p>Name</p>
+                  </div>
                 </th>
 
                 <th scope="col">
-                  <div>Status</div>
+                  <div>
+                    <p>Status</p>
+                  </div>
                 </th>
 
                 <th scope="col">
-                  <div>Created At</div>
+                  <div>
+                    <p>Created At</p>
+                  </div>
                 </th>
 
                 <th scope="col">
-                  <div>Expires in</div>
+                  <div>
+                    <p>Expires in</p>
+                  </div>
                 </th>
 
                 {linkData.work === "admin" && (
                   <th scope="col">
-                    <div>Url for</div>
+                    <div>
+                      <p>Url for</p>
+                    </div>
                   </th>
                 )}
 
                 <th scope="col">
-                  <div>Url</div>
+                  <div>
+                    <p>Url</p>
+                  </div>
                 </th>
 
                 <th scope="col" className="!w-[15%]">
-                  <div>Action</div>
+                  <div>
+                    <p>Action</p>
+                  </div>
                 </th>
               </>
             }
@@ -88,48 +102,61 @@ export default async function Page() {
                     <td>
                       <div className=" text-gray-900">
                         {linkVal.farmerName ? (
-                          <div className="flex-1 min-w-0">
-                            <h3 className="truncate">{linkVal.farmerName}</h3>
+                          <p className="flex-1 min-w-0">
+                            <span className="truncate">
+                              {linkVal.farmerName}
+                            </span>
 
-                            <p className="text-sm text-gray-500 truncate">
+                            <span className="text-sm text-gray-500 truncate">
                               {linkVal.username}
-                            </p>
-                          </div>
+                            </span>
+                          </p>
                         ) : (
-                          <div className="flex-1 min-w-0">
+                          <p className="flex-1 min-w-0">
                             <span className="truncate">New Agriculturist</span>
-                          </div>
+                          </p>
                         )}
                       </div>
                     </td>
 
                     <td>
                       <div>
-                        <ShowIsExpired expiredAt={linkVal.dateExpired} />
+                        <p>
+                          <ShowIsExpired expiredAt={linkVal.dateExpired} />
+                        </p>
                       </div>
                     </td>
 
                     <td>
                       <div>
-                        <DateWithTimeStamp date={linkVal.dateCreated} />
+                        <p>
+                          <DateWithTimeStamp date={linkVal.dateCreated} />
+                        </p>
                       </div>
                     </td>
 
                     <td>
                       <div>
-                        <DateWithTimeStamp date={linkVal.dateExpired} />
+                        <p>
+                          <DateWithTimeStamp date={linkVal.dateExpired} />
+                        </p>
                       </div>
                     </td>
 
                     {linkData.work === "admin" && (
                       <td>
                         {linkVal.farmerName ? (
-                          <div>Farmer Reset Password</div>
+                          <div>
+                            <p>Farmer Reset Password</p>
+                          </div>
                         ) : (
-                          <div>Create Agri Account</div>
+                          <div>
+                            <p>Create Agri Account</p>
+                          </div>
                         )}
                       </td>
                     )}
+
                     <td>
                       <div className="max-w-[200px] overflow-y-hidden">
                         <p className="link">{linkVal.link}</p>

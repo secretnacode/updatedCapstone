@@ -25,18 +25,18 @@ export default async function Page({
   if (!orgMemberList.success && !orgMemberList.isExist) notFound();
 
   return (
-    <>
+    <div className="component space-y-4">
+      <div>
+        <h1 className="table-title">Member of the organization</h1>
+      </div>
       {!orgMemberList.success ? (
-        <RenderRedirectNotification notif={orgMemberList.notifError} />
+        <>
+          <RenderRedirectNotification notif={orgMemberList.notifError} />
+          <AgriculturistOrgMemberTable orgMem={[]} />
+        </>
       ) : (
-        <div className="component space-y-4">
-          <div>
-            <h1 className="table-title">Member of the organization</h1>
-          </div>
-
-          <AgriculturistOrgMemberTable orgMem={orgMemberList.memberList} />
-        </div>
+        <AgriculturistOrgMemberTable orgMem={orgMemberList.memberList} />
       )}
-    </>
+    </div>
   );
 }

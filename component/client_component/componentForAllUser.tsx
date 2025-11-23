@@ -1367,7 +1367,8 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("farmerFirstName")}
                   className="cursor-pointer"
                 >
-                  Unang pangalan
+                  <p>Unang pangalan</p>
+
                   <SortType col={"farmerFirstName"} />
                 </div>
               </th>
@@ -1377,7 +1378,8 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("farmerLastName")}
                   className="cursor-pointer"
                 >
-                  Apelyido
+                  <p>Apelyido</p>
+
                   <SortType col={"farmerLastName"} />
                 </div>
               </th>
@@ -1387,7 +1389,8 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
                 >
-                  Alyas
+                  <p>Alyas</p>
+
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
@@ -1397,7 +1400,8 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("title")}
                   className="cursor-pointer"
                 >
-                  Pamagat ng ulat
+                  <p>Pamagat ng ulat</p>
+
                   <SortType col={"title"} />
                 </div>
               </th>
@@ -1407,21 +1411,28 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("dayReported")}
                   className="cursor-pointer"
                 >
-                  Araw Ipinasa
+                  <p>Araw Ipinasa</p>
+
                   <SortType col={"dayReported"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Uri ng ulat</div>
+                <div>
+                  <p>Uri ng ulat</p>
+                </div>
               </th>
 
               <th scope="col">
-                <div>Estado ng ulat</div>
+                <div>
+                  <p>Estado ng ulat</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[16.5%]">
-                <div>Aksyon</div>
+                <div>
+                  <p>Aksyon</p>
+                </div>
               </th>
             </>
           }
@@ -1430,38 +1441,50 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
               {tableList.map((report) => (
                 <tr key={report.reportId}>
                   <td className=" text-gray-900 font-medium">
-                    <div>{report.farmerFirstName}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{report.farmerLastName}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{report.farmerAlias}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{report.title}</div>
+                    <div>
+                      <p>{report.farmerFirstName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
                     <div>
-                      {ReadableDateFormat(new Date(report.dayReported))}
+                      <p>{report.farmerLastName}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{report.farmerAlias}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{report.title}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
                     </div>
                   </td>
 
                   <td>
                     <div>
-                      <ReportType type={report.reportType} />
+                      <p>
+                        <ReportType type={report.reportType} />
+                      </p>
                     </div>
                   </td>
 
                   <td>
                     <div>
-                      <ReportStatus
-                        verificationStatus={report.verificationStatus}
-                      />
+                      <p>
+                        <ReportStatus
+                          verificationStatus={report.verificationStatus}
+                        />
+                      </p>
                     </div>
                   </td>
 
@@ -1524,7 +1547,8 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   onClick={() => handleSortCol("farmerName")}
                   className="cursor-pointer w-[75%]"
                 >
-                  Pangalan ng magsasaka
+                  <p>Pangalan ng magsasaka</p>
+
                   <SortType col={"farmerName"} />
                 </div>
               </th>
@@ -1534,13 +1558,16 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
                 >
-                  Alyas ng magsasaka
+                  <p>Alyas ng magsasaka</p>
+
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Numero ng telepono</div>
+                <div>
+                  <p>Numero ng telepono</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[13%]">
@@ -1548,13 +1575,16 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   onClick={() => handleSortCol("barangay")}
                   className="cursor-pointer"
                 >
-                  Baranggay na tinitirhan
+                  <p>Baranggay na tinitirhan</p>
+
                   <SortType col={"barangay"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Estado ng account</div>
+                <div>
+                  <p>Estado ng account</p>
+                </div>
               </th>
 
               <th scope="col">
@@ -1562,13 +1592,16 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   onClick={() => handleSortCol("cropNum")}
                   className="cursor-pointer"
                 >
-                  Bilang ng pananim
+                  <p>Bilang ng pananim</p>
+
                   <SortType col={"cropNum"} />
                 </div>
               </th>
 
               <th scope="col" className="!w-[25.5%]">
-                <div>Aksyon</div>
+                <div>
+                  <p>Aksyon</p>
+                </div>
               </th>
             </>
           }
@@ -1577,24 +1610,32 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
               {tableList.map((member) => (
                 <tr key={member.farmerId}>
                   <td className=" text-gray-900 font-medium">
-                    {member.farmerName}
+                    <div>
+                      <p>{member.farmerName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.farmerAlias}</div>
+                    <div>
+                      <p>{member.farmerAlias}</p>
+                    </div>
                   </td>
 
                   <td className=" text-gray-900 font-medium">
-                    <div>{handleFarmerNumber(member.mobileNumber)}</div>
+                    <div>
+                      <p>{handleFarmerNumber(member.mobileNumber)}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.barangay}</div>
+                    <div>
+                      <p>{member.barangay}</p>
+                    </div>
                   </td>
 
                   <td>
                     <div>
-                      <span
+                      <p
                         className={`table-verify-cell ${
                           member.verified
                             ? "table-verified"
@@ -1602,12 +1643,14 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                         }`}
                       >
                         {!member.verified ? "Kumpirmahin" : "Kumpirmado"}
-                      </span>
+                      </p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.cropNum}</div>
+                    <div>
+                      <p>{member.cropNum}</p>
+                    </div>
                   </td>
 
                   <td className="text-center">
@@ -1684,29 +1727,33 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
           listCount={report.length}
           tableHeaderCell={
             <>
-              <th scope="col" className="!w-[15%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("title")}
                   className="cursor-pointer"
                 >
-                  Pamagat ng ulat
+                  <p>Pamagat ng ulat</p>
+
                   <SortType col={"title"} />
                 </div>
               </th>
 
-              <th scope="col" className="!w-[12%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("cropName")}
                   className="cursor-pointer"
                 >
-                  Pangalan ng pananim
+                  <p>Pangalan ng pananim</p>
+
                   <SortType col={"cropName"} />
                 </div>
               </th>
 
               {work === "leader" ? null : (
                 <th scope="col">
-                  <div className="cursor-pointer">Estado ng ulat</div>
+                  <div className="cursor-pointer">
+                    <p>Estado ng ulat</p>
+                  </div>
                 </th>
               )}
 
@@ -1715,7 +1762,8 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                   onClick={() => handleSortCol("dayReported")}
                   className="cursor-pointer"
                 >
-                  Araw na ipinasa
+                  <p>Araw na ipinasa</p>
+
                   <SortType col={"dayReported"} />
                 </div>
               </th>
@@ -1725,17 +1773,22 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                   onClick={() => handleSortCol("dayHappen")}
                   className="cursor-pointer"
                 >
-                  Araw na naganap
+                  <p>Araw na naganap</p>
+
                   <SortType col={"dayHappen"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Uri ng ulat</div>
+                <div>
+                  <p>Uri ng ulat</p>
+                </div>
               </th>
 
-              <th scope="col" className="!w-[16.5%]">
-                <div>Aksyon</div>
+              <th scope="col">
+                <div>
+                  <p>Aksyon</p>
+                </div>
               </th>
             </>
           }
@@ -1744,17 +1797,21 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
               {tableList.map((report) => (
                 <tr key={report.reportId}>
                   <td className=" text-gray-900 font-medium">
-                    <div>{report.title}</div>
+                    <div>
+                      <p>{report.title}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{report.cropName}</div>
+                    <div>
+                      <p>{report.cropName}</p>
+                    </div>
                   </td>
 
                   {work === "leader" ? null : (
                     <td>
                       <div>
-                        <span
+                        <p
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             report.verificationStatus
                               ? "bg-green-100 text-green-800"
@@ -1764,32 +1821,38 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                           {report.verificationStatus
                             ? "Naipasa"
                             : "kinukumpirma"}
-                        </span>
+                        </p>
                       </div>
                     </td>
                   )}
 
                   <td className="text-gray-500">
                     <div>
-                      {ReadableDateFormat(new Date(report.dayReported))}
+                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{ReadableDateFormat(new Date(report.dayHappen))}</div>
+                    <div>
+                      <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
+                    </div>
                   </td>
 
                   <td scope="col">
                     <div>
-                      <ReportType type={report.reportType} />
+                      <p>
+                        <ReportType type={report.reportType} />
+                      </p>
                     </div>
                   </td>
 
                   <td className="text-center">
-                    <ViewUserReportButton
-                      reportId={report.reportId}
-                      myReport={true}
-                    />
+                    <div>
+                      <ViewUserReportButton
+                        reportId={report.reportId}
+                        myReport={true}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1959,7 +2022,7 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("farmerName")}
                     className="cursor-pointer"
                   >
-                    Farmer Name
+                    <p>Farmer Name</p>
                     <SortType col={"farmerName"} />
                   </div>
                 </th>
@@ -1975,7 +2038,9 @@ export const AgriculturistFarmerReporTable: FC<
                 </th>
 
                 <th scope="col" className="!w-[10%]">
-                  <div className="cursor-pointer">Verified</div>
+                  <div className="cursor-pointer">
+                    <p>Verified</p>
+                  </div>
                 </th>
 
                 <th scope="col">
@@ -1983,7 +2048,7 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("orgName")}
                     className="cursor-pointer "
                   >
-                    Organization Name
+                    <p>Organization Name</p>
                     <SortType col={"orgName"} />
                   </div>
                 </th>
@@ -1993,7 +2058,9 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("dayReported")}
                     className="cursor-pointer"
                   >
-                    <p className="w-3/5">Date was passed</p>
+                    <p className="w-3/5">
+                      <p>Date was passed</p>
+                    </p>
                     <SortType col={"dayReported"} />
                   </div>
                 </th>
@@ -2003,13 +2070,15 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("dayHappen")}
                     className="cursor-pointer"
                   >
-                    Date it happen
+                    <p>Date it happen</p>
                     <SortType col={"dayHappen"} />
                   </div>
                 </th>
 
                 <th scope="col" className="!w-[18.5%]">
-                  <div>Action</div>
+                  <div>
+                    <p>Action</p>
+                  </div>
                 </th>
               </>
             }
@@ -2018,16 +2087,20 @@ export const AgriculturistFarmerReporTable: FC<
                 {tableList.map((report) => (
                   <tr key={report.reportId}>
                     <td className=" text-gray-900 font-medium ">
-                      <div>{report.farmerName}</div>
+                      <div>
+                        <p>{report.farmerName}</p>
+                      </div>
                     </td>
 
                     <td className="text-gray-500">
-                      <div>{report.cropLocation}</div>
+                      <div>
+                        <p>{report.cropLocation}</p>
+                      </div>
                     </td>
 
                     <td>
                       <div>
-                        <span
+                        <p
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
                             report.verificationStatus
                               ? "bg-green-100 text-green-800"
@@ -2037,25 +2110,29 @@ export const AgriculturistFarmerReporTable: FC<
                           {report.verificationStatus
                             ? "Verified"
                             : "Not verified"}
-                        </span>
+                        </p>
                       </div>
                     </td>
 
                     <td className="text-gray-500">
                       <div>
-                        {report.orgName ? report.orgName : "No organization"}
+                        <p>
+                          {report.orgName ? report.orgName : "No organization"}
+                        </p>
                       </div>
                     </td>
 
                     <td className="text-gray-500">
                       <div>
-                        {ReadableDateFormat(new Date(report.dayReported))}
+                        <p>
+                          {ReadableDateFormat(new Date(report.dayReported))}
+                        </p>
                       </div>
                     </td>
 
                     <td className="text-gray-500">
                       <div>
-                        {ReadableDateFormat(new Date(report.dayHappen))}
+                        <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
                       </div>
                     </td>
 
@@ -2132,7 +2209,7 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("farmerName")}
                   className="cursor-pointer"
                 >
-                  Farmer Name
+                  <p>Farmer Name</p>
                   <SortType col={"farmerName"} />
                 </div>
               </th>
@@ -2152,7 +2229,7 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
                 >
-                  Created At
+                  <p>Created At</p>
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
@@ -2162,7 +2239,7 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("orgName")}
                   className="cursor-pointer "
                 >
-                  Organization Name
+                  <p>Organization Name</p>
                   <SortType col={"orgName"} />
                 </div>
               </th>
@@ -2172,7 +2249,7 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("orgRole")}
                   className="cursor-pointer "
                 >
-                  Organization Role
+                  <p>Organization Role</p>
                   <SortType col={"orgRole"} />
                 </div>
               </th>
@@ -2182,7 +2259,7 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("reportCount")}
                   className="cursor-pointer"
                 >
-                  Report Count
+                  <p>Report Count</p>
                   <SortType col={"reportCount"} />
                 </div>
               </th>
@@ -2192,13 +2269,15 @@ export const AgriculturistFarmerUserTable: FC<
                   onClick={() => handleSortCol("cropCount")}
                   className="cursor-pointer"
                 >
-                  Crop Count
+                  <p>Crop Count</p>
                   <SortType col={"cropCount"} />
                 </div>
               </th>
 
               <th scope="col" className="!w-[18.5%]">
-                <div>Action</div>
+                <div>
+                  <p>Action</p>
+                </div>
               </th>
             </>
           }
@@ -2207,37 +2286,51 @@ export const AgriculturistFarmerUserTable: FC<
               {tableList.map((farmer) => (
                 <tr key={farmer.farmerId}>
                   <td className=" text-gray-900 font-medium ">
-                    <div>{farmer.farmerName}</div>
+                    <div>
+                      <p>{farmer.farmerName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{farmer.farmerAlias}</div>
+                    <div>
+                      <p>{farmer.farmerAlias}</p>
+                    </div>
                   </td>
 
                   <td>
-                    <div>{ReadableDateFormat(farmer.dateCreated)}</div>
-                  </td>
-
-                  <td className="text-gray-500">
                     <div>
-                      {farmer.orgName ? farmer.orgName : "No organization"}
+                      <p>{ReadableDateFormat(farmer.dateCreated)}</p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
                     <div>
-                      {capitalizeFirstLetter(
-                        farmer.orgRole ?? "No organization"
-                      )}
+                      <p>
+                        {farmer.orgName ? farmer.orgName : "No organization"}
+                      </p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{farmer.reportCount}</div>
+                    <div>
+                      <p>
+                        {capitalizeFirstLetter(
+                          farmer.orgRole ?? "No organization"
+                        )}
+                      </p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{farmer.cropCount}</div>
+                    <div>
+                      <p>{farmer.reportCount}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{farmer.cropCount}</p>
+                    </div>
                   </td>
 
                   <td className="text-center">
@@ -2321,7 +2414,7 @@ export const AgriculturistValidateFarmerTable: FC<
                   onClick={() => handleSortCol("farmerName")}
                   className="cursor-pointer"
                 >
-                  Farmer Name
+                  <p>Farmer Name</p>
                   <SortType col={"farmerName"} />
                 </div>
               </th>
@@ -2341,7 +2434,7 @@ export const AgriculturistValidateFarmerTable: FC<
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
                 >
-                  Created At
+                  <p>Created At</p>
                   <SortType col={"farmerAlias"} />
                 </div>
               </th>
@@ -2351,17 +2444,21 @@ export const AgriculturistValidateFarmerTable: FC<
                   onClick={() => handleSortCol("orgName")}
                   className="cursor-pointer "
                 >
-                  Organization Name
+                  <p></p>
                   <SortType col={"orgName"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Organization Role</div>
+                <div>
+                  <p>Organization Role</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[18.5%]">
-                <div>Action</div>
+                <div>
+                  <p>Action</p>
+                </div>
               </th>
             </>
           }
@@ -2370,26 +2467,36 @@ export const AgriculturistValidateFarmerTable: FC<
               {tableList.map((farmer) => (
                 <tr key={farmer.farmerId}>
                   <td className=" text-gray-900 font-medium ">
-                    <div>{farmer.farmerName}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{farmer.farmerAlias}</div>
-                  </td>
-
-                  <td>
-                    <div>{ReadableDateFormat(farmer.dateCreated)}</div>
-                  </td>
-
-                  <td className="text-gray-500">
-                    <div>{farmer.orgName ?? "No organization"}</div>
+                    <div>
+                      <p>{farmer.farmerName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
                     <div>
-                      {capitalizeFirstLetter(
-                        farmer.orgRole ?? "No organization"
-                      )}
+                      <p>{farmer.farmerAlias}</p>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <p>{ReadableDateFormat(farmer.dateCreated)}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{farmer.orgName ?? "No organization"}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>
+                        {capitalizeFirstLetter(
+                          farmer.orgRole ?? "No organization"
+                        )}
+                      </p>
                     </div>
                   </td>
 
@@ -2462,7 +2569,7 @@ export const AgriculturistFarmerOrgTable: FC<
                   onClick={() => handleSortCol("farmerLeaderName")}
                   className="cursor-pointer"
                 >
-                  Farmer Name
+                  <p>Farmer Name</p>
                   <SortType col={"farmerLeaderName"} />
                 </div>
               </th>
@@ -2482,7 +2589,7 @@ export const AgriculturistFarmerOrgTable: FC<
                   onClick={() => handleSortCol("orgName")}
                   className="cursor-pointer "
                 >
-                  Organization Name
+                  <p>Organization Name</p>
                   <SortType col={"orgName"} />
                 </div>
               </th>
@@ -2492,13 +2599,15 @@ export const AgriculturistFarmerOrgTable: FC<
                   onClick={() => handleSortCol("totalMember")}
                   className="cursor-pointer "
                 >
-                  Total Member
+                  <p>Total Member</p>
                   <SortType col={"totalMember"} />
                 </div>
               </th>
 
               <th scope="col" className="!w-[19%]">
-                <div>Action</div>
+                <div>
+                  <p>Action</p>
+                </div>
               </th>
             </>
           }
@@ -2507,19 +2616,27 @@ export const AgriculturistFarmerOrgTable: FC<
               {tableList.map((orgVal) => (
                 <tr key={orgVal.farmerId}>
                   <td className=" text-gray-900 font-medium ">
-                    <div>{orgVal.farmerLeaderName}</div>
+                    <div>
+                      <p>{orgVal.farmerLeaderName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{orgVal.farmerLeaderAlias}</div>
+                    <div>
+                      <p>{orgVal.farmerLeaderAlias}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{orgVal.orgName ?? "No organization"}</div>
+                    <div>
+                      <p>{orgVal.orgName ?? "No organization"}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{orgVal.totalMember}</div>
+                    <div>
+                      <p>{orgVal.totalMember}</p>
+                    </div>
                   </td>
 
                   <td className="text-center">
@@ -2592,7 +2709,7 @@ export const AgriculturistOrgMemberTable: FC<
                   onClick={() => handleSortCol("farmerName")}
                   className="cursor-pointer"
                 >
-                  Farmer Name
+                  <p>Farmer Name</p>
                   <SortType col={"farmerName"} />
                 </div>
               </th>
@@ -2612,21 +2729,27 @@ export const AgriculturistOrgMemberTable: FC<
                   onClick={() => handleSortCol("barangay")}
                   className="cursor-pointer "
                 >
-                  Baranggay
+                  <p>Baranggay</p>
                   <SortType col={"barangay"} />
                 </div>
               </th>
 
               <th scope="col">
-                <div>Organization Role</div>
+                <div>
+                  <p>Organization Role</p>
+                </div>
               </th>
 
               <th scope="col">
-                <div>Verification Status</div>
+                <div>
+                  <p>Verification Status</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[11%]">
-                <div>Action</div>
+                <div>
+                  <p>Action</p>
+                </div>
               </th>
             </>
           }
@@ -2635,19 +2758,27 @@ export const AgriculturistOrgMemberTable: FC<
               {tableList.map((member) => (
                 <tr key={member.farmerId}>
                   <td className=" text-gray-900 font-medium ">
-                    <div>{member.farmerName}</div>
+                    <div>
+                      <p>{member.farmerName}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.farmerAlias}</div>
+                    <div>
+                      <p>{member.farmerAlias}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.barangay}</div>
+                    <div>
+                      <p>{member.barangay}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
-                    <div>{member.orgRole}</div>
+                    <div>
+                      <p>{member.orgRole}</p>
+                    </div>
                   </td>
 
                   <td className="text-gray-500">
@@ -2656,7 +2787,7 @@ export const AgriculturistOrgMemberTable: FC<
                         member.verified ? "table-verified" : "table-unverified"
                       }`}
                     >
-                      {member.verified ? "Verified" : "Unverified"}
+                      <p>{member.verified ? "Verified" : "Unverified"}</p>
                     </div>
                   </td>
 

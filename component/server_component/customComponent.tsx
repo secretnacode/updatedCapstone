@@ -568,16 +568,14 @@ export const TableComponent: FC<TableComponentPropType> = ({
         </div>
       ) : (
         <div
-          className={`div rounded-lg border border-gray-200 overflow-hidden w-full ${tableClassName}`}
+          className={`div rounded-lg border border-gray-200 w-full ${tableClassName}`}
         >
           <div className="div overflow-x-auto">
-            <table className="table-style farmerReportTable table-fixed">
+            <table className="table-style farmerReportTable">
               <thead>
-                <tr className="[&>th>div]:inline-flex [&>th>div]:flex-row [&>th>div]:justify-start [&>th>div]:items-center [&>th>div]:gap-2 [&_th]:last-of-type:[&>div]:!justify-center w-full">
-                  {tableHeaderCell}
-                </tr>
+                <tr className="">{tableHeaderCell}</tr>
               </thead>
-              <tbody className="[&_tr_td_div]:truncate">{tableCell}</tbody>
+              <tbody className="">{tableCell}</tbody>
             </table>
           </div>
         </div>
@@ -1054,7 +1052,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
   return (
     <div className="component">
       <div className="card-title-wrapper">
-        <p className="">Kamakailang Ulat na iyong ipinasa</p>
+        <p className="">Kamakailang ulat na iyong ipinasa</p>
       </div>
 
       <div className="divide-y divide-gray-100">
@@ -1063,7 +1061,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
             recentReport.recentReport.map((report) => (
               <div
                 key={report.reportId}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                className="hover:bg-gray-50 transition-colors cursor-pointer py-2"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

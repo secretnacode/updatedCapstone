@@ -339,111 +339,125 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           tableHeaderCell={
             <>
               <th scope="col" className="!w-[15%]">
-                <div>Pangalan</div>
+                <div>
+                  <p>Pangalan</p>
+                </div>
               </th>
 
               <th scope="col">
-                <div>Lokasyon</div>
+                <div>
+                  <p>Lokasyon</p>
+                </div>
               </th>
 
               <th scope="col">
-                <div>Sukat(HA)</div>
+                <div>
+                  <p>Sukat(HA)</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[20%]">
-                <div>Estado ng pananim</div>
+                <div>
+                  <p>Estado ng pananim</p>
+                </div>
               </th>
 
               <th scope="col">
-                <div>Araw ng kaganapan</div>
+                <div>
+                  <p>Araw ng kaganapan</p>
+                </div>
               </th>
 
               <th scope="col" className="!w-[21.5%]">
-                Aksyon
+                <p>Aksyon</p>
               </th>
             </>
           }
-          tableCell={myCropInfoList.map((crop) => (
-            <tr key={crop.cropId}>
-              <td className="text-color">
-                <div>{crop.cropName}</div>
-              </td>
+          tableCell={myCropInfoList.map((crop) => {
+            const { className, status } = cropStatus(
+              crop.cropStatus,
+              crop.datePlanted,
+              crop.dateHarvested
+            );
 
-              <td className="text-color">
-                <div>{crop.cropLocation}</div>
-              </td>
+            return (
+              <tr key={crop.cropId}>
+                <td className="text-color">
+                  <div>
+                    <p>{crop.cropName}</p>
+                  </div>
+                </td>
 
-              <td className="text-color">
-                <div>{crop.farmAreaMeasurement}</div>
-              </td>
+                <td className="text-color">
+                  <div>
+                    <p>{crop.cropLocation}</p>
+                  </div>
+                </td>
 
-              <td className="text-color ">
-                <div>
-                  <p
-                    className={`py-1 px-3 rounded-2xl w-fit very-very-small-text ${
-                      cropStatus(
-                        crop.cropStatus,
-                        crop.datePlanted,
-                        crop.dateHarvested
-                      ).className
-                    }`}
-                  >
-                    {
-                      cropStatus(
-                        crop.cropStatus,
-                        crop.datePlanted,
-                        crop.dateHarvested
-                      ).status
-                    }
-                  </p>
-                </div>
-              </td>
+                <td className="text-color">
+                  <div>
+                    <p>{crop.farmAreaMeasurement}</p>
+                  </div>
+                </td>
 
-              <td className="text-color">
-                <div>
-                  {!crop.cropStatus
-                    ? "Wala pang ulat"
-                    : ReadableDateFormat(
-                        crop.cropStatus === "planted"
-                          ? crop.datePlanted
-                          : crop.dateHarvested
-                      )}
-                </div>
-              </td>
+                <td className="text-color ">
+                  <div>
+                    <p
+                      className={`py-1 px-3 rounded-2xl w-fit very-very-small-text ${className}`}
+                    >
+                      {status}
+                    </p>
+                  </div>
+                </td>
 
-              <td>
-                <div className="flex justify-center flex-row gap-2">
-                  <SubmitButton
-                    type="button"
-                    className="slimer-button"
-                    onClick={() =>
-                      ViewCrop(
-                        crop.cropLng,
-                        crop.cropLat,
-                        crop.cropLocation,
-                        mapRef
-                      )
-                    }
-                  >
-                    Tingnan
-                  </SubmitButton>
+                <td className="text-color">
+                  <div>
+                    <p>
+                      {!crop.cropStatus
+                        ? "Wala pang ulat"
+                        : ReadableDateFormat(
+                            crop.cropStatus === "planted"
+                              ? crop.datePlanted
+                              : crop.dateHarvested
+                          )}
+                    </p>
+                  </div>
+                </td>
 
-                  <SubmitButton
-                    type="button"
-                    className="slimer-button blue-button"
-                    onClick={() =>
-                      handleOpenModal({
-                        modalName: "editModal",
-                        cropId: crop.cropId,
-                      })
-                    }
-                  >
-                    Baguhin
-                  </SubmitButton>
-                </div>
-              </td>
-            </tr>
-          ))}
+                <td>
+                  <div className="flex justify-center flex-row gap-2">
+                    <SubmitButton
+                      type="button"
+                      className="slimer-button"
+                      onClick={() =>
+                        ViewCrop(
+                          crop.cropLng,
+                          crop.cropLat,
+                          crop.cropLocation,
+                          mapRef
+                        )
+                      }
+                    >
+                      Tingnan
+                    </SubmitButton>
+
+                    <SubmitButton
+                      type="button"
+                      className="slimer-button blue-button"
+                      onClick={() =>
+                        handleOpenModal({
+                          modalName: "editModal",
+                          cropId: crop.cropId,
+                        })
+                      }
+                    >
+                      Baguhin
+                    </SubmitButton>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         />
       </div>
 

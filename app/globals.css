@@ -108,11 +108,11 @@ body {
   .farmerReportTable thead tr th {
     @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
   }
-  .farmerReportTable thead tr th:first-of-type {
-    @apply w-12;
+  .farmerReportTable thead tr th div {
+    @apply flex flex-row justify-start items-center gap-2;
   }
-  .farmerReportTable thead tr th:last-of-type {
-    @apply !text-center w-24;
+  .farmerReportTable thead tr th:last-of-type div {
+    @apply !justify-center;
   }
   .farmerReportTable tbody {
     @apply bg-white divide-y divide-gray-200;
@@ -122,6 +122,15 @@ body {
   }
   .farmerReportTable tbody tr td {
     @apply px-4 py-3 text-sm;
+  }
+  .farmerReportTable tbody tr td div {
+    @apply flex items-center;
+  }
+  .farmerReportTable tbody tr td:last-of-type div {
+    @apply justify-center;
+  }
+  .farmerReportTable tbody tr td div p {
+    @apply min-w-0;
   }
 
   /* .div{
@@ -256,9 +265,9 @@ body {
   .modal-red-button {
     @apply !bg-red-700 hover:!bg-red-500;
   }
-  td {
+  /* td {
     @apply text-nowrap;
-  }
+  } */
   .very-small-text {
     @apply text-[14px];
   }

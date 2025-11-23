@@ -193,7 +193,7 @@ export const FarmerOrgMemberAction: FC<{
   farmerName: string;
 }> = ({ farmerId, verificationStatus, farmerName }) => {
   return (
-    <div className="flex flex-row justify-center items-center gap-2">
+    <div className="flex justify-center items-center gap-2">
       <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
 
       <ApprovedOrgMemberButton
