@@ -712,18 +712,6 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
     <SortColBy<GetAllCropInfoQueryReturnType> sortCol={sortCol} col={col} />
   );
 
-  const cropStatus = (
-    status: cropStatusType,
-    datePlanted: Date,
-    dateHarvested: Date
-  ): determineCropStatusReturnType =>
-    determineCropStatus({
-      cropStatus: status,
-      dateHarvested: dateHarvested,
-      datePlanted: datePlanted,
-      isEnglish: true,
-    });
-
   return (
     <div className="flex flex-col gap-5">
       {cropInfo.length > 0 ? (
@@ -780,7 +768,7 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
               listCount={cropInfo.length}
               tableHeaderCell={
                 <>
-                  <th scope="col" className="!w-[22%]">
+                  <th scope="col">
                     <div
                       onClick={() => handleSortCol("farmerName")}
                       className="cursor-pointer"
@@ -790,7 +778,7 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
                     </div>
                   </th>
 
-                  <th scope="col" className="!w-[13%]">
+                  <th scope="col">
                     <div
                       onClick={() => handleSortCol("farmerAlias")}
                       className="cursor-pointer"
@@ -824,78 +812,75 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
                     </div>
                   </th>
 
-                  <th scope="col" className="!w-[18.5%]">
+                  <th scope="col">
                     <div>Action</div>
                   </th>
                 </>
               }
               tableCell={
                 <>
-                  {tableList.map((crop) => (
-                    <tr key={crop.cropId}>
-                      <td className=" text-gray-900 font-medium ">
-                        <div>{crop.farmerName}</div>
-                      </td>
+                  {tableList.map((crop) => {
+                    const { className, status } = determineCropStatus({
+                      cropStatus: crop.cropStatus,
+                      dateHarvested: crop.dateHarvested,
+                      datePlanted: crop.datePlanted,
+                      isEnglish: true,
+                    });
 
-                      <td className="text-gray-500">
-                        <div>{crop.farmerAlias}</div>
-                      </td>
+                    return (
+                      <tr key={crop.cropId}>
+                        <td className=" text-gray-900 font-medium ">
+                          <div>{crop.farmerName}</div>
+                        </td>
 
-                      <td className="text-gray-500">
-                        <div>{crop.cropLocation}</div>
-                      </td>
+                        <td className="text-gray-500">
+                          <div>{crop.farmerAlias}</div>
+                        </td>
 
-                      <td className="text-gray-500">
-                        <div>{crop.farmAreaMeasurement}</div>
-                      </td>
+                        <td className="text-gray-500">
+                          <div>{crop.cropLocation}</div>
+                        </td>
 
-                      <td className="text-color ">
-                        <div>
-                          <span
-                            className={`py-1 px-3 rounded-2xl very-very-small-text ${
-                              cropStatus(
-                                crop.cropStatus,
-                                crop.datePlanted,
-                                crop.dateHarvested
-                              ).className
-                            }`}
-                          >
-                            {
-                              cropStatus(
-                                crop.cropStatus,
-                                crop.datePlanted,
-                                crop.dateHarvested
-                              ).status
-                            }
-                          </span>
-                        </div>
-                      </td>
+                        <td className="text-gray-500">
+                          <div>{crop.farmAreaMeasurement}</div>
+                        </td>
 
-                      <td className="text-center">
-                        <div className="flex flex-row justify-center items-centers gap-2">
-                          <SubmitButton
-                            type="button"
-                            className="slimer-button"
-                            onClick={() =>
-                              ViewCrop(
-                                crop.cropLng,
-                                crop.cropLat,
-                                crop.cropLocation as barangayType,
-                                mapRef
-                              )
-                            }
-                          >
-                            View
-                          </SubmitButton>
-                          <DynamicLink
-                            baseLink="farmerUser"
-                            dynamicId={crop.farmerId}
-                            label="Profile"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="text-color ">
+                          <div>
+                            <span
+                              className={`py-1 px-3 rounded-2xl very-very-small-text ${className}`}
+                            >
+                              {status}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td className="text-center">
+                          <div className="flex flex-row justify-center items-centers gap-2">
+                            <SubmitButton
+                              type="button"
+                              className="slimer-button"
+                              onClick={() =>
+                                ViewCrop(
+                                  crop.cropLng,
+                                  crop.cropLat,
+                                  crop.cropLocation as barangayType,
+                                  mapRef
+                                )
+                              }
+                            >
+                              View
+                            </SubmitButton>
+                            <DynamicLink
+                              baseLink="farmerUser"
+                              dynamicId={crop.farmerId}
+                              label="Profile"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </>
               }
             />

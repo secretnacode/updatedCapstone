@@ -756,8 +756,7 @@ export type ViewAllVerifiedFarmerUserQueryReturnType = {
   dateCreated: Date;
   orgRole: string;
   orgName: string;
-  reportCount: number;
-  cropCount: number;
+  status: farmerAuthStatusType;
 };
 
 export type ViewAllValidatedFarmerUserReturnType =
@@ -838,6 +837,10 @@ export type DynamicLinkPropType = {
 
 type deleteUserBaseType = {
   farmerName: string;
+};
+
+export type deleteFarmerButtonPropType = deleteMyOrgMemberPropType & {
+  path: pathToRevalidateAfterAgriDeleteFarmer;
 };
 
 export type deleteMyOrgMemberPropType = deleteUserBaseType & {
@@ -1131,6 +1134,7 @@ export type DashboardCardPropType = {
   link: string;
   cardContent: string;
   contentLabel: string;
+  isEnglish?: boolean;
 };
 
 type lineChartDataType = {
@@ -1924,3 +1928,14 @@ export type changeNewPassParamType = { token: string } & resetPasswordType;
 export type changeNewPassReturnType = ServerActionFailBaseType & {
   formError?: FormErrorType<resetPasswordType>;
 };
+
+export type pathToRevalidateAfterAgriDeleteFarmer =
+  | "/agriculturist/validateFarmer"
+  | "/agriculturist/farmerUsers";
+
+export type blockUserPropType = {
+  isEnglish: boolean;
+  blockOnClick: () => void;
+};
+
+export type blockMyOrgMemberButtonPropType = { farmerId: string };

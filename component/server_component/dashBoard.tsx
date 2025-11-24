@@ -175,15 +175,17 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   widget,
   showQuickAction = true,
 }) => {
+  const isEnglish = lineChart.user === "agriculturist";
+
   return (
     <div className="grid xl:grid-cols-4 grid-cols-1 xl:gap-4 gap-6">
       <div className="xl:col-span-3 lg:col-span-1 flex flex-col xl:gap-4 gap-6">
         <div className="grid xl:grid-cols-3 grid-cols-2 xl:gap-4 gap-6 [&>div]:shadow-sm ">
-          <DashboardCard {...card1} />
+          <DashboardCard {...card1} isEnglish={isEnglish} />
 
-          <DashboardCard {...card2} />
+          <DashboardCard {...card2} isEnglish={isEnglish} />
 
-          <DashboardCard {...card3} />
+          <DashboardCard {...card3} isEnglish={isEnglish} />
 
           <div className="xl:hidden block">
             <Suspense fallback={<WeatherSideComponentLoading />}>

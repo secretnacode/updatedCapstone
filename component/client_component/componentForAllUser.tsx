@@ -8,7 +8,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { useNotification } from "./provider/notificationProvider";
@@ -61,6 +60,9 @@ import {
   reportDownloadType,
   resetPasswordFormPropType,
   resetPasswordType,
+  blockUserPropType,
+  blockMyOrgMemberButtonPropType,
+  deleteFarmerButtonPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -89,9 +91,12 @@ import {
   getAllFarmerForResetPass,
   farmerLogout,
   agriLogout,
+  blockMyOrgMember,
+  blockFarmerUser,
 } from "@/lib/server_action/user";
 import { LineChart, PieChart } from "@mui/x-charts";
 import {
+  accountStatusStyle,
   baranggayList,
   capitalizeFirstLetter,
   DateToYYMMDD,
@@ -558,7 +563,6 @@ const DeleteUser: FC<DeleteUserPropType> = ({
   farmerName,
   deleteOnClick,
 }) => {
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
 
   return (
@@ -570,22 +574,15 @@ const DeleteUser: FC<DeleteUserPropType> = ({
         {isEnglish ? "Delete" : "Tanggalin"}
       </button>
 
-      <button
-        className="hidden"
-        onClick={() => {
-          deleteOnClick();
-          setShowModal(false);
-        }}
-        ref={submitButtonRef}
-      />
-
-      {showModal && (
-        <ModalNotice
-          type="warning"
-          title={isEnglish ? "Delete the account?" : "Tatanggalin ang account?"}
-          message={
-            <>
-              <p className="p font-bold !text-lg mb-4">
+      {showModal &&
+        createPortal(
+          <ModalNotice
+            type="warning"
+            title={
+              isEnglish ? "Delete the account?" : "Tatanggalin ang account?"
+            }
+            message={
+              <>
                 {isEnglish
                   ? `Delete the farmer user `
                   : `Burahin ang farmer user na si `}
@@ -594,26 +591,21 @@ const DeleteUser: FC<DeleteUserPropType> = ({
                   ? `?. If the user was deleted, it will deleted permanently`
                   : `?. Kapag ito ay binura mo, ito
         ay mawawala na ng tuluyan at hindi na maibabalik`}
-              </p>
-              <p className="p !text-[17px] tracking-wide">
-                {isEnglish
-                  ? "Proceed with the deletion of farmer's account?"
-                  : "Magpatuloy sa pag tatanggal ng account ng mag sasaka?"}
-              </p>
-            </>
-          }
-          onClose={() => setShowModal(false)}
-          showCancelButton={true}
-          onProceed={() => {
-            submitButtonRef.current?.click();
-            setShowModal(false);
-          }}
-          proceed={{
-            label: isEnglish ? "Proceed" : "Mag Patuloy",
-          }}
-          cancel={{ label: isEnglish ? "Back" : "Bumalik" }}
-        />
-      )}
+              </>
+            }
+            onClose={() => setShowModal(false)}
+            showCancelButton={true}
+            onProceed={() => {
+              deleteOnClick();
+              setShowModal(false);
+            }}
+            proceed={{
+              label: isEnglish ? "Proceed" : "Mag Patuloy",
+            }}
+            cancel={{ label: isEnglish ? "Back" : "Bumalik" }}
+          />,
+          document.body
+        )}
     </>
   );
 };
@@ -625,7 +617,7 @@ export const DeleteMyOrgMemberButton: FC<deleteMyOrgMemberPropType> = ({
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
 
-  const handleDeleteFarmerUser = async () => {
+  const handleDeleteOrgMember = async () => {
     try {
       handleIsLoading("Tinatanggal na ang account....");
 
@@ -644,7 +636,7 @@ export const DeleteMyOrgMemberButton: FC<deleteMyOrgMemberPropType> = ({
     <DeleteUser
       farmerName={farmerName}
       isEnglish={false}
-      deleteOnClick={handleDeleteFarmerUser}
+      deleteOnClick={handleDeleteOrgMember}
     />
   );
 };
@@ -654,9 +646,10 @@ export const DeleteMyOrgMemberButton: FC<deleteMyOrgMemberPropType> = ({
  * @param param0
  * @returns
  */
-export const DeleteFarmerButton: FC<deleteMyOrgMemberPropType> = ({
+export const DeleteFarmerButton: FC<deleteFarmerButtonPropType> = ({
   farmerId,
   farmerName,
+  path,
 }) => {
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
@@ -665,7 +658,7 @@ export const DeleteFarmerButton: FC<deleteMyOrgMemberPropType> = ({
     try {
       handleIsLoading("Deleting the farmer account....");
 
-      const deleteUser = await DeleteFarmerUser(farmerId);
+      const deleteUser = await DeleteFarmerUser(farmerId, path);
 
       handleSetNotification(deleteUser.notifMessage);
     } catch (error) {
@@ -685,6 +678,124 @@ export const DeleteFarmerButton: FC<deleteMyOrgMemberPropType> = ({
   );
 };
 
+const BlockUser: FC<blockUserPropType> = ({ isEnglish, blockOnClick }) => {
+  return (
+    <button
+      className="slimer-button bg-amber-500 hover:bg-amber-600 text-white text-nowrap"
+      onClick={blockOnClick}
+    >
+      {isEnglish ? "Block" : "I-block"}
+    </button>
+  );
+};
+
+export const BlockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleBlockOrgMember = async () => {
+    try {
+      handleIsLoading("Bino-block na ang account....");
+
+      const deleteUser = await blockMyOrgMember(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return <BlockUser isEnglish={false} blockOnClick={handleBlockOrgMember} />;
+};
+
+export const BlockFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleDeleteFarmerUser = async () => {
+    try {
+      handleIsLoading("Blocking the farmer account....");
+
+      const deleteUser = await blockFarmerUser(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return <BlockUser isEnglish={true} blockOnClick={handleDeleteFarmerUser} />;
+};
+
+const UnblockUser: FC<blockUserPropType> = ({ isEnglish, blockOnClick }) => {
+  return (
+    <button
+      className="slimer-button bg-amber-500 hover:bg-amber-600 text-white text-nowrap"
+      onClick={blockOnClick}
+    >
+      {isEnglish ? "Unblock" : "I-unblock"}
+    </button>
+  );
+};
+
+export const UnblockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleBlockOrgMember = async () => {
+    try {
+      handleIsLoading("Inu-unblock na ang account ng farmer....");
+
+      const deleteUser = await blockMyOrgMember(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return <UnblockUser isEnglish={false} blockOnClick={handleBlockOrgMember} />;
+};
+
+export const UnblockFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleDeleteFarmerUser = async () => {
+    try {
+      handleIsLoading("Blocking the farmer account....");
+
+      const deleteUser = await blockFarmerUser(farmerId);
+
+      handleSetNotification(deleteUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return <UnblockUser isEnglish={true} blockOnClick={handleDeleteFarmerUser} />;
+};
+
 export const LineChartComponent: FC<LineChartComponentPropType> = ({
   title,
   user,
@@ -694,6 +805,8 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
     "week"
   );
 
+  const isEnglish = user === "agriculturist";
+
   const week = data.week.reduce(
     (acc: barDataStateType, curVal: getReportCountThisWeekReturnType) => ({
       data: [...acc.data, Number(curVal.reportCount)],
@@ -701,7 +814,9 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
         ...acc.label,
         curVal.dayOfWeek ===
         new Date().toLocaleDateString("en-US", { weekday: "long" })
-          ? "NGAYON"
+          ? isEnglish
+            ? "TODAY"
+            : "NGAYON"
           : curVal.dayOfWeek,
       ],
     }),
@@ -751,7 +866,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
         case "week":
           return `${word} ${formatChart}`;
         case "month":
-          return `${word} ${formatChart}`;
+          return `${word} and previous ${formatChart}`;
         case "year":
           return `${word} ${formatChart}`;
       }
@@ -784,19 +899,19 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
             className={`${formatChart === "week" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("week")}
           >
-            Lingo
+            {isEnglish ? "Week" : "Lingo"}
           </Button>
           <Button
             className={`${formatChart === "month" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("month")}
           >
-            Buwan
+            {isEnglish ? "Months" : "Buwan"}
           </Button>
           <Button
             className={`${formatChart === "year" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("year")}
           >
-            Taon
+            {isEnglish ? "Year" : "Taon"}
           </Button>
         </div>
       </div>
@@ -2017,7 +2132,7 @@ export const AgriculturistFarmerReporTable: FC<
             listCount={report.length}
             tableHeaderCell={
               <>
-                <th scope="col" className="!w-[17%]">
+                <th scope="col">
                   <div
                     onClick={() => handleSortCol("farmerName")}
                     className="cursor-pointer"
@@ -2027,7 +2142,7 @@ export const AgriculturistFarmerReporTable: FC<
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[12%]">
+                <th scope="col">
                   <div
                     onClick={() => handleSortCol("cropLocation")}
                     className="cursor-pointer"
@@ -2037,7 +2152,7 @@ export const AgriculturistFarmerReporTable: FC<
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[10%]">
+                <th scope="col">
                   <div className="cursor-pointer">
                     <p>Verified</p>
                   </div>
@@ -2075,7 +2190,7 @@ export const AgriculturistFarmerReporTable: FC<
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[18.5%]">
+                <th scope="col">
                   <div>
                     <p>Action</p>
                   </div>
@@ -2180,185 +2295,207 @@ export const AgriculturistFarmerUserTable: FC<
   );
 
   return (
-    <TableWithFilter<ViewAllVerifiedFarmerUserQueryReturnType>
-      setTableList={setTableList}
-      sortCol={sortCol}
-      setSortCol={setSortCol}
-      obj={farmer}
-      additionalFilter={{
-        filterBy: {
-          orgRole: Array.from(new Set(farmer.map((val) => val.orgRole))),
-          orgName: Array.from(
-            new Set(farmer.map((val) => val.orgName).filter((val) => val))
-          ),
-        },
+    <>
+      <TableWithFilter<ViewAllVerifiedFarmerUserQueryReturnType>
+        setTableList={setTableList}
+        sortCol={sortCol}
+        setSortCol={setSortCol}
+        obj={farmer}
+        additionalFilter={{
+          filterBy: {
+            orgRole: Array.from(new Set(farmer.map((val) => val.orgRole))),
+            orgName: Array.from(
+              new Set(farmer.map((val) => val.orgName).filter((val) => val))
+            ),
+            status: Array.from(new Set(farmer.map((val) => val.status))),
+          },
 
-        handleFilterLabel: {
-          orgRole: (val) =>
-            val !== "null" ? capitalizeFirstLetter(val) : "No Org",
-          orgName: (val) => capitalizeFirstLetter(val),
-        },
-      }}
-      table={
-        <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
-          listCount={farmer.length}
-          tableHeaderCell={
-            <>
-              <th scope="col" className="!w-[17%]">
-                <div
-                  onClick={() => handleSortCol("farmerName")}
-                  className="cursor-pointer"
-                >
-                  <p>Farmer Name</p>
-                  <SortType col={"farmerName"} />
-                </div>
-              </th>
+          handleFilterLabel: {
+            orgRole: (val) =>
+              val !== "null" ? capitalizeFirstLetter(val) : "No Org",
+            orgName: (val) => capitalizeFirstLetter(val),
+            status: (val) => capitalizeFirstLetter(val),
+          },
+        }}
+        table={
+          <TableComponent
+            noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+            listCount={farmer.length}
+            tableHeaderCell={
+              <>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("farmerName")}
+                    className="cursor-pointer"
+                  >
+                    <p>Farmer Name</p>
+                    <SortType col={"farmerName"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("farmerAlias")}
-                  className="cursor-pointer"
-                >
-                  <p className="w-2/3">Alias</p>
-                  <SortType col={"farmerAlias"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("farmerAlias")}
+                    className="cursor-pointer"
+                  >
+                    <p className="w-2/3">Alias</p>
+                    <SortType col={"farmerAlias"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[10%]">
-                <div
-                  onClick={() => handleSortCol("farmerAlias")}
-                  className="cursor-pointer"
-                >
-                  <p>Created At</p>
-                  <SortType col={"farmerAlias"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("farmerAlias")}
+                    className="cursor-pointer"
+                  >
+                    <p>Created At</p>
+                    <SortType col={"farmerAlias"} />
+                  </div>
+                </th>
 
-              <th scope="col">
-                <div
-                  onClick={() => handleSortCol("orgName")}
-                  className="cursor-pointer "
-                >
-                  <p>Organization Name</p>
-                  <SortType col={"orgName"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("orgName")}
+                    className="cursor-pointer "
+                  >
+                    <p>Organization Name</p>
+                    <SortType col={"orgName"} />
+                  </div>
+                </th>
 
-              <th scope="col">
-                <div
-                  onClick={() => handleSortCol("orgRole")}
-                  className="cursor-pointer "
-                >
-                  <p>Organization Role</p>
-                  <SortType col={"orgRole"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("orgRole")}
+                    className="cursor-pointer "
+                  >
+                    <p>Organization Role</p>
+                    <SortType col={"orgRole"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[8%]">
-                <div
-                  onClick={() => handleSortCol("reportCount")}
-                  className="cursor-pointer"
-                >
-                  <p>Report Count</p>
-                  <SortType col={"reportCount"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("status")}
+                    className="cursor-pointer"
+                  >
+                    <p>Account status</p>
+                    <SortType col={"status"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[8%]">
-                <div
-                  onClick={() => handleSortCol("cropCount")}
-                  className="cursor-pointer"
-                >
-                  <p>Crop Count</p>
-                  <SortType col={"cropCount"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div>
+                    <p>Action</p>
+                  </div>
+                </th>
+              </>
+            }
+            tableCell={
+              <>
+                {tableList.map((farmer) => {
+                  const style = accountStatusStyle(farmer.status);
 
-              <th scope="col" className="!w-[18.5%]">
-                <div>
-                  <p>Action</p>
-                </div>
-              </th>
-            </>
-          }
-          tableCell={
-            <>
-              {tableList.map((farmer) => (
-                <tr key={farmer.farmerId}>
-                  <td className=" text-gray-900 font-medium ">
-                    <div>
-                      <p>{farmer.farmerName}</p>
-                    </div>
-                  </td>
+                  return (
+                    <tr
+                      key={farmer.farmerId}
+                      className={`${
+                        farmer.status === "delete"
+                          ? "bg-red-50 hover:!bg-red-100/50"
+                          : farmer.status === "block"
+                          ? "bg-amber-50 hover:!bg-amber-100/50"
+                          : ""
+                      }`}
+                    >
+                      <td className=" text-gray-900 font-medium ">
+                        <div>
+                          <p
+                            className={`${
+                              farmer.status === "delete" &&
+                              "line-through !text-gray-400"
+                            }`}
+                          >
+                            {farmer.farmerName}
+                          </p>
+                        </div>
+                      </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{farmer.farmerAlias}</p>
-                    </div>
-                  </td>
+                      <td className="text-gray-500">
+                        <div>
+                          <p>{farmer.farmerAlias}</p>
+                        </div>
+                      </td>
 
-                  <td>
-                    <div>
-                      <p>{ReadableDateFormat(farmer.dateCreated)}</p>
-                    </div>
-                  </td>
+                      <td>
+                        <div>
+                          <p>{ReadableDateFormat(farmer.dateCreated)}</p>
+                        </div>
+                      </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>
-                        {farmer.orgName ? farmer.orgName : "No organization"}
-                      </p>
-                    </div>
-                  </td>
+                      <td className="text-gray-500">
+                        <div>
+                          <p>
+                            {farmer.orgName
+                              ? farmer.orgName
+                              : "No organization"}
+                          </p>
+                        </div>
+                      </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>
-                        {capitalizeFirstLetter(
-                          farmer.orgRole ?? "No organization"
-                        )}
-                      </p>
-                    </div>
-                  </td>
+                      <td className="text-gray-500">
+                        <div>
+                          <p>
+                            {capitalizeFirstLetter(
+                              farmer.orgRole ?? "No organization"
+                            )}
+                          </p>
+                        </div>
+                      </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{farmer.reportCount}</p>
-                    </div>
-                  </td>
+                      <td className="text-gray-500">
+                        <div>
+                          <p
+                            className={`${style} rounded-2xl px-3 py-1 text-xs tracking-wider`}
+                          >
+                            {capitalizeFirstLetter(farmer.status)}
+                          </p>
+                        </div>
+                      </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{farmer.cropCount}</p>
-                    </div>
-                  </td>
+                      <td>
+                        <div className="flex flex-row justify-center items-center gap-2">
+                          <DynamicLink
+                            baseLink="farmerUser"
+                            dynamicId={farmer.farmerId}
+                            label="Profile"
+                            className="!bg-green-500 hover:!bg-green-600"
+                          />
 
-                  <td className="text-center">
-                    <div className="flex flex-row justify-center items-center">
-                      <Button className="slimer-button bg-red-500 hover:bg-red-600 text-white">
-                        Delete
-                      </Button>
+                          {farmer.status !== "delete" && (
+                            <>
+                              {farmer.status === "block" ? (
+                                <>buti nga</>
+                              ) : (
+                                <BlockFarmerButton farmerId={farmer.farmerId} />
+                              )}
 
-                      <Button className="slimer-button bg-amber-500 hover:bg-amber-600 text-white">
-                        Block
-                      </Button>
-
-                      <DynamicLink
-                        baseLink="farmerUser"
-                        dynamicId={farmer.farmerId}
-                        label="Profile"
-                        className="!bg-green-500 hover:!bg-green-600"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </>
-          }
-        />
-      }
-    />
+                              <DeleteFarmerButton
+                                farmerId={farmer.farmerId}
+                                farmerName={farmer.farmerName}
+                                path="/agriculturist/farmerUsers"
+                              />
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </>
+            }
+          />
+        }
+      />
+    </>
   );
 };
 
@@ -2513,6 +2650,7 @@ export const AgriculturistValidateFarmerTable: FC<
                       <DeleteFarmerButton
                         farmerId={farmer.farmerId}
                         farmerName={farmer.farmerName}
+                        path="/agriculturist/validateFarmer"
                       />
                     </div>
                   </td>

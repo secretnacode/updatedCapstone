@@ -482,7 +482,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
     <div className="modal-form">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in slide-in-from-bottom-4 duration-300">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in slide-in-from-bottom-4 duration-300 block">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             {logo && (
@@ -718,6 +718,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
   cardContent,
   contentLabel,
   link,
+  isEnglish = false,
 }) => {
   return (
     <div className="component">
@@ -744,7 +745,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
               {contentLabel}
             </p>
             <Link href={link} className="card-link xl:block lg:hidden block">
-              Tingnan
+              {isEnglish ? "See More" : "Tingnan"}
             </Link>
           </div>
         </div>

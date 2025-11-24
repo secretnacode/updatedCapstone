@@ -4,6 +4,7 @@ import {
   agriAuthQueryReturnType,
   agriculturistRoleType,
   agriIsExistParamType,
+  allUserRoleType,
   barangayType,
   farmerAuthStatusType,
   FarmerFirstDetailType,
@@ -19,13 +20,17 @@ import {
   ViewAllVerifiedFarmerUserQueryReturnType,
 } from "@/types";
 import { pool } from "../configuration";
+import { Hash } from "@/lib/reusableFunctions";
+import { CreateUUID } from "../helper_function/reusableFunction";
 
 // option of farmer auth status
-const farmerAuthStatus: Record<farmerAuthStatusType, farmerAuthStatusType> = {
+export const farmerAuthStatus = async (): Promise<
+  Record<farmerAuthStatusType, farmerAuthStatusType>
+> => ({
   delete: "delete",
   active: "active",
   block: "block",
-};
+});
 
 /**
  * Check the user value by making a query that returns a boolean value.
@@ -62,9 +67,11 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
  **/
 export const InsertNewUser = async (data: NewUserType): Promise<void> => {
   try {
+    const { active } = await farmerAuthStatus();
+
     await pool.query(
       `insert into capstone.auth ("authId", "username", "password", "status") values ($1, $2, $3, $4)`,
-      [data.userId, data.username, data.password, farmerAuthStatus.active]
+      [data.userId, data.username, data.password, active]
     );
   } catch (error) {
     console.error(
@@ -88,10 +95,12 @@ export const UserLogin = async (
   username: string
 ): Promise<QueryUserLoginReturnType> => {
   try {
+    const del = (await farmerAuthStatus()).delete;
+
     // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     const query = await pool.query(
       `select "authId", "password", "status" from capstone.auth where "username" = $1 and "status" <> $2`,
-      [username, farmerAuthStatus.delete]
+      [username, del]
     );
 
     if (!query.rows[0])
@@ -369,26 +378,53 @@ export const GetFarmerProfileOrgInfoQuery = async (
 };
 
 /**
- * delete the user infromation
- * @param farmerId id of the farmer you want to delete
+ * query for deleting or blocking the user
+ * @param farmerId id of the farmer to be mutated
+ * @param role role of the user who will make this action(deleting or blocking the user)
+ * @param action block or delete
  */
-export const DelteUserAccountQuery = async (
-  farmerId: string
+export const blockOrDelteUserAccountQuery = async (
+  farmerId: string,
+  role: allUserRoleType,
+  action: "block" | "delete"
 ): Promise<void> => {
   try {
-    await pool.query(
-      `update capstone.auth set "status" = $1 where "authId" = $2`,
-      [farmerAuthStatus.delete, farmerId]
-    );
+    const status = await farmerAuthStatus();
+
+    // default query for blocking a user
+    let query = `update capstone.auth set "status" = $1, "changeStatusAt" = $2, "changeStatusBy" = $3 where "authId" = $4`;
+
+    // default param of the query for blocking a user
+    let param = [status.block, new Date(), role, farmerId];
+
+    // if the action is delete, it wil overide the existing query and param
+    if (action === "delete") {
+      query = `update capstone.auth set "username" = $1, "password" = $2, "status" = $3, "changeStatusAt" = $4, "changeStatusBy" = $5 where "authId" = $6`;
+
+      param = [
+        "",
+        await Hash(CreateUUID()),
+        status.delete,
+        new Date(),
+        role,
+        farmerId,
+      ];
+    }
+
+    await pool.query(query, param);
   } catch (error) {
-    console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user`
-    );
+    const message =
+      role === "admin" || role === "agriculturist"
+        ? `Unexpected error while ${
+            action === "delete" ? "deleting" : "blocking"
+          } the user`
+        : `May pagkakamali na hindi inaasahang nang yari sa pag ${
+            action === "delete" ? "tatanggal" : "bblock"
+          } ng account ng user`;
+
+    console.error(`${message}: ${(error as Error).message}`);
+
+    throw new Error(message);
   }
 };
 
@@ -437,10 +473,12 @@ export const ViewAllVerifiedFarmerUserQuery = async (): Promise<
   ViewAllVerifiedFarmerUserQueryReturnType[]
 > => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgRole", o."orgName", count(r."reportId") as "reportCount", count(c."cropId") as "cropCount" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" where f."verified" = $1 group by f."farmerId", f."farmerFirstName", f."farmerLastName", f."farmerAlias", f."verified", f."dateCreated", f."orgId", f."orgRole", o."orgName"`,
-        [true]
+        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgRole", o."orgName", a."status" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" left join capstone.auth a on a."authId" = f."farmerId" where f."verified" = $1 group by f."farmerId", o."orgId", a."status" order by case when a."status" = $2 then $3 when a."status" = $4 then $5 else $6 end asc`,
+        [true, status.active, 1, status.block, 2, 3]
       )
     ).rows;
   } catch (error) {

@@ -3,6 +3,7 @@ import {
   brangayWithCalauanType,
   determineCropStatusParamType,
   determineCropStatusReturnType,
+  farmerAuthStatusType,
   getPointCoordinateReturnType,
   intoFeatureCollectionDataParam,
   NotificationBaseType,
@@ -642,7 +643,7 @@ export const determineCropStatus = ({
 
   if (cropStatus === null)
     return {
-      status: "Wala ka pang ulat",
+      status: isEnglish ? "No report yet" : "Wala ka pang ulat",
       className: "bg-red-100 text-red-800",
     };
 
@@ -799,3 +800,18 @@ export const cityToHighLightInMap = (data: barangayType[]) =>
       ];
     }, [])
   );
+
+/**
+ * style for farmer account status
+ * @param status status fo the farmer account
+ */
+export const accountStatusStyle = (status: farmerAuthStatusType) => {
+  switch (status) {
+    case "active":
+      return "border border-green-400 bg-green-100 text-green-700";
+    case "block":
+      return "border border-amber-400 bg-amber-100 text-amber-700";
+    case "delete":
+      return "border border-red-400 bg-red-100 text-red-700";
+  }
+};

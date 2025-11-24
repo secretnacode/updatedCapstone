@@ -2,7 +2,7 @@
 
 import {
   CheckMyMemberquery,
-  DelteUserAccountQuery,
+  blockOrDelteUserAccountQuery,
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getPassword,
@@ -26,6 +26,7 @@ import {
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
   newUserValNeedInfoReturnType,
+  pathToRevalidateAfterAgriDeleteFarmer,
   reportSequenceAndUserLocReturnType,
   ServerActionFailBaseType,
   serverActionNormalReturnType,
@@ -60,6 +61,7 @@ import { changePasswordSchema } from "@/util/helper_function/validation/validati
 import { DeleteSession, GetSession } from "../session";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
+
 /**
  * server action when the farmer leader want to delete a farmer account
  * @param farmerId id that you want to delete
@@ -69,7 +71,9 @@ export const DeleteMyOrgMember = async (
   farmerId: string
 ): Promise<serverActionNormalReturnType> => {
   try {
-    const { userId } = await ProtectedAction("delete:farmer:org:member:user");
+    const { userId, work } = await ProtectedAction(
+      "delete:farmer:org:member:user"
+    );
 
     const checkAuthorization = await farmerLeaderValidationForImportantAction(
       farmerId,
@@ -89,7 +93,7 @@ export const DeleteMyOrgMember = async (
         ],
       };
 
-    await DelteUserAccountQuery(farmerId);
+    await blockOrDelteUserAccountQuery(farmerId, work, "delete");
 
     revalidatePath(`/farmerLeader/orgMember`);
 
@@ -104,7 +108,9 @@ export const DeleteMyOrgMember = async (
     };
   } catch (error) {
     const err = error as Error;
-    console.log(`Error in getting the farmer reports: ${err}`);
+    console.log(
+      `May hindi inaasahang pag kakamali habang tinatanggal ang farmer: ${err}`
+    );
     return {
       success: false,
       notifMessage: [{ message: err.message, type: "error" }],
@@ -118,18 +124,20 @@ export const DeleteMyOrgMember = async (
  * @returns notifMessage that will be consumed by the notification provider
  */
 export const DeleteFarmerUser = async (
-  farmerId: string
+  farmerId: string,
+  path: pathToRevalidateAfterAgriDeleteFarmer
 ): Promise<serverActionNormalReturnType> => {
   try {
-    await ProtectedAction("delete:farmer:org:member:user");
+    const { work } = await ProtectedAction("delete:farmer:user");
 
     const checkAuthorization = await agriValidationForImportantAction(farmerId);
+
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
 
-    await DelteUserAccountQuery(farmerId);
+    await blockOrDelteUserAccountQuery(farmerId, work, "delete");
 
-    revalidatePath(`/agriculturist/validateFarmer`);
+    revalidatePath(path);
 
     return {
       success: true,
@@ -142,7 +150,106 @@ export const DeleteFarmerUser = async (
     };
   } catch (error) {
     const err = error as Error;
-    console.log(`Error in getting the farmer reports: ${err}`);
+
+    console.log(`Unexpected error occured while deleting the farmer: ${err}`);
+
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * server action for blocking the org member of the leader
+ * @param farmerId id of the member
+ * @returns
+ */
+export const blockMyOrgMember = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { userId, work } = await ProtectedAction(
+      "update:farmer:org:member:user"
+    );
+
+    const checkAuthorization = await farmerLeaderValidationForImportantAction(
+      farmerId,
+      userId
+    );
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    if (!(await CheckMyMemberquery(farmerId, userId)))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "Ang user na ibo-block mo ay hindi mo kamiyembro!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+
+    revalidatePath(`/farmerLeader/orgMember`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pag bblock ng account ng farmer",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May hindi inaasahang pag kakamali habang bino-block and farmer account: ${err}`
+    );
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * agriculturist action for blocking the user
+ * @param farmerId id of the farmer to be block
+ * @returns
+ */
+export const blockFarmerUser = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { work } = await ProtectedAction("update:farmer:user");
+
+    const checkAuthorization = await agriValidationForImportantAction(farmerId);
+
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+
+    revalidatePath(`/agriculturist/farmerUsers`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Successfully blocked the farmer account",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Unexpected error occured while blocking the farmer: ${err}`);
+
     return {
       success: false,
       notifMessage: [{ message: err.message, type: "error" }],
@@ -872,3 +979,5 @@ export const checkUserAlreadyLogin =
       };
     }
   };
+
+// export const deleteUser = async;
