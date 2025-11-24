@@ -50,7 +50,7 @@ export default async function Page() {
             tableClassName="!shadow-none"
             tableHeaderCell={
               <>
-                <th scope="col" className="!w-[17%]">
+                <th scope="col">
                   <div>
                     <p>Name</p>
                   </div>
@@ -88,7 +88,7 @@ export default async function Page() {
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[15%]">
+                <th scope="col">
                   <div>
                     <p>Action</p>
                   </div>

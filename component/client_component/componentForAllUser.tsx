@@ -2547,7 +2547,7 @@ export const AgriculturistValidateFarmerTable: FC<
           listCount={farmer.length}
           tableHeaderCell={
             <>
-              <th scope="col" className="!w-[17%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("farmerName")}
                   className="cursor-pointer"
@@ -2557,7 +2557,7 @@ export const AgriculturistValidateFarmerTable: FC<
                 </div>
               </th>
 
-              <th scope="col" className="!w-[12%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
@@ -2567,7 +2567,7 @@ export const AgriculturistValidateFarmerTable: FC<
                 </div>
               </th>
 
-              <th scope="col" className="!w-[10%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("farmerAlias")}
                   className="cursor-pointer"
@@ -2582,7 +2582,7 @@ export const AgriculturistValidateFarmerTable: FC<
                   onClick={() => handleSortCol("orgName")}
                   className="cursor-pointer "
                 >
-                  <p></p>
+                  <p>Organization name</p>
                   <SortType col={"orgName"} />
                 </div>
               </th>
@@ -2593,7 +2593,7 @@ export const AgriculturistValidateFarmerTable: FC<
                 </div>
               </th>
 
-              <th scope="col" className="!w-[18.5%]">
+              <th scope="col">
                 <div>
                   <p>Action</p>
                 </div>
@@ -2643,6 +2643,7 @@ export const AgriculturistValidateFarmerTable: FC<
                       <DynamicLink
                         baseLink="farmerUser"
                         dynamicId={farmer.farmerId}
+                        label="Profile"
                       />
 
                       <ApprovedFarmerButton farmerId={farmer.farmerId} />
@@ -2703,7 +2704,7 @@ export const AgriculturistFarmerOrgTable: FC<
           listCount={orgVal.length}
           tableHeaderCell={
             <>
-              <th scope="col" className="!w-[17%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("farmerLeaderName")}
                   className="cursor-pointer"
@@ -2713,7 +2714,7 @@ export const AgriculturistFarmerOrgTable: FC<
                 </div>
               </th>
 
-              <th scope="col" className="!w-[12%]">
+              <th scope="col">
                 <div
                   onClick={() => handleSortCol("farmerLeaderAlias")}
                   className="cursor-pointer"
@@ -2743,7 +2744,7 @@ export const AgriculturistFarmerOrgTable: FC<
                 </div>
               </th>
 
-              <th scope="col" className="!w-[19%]">
+              <th scope="col">
                 <div>
                   <p>Action</p>
                 </div>
