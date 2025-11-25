@@ -658,7 +658,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
           required
-          placeholder="Hal: Naitanim na ang mga palay dine sa lamot 1"
+          placeholder="Hal: Naitanim na ang mga palay dito sa lamot 1"
           className="input-green-ring"
         />
 
@@ -876,7 +876,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
           required
-          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
+          placeholder="Hal: Naani na ang mga palay dito sa may lamot 1, at handa nang ipag benta"
           className="input-amber-ring"
         />
 

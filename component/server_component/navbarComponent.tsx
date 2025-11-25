@@ -80,7 +80,7 @@ export const NavbarComponent: FC = async () => {
 
         <div className="md:block hidden">{navbar}</div>
 
-        <div className="md:hidden block absolute left-0 top-0">
+        <div className="md:hidden block absolute left-5 top-5 z-999 cursor-pointer">
           <BurgerNav>{navbar}</BurgerNav>
         </div>
       </div>
