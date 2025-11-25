@@ -49,12 +49,19 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
 
   if (!val.success) redirect(`/?notif=${NotifToUriComponent(val.notifError)}`);
 
-  const AgriNavbar = forAgri && <AgriculturistNav pages={currentPage} />;
+  const AgriNavbar = forAgri ? (
+    <AgriculturistNav pages={currentPage} />
+  ) : (
+    <AgriculturistNav />
+  );
 
-  const FarmerNavbar = forAgri === false &&
-    (val.work === "farmer" || val.work === "leader") && (
+  const FarmerNavbar =
+    (val.work === "farmer" || val.work === "leader") &&
+    (forAgri === false ? (
       <FarmerNav role={val.work} pages={currentPage} />
-    );
+    ) : (
+      <FarmerNav role={val.work} />
+    ));
 
   const logoLink = (): string => {
     if (val.work === "admin" || val.work === "agriculturist")

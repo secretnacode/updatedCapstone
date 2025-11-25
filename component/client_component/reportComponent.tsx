@@ -457,7 +457,7 @@ const DamageReport: FC<ReportContentPropType> = ({
         />
 
         <FormDivLabelInput
-          labelMessage="Laki ng sira sa iyong pananim:"
+          labelMessage="Laki ng sira sa iyong pananim:(Ektarya)"
           inputName={"totalDamageArea"}
           formError={state.formError?.totalDamageArea}
           inputType="number"
@@ -1469,10 +1469,12 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                 <div className="space-y-1">
                   <div className="date-report">
                     <CircleUser className="logo" />
+
                     <p>
                       {isEnglish ? "Farmer name" : "Pangalan ng mag sasaka"}
                     </p>
                   </div>
+
                   <p className="font-medium">{farmerName}</p>
                 </div>
               )}
@@ -1480,16 +1482,20 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
               <div className="space-y-1">
                 <div className="date-report">
                   <Wheat className="logo" />
+
                   <p>{isEnglish ? "Crop name" : "Pangalang ng pananim"}</p>
                 </div>
+
                 <p className="font-medium">{userReport.cropName}</p>
               </div>
 
               <div className="space-y-1">
                 <div className="date-report">
                   <Calendar className="logo" />
+
                   <p>{isEnglish ? "Day it happen" : "Araw ng kaganapan"}</p>
                 </div>
+
                 <p className="font-medium">
                   {userReport.dayHappen.toDateString()}
                 </p>
@@ -1498,18 +1504,22 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
               <div className="space-y-1">
                 <div className="date-report">
                   <CalendarArrowUp className="logo" />
+
                   <p>{isEnglish ? "Day it was reported" : "Araw na ipinasa"}</p>
                 </div>
+
                 <p className="font-medium">
                   {userReport.dayReported.toDateString()}
                 </p>
               </div>
             </div>
 
-            <div className="form-div">
+            <div className="space-y-3">
               {userReport.cropType && (
                 <FormDivLabelInput
-                  labelMessage="Uri ng pananim:"
+                  labelMessage={
+                    isEnglish ? "Type of crops:" : "Uri ng pananim:"
+                  }
                   inputName="cropType"
                   defaultValue={capitalizeFirstLetter(userReport.cropType)}
                   inputDisable={true}
@@ -1518,7 +1528,11 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
 
               {userReport.totalKgHarvest && (
                 <FormDivLabelInput
-                  labelMessage="Kabuuang kilo na naani:"
+                  labelMessage={
+                    isEnglish
+                      ? "Total KG harvested:"
+                      : "Kabuuang kilo na naani:"
+                  }
                   inputName="totalKgHarvest"
                   defaultValue={userReport.totalKgHarvest}
                   inputDisable={true}
@@ -1527,7 +1541,11 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
 
               {userReport.totalDamageArea && (
                 <FormDivLabelInput
-                  labelMessage="Laki ng sira:(Ektarya)"
+                  labelMessage={
+                    isEnglish
+                      ? "Total damage area:(Hectare)"
+                      : "Laki ng sira:(Ektarya)"
+                  }
                   inputName="totalDamageArea"
                   defaultValue={userReport.totalDamageArea}
                   inputDisable={true}
@@ -1561,8 +1579,11 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                     <span>
                       <Info className="logo !size-5 text-blue-600" />
                     </span>
+
                     <p className="text-blue-800 font-medium very-small-text">
-                      Binago mo ang ulat na ginawa ng iba
+                      {isEnglish
+                        ? "You change the content of the report"
+                        : "Binago mo ang ulat na ginawa ng iba"}
                     </p>
                   </div>
 
@@ -1570,7 +1591,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                     className="slimer-button !bg-red-100 !text-black outline outline-red-800 hover:!bg-red-600 hover:!text-white hover:outline-none hover:shadow-md "
                     onClick={backDefault}
                   >
-                    Ibalik sa dati
+                    {isEnglish ? "Revert to normal" : "Ibalik sa dati"}
                   </CancelButton>
                 </div>
               )}
@@ -1584,7 +1605,6 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
               <div className="grid grid-cols-2 gap-4">
                 {userReport.pictures.map((pic, index) => (
                   <div key={pic + index} className="relative aspect-video">
-                    -
                     <Image
                       src={pic}
                       alt={`Larawan ${index + 1} ng gagawing ulat`}

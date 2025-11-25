@@ -27,8 +27,11 @@ export default async function Page({
   return (
     <div className="component space-y-4">
       <div>
-        <h1 className="table-title">Member of the organization</h1>
+        <h1 className="table-title">{`Member/s of the ${
+          orgMemberList.success ? orgMemberList.orgName : "unknown"
+        } organization`}</h1>
       </div>
+
       {!orgMemberList.success ? (
         <>
           <RenderRedirectNotification notif={orgMemberList.notifError} />

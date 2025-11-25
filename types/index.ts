@@ -367,7 +367,7 @@ export type GetAllFarmerReportQueryReturnType = {
   verificationStatus: string;
   farmerName: string;
   dayReported: Date;
-  dayHappen: Date;
+  reportType: reportTypeStateType;
   orgName: string;
 };
 
@@ -441,11 +441,13 @@ export type UserFarmerInfoPropType = {
   leaderName: string;
 };
 
-export type ViewUserProfileFormPropType = {
-  userInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+export type ViewUserProfileFormPropType = MyProfileFormPropType & {
+  isEnglish: boolean;
 };
 
-export type MyProfileFormPropType = ViewUserProfileFormPropType;
+export type MyProfileFormPropType = {
+  userInfo: GetFarmerProfilePersonalInfoQueryReturnType;
+};
 // & (
 //   | {
 //       isViewing: true;
@@ -492,6 +494,7 @@ export type MyOrganizationFormPropType = {
 
 export type UserOrganizationInfoFormPropType = {
   userOrgInfo?: GetFarmerProfileOrgInfoQueryReturnType;
+  isEnglish: boolean;
 };
 // | {
 //     isViewing: false;
@@ -518,12 +521,12 @@ export type CreateNewOrgAfterSignUpType = {
 };
 
 export type GetFarmerUserProfileInfoReturnType =
-  | SuccessGetMyProfileInfoReturnType
+  | (SuccessGetMyProfileInfoReturnType & {
+      work: allUserRoleType;
+    })
   | {
       success: false;
-      isNotValid?: true;
-      notifError?: NotificationBaseType[];
-      isExist?: false;
+      notifError: NotificationBaseType[];
     };
 
 export type GetFarmerCropInfoQueryReturnType = {
@@ -878,7 +881,11 @@ export type GetAllOrgMemberListQueryReturnType = {
 };
 
 export type GetAllOrgMemberListReturnType =
-  | { success: true; memberList: GetAllOrgMemberListQueryReturnType[] }
+  | {
+      success: true;
+      memberList: GetAllOrgMemberListQueryReturnType[];
+      orgName: string;
+    }
   | (ServerActionFailBaseType & { isExist?: boolean });
 
 export type AgriculturistNavLinkType = {
@@ -894,6 +901,8 @@ export type FarmerUserProfilePropType = {
 
 export type ViewCropModalButtonPropType = {
   isViewing: boolean;
+  isEnglish: boolean;
+  authStatus: farmerAuthStatusType;
 };
 
 export type UserProFilePropType = {
@@ -1781,7 +1790,10 @@ export type getCropStatusCountCropStatusAccType = {
 };
 
 export type getCropStatusCountReturnType =
-  | { success: true; cropStatusCount: getCropStatusCountCropStatusAccType[] }
+  | {
+      success: true;
+      cropStatusCount: getCropStatusCountCropStatusAccType[];
+    }
   | ServerActionFailBaseType;
 
 export type agriculturistFarmerUserTablePropType = {
@@ -1822,7 +1834,6 @@ export type viewUserCropInfoPropType = {
 export type profileButtonIdType =
   | "profile-user-info"
   | "profile-org-info"
-  | "profile-crop-info"
   | "profile-change-pass";
 
 export type BurgerNavPropType = ChildrenPropType;

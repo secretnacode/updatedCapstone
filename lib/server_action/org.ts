@@ -12,6 +12,7 @@ import {
   GetAllOrganizationQuery,
   GetAllOrgMemberListQuery,
   GetAvailableOrgQuery,
+  getOrgName,
   organizationIsExist,
   UpdateUserOrg,
 } from "@/util/queries/org";
@@ -153,7 +154,11 @@ export const GetAllOrgMemberList = async (
         isExist: false,
       };
 
-    return { success: true, memberList: await GetAllOrgMemberListQuery(orgId) };
+    return {
+      success: true,
+      memberList: await GetAllOrgMemberListQuery(orgId),
+      orgName: await getOrgName(orgId),
+    };
   } catch (error) {
     const err = error as Error;
     console.log(

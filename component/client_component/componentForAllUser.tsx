@@ -104,6 +104,7 @@ import {
   NotifToUriComponent,
   ReadableDateFormat,
   reportStatus,
+  reportTypeColor,
   timeStampAmPmFormat,
   translateReportType,
   UnexpectedErrorMessage,
@@ -123,6 +124,7 @@ import {
   Minus,
   Package,
   Phone,
+  Plus,
   Search,
   Sprout,
   User,
@@ -145,6 +147,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { createPortal } from "react-dom";
 import { getToBeDownloadReport } from "@/lib/server_action/report";
 import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -751,22 +754,21 @@ const UnblockUser: FC<blockUserPropType> = ({ isEnglish, blockOnClick }) => {
 export const UnblockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
   farmerId,
 }) => {
-  const { handleSetNotification } = useNotification();
-  const { handleIsLoading, handleDoneLoading } = useLoading();
+  // const { handleSetNotification } = useNotification();
+  // const { handleIsLoading, handleDoneLoading } = useLoading();
 
   const handleBlockOrgMember = async () => {
-    try {
-      handleIsLoading("Inu-unblock na ang account ng farmer....");
-
-      const deleteUser = await blockMyOrgMember(farmerId);
-
-      handleSetNotification(deleteUser.notifMessage);
-    } catch (error) {
-      const err = error as Error;
-      handleSetNotification([{ message: err.message, type: "error" }]);
-    } finally {
-      handleDoneLoading();
-    }
+    console.log(farmerId);
+    // try {
+    //   handleIsLoading("Inu-unblock na ang account ng farmer....");
+    //   const deleteUser = await blockMyOrgMember(farmerId);
+    //   handleSetNotification(deleteUser.notifMessage);
+    // } catch (error) {
+    //   const err = error as Error;
+    //   handleSetNotification([{ message: err.message, type: "error" }]);
+    // } finally {
+    //   handleDoneLoading();
+    // }
   };
 
   return <UnblockUser isEnglish={false} blockOnClick={handleBlockOrgMember} />;
@@ -775,22 +777,21 @@ export const UnblockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
 export const UnblockFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
   farmerId,
 }) => {
-  const { handleSetNotification } = useNotification();
-  const { handleIsLoading, handleDoneLoading } = useLoading();
+  // const { handleSetNotification } = useNotification();
+  // const { handleIsLoading, handleDoneLoading } = useLoading();
 
   const handleDeleteFarmerUser = async () => {
-    try {
-      handleIsLoading("Blocking the farmer account....");
-
-      const deleteUser = await blockFarmerUser(farmerId);
-
-      handleSetNotification(deleteUser.notifMessage);
-    } catch (error) {
-      const err = error as Error;
-      handleSetNotification([{ message: err.message, type: "error" }]);
-    } finally {
-      handleDoneLoading();
-    }
+    console.log(farmerId);
+    // try {
+    //   handleIsLoading("Blocking the farmer account....");
+    //   const deleteUser = await blockFarmerUser(farmerId);
+    //   handleSetNotification(deleteUser.notifMessage);
+    // } catch (error) {
+    //   const err = error as Error;
+    //   handleSetNotification([{ message: err.message, type: "error" }]);
+    // } finally {
+    //   handleDoneLoading();
+    // }
   };
 
   return <UnblockUser isEnglish={true} blockOnClick={handleDeleteFarmerUser} />;
@@ -923,7 +924,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
         series={[
           {
             data: barData.data,
-            label: "report",
+            label: isEnglish ? "Report" : "Ulat",
             color: "oklch(72.3% 0.219 149.579)",
           },
         ]}
@@ -933,7 +934,9 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
 
       <div className="mt-3 flex justify-start items-center gap-1">
         <p className="bg-green-500 rounded-full size-3" />
-        <p className="text-gray-500 text-sm">Bilang ng mga ulat</p>
+        <p className="text-gray-500 text-sm">
+          {isEnglish ? "Farmer's report count" : "Bilang ng mga ulat"}
+        </p>
       </div>
     </div>
   );
@@ -1173,7 +1176,10 @@ export const CreateResetPassOrCreateAgriButton = () => {
           className="flex justify-between items-center gap-2 !px-4 relative"
           onClick={() => setShowOption(!showOption)}
         >
-          <span>Create</span>
+          <span className="flex items-center gap-1">
+            <Plus className="size-4 stroke-3" />
+            Create
+          </span>
           <ChevronDown
             className={`logo transition-transform duration-300 ${
               showOption ? "rotate-180" : ""
@@ -1375,7 +1381,7 @@ export function TableWithFilter<
                               : { col: col, val: option }
                           )
                         }
-                        className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize  ${
+                        className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize cursor-pointer ${
                           filterCol?.val === option
                             ? "bg-green-500 text-white"
                             : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
@@ -2119,11 +2125,15 @@ export const AgriculturistFarmerReporTable: FC<
             verificationStatus: Array.from(
               new Set(report.map((val) => val.verificationStatus))
             ),
+            reportType: Array.from(
+              new Set(report.map((val) => val.reportType))
+            ),
           },
 
           handleFilterLabel: {
             verificationStatus: (val) =>
               val === "true" ? "Verified" : "Not Verified",
+            reportType: (val) => capitalizeFirstLetter(val),
           },
         }}
         table={
@@ -2153,12 +2163,6 @@ export const AgriculturistFarmerReporTable: FC<
                 </th>
 
                 <th scope="col">
-                  <div className="cursor-pointer">
-                    <p>Verified</p>
-                  </div>
-                </th>
-
-                <th scope="col">
                   <div
                     onClick={() => handleSortCol("orgName")}
                     className="cursor-pointer "
@@ -2173,20 +2177,23 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("dayReported")}
                     className="cursor-pointer"
                   >
-                    <p className="w-3/5">
+                    <p>
                       <p>Date was passed</p>
                     </p>
+
                     <SortType col={"dayReported"} />
                   </div>
                 </th>
 
                 <th scope="col">
-                  <div
-                    onClick={() => handleSortCol("dayHappen")}
-                    className="cursor-pointer"
-                  >
-                    <p>Date it happen</p>
-                    <SortType col={"dayHappen"} />
+                  <div>
+                    <p>Verified</p>
+                  </div>
+                </th>
+
+                <th scope="col">
+                  <div>
+                    <p>Report Type</p>
                   </div>
                 </th>
 
@@ -2213,22 +2220,6 @@ export const AgriculturistFarmerReporTable: FC<
                       </div>
                     </td>
 
-                    <td>
-                      <div>
-                        <p
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
-                            report.verificationStatus
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {report.verificationStatus
-                            ? "Verified"
-                            : "Not verified"}
-                        </p>
-                      </div>
-                    </td>
-
                     <td className="text-gray-500">
                       <div>
                         <p>
@@ -2245,15 +2236,38 @@ export const AgriculturistFarmerReporTable: FC<
                       </div>
                     </td>
 
+                    <td>
+                      <div>
+                        <p
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center tracking-wider ${
+                            report.verificationStatus
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {report.verificationStatus
+                            ? "Verified"
+                            : "Not verified"}
+                        </p>
+                      </div>
+                    </td>
+
                     <td className="text-gray-500">
                       <div>
-                        <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
+                        <p
+                          className={`${reportTypeColor(
+                            report.reportType
+                          )} text-xs py-1 px-3 rounded-2xl tracking-wider`}
+                        >
+                          {capitalizeFirstLetter(report.reportType)}
+                        </p>
                       </div>
                     </td>
 
                     <td className="text-center">
                       <div className="flex flex-row justify-center items-center gap-2">
                         <ViewUserReportButton
+                          farmerName={report.farmerName}
                           reportId={report.reportId}
                           className="slimer-button"
                           label="View Report"
@@ -2374,12 +2388,8 @@ export const AgriculturistFarmerUserTable: FC<
                 </th>
 
                 <th scope="col">
-                  <div
-                    onClick={() => handleSortCol("status")}
-                    className="cursor-pointer"
-                  >
+                  <div>
                     <p>Account status</p>
-                    <SortType col={"status"} />
                   </div>
                 </th>
 
@@ -2473,7 +2483,9 @@ export const AgriculturistFarmerUserTable: FC<
                           {farmer.status !== "delete" && (
                             <>
                               {farmer.status === "block" ? (
-                                <>buti nga</>
+                                <UnblockFarmerButton
+                                  farmerId={farmer.farmerId}
+                                />
                               ) : (
                                 <BlockFarmerButton farmerId={farmer.farmerId} />
                               )}
@@ -2648,6 +2660,7 @@ export const AgriculturistValidateFarmerTable: FC<
 
                       <ApprovedFarmerButton farmerId={farmer.farmerId} />
 
+                      {/* Baguhin yung logic nito kung saan tatanggalin tlga yung information din sa farmer table kase wala pa nn napapasa yung user na report kaya d kelanag ng soft deletion */}
                       <DeleteFarmerButton
                         farmerId={farmer.farmerId}
                         farmerName={farmer.farmerName}
@@ -2922,12 +2935,16 @@ export const AgriculturistOrgMemberTable: FC<
                   </td>
 
                   <td className="text-gray-500">
-                    <div
-                      className={`table-verify-cell ${
-                        member.verified ? "table-verified" : "table-unverified"
-                      }`}
-                    >
-                      <p>{member.verified ? "Verified" : "Unverified"}</p>
+                    <div>
+                      <p
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center tracking-wider ${
+                          member.verified
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {member.verified ? "Verified" : "Unverified"}
+                      </p>
                     </div>
                   </td>
 
@@ -3122,7 +3139,7 @@ export const FarmerLogoutButton = () => {
             onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}
-            proceed={{ label: "Mag patuloy" }}
+            proceed={{ label: "Mag log out" }}
             cancel={{ label: "Kanselahin" }}
           />,
           document.body
@@ -3184,7 +3201,7 @@ export const AgriLogoutButton = () => {
             onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}
-            proceed={{ label: "Confirm, Log Out" }}
+            proceed={{ label: "Log out" }}
             cancel={{ label: "Cancel" }}
           />,
           document.body
@@ -3349,5 +3366,32 @@ export const ResetPasswordForm: FC<resetPasswordFormPropType> = ({ token }) => {
         <button type="submit">IPASA</button>
       </form>
     </div>
+  );
+};
+
+export const BackButton: FC<{ label: string }> = ({ label }) => {
+  const router = useRouter();
+
+  return (
+    <button
+      onClick={() => router.back()}
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={2}
+        stroke="currentColor"
+        className="w-4 h-4"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+        />
+      </svg>
+      {label}
+    </button>
   );
 };

@@ -348,6 +348,8 @@ export const getCropStatusCount =
             isEnglish: true,
           }).status;
 
+          console.log(cropStatus);
+
           if (acc.some((val) => val.status === cropStatus))
             return acc.map((val) =>
               val.status === cropStatus
@@ -359,6 +361,10 @@ export const getCropStatusCount =
         },
         []
       );
+
+      console.log(crop);
+
+      console.log(cropStatusCount);
 
       return {
         success: true,

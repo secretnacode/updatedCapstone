@@ -643,25 +643,26 @@ export const determineCropStatus = ({
 
   if (cropStatus === null)
     return {
-      status: isEnglish ? "No report yet" : "Wala ka pang ulat",
-      className: "bg-red-100 text-red-800",
-    };
-
-  if (!datePlanted || !dateHarvested)
-    return {
       status: isEnglish ? "Vacant" : "Bakante",
       className: "bg-gray-100 text-gray-800",
     };
 
-  const planted5DaysAgo = new Date(
-    new Date(datePlanted).getTime() + fiveDaysLater
-  );
-  const harvested5DaysAgo = new Date(
-    new Date(dateHarvested).getTime() + fiveDaysLater
-  );
+  const planted5DaysAgo = datePlanted
+    ? new Date(new Date(datePlanted).getTime() + fiveDaysLater)
+    : undefined;
+
+  const harvested5DaysAgo = dateHarvested
+    ? new Date(new Date(dateHarvested).getTime() + fiveDaysLater)
+    : undefined;
 
   switch (cropStatus) {
     case `planted`:
+      if (!planted5DaysAgo)
+        return {
+          status: isEnglish ? "Vacant" : "Bakante",
+          className: "bg-gray-100 text-gray-800",
+        };
+
       if (new Date() >= planted5DaysAgo)
         return {
           status: isEnglish ? "Growing" : "Pag papatubo",
@@ -674,6 +675,12 @@ export const determineCropStatus = ({
       };
 
     case `harvested`:
+      if (!harvested5DaysAgo)
+        return {
+          status: isEnglish ? "Vacant" : "Bakante",
+          className: "bg-gray-100 text-gray-800",
+        };
+
       if (new Date() >= harvested5DaysAgo)
         return {
           status: isEnglish ? "Vacant" : "Bakante",

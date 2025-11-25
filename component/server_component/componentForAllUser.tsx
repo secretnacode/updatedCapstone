@@ -12,7 +12,6 @@ import {
   reportTypeStateType,
   getCropCountPerBrgyReturnType,
   getCropStatusCountReturnType,
-  GetFarmerCropInfoReturnType,
   cropStatusType,
   viewUserCropInfoPropType,
 } from "@/types";
@@ -23,6 +22,7 @@ import {
   Calendar,
   CalendarDays,
   CircleCheck,
+  CircleX,
   ClipboardX,
   CloudOff,
   FileText,
@@ -37,6 +37,7 @@ import {
   Sprout,
   TriangleAlert,
   User,
+  UserX,
   Wheat,
   WheatOff,
 } from "lucide-react";
@@ -49,15 +50,13 @@ import {
   ApprovedOrgMemberButton,
   PieChartCard,
   ChangeMyPassword,
+  BackButton,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
+import { FormDivLabelInput, SeeAllValButton } from "./customComponent";
 import {
-  FormDivLabelInput,
-  NoContentYet,
-  SeeAllValButton,
-} from "./customComponent";
-import {
+  accountStatusStyle,
   capitalizeFirstLetter,
   converTimeToAMPM,
   DateToYYMMDD,
@@ -76,14 +75,10 @@ import {
   getLatestReport,
   getReportCountPerCrop,
 } from "@/lib/server_action/report";
-import {
-  RenderNotification,
-  RenderRedirectNotification,
-} from "../client_component/provider/notificationProvider";
+import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
 import {
   getCropCountPerBrgy,
   getCropStatusCount,
-  GetFarmerCropInfo,
 } from "@/lib/server_action/crop";
 
 export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
@@ -101,89 +96,139 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
     };
   }
 
+  const isEnglish: boolean = AvailOrg.success
+    ? AvailOrg.work === "admin" || AvailOrg.work === "agriculturist"
+    : false;
+
+  const logoColor = () => {
+    switch (userFarmerInfo.farmerInfo.status) {
+      case "active":
+        return `from-green-200 to-green-400 text-green-700`;
+      case "block":
+        return `from-amber-200 to-amber-400 text-amber-700`;
+      case "delete":
+        return `from-red-200 to-red-400 text-red-700`;
+    }
+  };
+
   return (
-    <div className="grid md:grid-cols-4 gap-6">
-      {/* Left Column - Profile Info */}
-      {!AvailOrg.success && (
-        <RenderRedirectNotification notif={AvailOrg.notifError} />
-      )}
-      <div>
-        <div className="sticky top-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
-            <div className="flex flex-col items-center">
-              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                <span className="text-4xl text-green-700 font-bold">
-                  {getInitials(
-                    userFarmerInfo.farmerInfo.farmerFirstName,
-                    userFarmerInfo.farmerInfo.farmerLastName
-                  )}
-                </span>
-              </div>
-            </div>
+    <>
+      {!isViewing && <BackButton label={isEnglish ? "Go back" : "Bumalik"} />}
 
-            {/* Basic Info */}
-            <div className="space-y-4">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
-                  {userFarmerInfo.farmerInfo.farmerLastName}
-                </h2>
-                {userFarmerInfo.farmerInfo.farmerAlias && (
-                  <p className="text-gray-500 text-sm">
-                    &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-start gap-2 text-gray-600">
-                <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
-              </div>
-
-              <div className="flex justify-center items-center">
-                <p
-                  className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${
-                    userFarmerInfo.farmerInfo.verified
-                      ? "bg-green-50 text-green-700 border-green-500"
-                      : "bg-yellow-50 text-yellow-700 border-yellow-900"
-                  }`}
+      <div className="grid md:grid-cols-4 gap-6">
+        {/* Left Column - Profile Info */}
+        <div>
+          <div className="sticky top-8">
+            <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`relative w-32 h-32 rounded-full bg-gradient-to-br ${logoColor()} flex items-center justify-center`}
                 >
-                  {userFarmerInfo.farmerInfo.verified ? (
+                  <span className="text-4xl font-bold">
+                    {getInitials(
+                      userFarmerInfo.farmerInfo.farmerFirstName,
+                      userFarmerInfo.farmerInfo.farmerLastName
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
+                    {userFarmerInfo.farmerInfo.farmerLastName}
+                  </h2>
+                  {userFarmerInfo.farmerInfo.farmerAlias && (
+                    <p className="text-gray-500 text-sm">
+                      &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-start gap-2 text-gray-600">
+                  <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
+                </div>
+
+                <div className="flex justify-center items-center [&_svg]:size-5">
+                  {userFarmerInfo.farmerInfo.status === "active" ? (
                     <>
-                      <CircleCheck className="size-5" />
-                      Verified Account
+                      <p
+                        className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${
+                          userFarmerInfo.farmerInfo.verified
+                            ? "bg-green-50 text-green-700 border-green-500"
+                            : "bg-yellow-50 text-yellow-700 border-yellow-900"
+                        }`}
+                      >
+                        {userFarmerInfo.farmerInfo.verified ? (
+                          <>
+                            <CircleCheck />
+                            {isEnglish
+                              ? "Verified Account"
+                              : "Beripikado ang account"}
+                          </>
+                        ) : (
+                          <>
+                            <TriangleAlert />
+                            {isEnglish
+                              ? "Pending Verification"
+                              : "Hindi pa beripikado"}
+                          </>
+                        )}
+                      </p>
                     </>
                   ) : (
-                    <>
-                      <TriangleAlert className="size-5" />
-                      Pending Verification
-                    </>
+                    <p
+                      className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${accountStatusStyle(
+                        userFarmerInfo.farmerInfo.status
+                      )}`}
+                    >
+                      {userFarmerInfo.farmerInfo.status === "block" ? (
+                        <UserX />
+                      ) : (
+                        <CircleX />
+                      )}
+
+                      {isEnglish
+                        ? `The user is ${userFarmerInfo.farmerInfo.status}`
+                        : `Ang accout ay naka ${userFarmerInfo.farmerInfo.status}`}
+                    </p>
                   )}
-                </p>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-5">
-              <h3 className="font-semibold text-gray-900">Tingnan:</h3>
+              <div className="space-y-5">
+                <h3 className="font-semibold text-gray-900">
+                  {isEnglish ? "Shortcut:" : "Tingnan:"}
+                </h3>
 
-              <ViewCropModalButton isViewing={isViewing} />
+                <ViewCropModalButton
+                  isViewing={isViewing}
+                  isEnglish={isEnglish}
+                  authStatus={userFarmerInfo.farmerInfo.status}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="md:col-span-3">
-        {AvailOrg.success && (
-          <UserProFile
-            userFarmerInfo={userFarmerInfo.farmerInfo}
-            orgInfo={userFarmerInfo.orgInfo}
-            orgList={AvailOrg.orgList}
-            isViewing={isViewing}
-            work={AvailOrg.work}
-          />
-        )}
+        <div className="md:col-span-3">
+          {AvailOrg.success ? (
+            <UserProFile
+              userFarmerInfo={userFarmerInfo.farmerInfo}
+              orgInfo={userFarmerInfo.orgInfo}
+              orgList={AvailOrg.orgList}
+              isViewing={isViewing}
+              work={AvailOrg.work}
+            />
+          ) : (
+            <RenderRedirectNotification notif={AvailOrg.notifError} />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -237,31 +282,24 @@ export const UserProFile: FC<UserProFilePropType> = async ({
   isViewing,
   work,
 }) => {
-  let cropInfo: GetFarmerCropInfoReturnType;
-
-  try {
-    cropInfo = await GetFarmerCropInfo(userFarmerInfo.farmerId, isViewing);
-  } catch (error) {
-    console.log((error as Error).message);
-    cropInfo = {
-      success: false,
-      notifError: [{ message: UnexpectedErrorMessage(), type: "error" }],
-    };
-  }
+  const isEnglish = work === "admin" || work === "agriculturist";
 
   return (
     <div className="profile-component">
-      {!cropInfo.success && <RenderNotification notif={cropInfo.notifError} />}
-
       <div className="component" id="profile-user-info">
         <div>
           <User />
-          <h1>Personal na Impormasyon</h1>
+          <h1>
+            {isEnglish ? "Personal Information" : "Personal na Impormasyon"}
+          </h1>
         </div>
 
         <div className="personal-info-component">
           {isViewing ? (
-            <ViewUserProfileInfo userInfo={userFarmerInfo} />
+            <ViewUserProfileInfo
+              userInfo={userFarmerInfo}
+              isEnglish={isEnglish}
+            />
           ) : (
             <MyProfileForm userInfo={userFarmerInfo} />
           )}
@@ -271,65 +309,17 @@ export const UserProFile: FC<UserProFilePropType> = async ({
       <div className="component" id="profile-org-info">
         <div>
           <Building />
-          <h1>Organisasyon na Kasali</h1>
+          <h1>{isEnglish ? "User Organization" : "Organisasyon na Kasali"}</h1>
         </div>
 
         <div className="default-style-info">
           {isViewing ? (
-            <ViewUserOrganizationInfo userOrgInfo={orgInfo} />
+            <ViewUserOrganizationInfo
+              userOrgInfo={orgInfo}
+              isEnglish={isEnglish}
+            />
           ) : (
             <MyOrganizationForm availOrgList={orgList} userOrgInfo={orgInfo} />
-          )}
-        </div>
-      </div>
-
-      <div className="component" id="profile-crop-info">
-        <div>
-          <Wheat />
-          <h1>Mga pananim</h1>
-        </div>
-
-        <div>
-          {cropInfo.success ? (
-            cropInfo.cropData.length > 0 ? (
-              <ViewUserCropInfo
-                cropData={cropInfo.cropData}
-                isViewing
-                work={work}
-              />
-            ) : (
-              <NoContentYet
-                message="Wala pang pananim"
-                logo={WheatOff}
-                parentDiv="!m-0"
-              >
-                {!isViewing && (
-                  <Link
-                    href={pathCropAddingCrop}
-                    className="button submit-button"
-                  >
-                    <Pencil className="size-5" />
-                    Mag dagdag ng pananim
-                  </Link>
-                )}
-              </NoContentYet>
-            )
-          ) : (
-            <NoContentYet
-              message="Wala pang pananim"
-              logo={WheatOff}
-              parentDiv="!m-0"
-            >
-              {!isViewing && (
-                <Link
-                  href={pathCropAddingCrop}
-                  className="button submit-button"
-                >
-                  <Pencil className="size-5" />
-                  Mag dagdag ng pananim
-                </Link>
-              )}
-            </NoContentYet>
           )}
         </div>
       </div>
@@ -352,76 +342,81 @@ export const UserProFile: FC<UserProFilePropType> = async ({
 
 export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
   userInfo,
+  isEnglish,
 }) => {
   return (
     <>
       <FormDivLabelInput
-        labelMessage={"Unang Pangalan"}
+        labelMessage={isEnglish ? "First name:" : "Unang Pangalan:"}
         inputName={"farmerFirstName"}
-        inputPlaceholder={"Hal. Jose"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Jose"}
         inputDisable={true}
         inputDefaultValue={userInfo.farmerFirstName}
       />
 
       <FormDivLabelInput
-        labelMessage={"Gitnang Pangalan"}
+        labelMessage={isEnglish ? "Middle name:" : "Gitnang Pangalan:"}
         inputName={"farmerMiddleName"}
-        inputPlaceholder={"Hal. Luzviminda"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Luzviminda"}
         inputDisable={true}
         inputDefaultValue={userInfo.farmerMiddleName}
       />
 
       <FormDivLabelInput
-        labelMessage={"Apelyido"}
+        labelMessage={isEnglish ? "Last name:" : "Apelyido:"}
         inputName={"farmerLastName"}
-        inputPlaceholder={"Hal. Juan Delacruz"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Juan Delacruz"}
         inputDisable={true}
         inputDefaultValue={userInfo.farmerLastName}
       />
 
       <FormDivLabelInput
-        labelMessage={"Palayaw na pagdugtong"}
+        labelMessage={isEnglish ? "Extension name:" : "Palayaw na pagdugtong:"}
         inputName={"farmerExtensionName"}
-        inputPlaceholder={"Hal. Jr"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Jr"}
         inputDisable={true}
         inputDefaultValue={userInfo.farmerExtensionName}
       />
 
       <FormDivLabelInput
-        labelMessage={"Alyas"}
+        labelMessage={isEnglish ? "Alias:" : "Alyas:"}
         inputName={"farmerAlias"}
-        inputPlaceholder={"Hal. Mang Kanor"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Mang Kanor"}
         inputDisable={true}
         inputDefaultValue={userInfo.farmerAlias}
       />
 
       <FormDivLabelInput
-        labelMessage={"Alyas"}
+        labelMessage={
+          isEnglish ? "Family member count:" : "Bilang ng miyembro sa pamilya:"
+        }
         inputName={"familyMemberCount"}
-        inputPlaceholder={"Hal. Mang Kanor"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "1"}
         inputDisable={true}
         inputDefaultValue={userInfo.familyMemberCount}
       />
 
       <FormDivLabelInput
-        labelMessage={"Baranggay na tinitirhan"}
+        labelMessage={
+          isEnglish ? "Residential barangay:" : "Baranggay na tinitirhan:"
+        }
         inputName={"barangay"}
-        inputPlaceholder={"Hal. Silangan"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Silangan"}
         inputDisable={true}
         inputDefaultValue={capitalizeFirstLetter(userInfo.barangay)}
       />
 
       <FormDivLabelInput
-        labelMessage={"Numero ng Telepono"}
+        labelMessage={isEnglish ? "Mobile number:" : "Numero ng Telepono:"}
         inputName={"mobileNumber"}
-        inputPlaceholder={"Hal. 09** *** ****"}
+        inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "09** *** ****"}
         inputDisable={true}
         inputDefaultValue={userInfo.mobileNumber}
         logo={{ icon: Phone }}
       />
 
       <FormDivLabelInput
-        labelMessage={"Kapanganakan"}
+        labelMessage={isEnglish ? "Date of birth:" : "Kapanganakan:"}
         inputName={"birthdate"}
         inputDisable={true}
         inputDefaultValue={
@@ -437,31 +432,52 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
 
 export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
   userOrgInfo,
+  isEnglish,
 }) => {
   return (
     <>
       <FormDivLabelInput
-        labelMessage="Pangalan ng Organisasyon"
+        labelMessage={
+          isEnglish ? "Name of the Organization:" : "Pangalan ng Organisasyon:"
+        }
         inputDisable={true}
         inputName={"orgId"}
-        inputDefaultValue={userOrgInfo?.orgName ?? "Wala sa organisasyon"}
-        inputPlaceholder="Pangalan ng organisasyon"
+        inputDefaultValue={
+          userOrgInfo?.orgName ?? isEnglish
+            ? "Not in any Organization"
+            : "Wala sa organisasyon"
+        }
+        inputPlaceholder={
+          isEnglish ? "Name of the Organization" : "Pangalan ng organisasyon"
+        }
       />
 
       <FormDivLabelInput
-        labelMessage="Leader ng Organisasyon"
+        labelMessage={
+          isEnglish ? "Leader of the Organization" : "Leader ng Organisasyon"
+        }
         inputDisable={true}
         inputName={"leaderName"}
-        inputDefaultValue={userOrgInfo?.farmerLeader ?? "Wala sa organisasyon"}
-        inputPlaceholder="Miyembro"
+        inputDefaultValue={
+          userOrgInfo?.farmerLeader ?? isEnglish
+            ? "Not in any Organization"
+            : "Wala sa organisasyon"
+        }
+        inputPlaceholder={
+          isEnglish ? "Leader of the Organization" : "Leader ng Organisasyon"
+        }
       />
 
       <FormDivLabelInput
-        labelMessage="Posisyon"
+        labelMessage={isEnglish ? "Position" : "Posisyon"}
         inputDisable={true}
         inputName={"orgRole"}
-        inputDefaultValue={userOrgInfo?.orgRole ?? "Wala sa organisasyon"}
-        inputPlaceholder="Miyembro"
+        inputDefaultValue={
+          userOrgInfo?.orgRole ?? userOrgInfo?.farmerLeader ?? isEnglish
+            ? "Not in any Organization"
+            : "Wala sa organisasyon"
+        }
+        inputPlaceholder={isEnglish ? "Position" : "Posisyon"}
       />
     </>
   );
@@ -903,14 +919,12 @@ export const CropStatusCount: FC = async () => {
     };
   }
 
-  await getCropStatusCount();
-
   const NoValueInPieChart: FC = () => (
     <div className="no-val">
       <WheatOff className="!size-10 text-gray-400 mb-4" />
 
       <p className="text-xl font-semibold text-gray-700 mb-1">
-        Wala ka pang pananim
+        There&apos;s no crop yet
       </p>
     </div>
   );
@@ -919,7 +933,7 @@ export const CropStatusCount: FC = async () => {
     <div className="component ">
       <div className=" space-y-4">
         <div className="font-semibold">
-          <p>Bilang ng ulat kada pananim</p>
+          <p>Count per crop status</p>
         </div>
 
         {cropCount.success ? (

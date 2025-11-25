@@ -223,3 +223,22 @@ export const getFarmerLeaderId = async (userId: string) => {
     );
   }
 };
+
+/**
+ * query for getting the org name from the org table
+ * @param orgId id of the org
+ * @returns org name
+ */
+export const getOrgName = async (orgId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "orgName" from capstone.org where "orgId" = $1`,
+        [orgId]
+      )
+    ).rows[0].orgName;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(`Error occured while getting the organization name`);
+  }
+};

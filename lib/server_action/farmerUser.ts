@@ -240,15 +240,26 @@ export const GetViewingFarmerUserProfileInfo = async (
   try {
     const { work, userId } = await ProtectedAction("read:farmer:profile");
 
+    const isEnglish = work === "admin" || work === "agriculturist";
+
     if (!(await farmerIsExist(farmerId)))
-      return { success: false, isExist: false };
+      return {
+        success: false,
+        notifError: [
+          {
+            message: isEnglish
+              ? "The user is not existing"
+              : "Hindi mahanap ang user",
+            type: "warning",
+          },
+        ],
+      };
 
     if (work === "leader") {
       const leadAuth = await checkFarmerLeader(farmerId, userId);
       if (!leadAuth.success)
         return {
           success: false,
-          isNotValid: true,
           notifError: leadAuth.notifError,
         };
     } else {
@@ -257,17 +268,17 @@ export const GetViewingFarmerUserProfileInfo = async (
       if (!agriAuth.success)
         return {
           success: false,
-          isNotValid: true,
           notifError: agriAuth.notifError,
         };
     }
 
-    return await userFarmerProfileInfo(farmerId);
+    return { work: work, ...(await userFarmerProfileInfo(farmerId)) };
   } catch (error) {
     const err = error as Error;
     console.log(
       `Nagka problema sa pag kuha ng impormasyon ng mag sasaka ${err}`
     );
+
     return {
       success: false,
       notifError: [
