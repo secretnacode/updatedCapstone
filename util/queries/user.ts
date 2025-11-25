@@ -23,7 +23,10 @@ import { pool } from "../configuration";
 import { Hash } from "@/lib/reusableFunctions";
 import { CreateUUID } from "../helper_function/reusableFunction";
 
-// option of farmer auth status
+/**
+ * function taht returns all the available auth statuses
+ * @returns
+ */
 export const farmerAuthStatus = async (): Promise<
   Record<farmerAuthStatusType, farmerAuthStatusType>
 > => ({
@@ -253,10 +256,12 @@ export const GetFarmerOrgMemberQuery = async (
   leaderId: string
 ): Promise<GetFarmerOrgMemberQueryReturnType[]> => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId"  where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId" order by case when f."verified" = $3 then $4 when f."isDeleted" = $5 then $6 else $7 end asc`,
-        [leaderId, "member", false, 1, true, 3, 2]
+        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum", a."status" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId" join capstone.auth a on f."farmerId" = a."authId" where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId", a."authId" order by case when a."status" = $3 then $4 when a."status" = $5 then $6 else $7 end asc`,
+        [leaderId, "member", status.active, 1, status.block, 2, 3]
       )
     ).rows;
   } catch (error) {

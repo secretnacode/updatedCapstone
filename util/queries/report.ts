@@ -27,6 +27,7 @@ import {
   cteWeekSeries,
   dateFilter,
 } from "./reausableQuery";
+import { farmerAuthStatus } from "./user";
 
 export const reportType = async (): Promise<
   Record<reportTypeStateType, reportTypeStateType>
@@ -160,10 +161,12 @@ export const GetOrgMemberReportQuery = async (
   orgId: string
 ): Promise<GetOrgMemberReportQueryType[]> => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select r."reportId", r."verificationStatus", r."dayReported", r."title", r."reportType", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" where f."orgId" = $1 and f."orgRole" = $2 order by case when r."verificationStatus" = $3 then $4 else $5 end asc`,
-        [orgId, "member", false, 1, 2]
+        `select r."reportId", r."verificationStatus", r."dayReported", r."title", r."reportType", f."farmerFirstName", f."farmerLastName", f."farmerAlias" from capstone.report r join capstone.farmer f on f."farmerId" = r."farmerId" join capstone.auth a on f."farmerId" = a."authId" where f."orgId" = $1 and f."orgRole" = $2 and a."status" <> $3 order by case when r."verificationStatus" = $4 then $5 else $6 end asc`,
+        [orgId, "member", status.delete, false, 1, 2]
       )
     ).rows;
   } catch (error) {

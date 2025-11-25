@@ -21,6 +21,8 @@ export default async function Page() {
       ],
     };
   }
+  if (farmerMember.success)
+    console.log(farmerMember.farmerMember.map((val) => val.status));
 
   return (
     <div className="component space-y-6">

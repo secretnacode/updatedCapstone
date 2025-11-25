@@ -386,6 +386,7 @@ export type GetFarmerOrgMemberQueryReturnType = {
   barangay: string;
   verified: boolean;
   cropNum: number;
+  status: farmerAuthStatusType;
 };
 
 export type GetFarmerOrgMemberReturnType =
