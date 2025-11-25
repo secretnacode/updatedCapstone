@@ -12,6 +12,9 @@
 }
 
 @theme inline {
+  --breakpoint-1920: 120rem;
+  --breakpoint-1500: 93.75rem;
+
   --color-background: var(--background);
   --color-text-primary: var(--text-primary);
   --color-color-border: var(--color-border);

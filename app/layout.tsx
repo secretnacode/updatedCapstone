@@ -2,6 +2,7 @@ import { NotificationProvider } from "@/component/client_component/provider/noti
 import "./globals.css";
 import { LoadingProvider } from "@/component/client_component/provider/loadingProvider";
 import Head from "next/head";
+import { WindowProvider } from "@/provider/WindowProvider";
 
 export default function RootLayout({
   children,
@@ -17,9 +18,11 @@ export default function RootLayout({
         />
       </Head>
       <body className="antialiased">
-        <LoadingProvider>
-          <NotificationProvider>{children}</NotificationProvider>
-        </LoadingProvider>
+        <WindowProvider>
+          <LoadingProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </LoadingProvider>
+        </WindowProvider>
       </body>
     </html>
   );

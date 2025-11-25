@@ -1177,6 +1177,7 @@ export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
         },
       ]}
       height={100}
+      width={100}
     />
   );
 };
@@ -2874,7 +2875,7 @@ export const BurgerNav: FC<BurgerNavPropType> = ({ children }) => {
   const [viewNav, setViewNav] = useState<boolean>(false);
 
   return (
-    <div>
+    <div className="bg-gray-900 dark:bg-gray-100 z-999 rounded-md">
       <Menu className="size-10" onClick={() => setViewNav(!viewNav)} />
 
       {viewNav && (

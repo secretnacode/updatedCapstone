@@ -53,6 +53,7 @@ import { MapMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { DynamicLink } from "../server_component/componentForAllUser";
 import { useSearchParam, useSortColumnHandler } from "./customHook";
 import { SortColBy, TableWithFilter } from "./componentForAllUser";
+import { useWindowStore } from "@/store/useWindowStore";
 
 export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
   isViewing,
@@ -312,6 +313,8 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     handleCloseModal("addModal");
   };
 
+  const currentWindowWidth = useWindowStore((state) => state.width);
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -338,7 +341,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       </div>
 
       <div className="component">
-        <div className="mb-4 flex flex-row justify-between items-center">
+        <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
           <p className="table-title">Impormasyon ng iyong mga pananim</p>
 
           <SubmitButton
@@ -372,11 +375,18 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
               </th>
 
               <th scope="col" className="!w-[20%]">
-                <div>Estado ng pananim</div>
+                <div>
+                  {currentWindowWidth >= 870 ? "Estado ng pananim" : "Estado"}
+                </div>
               </th>
 
               <th scope="col">
-                <div>Araw ng kaganapan</div>
+                <div>
+                  {" "}
+                  {currentWindowWidth >= 870
+                    ? "Araw ng kaganapan"
+                    : "Kaganapan"}
+                </div>
               </th>
 
               <th scope="col" className="!w-[21.5%]">
@@ -433,7 +443,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
               </td>
 
               <td>
-                <div className="flex justify-center flex-row gap-2">
+                <div className="flex justify-center flex-col 2xl:flex-row gap-2">
                   <SubmitButton
                     type="button"
                     className="slimer-button"

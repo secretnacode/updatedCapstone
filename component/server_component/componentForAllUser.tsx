@@ -1008,37 +1008,39 @@ export const LatestReport = async () => {
       <div>
         {report.success ? (
           report.reportVal.length > 0 ? (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 w-full">
               {report.reportVal.map((val) => (
                 <div
                   key={val.reportId}
-                  className="hover:bg-gray-50 transition-all duration-200 group py-2"
+                  className="hover:bg-gray-50 transition-all duration-200 group py-2 w-full"
                 >
-                  <div className="flex items-center justify-evenly gap-2">
-                    <div
-                      className={`flex-shrink-0 p-2 rounded-lg ${reportTypeColor(
-                        val.reportType
-                      )} flex items-center justify-center`}
-                    >
-                      {reportTypeIcon(val.reportType)}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3 mb-1">
-                        <h4 className="font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors leading-snug">
-                          {val.title}
-                        </h4>
+                  <div className="flex 1500:items-center xl:items-start items-center xl:flex-col flex-row 1500:flex-row justify-between w-full gap-2 overflow-hidden">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex-shrink-0 p-2 rounded-lg ${reportTypeColor(
+                          val.reportType
+                        )} flex items-center justify-center`}
+                      >
+                        {reportTypeIcon(val.reportType)}
                       </div>
 
-                      <div className="flex justify-start items-center text-xs text-gray-500">
-                        <Calendar className="w-3.5 h-3.5 mr-1" />
-                        <span>{ReadableDateFormat(val.dayReported)}</span>
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-1">
+                          <h4 className="font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors leading-snug">
+                            {val.title}
+                          </h4>
+                        </div>
+
+                        <div className="flex justify-start items-center text-xs text-gray-500">
+                          <Calendar className="w-3.5 h-3.5 mr-1" />
+                          <span>{ReadableDateFormat(val.dayReported)}</span>
+                        </div>
                       </div>
                     </div>
 
                     <Link
                       href={viewFarmerReportPath(val.reportId)}
-                      className="button submit-button slimer-button flex-shrink-0 ml-3 very-small"
+                      className="button submit-button slimer-button flex-shrink-0 1500:ml-3 very-small"
                     >
                       Tingnan
                     </Link>
