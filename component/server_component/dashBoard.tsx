@@ -35,7 +35,10 @@ export const FarmerLeadDashBoard = async () => {
   return (
     <>
       {!data.success ? (
-        <RenderRedirectNotification notif={data.notifError} />
+        <>
+          <DashboardNoValComponent />
+          <RenderRedirectNotification notif={data.notifError} />
+        </>
       ) : (
         <DashboardComponent
           card1={{
@@ -106,7 +109,10 @@ export const FarmerDashBoard = async () => {
   return (
     <>
       {!data.success ? (
-        <RenderRedirectNotification notif={data.notifError} />
+        <>
+          <DashboardNoValComponent />
+          <RenderRedirectNotification notif={data.notifError} />
+        </>
       ) : (
         <DashboardComponent
           card1={{
@@ -232,7 +238,7 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   );
 };
 
-export const DashboardNoValComponent = () => (
+export const DashboardNoValComponent: FC = () => (
   <DashboardComponent
     card1={{
       logo: {

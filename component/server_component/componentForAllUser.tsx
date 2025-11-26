@@ -14,6 +14,7 @@ import {
   getCropStatusCountReturnType,
   cropStatusType,
   viewUserCropInfoPropType,
+  farmerOrgMemberActionPropType,
 } from "@/types";
 import {
   AlertCircle,
@@ -51,6 +52,10 @@ import {
   PieChartCard,
   ChangeMyPassword,
   BackButton,
+  BlockFarmerButton,
+  UnblockFarmerButton,
+  BlockMyOrgMemberButton,
+  UnblockMyOrgMemberButton,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
@@ -232,21 +237,43 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
   );
 };
 
-export const FarmerOrgMemberAction: FC<{
-  farmerId: string;
-  verificationStatus: boolean;
-  farmerName: string;
-}> = ({ farmerId, verificationStatus, farmerName }) => {
+export const FarmerOrgMemberAction: FC<farmerOrgMemberActionPropType> = ({
+  farmerId,
+  verificationStatus,
+  farmerName,
+  status,
+}) => {
   return (
     <div className="flex justify-center items-center gap-2">
-      <DynamicLink baseLink="farmerUser" dynamicId={farmerId} />
-
-      <ApprovedOrgMemberButton
-        farmerId={farmerId}
-        verificationStatus={verificationStatus}
+      <DynamicLink
+        baseLink="farmerUser"
+        dynamicId={farmerId}
+        className={
+          verificationStatus ? "!bg-green-500 hover:!bg-green-600" : ""
+        }
       />
 
-      <DeleteMyOrgMemberButton farmerId={farmerId} farmerName={farmerName} />
+      {status !== "delete" && (
+        <>
+          {verificationStatus ? (
+            status === "block" ? (
+              <UnblockMyOrgMemberButton farmerId={farmerId} />
+            ) : (
+              <BlockMyOrgMemberButton farmerId={farmerId} />
+            )
+          ) : (
+            <ApprovedOrgMemberButton
+              farmerId={farmerId}
+              verificationStatus={verificationStatus}
+            />
+          )}
+
+          <DeleteMyOrgMemberButton
+            farmerId={farmerId}
+            farmerName={farmerName}
+          />
+        </>
+      )}
     </div>
   );
 };

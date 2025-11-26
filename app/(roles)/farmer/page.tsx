@@ -16,7 +16,6 @@ export default async function Page({
 }: {
   searchParams: Promise<{ notif?: string }>;
 }) {
-  // for notification
   const { notif } = await searchParams;
   let message: NotificationBaseType[] | null = null;
   if (notif) message = JSON.parse(notif);

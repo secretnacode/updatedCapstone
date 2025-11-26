@@ -568,23 +568,25 @@ export const getCountNotVerifiedFarmer = async (
   param: getCountNotVerifiedFarmerParamType
 ): Promise<number> => {
   try {
+    const status = await farmerAuthStatus();
+
     const dynamicVal: {
       filter: string;
       param: (string | boolean)[];
     } =
       param.userRole === "agriculturist"
         ? {
-            filter: `f."verified" = $1 or f."verified" and f."orgId" is null`,
-            param: [false],
+            filter: `f."verified" = $1 or (f."verified" = $2 and f."orgId" is null) and a."status" <> $3`,
+            param: [true, false, status.delete],
           }
         : {
-            filter: `f."verified" = $1 and o."farmerLeadId" = $2`,
-            param: [false, param.leaderId],
+            filter: `f."verified" = $1 and o."farmerLeadId" = $2 and a."status" <> $3`,
+            param: [false, param.leaderId, status.delete],
           };
 
     return (
       await pool.query(
-        `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where ${dynamicVal.filter}`,
+        `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.auth a on f."farmerId" = a."authId" where ${dynamicVal.filter}`,
         dynamicVal.param
       )
     ).rows[0].count;

@@ -1951,3 +1951,10 @@ export type blockUserPropType = {
 };
 
 export type blockMyOrgMemberButtonPropType = { farmerId: string };
+
+export type farmerOrgMemberActionPropType = {
+  farmerId: string;
+  verificationStatus: boolean;
+  farmerName: string;
+  status: farmerAuthStatusType;
+};

@@ -238,10 +238,12 @@ export const getCountFarmerMemReportToday = async (
   farmerLeadId: string
 ): Promise<number> => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select count(r."title") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and date(r."dayReported") = current_date`,
-        [farmerLeadId]
+        `select count(r."title") from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" join capstone.auth a on f."farmerId" = a."authId" where o."farmerLeadId" = $1 and date(r."dayReported") = current_date and a."status" <> $2`,
+        [farmerLeadId, status.delete]
       )
     ).rows[0].count;
   } catch (error) {
@@ -265,10 +267,12 @@ export const getCountUnvalidatedReport = async (
   farmerLeadId: string
 ): Promise<number> => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select count(r."verificationStatus") from capstone.report r left join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
-        [farmerLeadId, false]
+        `select count(r."verificationStatus") from capstone.report r join capstone.farmer f on r."farmerId" = f."farmerId" join capstone.auth a on f."farmerId" = a."authId" join capstone.org o on f."orgId" = o."orgId" where o."farmerLeadId" = $1 and r."verificationStatus" = $2 and a."status" <> $3`,
+        [farmerLeadId, false, status.delete]
       )
     ).rows[0].count;
   } catch (error) {
@@ -323,14 +327,17 @@ export const getReportCountThisWeek = async (
   role: allUserRoleType
 ): Promise<getReportCountThisWeekReturnType[]> => {
   try {
+    const status = await farmerAuthStatus();
     const cte = await cteDaySeries();
     const filter = await dateFilter(role);
-    const paramVal = role === "agriculturist" ? [] : [userId];
+    const isAgri = role === "agriculturist" || role === "admin";
+    const paramVal = isAgri ? [status.delete] : [userId, status.delete];
+    const placeHolder = isAgri ? "$1" : "$2";
 
     return (
       await pool.query(
         `${cte}
-      select to_char(ds.date, 'FMDay') as "dayOfWeek", coalesce(count(r."reportId"), 0) as "reportCount" from day_series ds left join capstone.report r on date(r."dayReported") = ds.date ${filter} group by ds.date, to_char(ds.date, 'FMDay') order by ds.date`,
+      select to_char(ds.date, 'FMDay') as "dayOfWeek", coalesce(count(r."reportId"), 0) as "reportCount" from day_series ds left join capstone.report r on date(r."dayReported") = ds.date ${filter} left join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.auth a on f."farmerId" = a."authId" and a."status" <> ${placeHolder} group by ds.date, to_char(ds.date, 'FMDay') order by ds.date`,
         paramVal
       )
     ).rows;
@@ -359,14 +366,17 @@ export const getReportCountThisAndPrevMonth = async (
   role: allUserRoleType
 ): Promise<getReportCountThisAndPrevMonthReturnType[]> => {
   try {
+    const status = await farmerAuthStatus();
     const cte = await cteWeekSeries();
     const filter = await dateFilter(role);
-    const paramVal = role === "agriculturist" ? [] : [userId];
+    const isAgri = role === "agriculturist" || role === "admin";
+    const paramVal = isAgri ? [status.delete] : [userId, status.delete];
+    const placeHolder = isAgri ? "$1" : "$2";
 
     return (
       await pool.query(
         `${cte}
-      select concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')) as "weekLabel", coalesce(count(r."reportId"), 0) as "reportCount" from week_series ws left join capstone.report r on ws.date <= date(r."dayReported") and (ws.date + interval '6 days')::date >= date(r."dayReported") ${filter} group by concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')), extract(week from date) order by extract(week from date)`,
+      select concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')) as "weekLabel", coalesce(count(r."reportId"), 0) as "reportCount" from week_series ws left join capstone.report r on ws.date <= date(r."dayReported") and (ws.date + interval '6 days')::date >= date(r."dayReported") ${filter} left join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.auth a on f."farmerId" = a."authId" and a."status" <> ${placeHolder}  group by concat(to_char(ws.date, 'Mon DD'), '-', to_char((ws.date + interval '6 days')::date, 'DD')), extract(week from date) order by extract(week from date)`,
         paramVal
       )
     ).rows;
@@ -395,14 +405,17 @@ export const getReportCountThisYear = async (
   role: allUserRoleType
 ): Promise<getReportCountThisYearReturnType[]> => {
   try {
+    const status = await farmerAuthStatus();
     const cte = await cteMonthSeries();
     const filter = await dateFilter(role);
-    const paramVal = role === "agriculturist" ? [] : [userId];
+    const isAgri = role === "agriculturist" || role === "admin";
+    const paramVal = isAgri ? [status.delete] : [userId, status.delete];
+    const placeHolder = isAgri ? "$1" : "$2";
 
     return (
       await pool.query(
         `${cte}
-      select to_char(ms.date, 'Mon') as month, coalesce(count(r."reportId"), 0) as "reportCount" from month_series ms left join capstone.report r on ms.date <= date(r."dayReported") and (ms.date + interval '1 month' - interval '1 day')::date >= date(r."dayReported") ${filter} group by to_char(ms.date, 'Mon'), extract(month from ms.date) order by extract(month from ms.date)`,
+      select to_char(ms.date, 'Mon') as month, coalesce(count(r."reportId"), 0) as "reportCount" from month_series ms left join capstone.report r on ms.date <= date(r."dayReported") and (ms.date + interval '1 month' - interval '1 day')::date >= date(r."dayReported") ${filter} left join capstone.farmer f on r."farmerId" = f."farmerId" left join capstone.auth a on f."farmerId" = a."authId" and a."status" <> ${placeHolder} group by to_char(ms.date, 'Mon'), extract(month from ms.date) order by extract(month from ms.date)`,
         paramVal
       )
     ).rows;
@@ -432,23 +445,25 @@ export const getRecentReport = async (
   param: getRecentReportParamType
 ): Promise<getRecentReportReturnType[]> => {
   try {
+    const status = await farmerAuthStatus();
+
     const dynamicFilterAndParam: {
       filter: string;
       param: (string | boolean)[];
     } =
       param.userRole === "agriculturist"
         ? {
-            filter: `r."verificationStatus" = $1`,
-            param: [true],
+            filter: `r."verificationStatus" = $1 and a."status"`,
+            param: [true, status.delete],
           }
         : {
-            filter: `o."farmerLeadId" = $1 and r."verificationStatus" = $2`,
-            param: [param.leaderId, false],
+            filter: `o."farmerLeadId" = $1 and r."verificationStatus" = $2 and a."status" <> $3`,
+            param: [param.leaderId, false, status.delete],
           };
 
     return (
       await pool.query(
-        `select f."farmerFirstName", f."farmerLastName", f."barangay", current_timestamp - r."dayReported" as "pastTime", r."reportId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" join capstone.org o on r."orgId" = o."orgId" where ${dynamicFilterAndParam.filter} order by current_timestamp - r."dayReported" limit 4`,
+        `select f."farmerFirstName", f."farmerLastName", f."barangay", current_timestamp - r."dayReported" as "pastTime", r."reportId" from capstone.farmer f join capstone.report r on f."farmerId" = r."farmerId" join capstone.org o on r."orgId" = o."orgId" join capstone.auth a on f."farmerId" = a."authId" where ${dynamicFilterAndParam.filter} order by current_timestamp - r."dayReported" limit 4`,
         dynamicFilterAndParam.param
       )
     ).rows;

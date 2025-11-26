@@ -1729,16 +1729,39 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
           tableCell={
             <>
               {tableList.map((member) => (
-                <tr key={member.farmerId}>
+                <tr
+                  key={member.farmerId}
+                  className={`${
+                    member.status === "delete"
+                      ? "bg-red-50 hover:!bg-red-100/50"
+                      : member.status === "block"
+                      ? "bg-amber-50 hover:!bg-amber-100/50"
+                      : ""
+                  }`}
+                >
                   <td className=" text-gray-900 font-medium">
                     <div>
-                      <p>{member.farmerName}</p>
+                      <p
+                        className={`${
+                          member.status === "delete" &&
+                          "line-through !text-gray-400"
+                        }`}
+                      >
+                        {member.farmerName}
+                      </p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
                     <div>
-                      <p>{member.farmerAlias}</p>
+                      <p
+                        className={`${
+                          member.status === "delete" &&
+                          "line-through !text-gray-400"
+                        }`}
+                      >
+                        {member.farmerAlias}
+                      </p>
                     </div>
                   </td>
 
@@ -1778,6 +1801,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                     <FarmerOrgMemberAction
                       farmerId={member.farmerId}
                       verificationStatus={member.verified}
+                      status={member.status}
                       farmerName={member.farmerName}
                     />
                   </td>
