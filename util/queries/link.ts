@@ -20,7 +20,7 @@ export const createResetPassWordLinkQuery = async (
 ) => {
   try {
     await pool.query(
-      `insert into capstone."${resetPassDbName()}" ("linkId", "dateCreated", "dateExpired", "link", "farmerId", "linkToken") values ($1, $2, $3, $4, $5, $6)`,
+      `insert into capstone."${resetPassDbName()}" ("linkId", "dateCreated", "dateExpired", "link", "farmerId", "linkToken","isUsed") values ($1, $2, $3, $4, $5, $6, $7)`,
       [
         data.linkId,
         data.dateCreated,
@@ -28,6 +28,7 @@ export const createResetPassWordLinkQuery = async (
         data.link,
         data.farmerId,
         data.linkToken,
+        data.isUsed,
       ]
     );
   } catch (error) {
@@ -381,10 +382,56 @@ export const getFarmerIdOfResetPass = async (
   try {
     return (
       await pool.query(
-        `select "farmerId" from capstone."${resetPassDbName()} where "linkToken" = $1`,
+        `select "farmerId" from capstone."${resetPassDbName()}" where "linkToken" = $1`,
         [token]
       )
     ).rows[0].farmerId;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May Hindi inaasahang pag kakamali habang binabago ang password`
+    );
+  }
+};
+
+/**
+ * query for getting the expiration date of the reset pass link
+ * @param token token of the link
+ * @returns expiration date
+ */
+export const getResetPassExpirationDate = async (
+  token: string
+): Promise<{ dateExpired: Date }> => {
+  try {
+    return (
+      await pool.query(
+        `select "dateExpired" from capstone."${resetPassDbName()}" where "linkToken" = $1`,
+        [token]
+      )
+    ).rows[0];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May Hindi inaasahang pag kakamali habang binabago ang password`
+    );
+  }
+};
+
+/**
+ * query for getting the link id of the reset password link base on the token that will be passed
+ * @param token token of the link of reset pass
+ * @returns
+ */
+export const getResetPassLinkId = async (
+  token: string
+): Promise<{ linkId: string }> => {
+  try {
+    return (
+      await pool.query(
+        `select "linkId" from capstone."${resetPassDbName()}" where "linkToken" = $1`,
+        [token]
+      )
+    ).rows[0];
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(

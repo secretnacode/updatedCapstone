@@ -48,9 +48,6 @@ export async function POST(req: NextRequest) {
         `The request should be user.created instance but was given a ${evt.type}`
       );
 
-    console.log(evt);
-    console.log(evt.data.email_addresses);
-
     await insertNewAgriculturist({
       agriId: evt.data.id,
       userName: evt.data.email_addresses[0].email_address,

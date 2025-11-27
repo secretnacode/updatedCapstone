@@ -1270,6 +1270,7 @@ export const CopyTextButton: FC<ButtonPropType & { textToCopy: string }> = ({
     handleSetNotification([
       { message: "Successfully copied the link", type: "success" },
     ]);
+
     navigator.clipboard.writeText(textToCopy);
   };
 
@@ -3341,9 +3342,11 @@ export const ResetPasswordForm: FC<resetPasswordFormPropType> = ({ token }) => {
   const handeHidePass = (key: "newPass" | "confirmNewPass") =>
     setHidePass((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const handleFormSubmit = async () => {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     try {
-      handleIsLoading("Pinapalta na ang iyong password");
+      e.preventDefault();
+
+      handleIsLoading("Pinapaltan na ang iyong password");
 
       const res = await changeNewPass({
         token,
@@ -3371,7 +3374,7 @@ export const ResetPasswordForm: FC<resetPasswordFormPropType> = ({ token }) => {
 
   return (
     <div className="auth_form">
-      <h1>Mag gawa ng panibagong password</h1>
+      <h1>Ulitin ang Password</h1>
 
       <form onSubmit={handleFormSubmit}>
         <AuthInputPass
@@ -3398,7 +3401,9 @@ export const ResetPasswordForm: FC<resetPasswordFormPropType> = ({ token }) => {
           required
         />
 
-        <button type="submit">IPASA</button>
+        <button type="submit" className="mb-5">
+          IPASA
+        </button>
       </form>
     </div>
   );

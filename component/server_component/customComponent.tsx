@@ -1008,7 +1008,8 @@ export const AuthBaseDesign: FC<authBaseDesignPropType> = ({
           <div className="hidden lg:block w-px bg-gradient-to-b from-transparent via-green-300 to-transparent h-[70vh] md:mx-4 lg:mx-8"></div>
 
           {/* Right Section - Auth Forms */}
-          {children}
+
+          <div className="w-[90%] max-w-md">{children}</div>
         </div>
       </div>
     </main>

@@ -1,3 +1,4 @@
+import { ResetPasswordForm } from "@/component/client_component/componentForAllUser";
 import { checkResetPass } from "@/lib/server_action/link";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
@@ -25,5 +26,7 @@ export default async function Page({
   if (!checkToken.success)
     return RedirectUnauthorizedWithNotif(checkToken.notifError);
 
-  return <div>{(await params).token}</div>;
+  console.log(checkToken);
+
+  return <ResetPasswordForm token={(await params).token} />;
 }

@@ -1434,11 +1434,10 @@ type linkBaseType = {
   dateExpired: Date;
   link: string;
   linkToken: string;
-};
-
-export type createSignUpLinkForAgriQueryParamType = linkBaseType & {
   isUsed: boolean;
 };
+
+export type createSignUpLinkForAgriQueryParamType = linkBaseType;
 
 export type createResetPassWordLinkQueryParamType = linkBaseType & {
   farmerId: string;

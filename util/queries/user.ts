@@ -631,9 +631,12 @@ export const getFarmerDataForResetingPass = async (): Promise<
   getFarmerDataForResetingPassReturnType[]
 > => {
   try {
+    const status = await farmerAuthStatus();
+
     return (
       await pool.query(
-        `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" order by a."username"`
+        `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where a."status" <> $1 order by a."username"`,
+        [status.delete]
       )
     ).rows;
   } catch (error) {

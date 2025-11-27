@@ -16,6 +16,8 @@ import {
   updatResetPassIsUse,
   checkResetPassTokenIfUse,
   getFarmerIdOfResetPass,
+  getResetPassExpirationDate,
+  getResetPassLinkId,
 } from "@/util/queries/link";
 import { ProtectedAction } from "../protectedActions";
 import {
@@ -68,6 +70,7 @@ export const createResetPassWordLink = async (
       link: link,
       linkToken: token,
       farmerId,
+      isUsed: false,
     });
 
     revalidatePath(`/agriculturist/createLink`);
@@ -385,12 +388,14 @@ export const changeNewPass = async ({
         ],
       };
 
-    if (await checkResetPassTokenIfUse(token))
+    const exp = await getResetPassExpirationDate(token);
+
+    if (Date.now() > exp.dateExpired.getTime())
       return {
         success: false,
         notifError: [
           {
-            message: "Nagamit na ang link na ito",
+            message: "Nag expired na ang iyong pag babago ng password",
             type: "warning",
           },
           {
@@ -404,7 +409,6 @@ export const changeNewPass = async ({
       { newPass, confirmNewPass },
       resetPasswordSchema
     );
-
     if (!valid)
       return {
         success: false,
@@ -416,6 +420,8 @@ export const changeNewPass = async ({
       await getFarmerIdOfResetPass(token),
       await Hash(newPass)
     );
+
+    await deleteResetPassLink((await getResetPassLinkId(token)).linkId);
 
     return RedirectLoginWithNotif([
       { message: "Matagumpay ang pag papalit mo ng password", type: "success" },

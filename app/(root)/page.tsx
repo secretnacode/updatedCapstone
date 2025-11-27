@@ -33,15 +33,13 @@ export default async function Page({
 
   return (
     <AuthBaseDesign isEnglish={false}>
-      <div className="w-[90%] max-w-md">
-        {message && <RenderRedirectNotification notif={message} />}
+      {message && <RenderRedirectNotification notif={message} />}
 
-        {checkSession && !checkSession.success && (
-          <RenderRedirectNotification notif={checkSession.notifError} />
-        )}
+      {checkSession && !checkSession.success && (
+        <RenderRedirectNotification notif={checkSession.notifError} />
+      )}
 
-        <AuthForm />
-      </div>
+      <AuthForm />
     </AuthBaseDesign>
   );
 }
