@@ -653,7 +653,7 @@ export const CropForm: FC<CropFormPropType> = ({
       />
 
       <FormDivLabelInput
-        labelMessage="Sukat ng lote na iyong Pinagtataniman:(Ektarya)"
+        labelMessage="Sukat ng Lupain:(Ektarya)"
         inputName="cropFarmArea"
         onChange={handleChangeVal}
         inputValue={currentCrops.cropFarmArea}
@@ -1080,7 +1080,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
   return (
     <div className="component">
       <div className="card-title-wrapper">
-        <p className="">Kamakailang ulat na iyong ipinasa</p>
+        <p className="">Mga Dati ng Ulat na Ipinasa</p>
       </div>
 
       <div className="divide-y divide-gray-100">
@@ -1277,7 +1277,7 @@ export const SideComponentMyCropStatus = async () => {
   return (
     <div className="component overflow-hidden">
       <div className="card-title-wrapper">
-        <p>Aking mga Pananim</p>
+        <p>Mga Pananim Ko</p>
       </div>
 
       {cropStatus.success ? (
@@ -1286,25 +1286,26 @@ export const SideComponentMyCropStatus = async () => {
             <div className="divide-y divide-gray-100 [&>div]:not-last-of-type:border-b [&>div]:not-last-of-type:border-gray-200">
               {cropStatus.cropInfoStatus.map((crop) => (
                 <div key={crop.cropId} className=" py-2 ">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">
-                          {crop.cropName}
-                        </h4>
-                        <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                          <MapPin className="w-3.5 h-3.5" />
-                          <span>
-                            {crop.farmAreaMeasurement}
-                            {parseFloat(crop.farmAreaMeasurement) === 1
-                              ? "hectare"
-                              : "hectares"}
-                          </span>
-                        </p>
-                      </div>
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 truncate">
+                        {crop.cropName}
+                      </h4>
+
+                      <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5 truncate">
+                        <MapPin className="w-3.5 h-3.5" />
+
+                        <span>
+                          {crop.farmAreaMeasurement}
+                          {parseFloat(crop.farmAreaMeasurement) === 1
+                            ? "hectare"
+                            : "hectares"}
+                        </span>
+                      </p>
                     </div>
+
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
+                      className={`px-2 py-1 rounded text-xs font-semibold text-nowrap ${
                         crop.cropStatus === "harvested"
                           ? "bg-amber-100 text-amber-800"
                           : "bg-green-100 text-green-800"

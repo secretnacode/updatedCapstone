@@ -283,7 +283,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
                     defaultReport === "planting" && "!text-gray-700"
                   }`}
                 >
-                  Pag tatanim
+                  Pagtatanim
                 </span>
               </Button>
 
@@ -318,7 +318,7 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
                     defaultReport === "harvesting" && "!text-gray-700"
                   }`}
                 >
-                  Pag aani
+                  Pag-aani
                 </span>
               </Button>
             </div>
@@ -1622,7 +1622,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
         <div className="border-t border-gray-200 [&>div]:!p-4">
           {!isView && !userReport.verificationStatus ? (
             <FormCancelSubmitButton
-              submitButtonLabel={"Aprubahan"}
+              submitButtonLabel={"Beripikahin"}
               submitOnClick={proceedOnClick}
               cancelButtonLabel={"Bumalik"}
               cancelOnClick={closeModal}

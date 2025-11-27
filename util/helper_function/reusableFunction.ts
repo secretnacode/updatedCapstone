@@ -783,7 +783,7 @@ export const reportStatus = ({
       : "Naipasa"
     : isEnglish
     ? "Not Verified"
-    : "Kumpirmahin";
+    : "Beripikahin";
 
 /**
  * function that returns a featureCollection Type that can be passed in the map component

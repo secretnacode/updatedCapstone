@@ -82,7 +82,7 @@ export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
         onClick={() => handleGoToComponent("profile-user-info")}
         className={`${accountStatusStyle(authStatus)} ${borderHover}`}
       >
-        {isEnglish ? "Personal Information" : "Personal na impormasyon"}
+        {isEnglish ? "Personal Information" : "Personal na Impormasyon"}
       </Button>
 
       <Button
@@ -97,7 +97,7 @@ export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
           onClick={() => handleGoToComponent("profile-change-pass")}
           className={`${accountStatusStyle(authStatus)} ${borderHover}`}
         >
-          Mag palit ng password
+          Magpalit ng password
         </Button>
       )}
     </div>

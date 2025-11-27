@@ -209,7 +209,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   return (
     <>
       <FormDivLabelInput
-        labelMessage={"Unang Pangalan"}
+        labelMessage={"Unang Pangalan:"}
         inputName={"farmerFirstName"}
         inputType={"text"}
         inputPlaceholder={"Hal. Jose"}
@@ -220,7 +220,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Gitnang Pangalan"}
+        labelMessage={"Gitnang Pangalan:"}
         inputName={"farmerMiddleName"}
         inputType={"text"}
         inputPlaceholder={"Hal. Luzviminda"}
@@ -231,7 +231,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Apelyido"}
+        labelMessage={"Apelyido:"}
         inputName={"farmerLastName"}
         inputType={"text"}
         inputPlaceholder={"Hal. Juan Delacruz"}
@@ -242,7 +242,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Palayaw na pagdugtong"}
+        labelMessage={"Ekstensyon ng Pangalan (Hal. Sr. ,Jr. , III):"}
         inputName={"farmerExtensionName"}
         inputType={"text"}
         inputPlaceholder={"Hal. Jr"}
@@ -253,7 +253,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Alyas"}
+        labelMessage={"Alyas:"}
         inputName={"farmerAlias"}
         inputType={"text"}
         inputPlaceholder={"Hal. Mang Kanor"}
@@ -264,7 +264,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Bilang ng pamilya"}
+        labelMessage={"Bilang ng Pamilya:"}
         inputName={"familyMemberCount"}
         inputType={"text"}
         inputDisable={false}
@@ -274,7 +274,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelSelect
-        labelMessage="Baranggay na tinitirhan"
+        labelMessage="Baranggay na Tirahan:"
         selectName={"barangay"}
         childrenOption={baranggayList.map((brgy) => (
           <option key={brgy} value={brgy}>
@@ -287,7 +287,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Numero ng Telepono"}
+        labelMessage={"Numero ng Telepono:"}
         inputName={"mobileNumber"}
         inputType={"text"}
         inputPlaceholder={"Hal. 09** *** ****"}
@@ -299,7 +299,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
       />
 
       <FormDivLabelInput
-        labelMessage={"Kapanganakan"}
+        labelMessage={"Kapanganakan:"}
         inputName={"birthdate"}
         inputType={"date"}
         inputDisable={false}
@@ -424,7 +424,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       />
 
       <FormDivLabelInput
-        labelMessage="Leader ng Organisasyon"
+        labelMessage="Pinuno ng Organisasyon"
         inputDisable={true}
         inputName={"leaderName"}
         inputDefaultValue={
@@ -446,7 +446,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       {otherOrg && (
         <div className="col-span-2">
           <FormDivLabelInput
-            labelMessage="Mag lagay ng panibagong organisasyon"
+            labelMessage="Mag lagay ng Panibagong Organisasyon"
             inputName={"otherOrgName"}
             inputValue={orgInfo.otherOrgName ?? ""}
             inputPlaceholder="e.g. Kataniman"
@@ -471,7 +471,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       {showModal && (
         <ModalNotice
           type={"warning"}
-          title="Mag babago ng organisasyon?"
+          title="Mag Babago ng Organisasyon?"
           showCancelButton={true}
           onClose={() => setShowModal(false)}
           onProceed={() => handleFormSubmit}
@@ -523,7 +523,7 @@ export const ApprovedOrgMemberButton: FC<ApprovedOrgMemberButtonPropType> = ({
       disabled={verificationStatus}
       onClick={handleApproveFarmerAcc}
     >
-      Aprubahan
+      Beripikahin
     </button>
   );
 };
@@ -890,7 +890,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
       case "week":
         return `${word} linggo`;
       case "month":
-        return `${word} buwan`;
+        return `${word} buwan at nakaraang buwan`;
       case "year":
         return `${word} taon`;
     }
@@ -1543,7 +1543,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   onClick={() => handleSortCol("dayReported")}
                   className="cursor-pointer"
                 >
-                  <p>Araw Ipinasa</p>
+                  <p>Araw ng Pag-uulat</p>
 
                   <SortType col={"dayReported"} />
                 </div>
@@ -1557,7 +1557,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
 
               <th scope="col">
                 <div>
-                  <p>Estado ng ulat</p>
+                  <p>Kalagayan ng ulat</p>
                 </div>
               </th>
 
@@ -1661,11 +1661,11 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
       additionalFilter={{
         filterBy: {
           verified: Array.from(new Set(orgMember.map((val) => val.verified))),
-          cropNum: Array.from(new Set(orgMember.map((val) => val.cropNum))),
+          barangay: Array.from(new Set(orgMember.map((val) => val.barangay))),
         },
         handleFilterLabel: {
           verified: (val) => (val === "true" ? "Kumpirmahin" : "Kumpirmado"),
-          cropNum: (val) => `pananim ${val}`,
+          barangay: (val) => capitalizeFirstLetter(val),
         },
       }}
       table={
@@ -1707,7 +1707,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                   onClick={() => handleSortCol("barangay")}
                   className="cursor-pointer"
                 >
-                  <p>Baranggay na tinitirhan</p>
+                  <p>Baranggay na Tirahan</p>
 
                   <SortType col={"barangay"} />
                 </div>
@@ -1797,7 +1797,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                             : "table-unverified"
                         }`}
                       >
-                        {!member.verified ? "Kumpirmahin" : "Kumpirmado"}
+                        {member.verified ? "Beripikado" : "Beripikahin"}
                       </p>
                     </div>
                   </td>
@@ -1918,7 +1918,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                   onClick={() => handleSortCol("dayReported")}
                   className="cursor-pointer"
                 >
-                  <p>Araw na ipinasa</p>
+                  <p>Araw ng Pag-uulat</p>
 
                   <SortType col={"dayReported"} />
                 </div>
@@ -1929,7 +1929,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                   onClick={() => handleSortCol("dayHappen")}
                   className="cursor-pointer"
                 >
-                  <p>Araw na naganap</p>
+                  <p>Araw na Naganap</p>
 
                   <SortType col={"dayHappen"} />
                 </div>
@@ -3059,7 +3059,7 @@ export const ChangeMyPassword = () => {
   return (
     <>
       <AuthInputPass
-        label="Kasalukuyang password:"
+        label="Kasalukuyang Password:"
         isHidden={hidePass}
         setIsHidden={() => setHidePass(!hidePass)}
         name="currentPass"
@@ -3071,7 +3071,7 @@ export const ChangeMyPassword = () => {
       />
 
       <FormDivLabelInput
-        labelMessage="Bagong password:"
+        labelMessage="Bagong Password:"
         inputName="newPass"
         placeholder="NewPasswordPalay123"
         value={passVal.newPass}
@@ -3081,7 +3081,7 @@ export const ChangeMyPassword = () => {
       />
 
       <FormDivLabelInput
-        labelMessage="Kumpirmahin ang panibagong password:"
+        labelMessage="Kumpirmahin ang Bagong Password:"
         inputName="confirmNewPass"
         placeholder="NewPasswordPalay123"
         value={passVal.confirmNewPass}
@@ -3168,13 +3168,13 @@ export const FarmerLogoutButton = () => {
         createPortal(
           <ModalNotice
             type="warning"
-            title="Mag log out ng account"
+            title="Mag-log Out ng Account"
             showCloseButton={false}
             message={<>Mag log out ng account?</>}
             onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}
-            proceed={{ label: "Mag log out" }}
+            proceed={{ label: "Mag-log out" }}
             cancel={{ label: "Kanselahin" }}
           />,
           document.body
@@ -3230,7 +3230,7 @@ export const AgriLogoutButton = () => {
         createPortal(
           <ModalNotice
             type="warning"
-            title="Log out your account?"
+            title="Log Out your Account?"
             showCloseButton={false}
             message={<>Are you sure you want to log out?</>}
             onClose={() => setOpenModal(false)}

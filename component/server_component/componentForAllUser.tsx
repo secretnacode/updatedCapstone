@@ -52,8 +52,6 @@ import {
   PieChartCard,
   ChangeMyPassword,
   BackButton,
-  BlockFarmerButton,
-  UnblockFarmerButton,
   BlockMyOrgMemberButton,
   UnblockMyOrgMemberButton,
 } from "../client_component/componentForAllUser";
@@ -145,6 +143,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
                     {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
                     {userFarmerInfo.farmerInfo.farmerLastName}
                   </h2>
+
                   {userFarmerInfo.farmerInfo.farmerAlias && (
                     <p className="text-gray-500 text-sm">
                       &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
@@ -154,6 +153,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
 
                 <div className="flex items-start gap-2 text-gray-600">
                   <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
+
                   <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
                 </div>
 
@@ -172,14 +172,14 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
                             <CircleCheck />
                             {isEnglish
                               ? "Verified Account"
-                              : "Beripikado ang account"}
+                              : "Beripikado ang Account"}
                           </>
                         ) : (
                           <>
                             <TriangleAlert />
                             {isEnglish
                               ? "Pending Verification"
-                              : "Hindi pa beripikado"}
+                              : "Hindi pa Beripikado"}
                           </>
                         )}
                       </p>
@@ -336,7 +336,9 @@ export const UserProFile: FC<UserProFilePropType> = async ({
       <div className="component" id="profile-org-info">
         <div>
           <Building />
-          <h1>{isEnglish ? "User Organization" : "Organisasyon na Kasali"}</h1>
+          <h1>
+            {isEnglish ? "User Organization" : "Organisasyon na Kinabibilangan"}
+          </h1>
         </div>
 
         <div className="default-style-info">
@@ -398,7 +400,11 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
       />
 
       <FormDivLabelInput
-        labelMessage={isEnglish ? "Extension name:" : "Palayaw na pagdugtong:"}
+        labelMessage={
+          isEnglish
+            ? "Extension name:"
+            : "Ekstensyon ng Pangalan (Hal. Sr. ,Jr. , III)"
+        }
         inputName={"farmerExtensionName"}
         inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Jr"}
         inputDisable={true}
@@ -415,7 +421,7 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
 
       <FormDivLabelInput
         labelMessage={
-          isEnglish ? "Family member count:" : "Bilang ng miyembro sa pamilya:"
+          isEnglish ? "Family member count:" : "Bilang ng Miyembro sa Pamilya:"
         }
         inputName={"familyMemberCount"}
         inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "1"}
@@ -425,7 +431,7 @@ export const ViewUserProfileInfo: FC<ViewUserProfileFormPropType> = ({
 
       <FormDivLabelInput
         labelMessage={
-          isEnglish ? "Residential barangay:" : "Baranggay na tinitirhan:"
+          isEnglish ? "Residential barangay:" : "Baranggay na Tirahan:"
         }
         inputName={"barangay"}
         inputPlaceholder={isEnglish ? "e.g. " : "Hal. " + "Silangan"}
@@ -854,7 +860,7 @@ export const ReportCountPerCrop: FC = async () => {
     <div className="component ">
       <div className=" space-y-4">
         <div className="font-semibold">
-          <p>Bilang ng ulat kada pananim</p>
+          <p>Bilang ng Ulat Bawat Pananim</p>
         </div>
 
         {reportCount.success ? (
@@ -1068,7 +1074,7 @@ export const LatestReport = async () => {
   return (
     <div className="space-y-4 component">
       <div className="font-semibold">
-        <p>Huling ulat na naipasa</p>
+        <p>Mga Dati ng Ulat na Ipinasa</p>
       </div>
 
       <div>

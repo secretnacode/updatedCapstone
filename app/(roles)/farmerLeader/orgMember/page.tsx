@@ -21,14 +21,12 @@ export default async function Page() {
       ],
     };
   }
-  if (farmerMember.success)
-    console.log(farmerMember.farmerMember.map((val) => val.status));
 
   return (
     <div className="component space-y-6">
       <div>
         <div className="flex justify-start items-center">
-          <h1 className="table-title">Mga Miyembro sa Organisasyon</h1>
+          <h1 className="table-title">Mga Miyembro ng Organisasyon</h1>
         </div>
       </div>
 
