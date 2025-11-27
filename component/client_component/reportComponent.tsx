@@ -104,7 +104,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
         className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
       >
         <Plus className="h-5 w-5" />
-        Mag sagawa ng ulat
+        Gumawa ng Ulat
       </button>
 
       {openReportModal && (
@@ -114,7 +114,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
           <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold">
-                Mag sagawa ng panibagong ulat
+                Mag Gawa ng Panibagong Ulat
               </h2>
 
               <button

@@ -199,7 +199,7 @@ export const blockMyOrgMember = async (
       success: true,
       notifMessage: [
         {
-          message: "Matagumpay ang pag bblock ng account ng farmer",
+          message: "Matagumpay ang pag b-block ng account ng farmer",
           type: "success",
         },
       ],
@@ -207,7 +207,7 @@ export const blockMyOrgMember = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May hindi inaasahang pag kakamali habang bino-block and farmer account: ${err}`
+      `May hindi inaasahang pag kakamali habang bino-block ang farmer account: ${err}`
     );
     return {
       success: false,
@@ -258,27 +258,101 @@ export const blockFarmerUser = async (
 };
 
 /**
- *
- * @param dynamicPath base path of the dynamic route where you will use this
- * @param dynamicVal value of the dynamic page you want to check
- * @returns boolean
+ * server action for unblocking the org member of the leader
+ * @param farmerId id of the member
+ * @returns
  */
-// export const isDynamicValueExist = async (
-//   dynamicPath: "agriculturist/organizations" | "farmer/farmerUser",
-//   dynamicVal: string
-// ): Promise<boolean> => {
-//   try {
-//     if (dynamicPath === "agriculturist/organizations")
-//       return organizationIsExist(dynamicVal);
-//     else if (dynamicPath === "farmer/farmerUser")
-//       return farmerIsExist(dynamicVal);
+export const unblockMyOrgMember = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { userId, work } = await ProtectedAction(
+      "update:farmer:org:member:user"
+    );
 
-//     return false;
-//   } catch (error) {
-//     console.log((error as Error).message);
-//     return false;
-//   }
-// };
+    const checkAuthorization = await farmerLeaderValidationForImportantAction(
+      farmerId,
+      userId
+    );
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    if (!(await CheckMyMemberquery(farmerId, userId)))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "Ang user na iu-unblock mo ay hindi mo kamiyembro!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+
+    revalidatePath(`/farmerLeader/orgMember`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pag u-unblock ng account ng farmer",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May hindi inaasahang pag kakamali habang inu-unblock ang farmer account: ${err}`
+    );
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * agriculturist action for unblocking the user
+ * @param farmerId id of the farmer to be block
+ * @returns
+ */
+export const unblockFarmerUser = async (
+  farmerId: string
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { work } = await ProtectedAction("update:farmer:user");
+
+    const checkAuthorization = await agriValidationForImportantAction(farmerId);
+
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await blockOrDelteUserAccountQuery(farmerId, work, "unblock");
+
+    revalidatePath(`/agriculturist/farmerUsers`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Successfully blocked the farmer account",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Unexpected error occured while blocking the farmer: ${err}`);
+
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
 
 /**
  * server action that checks if the new use already fill up the first part of the sign up

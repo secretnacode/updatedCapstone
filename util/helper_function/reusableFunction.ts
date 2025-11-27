@@ -665,7 +665,7 @@ export const determineCropStatus = ({
 
       if (new Date() >= planted5DaysAgo)
         return {
-          status: isEnglish ? "Growing" : "Pag papatubo",
+          status: isEnglish ? "Growing" : "Pagpapatubo",
           className: "bg-green-100 text-green-800",
         };
 

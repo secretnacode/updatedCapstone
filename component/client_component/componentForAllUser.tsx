@@ -93,6 +93,8 @@ import {
   agriLogout,
   blockMyOrgMember,
   blockFarmerUser,
+  unblockMyOrgMember,
+  unblockFarmerUser,
 } from "@/lib/server_action/user";
 import { LineChart, PieChart } from "@mui/x-charts";
 import {
@@ -702,9 +704,9 @@ export const BlockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
     try {
       handleIsLoading("Bino-block na ang account....");
 
-      const deleteUser = await blockMyOrgMember(farmerId);
+      const blockUser = await blockMyOrgMember(farmerId);
 
-      handleSetNotification(deleteUser.notifMessage);
+      handleSetNotification(blockUser.notifMessage);
     } catch (error) {
       const err = error as Error;
       handleSetNotification([{ message: err.message, type: "error" }]);
@@ -722,22 +724,23 @@ export const BlockFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
   const { handleSetNotification } = useNotification();
   const { handleIsLoading, handleDoneLoading } = useLoading();
 
-  const handleDeleteFarmerUser = async () => {
+  const handleBlockFarmerUser = async () => {
     try {
       handleIsLoading("Blocking the farmer account....");
 
-      const deleteUser = await blockFarmerUser(farmerId);
+      const blockUser = await blockFarmerUser(farmerId);
 
-      handleSetNotification(deleteUser.notifMessage);
+      handleSetNotification(blockUser.notifMessage);
     } catch (error) {
       const err = error as Error;
+
       handleSetNotification([{ message: err.message, type: "error" }]);
     } finally {
       handleDoneLoading();
     }
   };
 
-  return <BlockUser isEnglish={true} blockOnClick={handleDeleteFarmerUser} />;
+  return <BlockUser isEnglish={true} blockOnClick={handleBlockFarmerUser} />;
 };
 
 const UnblockUser: FC<blockUserPropType> = ({ isEnglish, blockOnClick }) => {
@@ -754,47 +757,55 @@ const UnblockUser: FC<blockUserPropType> = ({ isEnglish, blockOnClick }) => {
 export const UnblockMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
   farmerId,
 }) => {
-  // const { handleSetNotification } = useNotification();
-  // const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
 
-  const handleBlockOrgMember = async () => {
+  const handleUnblockOrgMember = async () => {
     console.log(farmerId);
-    // try {
-    //   handleIsLoading("Inu-unblock na ang account ng farmer....");
-    //   const deleteUser = await blockMyOrgMember(farmerId);
-    //   handleSetNotification(deleteUser.notifMessage);
-    // } catch (error) {
-    //   const err = error as Error;
-    //   handleSetNotification([{ message: err.message, type: "error" }]);
-    // } finally {
-    //   handleDoneLoading();
-    // }
+    try {
+      handleIsLoading("Inu-unblock na ang account ng farmer....");
+
+      const unblockUser = await unblockMyOrgMember(farmerId);
+
+      handleSetNotification(unblockUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
   };
 
-  return <UnblockUser isEnglish={false} blockOnClick={handleBlockOrgMember} />;
+  return (
+    <UnblockUser isEnglish={false} blockOnClick={handleUnblockOrgMember} />
+  );
 };
 
 export const UnblockFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
   farmerId,
 }) => {
-  // const { handleSetNotification } = useNotification();
-  // const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
 
-  const handleDeleteFarmerUser = async () => {
-    console.log(farmerId);
-    // try {
-    //   handleIsLoading("Blocking the farmer account....");
-    //   const deleteUser = await blockFarmerUser(farmerId);
-    //   handleSetNotification(deleteUser.notifMessage);
-    // } catch (error) {
-    //   const err = error as Error;
-    //   handleSetNotification([{ message: err.message, type: "error" }]);
-    // } finally {
-    //   handleDoneLoading();
-    // }
+  const handleUnblockFarmerUser = async () => {
+    try {
+      handleIsLoading("Unblocking the farmer account....");
+
+      const unblockUser = await unblockFarmerUser(farmerId);
+
+      handleSetNotification(unblockUser.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
   };
 
-  return <UnblockUser isEnglish={true} blockOnClick={handleDeleteFarmerUser} />;
+  return (
+    <UnblockUser isEnglish={true} blockOnClick={handleUnblockFarmerUser} />
+  );
 };
 
 export const LineChartComponent: FC<LineChartComponentPropType> = ({
@@ -877,7 +888,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
 
     switch (formatChart) {
       case "week":
-        return `${word} lingo`;
+        return `${word} linggo`;
       case "month":
         return `${word} buwan`;
       case "year":

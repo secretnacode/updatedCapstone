@@ -27,7 +27,7 @@ export default async function Page() {
     <div className="component space-y-6">
       <div>
         <div className="flex justify-start items-center">
-          <h1 className="table-title">Mga ulat ng ka-miyembro</h1>
+          <h1 className="table-title">Mga Ulat ng Miyembro</h1>
         </div>
       </div>
 

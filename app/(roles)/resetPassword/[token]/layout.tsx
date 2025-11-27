@@ -1,4 +1,4 @@
-import { AuthBaserDesign } from "@/component/server_component/customComponent";
+import { AuthBaseDesign } from "@/component/server_component/customComponent";
 import { ReactNode } from "react";
 
 export default function Layout({
@@ -6,5 +6,5 @@ export default function Layout({
 }: Readonly<{
   children: Readonly<ReactNode>;
 }>) {
-  return <AuthBaserDesign>{children}</AuthBaserDesign>;
+  return <AuthBaseDesign isEnglish={false}>{children}</AuthBaseDesign>;
 }

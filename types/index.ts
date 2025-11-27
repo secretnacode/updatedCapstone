@@ -1958,3 +1958,5 @@ export type farmerOrgMemberActionPropType = {
   farmerName: string;
   status: farmerAuthStatusType;
 };
+
+export type authBaseDesignPropType = { isEnglish: boolean } & ChildrenPropType;

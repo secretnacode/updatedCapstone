@@ -93,7 +93,10 @@ export const ViewCropModalButton: FC<ViewCropModalButtonPropType> = ({
       </Button>
 
       {!isViewing && (
-        <Button onClick={() => handleGoToComponent("profile-change-pass")}>
+        <Button
+          onClick={() => handleGoToComponent("profile-change-pass")}
+          className={`${accountStatusStyle(authStatus)} ${borderHover}`}
+        >
           Mag palit ng password
         </Button>
       )}

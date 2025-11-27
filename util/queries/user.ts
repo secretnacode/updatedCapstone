@@ -4,6 +4,7 @@ import {
   agriAuthQueryReturnType,
   agriculturistRoleType,
   agriIsExistParamType,
+  allType,
   allUserRoleType,
   barangayType,
   farmerAuthStatusType,
@@ -383,7 +384,7 @@ export const GetFarmerProfileOrgInfoQuery = async (
 };
 
 /**
- * query for deleting or blocking the user
+ * query for mutating the farmer auth status(active, delete, block)
  * @param farmerId id of the farmer to be mutated
  * @param role role of the user who will make this action(deleting or blocking the user)
  * @param action block or delete
@@ -391,29 +392,23 @@ export const GetFarmerProfileOrgInfoQuery = async (
 export const blockOrDelteUserAccountQuery = async (
   farmerId: string,
   role: allUserRoleType,
-  action: "block" | "delete"
+  action: "block" | "delete" | "unblock"
 ): Promise<void> => {
   try {
     const status = await farmerAuthStatus();
 
-    // default query for blocking a user
-    let query = `update capstone.auth set "status" = $1, "changeStatusAt" = $2, "changeStatusBy" = $3 where "authId" = $4`;
+    let query = "";
+    let param: allType[] = [];
 
-    // default param of the query for blocking a user
-    let param = [status.block, new Date(), role, farmerId];
+    if (action === "block" || action === "unblock") {
+      query = `update capstone.auth set "status" = $1 where "authId" = $2`;
 
-    // if the action is delete, it wil overide the existing query and param
-    if (action === "delete") {
-      query = `update capstone.auth set "username" = $1, "password" = $2, "status" = $3, "changeStatusAt" = $4, "changeStatusBy" = $5 where "authId" = $6`;
+      if (action === "block") param = [status.active, farmerId];
+      else param = [status.block, farmerId];
+    } else if (action === "delete") {
+      query = `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "authId" = $4`;
 
-      param = [
-        "",
-        await Hash(CreateUUID()),
-        status.delete,
-        new Date(),
-        role,
-        farmerId,
-      ];
+      param = ["", await Hash(CreateUUID()), status.delete, farmerId];
     }
 
     await pool.query(query, param);
@@ -421,10 +416,18 @@ export const blockOrDelteUserAccountQuery = async (
     const message =
       role === "admin" || role === "agriculturist"
         ? `Unexpected error while ${
-            action === "delete" ? "deleting" : "blocking"
+            action === "delete"
+              ? "deleting"
+              : action === "block"
+              ? "blocking"
+              : "unblocking"
           } the user`
         : `May pagkakamali na hindi inaasahang nang yari sa pag ${
-            action === "delete" ? "tatanggal" : "bblock"
+            action === "delete"
+              ? "tatanggal"
+              : action === "block"
+              ? "b-block"
+              : "u-unblock"
           } ng account ng user`;
 
     console.error(`${message}: ${(error as Error).message}`);

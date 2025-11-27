@@ -48,7 +48,7 @@ export const FarmerLeadDashBoard = async () => {
               iconWrapperStyle: "bg-blue-200",
             },
             cardLabel: {
-              label: "Ulat sa organisasyon",
+              label: "Ulat ng Organisasyon",
               className: "text-blue-700 bg-blue-100",
             },
             cardContent: String(data.cardValue.orgMemberTotalReportToday),
@@ -92,7 +92,7 @@ export const FarmerLeadDashBoard = async () => {
           importantWidget={
             <RecentReportWidget
               recentReport={data.recentReport}
-              widgetTitle={"Mga nag pasa ng ulat"}
+              widgetTitle={"Mga Nagsumite ng Ulat"}
               linkFor="farmer"
             />
           }

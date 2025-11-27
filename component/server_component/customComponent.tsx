@@ -1,8 +1,8 @@
 import {
+  authBaseDesignPropType,
   AuthFormPropType,
   barangayType,
   ButtonPropType,
-  ChildrenPropType,
   CropFormPropType,
   DashboardCardPropType,
   FormCancelSubmitButtonPropType,
@@ -947,32 +947,59 @@ export const ModalLoading: FC = () => {
   );
 };
 
-export const AuthBaserDesign: FC<ChildrenPropType> = ({ children }) => {
+export const AuthBaseDesign: FC<authBaseDesignPropType> = ({
+  children,
+  isEnglish,
+}) => {
   return (
     <main>
       <div className="min-h-screen max-h-fit w-full bg-gradient-to-b from-green-50 to-white">
         <div className="flex flex-col md:flex-row md:gap-7 lg:gap-0 items-center justify-center min-h-screen p-4">
-          {/* Left Section */}
           <div className="flex flex-col items-center md:items-end md:w-full md:max-w-[500px] lg:pr-4 xl:pr-8 space-y-6 mb-8 md:mb-0">
             <div className="text-center md:text-right">
               <h1 className="web-title">AgroFarm</h1>
               <p className="hidden md:block text-lg lg:text-xl text-gray-600 max-w-md">
-                Enabling Seamless Reporting and Informed Farmer Reports
+                {/* original text "Enabling Seamless Reporting and Informed Farmer Reports" */}
+                {isEnglish
+                  ? "Enabling Seamless Monitoring of Farmers' Crops Through Informed Farmer Reports"
+                  : "Mag Pasa ng Ulat ng Walang Hadlang at Mabilis na may Patungkol sa Iyong Pananim"}
               </p>
             </div>
 
-            {/* Features Section - Visible on MD and up */}
             <div className="hidden md:grid grid-cols-2 gap-4 text-right">
               <div className="hidden lg:block p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-green-100 shadow-sm">
-                <h3 className="font-semibold text-green-800">
-                  Real-time Updates
+                <h3
+                  className={`font-semibold text-green-800 ${
+                    isEnglish ? "" : "text-sm"
+                  }`}
+                >
+                  {/* original text: "Real-time Updates" */}
+                  {isEnglish
+                    ? "Instant Report Delivery"
+                    : "Agarang Pagpapasa ng Ulat"}
                 </h3>
-                <p className="text-sm text-gray-600">Instant farm monitoring</p>
+                <p className="text-sm text-gray-600">
+                  {/* original text: "Instant farm monitoring" */}
+                  {isEnglish
+                    ? "Receive reports immediately"
+                    : "Mabilisang pag gawa ng ulat"}
+                </p>
               </div>
 
               <div className="hidden lg:block p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-green-100 shadow-sm">
-                <h3 className="font-semibold text-green-800">Data Analytics</h3>
-                <p className="text-sm text-gray-600">Smart farming insights</p>
+                <h3
+                  className={`font-semibold text-green-800 ${
+                    isEnglish ? "" : "text-sm"
+                  }`}
+                >
+                  {/* original text: "Data Analytics" */}
+                  {isEnglish ? "Data Analytics" : "Pamamahala ng Pananim"}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {/* orginial text: "Smart farming insights" */}
+
+                  {isEnglish ? "Smart farming insights" : "Estado ng pananim"}
+                </p>
               </div>
             </div>
           </div>

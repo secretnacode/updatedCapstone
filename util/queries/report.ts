@@ -453,7 +453,7 @@ export const getRecentReport = async (
     } =
       param.userRole === "agriculturist"
         ? {
-            filter: `r."verificationStatus" = $1 and a."status"`,
+            filter: `r."verificationStatus" = $1 and a."status" <> $2`,
             param: [true, status.delete],
           }
         : {
