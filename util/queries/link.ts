@@ -3,8 +3,8 @@
 import {
   createResetPassWordLinkQueryParamType,
   createSignUpLinkForAgriQueryParamType,
-  getLinkQueryReturnTyepe,
-  getLinkResetPassQueryReturnType,
+  getCreateAgriLinkReturnType,
+  getRestPasswordLinkQueryReturnType,
   linkTableType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -77,7 +77,7 @@ export const createSignUpLinkForAgriQuery = async (
  * query for getting the necessary data for viewing the links in reseting the password of the farmer
  */
 export const getRestPasswordLinkQuery = async (): Promise<
-  getLinkResetPassQueryReturnType[]
+  getRestPasswordLinkQueryReturnType[]
 > => {
   try {
     return (
@@ -101,7 +101,7 @@ export const getRestPasswordLinkQuery = async (): Promise<
  * query for getting the necessary data for viewing the links in creating a user agriculturist
  */
 export const getCreateAgriLink = async (): Promise<
-  getLinkQueryReturnTyepe[]
+  getCreateAgriLinkReturnType[]
 > => {
   try {
     return (

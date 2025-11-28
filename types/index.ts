@@ -1448,30 +1448,24 @@ export type serverActionNormalReturnType = {
   notifMessage: NotificationBaseType[];
 };
 
-export type getLinkQueryReturnTyepe = {
+export type getCreateAgriLinkReturnType = {
   linkId: string;
   link: string;
   dateCreated: Date;
   dateExpired: Date;
 };
 
-export type getLinkResetPassQueryReturnType = getLinkQueryReturnTyepe & {
-  farmerName: string;
-  username: string;
-};
-
-export type linkResetPassMergeWithLinkCreateAgri = getLinkQueryReturnTyepe & {
+export type getRestPasswordLinkQueryReturnType = getCreateAgriLinkReturnType & {
   farmerName: string | null;
   username: string | null;
 };
 
 export type getAllLinkDataReturnType =
-  | ({
+  | {
       success: true;
-    } & (
-      | { work: "agriculturist"; links: getLinkResetPassQueryReturnType[] }
-      | { work: "admin"; links: linkResetPassMergeWithLinkCreateAgri[] }
-    ))
+      work: agriRoleType;
+      links: getRestPasswordLinkQueryReturnType[];
+    }
   | ServerActionFailBaseType;
 
 export type tableNoDataPropType = {
@@ -1959,3 +1953,5 @@ export type farmerOrgMemberActionPropType = {
 };
 
 export type authBaseDesignPropType = { isEnglish: boolean } & ChildrenPropType;
+
+export const agriculturistCreateLinkTableReturnType = {};

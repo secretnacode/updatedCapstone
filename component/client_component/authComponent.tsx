@@ -247,8 +247,6 @@ const ModalNotif: FC<{
 }> = ({ isSignUp }): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  console.log(modalRef.current);
-
   return (
     <>
       {isSignUp && (
@@ -279,11 +277,23 @@ const ModalNotif: FC<{
               <ul className="space-y-3 mb-6 ml-3">
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Hindi bababa sa 8 letra o numero</span>
+                  <span>Hindi bababa sa walong(8) karakter</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Letra at Numero lamang ang laman</span>
+                  <span>Mga letra at numero lamang</span>
+                </li>
+                <li className="flex items-center gap-2 text-gray-600">
+                  <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+                  <span>Kahit isang malaking letra (A-Z)</span>
+                </li>
+                <li className="flex items-center gap-2 text-gray-600">
+                  <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+                  <span>Kahit isang maliit letra (a-z)</span>
+                </li>
+                <li className="flex items-center gap-2 text-gray-600">
+                  <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
+                  <span>Kahit isang numero (0-9)</span>
                 </li>
               </ul>
 
@@ -294,15 +304,15 @@ const ModalNotif: FC<{
               <ul className="space-y-3 mb-6 ml-3">
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Hindi bababa sa 8 letra o numero</span>
+                  <span>Hindi bababa sa walong(8) karakter</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Kahit isang malaking na letra (A-Z)</span>
+                  <span>Kahit isang malaking letra (A-Z)</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Kahit isang maliit na letra (a-z)</span>
+                  <span>Kahit isang maliit letra (a-z)</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
@@ -318,7 +328,7 @@ const ModalNotif: FC<{
               <ul className="space-y-3 mb-6 ml-3">
                 <li className="flex items-center gap-2 text-gray-600">
                   <div className="h-2 w-2 bg-yellow-400 rounded-full"></div>
-                  <span>Kaparehas ng inilagay mo sa password</span>
+                  <span>Kapareho ng inilagay mo sa password</span>
                 </li>
               </ul>
 

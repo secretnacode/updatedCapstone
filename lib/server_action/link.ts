@@ -162,26 +162,38 @@ export const getAllLinkData = async (): Promise<getAllLinkDataReturnType> => {
   try {
     const { work } = await ProtectedAction("read:link");
 
-    const resetPassLink = await getRestPasswordLinkQuery();
-
-    if (work === "agriculturist")
+    if (work === "farmer" || work === "leader")
       return {
-        success: true,
-        work,
-        links: resetPassLink,
+        success: false,
+        notifError: [
+          {
+            message: "Hindi mo pwedeng gawin ang aksyon na ito",
+            type: "error",
+          },
+        ],
       };
+
+    let resetPassLink = await getRestPasswordLinkQuery();
+
+    if (work === "admin")
+      resetPassLink = (await getCreateAgriLink()).map((val) => ({
+        ...val,
+        farmerName: null,
+        username: null,
+      }));
+
+    const sortedVal = [...resetPassLink].sort((a, b) => {
+      if (a.dateCreated.getTime() > b.dateCreated.getTime()) return 1;
+
+      if (a.dateCreated.getTime() < b.dateCreated.getTime()) return -1;
+
+      return 0;
+    });
 
     return {
       success: true,
-      work: "admin",
-      links: [
-        ...resetPassLink,
-        ...(await getCreateAgriLink()).map((val) => ({
-          ...val,
-          farmerName: null,
-          username: null,
-        })),
-      ],
+      work: work,
+      links: sortedVal,
     };
   } catch (error) {
     const err = error as Error;

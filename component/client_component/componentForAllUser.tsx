@@ -3136,7 +3136,7 @@ export const FarmerLogoutButton = () => {
 
   const handleLogout = async () => {
     try {
-      handleIsLoading("Logging out!!!");
+      handleIsLoading("Nag-Lolog out!!!");
 
       const res = await farmerLogout();
 
@@ -3162,7 +3162,7 @@ export const FarmerLogoutButton = () => {
       >
         <LogOut className="logo" />
 
-        <span className="nav-span">Log out</span>
+        <span className="nav-span">Mag-log out</span>
       </button>
 
       {openModal &&
@@ -3433,5 +3433,164 @@ export const BackButton: FC<{ label: string }> = ({ label }) => {
       </svg>
       {label}
     </button>
+  );
+};
+
+export const AgriculturistCreateLinkTable: FC = ({ links }) => {
+  const { sortCol, setSortCol, handleSortCol } =
+    useSortColumnHandler<GetUserReportReturnType>();
+  const [tableList, setTableList] = useState<GetUserReportReturnType[]>(links);
+
+  const SortType: FC<{ col: keyof GetUserReportReturnType }> = ({ col }) => (
+    <SortColBy<GetUserReportReturnType> sortCol={sortCol} col={col} />
+  );
+
+  return (
+    <TableWithFilter<GetUserReportReturnType>
+      setTableList={setTableList}
+      sortCol={sortCol}
+      setSortCol={setSortCol}
+      obj={report}
+      additionalFilter={}
+      table={
+        <TableComponent
+          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
+          listCount={links.length}
+          tableHeaderCell={
+            <>
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("title")}
+                  className="cursor-pointer"
+                >
+                  <p>Pamagat ng ulat</p>
+
+                  <SortType col={"title"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("cropName")}
+                  className="cursor-pointer"
+                >
+                  <p>Pangalan ng pananim</p>
+
+                  <SortType col={"cropName"} />
+                </div>
+              </th>
+
+              {work === "leader" ? null : (
+                <th scope="col">
+                  <div className="cursor-pointer">
+                    <p>Estado ng ulat</p>
+                  </div>
+                </th>
+              )}
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayReported")}
+                  className="cursor-pointer"
+                >
+                  <p>Araw ng Pag-uulat</p>
+
+                  <SortType col={"dayReported"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dayHappen")}
+                  className="cursor-pointer"
+                >
+                  <p>Araw na Naganap</p>
+
+                  <SortType col={"dayHappen"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>
+                  <p>Uri ng ulat</p>
+                </div>
+              </th>
+
+              <th scope="col">
+                <div>
+                  <p>Aksyon</p>
+                </div>
+              </th>
+            </>
+          }
+          tableCell={
+            <>
+              {tableList.map((report) => (
+                <tr key={report.reportId}>
+                  <td className=" text-gray-900 font-medium">
+                    <div>
+                      <p>{report.title}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{report.cropName}</p>
+                    </div>
+                  </td>
+
+                  {work === "leader" ? null : (
+                    <td>
+                      <div>
+                        <p
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            report.verificationStatus
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {report.verificationStatus
+                            ? "Naipasa"
+                            : "kinukumpirma"}
+                        </p>
+                      </div>
+                    </td>
+                  )}
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
+                    </div>
+                  </td>
+
+                  <td className="text-gray-500">
+                    <div>
+                      <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
+                    </div>
+                  </td>
+
+                  <td scope="col">
+                    <div>
+                      <p>
+                        <ReportType type={report.reportType} />
+                      </p>
+                    </div>
+                  </td>
+
+                  <td className="text-center">
+                    <div>
+                      <ViewUserReportButton
+                        reportId={report.reportId}
+                        myReport={true}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          }
+        />
+      }
+    />
   );
 };
