@@ -114,7 +114,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
           <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold">
-                Mag Gawa ng Panibagong Ulat
+                Maggawa ng Panibagong Ulat
               </h2>
 
               <button
@@ -477,7 +477,7 @@ const DamageReport: FC<ReportContentPropType> = ({
 
         <div>
           <label htmlFor="reportPicture" className="label">
-            Mag lagay ng larawan ng mga nasira:
+            Maglagay ng larawan ng mga nasira:
             <span className="text-red-500">*</span>
           </label>
 
@@ -676,7 +676,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
             htmlFor="reportPicture"
             className="block text-sm font-medium text-gray-700 mb-3"
           >
-            Mag lagay ng larawan ng lugar na tinaniman:
+            Maglagay ng larawan ng lugar na tinaniman:
             <span className="text-red-500">*</span>
           </label>
 
@@ -755,18 +755,18 @@ const PlantingReport: FC<ReportContentPropType> = ({
       {openModal && (
         <ModalNotice
           type="warning"
-          title="Mag ulat tungkol sa pag tatanim?"
+          title="Mag-ulat tungkol sa pagtatanim?"
           message={
             <>
-              Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
-              tatanim? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
+              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong pag
+              tatanim? Pag-ito ay ipinasa, hindi na ito muling maibabalik ang
               estado ng iyong pananim.
             </>
           }
           onClose={() => setOpenModal(false)}
           onProceed={handleSubmit}
           showCancelButton={true}
-          proceed={{ label: "Mag patuloy" }}
+          proceed={{ label: "Magpatuloy" }}
           cancel={{ label: "Kanselahin" }}
         />
       )}
@@ -855,7 +855,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Pamagat ng ulat ng pag-aani:"
           inputName={"reportTitle"}
           formError={state.formError?.reportTitle}
-          inputPlaceholder="Hal: Pag aani sa taniman sa may lamot 1"
+          inputPlaceholder="Hal: Pag-aani sa taniman sa may lamot 1"
           inputClassName="input-amber-ring"
         />
 
@@ -881,7 +881,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
           labelMessage="Karagdagang detalye:"
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
-          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa nang ipag benta"
+          placeholder="Hal: Naani na ang mga palay dine sa may lamot 1, at handa ng ibenta"
           className="input-amber-ring"
         />
 
@@ -890,7 +890,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
             htmlFor="reportPicture"
             className="block text-sm font-medium text-gray-700 mb-3"
           >
-            Mag lagay ng larawan ng ani:<span className="text-red-500">*</span>
+            Maglagay ng larawan ng ani:<span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -968,18 +968,18 @@ const HarvestingReport: FC<ReportContentPropType> = ({
       {openModal && (
         <ModalNotice
           type="warning"
-          title="Mag ulat tungkol sa pag aani?"
+          title="Mag-ulat tungkol sa pag-aani?"
           message={
             <>
-              Sigurado ka bang mag papasa ka ng ulat patungkol sa iyong pag
-              aani? Pag ito ay ipinasa, hindi na ito muling maibabalik ang
-              estado ng iyong pananim.
+              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong pag-aani?
+              Pag-ito ay ipinasa, hindi na ito muling maibabalik ang estado ng
+              iyong pananim.
             </>
           }
           onClose={() => setOpenModal(false)}
           onProceed={handleSubmit}
           showCancelButton={true}
-          proceed={{ label: "Mag patuloy" }}
+          proceed={{ label: "Magpatuloy" }}
           cancel={{ label: "Kanselahin" }}
         />
       )}
@@ -1006,7 +1006,7 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
       return handleSetNotification([
         {
           message:
-            "Ang browser mo ay hindi supported ang pag gamit ng camera mo",
+            "Ang browser mo ay hindi supported ang paggamit ng camera mo",
           type: "warning",
         },
       ]);
@@ -1026,7 +1026,7 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
         handleSetNotification([
           {
             message:
-              "Mag bigay ng pahintulot na gamitin ang iyong camera para mag patuloy",
+              "Magbigay ng pahintulot na gamitin ang iyong camera para magpatuloy",
             type: "warning",
           },
         ]);
@@ -1369,12 +1369,12 @@ export const EditableUserReportDetails: FC<
             <>
               Babaguhin mo ang deskripsyon na ipinasang ulat ni {farmerName}.
               <br />
-              Pag ito ay iyong binago hindi na ito muling maibabalik
+              Pag-ito ay iyong binago hindi na ito muling maibabalik
             </>
           }
           onClose={() => setShowNotifModal(false)}
           onProceed={handleChangeApproveOrJustApprove}
-          proceed={{ label: "Mag patuloy" }}
+          proceed={{ label: "Magpatuloy" }}
           showCancelButton={true}
           cancel={{ label: "Bumalik" }}
         />
@@ -1470,9 +1470,7 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                   <div className="date-report">
                     <CircleUser className="logo" />
 
-                    <p>
-                      {isEnglish ? "Farmer name" : "Pangalan ng mag sasaka"}
-                    </p>
+                    <p>{isEnglish ? "Farmer name" : "Pangalan ng magsasaka"}</p>
                   </div>
 
                   <p className="font-medium">{farmerName}</p>
@@ -1505,7 +1503,9 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
                 <div className="date-report">
                   <CalendarArrowUp className="logo" />
 
-                  <p>{isEnglish ? "Day it was reported" : "Araw na ipinasa"}</p>
+                  <p>
+                    {isEnglish ? "Day it was reported" : "Araw ng Pag-uulat"}
+                  </p>
                 </div>
 
                 <p className="font-medium">

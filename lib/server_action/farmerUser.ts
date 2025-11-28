@@ -198,7 +198,7 @@ export const ApprovedFarmerAcc = async (
   farmerId: string
 ): Promise<serverActionNormalReturnType> => {
   try {
-    await ProtectedAction("update:farmer:user");
+    const { work } = await ProtectedAction("update:farmer:user");
 
     const checkAuthorization = await agriValidationForImportantAction(farmerId);
     if (!checkAuthorization.success)
@@ -211,7 +211,13 @@ export const ApprovedFarmerAcc = async (
     return {
       success: true,
       notifMessage: [
-        { message: `Matagumpay ang iyong pag aapruba!!!`, type: "success" },
+        {
+          message:
+            work === "admin" || work === "agriculturist"
+              ? `Successfully verified the user!!!`
+              : `Matagumpay ang iyong pag aapruba!!!`,
+          type: "success",
+        },
       ],
     };
   } catch (error) {

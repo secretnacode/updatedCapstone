@@ -353,7 +353,7 @@ export const FormDivLabelSelect: FC<FormDivLabelSelectType> = ({
         {selectOrganization && (
           <>
             <option value="other" className="option">
-              Mag lagay ng iba
+              Maglagay ng iba
             </option>
             <option value="none" className="option">
               Wala
@@ -461,7 +461,7 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
   showCancelButton,
   showCloseButton = true,
   cancel,
-  proceed = { label: "Mag patuloy", className: "" },
+  proceed = { label: "Magpatuloy", className: "" },
 }) => {
   const logo: ModalNoticeLogoType =
     type === "warning"
@@ -962,7 +962,7 @@ export const AuthBaseDesign: FC<authBaseDesignPropType> = ({
                 {/* original text "Enabling Seamless Reporting and Informed Farmer Reports" */}
                 {isEnglish
                   ? "Enabling Seamless Monitoring of Farmers' Crops Through Informed Farmer Reports"
-                  : "Mag Pasa ng Ulat ng Walang Hadlang at Mabilis na may Patungkol sa Iyong Pananim"}
+                  : "Magpasa ng Ulat ng Walang Hadlang at Mabilis na may Patungkol sa Iyong Pananim"}
               </p>
             </div>
 
@@ -982,7 +982,7 @@ export const AuthBaseDesign: FC<authBaseDesignPropType> = ({
                   {/* original text: "Instant farm monitoring" */}
                   {isEnglish
                     ? "Receive reports immediately"
-                    : "Mabilisang pag gawa ng ulat"}
+                    : "Mabilisang paggawa ng ulat"}
                 </p>
               </div>
 
@@ -1145,7 +1145,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                 className="button submit-button blue-button"
               >
                 <ClipboardPenLine className="logo !size-5" />
-                <span>Mag Ulat</span>
+                <span>Mag-ulat</span>
               </Link>
             </NoContentYet>
           )
@@ -1343,7 +1343,7 @@ export const SideComponentMyCropStatus = async () => {
           >
             <Link href={pathCropAddingCrop} className="button submit-button">
               <Wheat className="logo !size-5" />
-              <span>Mag dagdag</span>
+              <span>Magdagdag</span>
             </Link>
           </NoContentYet>
         )

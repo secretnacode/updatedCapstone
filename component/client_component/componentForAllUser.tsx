@@ -446,7 +446,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       {otherOrg && (
         <div className="col-span-2">
           <FormDivLabelInput
-            labelMessage="Mag lagay ng Panibagong Organisasyon"
+            labelMessage="Maglagay ng Panibagong Organisasyon"
             inputName={"otherOrgName"}
             inputValue={orgInfo.otherOrgName ?? ""}
             inputPlaceholder="e.g. Kataniman"
@@ -471,7 +471,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       {showModal && (
         <ModalNotice
           type={"warning"}
-          title="Mag Babago ng Organisasyon?"
+          title="Magbabago ng Organisasyon?"
           showCancelButton={true}
           onClose={() => setShowModal(false)}
           onProceed={() => handleFormSubmit}
@@ -486,7 +486,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
               </span>
             </>
           }
-          proceed={{ label: "Mag Patuloy" }}
+          proceed={{ label: "Magpatuloy" }}
           cancel={{ label: "Bumalik" }}
         />
       )}
@@ -605,7 +605,7 @@ const DeleteUser: FC<DeleteUserPropType> = ({
               setShowModal(false);
             }}
             proceed={{
-              label: isEnglish ? "Proceed" : "Mag Patuloy",
+              label: isEnglish ? "Proceed" : "Magpatuloy",
             }}
             cancel={{ label: isEnglish ? "Back" : "Bumalik" }}
           />,
@@ -884,7 +884,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
       }
     }
 
-    const word = `Mga nag pasa ng ulat ngayong`;
+    const word = `Mga nagpasa ng ulat ngayong`;
 
     switch (formatChart) {
       case "week":
@@ -911,7 +911,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
             className={`${formatChart === "week" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("week")}
           >
-            {isEnglish ? "Week" : "Lingo"}
+            {isEnglish ? "Week" : "Linggo"}
           </Button>
           <Button
             className={`${formatChart === "month" ? buttonStyle : ""}`}
@@ -1880,7 +1880,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
       additionalFilter={{ ...leaderFilter() }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
           listCount={report.length}
           tableHeaderCell={
             <>
@@ -2174,7 +2174,7 @@ export const AgriculturistFarmerReporTable: FC<
         }}
         table={
           <TableComponent
-            noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+            noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
             listCount={report.length}
             tableHeaderCell={
               <>
@@ -2369,7 +2369,7 @@ export const AgriculturistFarmerUserTable: FC<
         }}
         table={
           <TableComponent
-            noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+            noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
             listCount={farmer.length}
             tableHeaderCell={
               <>
@@ -2591,7 +2591,7 @@ export const AgriculturistValidateFarmerTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
           listCount={farmer.length}
           tableHeaderCell={
             <>
@@ -2749,7 +2749,7 @@ export const AgriculturistFarmerOrgTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
           listCount={orgVal.length}
           tableHeaderCell={
             <>
@@ -2889,7 +2889,7 @@ export const AgriculturistOrgMemberTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Mag sagawa ng panibagong ulat."
+          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
           listCount={orgMem.length}
           tableHeaderCell={
             <>
@@ -3106,7 +3106,7 @@ export const ChangeMyPassword = () => {
       {showModal && (
         <ModalNotice
           type={"warning"}
-          title="Mag babago ng organisasyon?"
+          title="Magbabago ng organisasyon?"
           showCancelButton={true}
           onClose={() => setShowModal(false)}
           onProceed={() => handleFormSubmit}
@@ -3121,7 +3121,7 @@ export const ChangeMyPassword = () => {
               </span>
             </>
           }
-          proceed={{ label: "Mag Patuloy" }}
+          proceed={{ label: "Magpatuloy" }}
           cancel={{ label: "Bumalik" }}
         />
       )}
@@ -3171,7 +3171,7 @@ export const FarmerLogoutButton = () => {
             type="warning"
             title="Mag-log Out ng Account"
             showCloseButton={false}
-            message={<>Mag log out ng account?</>}
+            message={<>Mag-log out ng account?</>}
             onClose={() => setOpenModal(false)}
             onProceed={handleLogout}
             showCancelButton={true}

@@ -357,7 +357,7 @@ export const UserProFile: FC<UserProFilePropType> = async ({
         <div className="component" id="profile-change-pass">
           <div>
             <KeyRound />
-            <h1>Mag Palit ng Password</h1>
+            <h1>Magpalit ng Password</h1>
           </div>
 
           <div>
@@ -636,7 +636,7 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
                     <p className="text-sage-900 font-medium">
                       {crop.dateHarvested
                         ? ReadableDateFormat(crop.datePlanted)
-                        : "Hindi pa nakakapag tanim"}
+                        : "Hindi pa nakakapagtanim"}
                     </p>
                   </div>
                 </div>
@@ -803,7 +803,7 @@ export const FarmerQuickActionComponent: FC = () => {
   return (
     <div className="component !p-0">
       <div className="card-title-wrapper">
-        <p>Mabilisang Pag gawa</p>
+        <p>Mabilisang Paggawa</p>
       </div>
 
       <div className="flex flex-col space-y-4 [&>a]:flex [&>a]:items-center [&>a]:gap-2 [&>a]:border [&>a]:rounded-md [&>a]:p-2">
@@ -812,7 +812,7 @@ export const FarmerQuickActionComponent: FC = () => {
           className="text-blue-700 border-blue-500 hover:bg-blue-50 hover:border-blue-800"
         >
           <FileText className="logo !size-5 " />
-          <span>Mag gawa ng ulat</span>
+          <span>Maggawa ng ulat</span>
         </Link>
 
         <Link
@@ -820,7 +820,7 @@ export const FarmerQuickActionComponent: FC = () => {
           className="text-green-700 border-green-500 hover:bg-green-50 hover:border-green-800"
         >
           <Wheat className="logo !size-5  " />
-          <span>Mag dagdag ng pananim</span>
+          <span>Magdagdag ng pananim</span>
         </Link>
       </div>
     </div>

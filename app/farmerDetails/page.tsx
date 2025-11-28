@@ -2,6 +2,7 @@ import { FarmerDetailForm } from "@/component/client_component/farmerDetailsComp
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { newUserValNeedInfo } from "@/lib/server_action/user";
 import { newUserValNeedInfoReturnType } from "@/types";
+import { User } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,24 +25,32 @@ export default async function Page() {
     };
   }
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-4 md:p-6 lg:p-8">
-      {!newUserNeedInfo.success ? (
-        <RenderRedirectNotification notif={newUserNeedInfo.notifError} />
-      ) : (
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Impormasyon ng Magsasaka
-            </h1>
+    <div className="min-h-screen bg-green-100/10 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-800/10 mb-4">
+            <User className="w-8 h-8 text-green-800" />
           </div>
 
-          <div>
-            <FarmerDetailForm
-              orgList={newUserNeedInfo.success ? newUserNeedInfo.orgList : []}
-            />
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-700">
+            Impormasyon ng Magsasaka
+          </h1>
+
+          <p className="text-gray-700 mt-2">
+            Punan ang mga impormasyon sa ibaba upang makumpleto ang iyong
+            rehistrasyon
+          </p>
         </div>
-      )}
+
+        {!newUserNeedInfo.success ? (
+          <>
+            <RenderRedirectNotification notif={newUserNeedInfo.notifError} />
+            <FarmerDetailForm orgList={[]} />
+          </>
+        ) : (
+          <FarmerDetailForm orgList={newUserNeedInfo.orgList} />
+        )}
+      </div>
     </div>
   );
 }

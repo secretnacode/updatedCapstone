@@ -16,6 +16,7 @@ import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
 import { FarmerFirstDetailQuery } from "@/util/queries/user";
+import { DeleteSession } from "../session";
 
 /**
  * server action that partners with the actionState hook
@@ -95,6 +96,8 @@ export const AddFirstFarmerDetails = async (
       orgRole: orgRole,
       farmerId: authId,
     });
+
+    await DeleteSession();
 
     // no session creation because the user need to be validate first before it proceed to the system
     redirect(

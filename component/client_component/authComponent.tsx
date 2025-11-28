@@ -97,7 +97,7 @@ const FarmerSignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
   return (
     <div className="auth_form">
-      <h1>Mag Gawa ng Account</h1>
+      <h1>Maggawa ng Account</h1>
       <form onSubmit={handleFormSubmit}>
         <FormDivLabelInput
           labelMessage={"Username:"}
@@ -147,7 +147,7 @@ const FarmerSignUp: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
           onClick={() => setIsSignUp(false)}
           disabled={isLoading ? true : false}
         >
-          Mag log in
+          Mag-log in
         </button>
       </p>
     </div>
@@ -200,7 +200,7 @@ const LogIn: FC<{ setIsSignUp: Dispatch<SetStateAction<boolean>> }> = ({
 
   return (
     <div className="auth_form">
-      <h1>Mag Log In</h1>
+      <h1>Mag-Log In</h1>
       <form onSubmit={handleFormSubmit}>
         <FormDivLabelInput
           labelMessage={"Username:"}
