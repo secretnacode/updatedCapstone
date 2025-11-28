@@ -1448,11 +1448,15 @@ export type serverActionNormalReturnType = {
   notifMessage: NotificationBaseType[];
 };
 
+// was determine from the query and not from the database
+export type linkStatusType = "expired" | "active";
+
 export type getCreateAgriLinkReturnType = {
   linkId: string;
   link: string;
   dateCreated: Date;
   dateExpired: Date;
+  status: linkStatusType;
 };
 
 export type getRestPasswordLinkQueryReturnType = getCreateAgriLinkReturnType & {

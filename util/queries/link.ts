@@ -5,6 +5,7 @@ import {
   createSignUpLinkForAgriQueryParamType,
   getCreateAgriLinkReturnType,
   getRestPasswordLinkQueryReturnType,
+  linkStatusType,
   linkTableType,
 } from "@/types";
 import { pool } from "../configuration";
@@ -80,9 +81,15 @@ export const getRestPasswordLinkQuery = async (): Promise<
   getRestPasswordLinkQueryReturnType[]
 > => {
   try {
+    const status: linkStatusType[] = ["active", "expired"];
+
     return (
       await pool.query(
-        `select l."linkId", l."link", l."dateCreated", l."dateExpired", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", a."username" from capstone."${resetPassDbName()}" l join capstone.farmer f on l."farmerId" = f."farmerId" join capstone.auth a on f."farmerId" = a."authId"`
+        `select l."linkId", l."link", l."dateCreated", l."dateExpired", case when now() > l."dateExpired" then '${
+          status[1]
+        }' else '${
+          status[0]
+        }' end as status, concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", a."username" from capstone."${resetPassDbName()}" l join capstone.farmer f on l."farmerId" = f."farmerId" join capstone.auth a on f."farmerId" = a."authId"`
       )
     ).rows;
   } catch (error) {
@@ -104,9 +111,15 @@ export const getCreateAgriLink = async (): Promise<
   getCreateAgriLinkReturnType[]
 > => {
   try {
+    const status: linkStatusType[] = ["active", "expired"];
+
     return (
       await pool.query(
-        `select "linkId", "link", "dateCreated", "dateExpired" from capstone."${createAgriDbName()}"`
+        `select "linkId", "link", "dateCreated", "dateExpired", case when now() > "dateExpired" then '${
+          status[1]
+        }' else '${
+          status[0]
+        }' end as status from capstone."${createAgriDbName()}"`
       )
     ).rows;
   } catch (error) {

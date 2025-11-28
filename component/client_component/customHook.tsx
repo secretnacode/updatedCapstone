@@ -64,7 +64,7 @@ export const useSearchParam = () => {
  * @returns sorted, filterized, normal value
  */
 export function useFilterSortTable<
-  T extends Record<string, string | number | Date | boolean>
+  T extends Record<string, string | number | Date | boolean | null>
 >({ obj, filterCol, searchVal, sortCol }: useFilterSortValueParamType<T>): T[] {
   const filter = useMemo(() => {
     if (!filterCol) return obj;

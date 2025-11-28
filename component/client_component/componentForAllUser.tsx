@@ -26,7 +26,6 @@ import {
   getReportCountThisYearReturnType,
   CreateResetPasswordButtonPropType,
   getFarmerDataForResetingPassReturnType,
-  ShowIsExpiredPropType,
   ButtonPropType,
   approvedButtonProp,
   deleteMyOrgMemberPropType,
@@ -63,6 +62,8 @@ import {
   blockUserPropType,
   blockMyOrgMemberButtonPropType,
   deleteFarmerButtonPropType,
+  getRestPasswordLinkQueryReturnType,
+  agriRoleType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -438,7 +439,13 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
           labelMessage="Posisyon"
           inputDisable={true}
           inputName={"orgRole"}
-          inputDefaultValue={userOrgInfo?.orgRole ?? "Wala kang organisasyon"}
+          inputDefaultValue={
+            userOrgInfo?.orgRole
+              ? userOrgInfo?.orgRole === "member"
+                ? "Miyembro"
+                : userOrgInfo?.orgRole
+              : "Wala kang organisasyon"
+          }
           inputPlaceholder="Miyembro"
         />
       </div>
@@ -1220,44 +1227,6 @@ export const CreateResetPassOrCreateAgriButton = () => {
   );
 };
 
-export const ShowIsExpired: FC<ShowIsExpiredPropType> = ({ expiredAt }) => {
-  const [status, setStatus] = useState<"Expired" | "Active">("Active");
-
-  useEffect(() => {
-    const isExpired = () => {
-      if (Date.now() > new Date(expiredAt).getTime()) {
-        setStatus("Expired");
-        return true;
-      }
-
-      setStatus("Active");
-      return false;
-    };
-
-    if (isExpired()) return;
-
-    const interval = setInterval(() => {
-      if (isExpired()) clearInterval(interval);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [expiredAt]);
-
-  return (
-    <div className="grid place-items-start">
-      <p
-        className={`py-1 px-3 rounded-md very-small-text ${
-          status === "Expired"
-            ? "text-red-900 bg-red-100"
-            : "text-green-900 bg-green-100"
-        }`}
-      >
-        {status}
-      </p>
-    </div>
-  );
-};
-
 export const CopyTextButton: FC<ButtonPropType & { textToCopy: string }> = ({
   textToCopy,
   children,
@@ -1330,7 +1299,7 @@ export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
 };
 
 export function TableWithFilter<
-  T extends Record<string, string | number | Date | boolean>
+  T extends Record<string, string | number | Date | boolean | null>
 >({
   obj,
   table,
@@ -1865,8 +1834,13 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
           return translateReportType({ type: forceType, isEnglish: false });
         },
 
-        verificationStatus: (label: string) =>
-          reportStatus({ val: label === "true" }),
+        verificationStatus: (label: string) => {
+          const val = reportStatus({ val: label === "true" });
+
+          if (val === "Beripikahin") return "Kinukumpirma";
+
+          return val;
+        },
       },
     };
   };
@@ -3004,10 +2978,10 @@ export const AgriculturistOrgMemberTable: FC<
 };
 
 export const DateWithTimeStamp: FC<dateWithTimeStampPropType> = ({ date }) => (
-  <div className="flex flex-col justify-center items-center w-fit very-small-text text-gray-600">
+  <p className="flex flex-col justify-center items-center w-fit very-small-text text-gray-600">
     {ReadableDateFormat(date)}
     <span className="!text-xs text-gray-500">{timeStampAmPmFormat(date)}</span>
-  </div>
+  </p>
 );
 
 export const ChangeMyPassword = () => {
@@ -3436,153 +3410,191 @@ export const BackButton: FC<{ label: string }> = ({ label }) => {
   );
 };
 
-export const AgriculturistCreateLinkTable: FC = ({ links }) => {
+export const AgriculturistCreateLinkTable: FC<{
+  links: getRestPasswordLinkQueryReturnType[];
+  work: agriRoleType;
+}> = ({ links, work }) => {
   const { sortCol, setSortCol, handleSortCol } =
-    useSortColumnHandler<GetUserReportReturnType>();
-  const [tableList, setTableList] = useState<GetUserReportReturnType[]>(links);
+    useSortColumnHandler<getRestPasswordLinkQueryReturnType>();
+  const [tableList, setTableList] =
+    useState<getRestPasswordLinkQueryReturnType[]>(links);
 
-  const SortType: FC<{ col: keyof GetUserReportReturnType }> = ({ col }) => (
-    <SortColBy<GetUserReportReturnType> sortCol={sortCol} col={col} />
+  const SortType: FC<{ col: keyof getRestPasswordLinkQueryReturnType }> = ({
+    col,
+  }) => (
+    <SortColBy<getRestPasswordLinkQueryReturnType>
+      sortCol={sortCol}
+      col={col}
+    />
   );
 
   return (
-    <TableWithFilter<GetUserReportReturnType>
+    <TableWithFilter<getRestPasswordLinkQueryReturnType>
       setTableList={setTableList}
       sortCol={sortCol}
       setSortCol={setSortCol}
-      obj={report}
-      additionalFilter={}
+      obj={links}
+      additionalFilter={{
+        filterBy: {
+          status: Array.from(new Set(links.map((val) => val.status))),
+        },
+        handleFilterLabel: { status: (val) => capitalizeFirstLetter(val) },
+      }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
+          noContentMessage="There's no link has been created yet"
           listCount={links.length}
+          tableClassName="!shadow-none"
           tableHeaderCell={
             <>
               <th scope="col">
                 <div
-                  onClick={() => handleSortCol("title")}
+                  onClick={() => handleSortCol("username")}
                   className="cursor-pointer"
                 >
-                  <p>Pamagat ng ulat</p>
+                  <p>Name</p>
 
-                  <SortType col={"title"} />
+                  <SortType col={"username"} />
                 </div>
               </th>
 
               <th scope="col">
                 <div
-                  onClick={() => handleSortCol("cropName")}
+                  onClick={() => handleSortCol("status")}
                   className="cursor-pointer"
                 >
-                  <p>Pangalan ng pananim</p>
+                  <p>Status</p>
 
-                  <SortType col={"cropName"} />
+                  <SortType col={"status"} />
                 </div>
               </th>
 
-              {work === "leader" ? null : (
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dateCreated")}
+                  className="cursor-pointer"
+                >
+                  <p>Created At</p>
+
+                  <SortType col={"dateCreated"} />
+                </div>
+              </th>
+
+              <th scope="col">
+                <div
+                  onClick={() => handleSortCol("dateExpired")}
+                  className="cursor-pointer"
+                >
+                  <p>Expires in</p>
+
+                  <SortType col={"dateExpired"} />
+                </div>
+              </th>
+
+              {work === "admin" && (
                 <th scope="col">
-                  <div className="cursor-pointer">
-                    <p>Estado ng ulat</p>
+                  <div>
+                    <p>Url for</p>
                   </div>
                 </th>
               )}
 
               <th scope="col">
-                <div
-                  onClick={() => handleSortCol("dayReported")}
-                  className="cursor-pointer"
-                >
-                  <p>Araw ng Pag-uulat</p>
-
-                  <SortType col={"dayReported"} />
-                </div>
-              </th>
-
-              <th scope="col">
-                <div
-                  onClick={() => handleSortCol("dayHappen")}
-                  className="cursor-pointer"
-                >
-                  <p>Araw na Naganap</p>
-
-                  <SortType col={"dayHappen"} />
+                <div>
+                  <p>Url</p>
                 </div>
               </th>
 
               <th scope="col">
                 <div>
-                  <p>Uri ng ulat</p>
-                </div>
-              </th>
-
-              <th scope="col">
-                <div>
-                  <p>Aksyon</p>
+                  <p>Action</p>
                 </div>
               </th>
             </>
           }
           tableCell={
             <>
-              {tableList.map((report) => (
-                <tr key={report.reportId}>
-                  <td className=" text-gray-900 font-medium">
-                    <div>
-                      <p>{report.title}</p>
-                    </div>
-                  </td>
+              {tableList.map((linkVal) => (
+                <tr key={linkVal.linkId}>
+                  <td>
+                    <div className="flex text-gray-900">
+                      {linkVal.farmerName ? (
+                        <p className="flex flex-col flex-1 min-w-0">
+                          <span className="truncate">{linkVal.farmerName}</span>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{report.cropName}</p>
-                    </div>
-                  </td>
-
-                  {work === "leader" ? null : (
-                    <td>
-                      <div>
-                        <p
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            report.verificationStatus
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {report.verificationStatus
-                            ? "Naipasa"
-                            : "kinukumpirma"}
+                          <span className="text-xs font-bold text-gray-500 truncate">
+                            {linkVal.username}
+                          </span>
                         </p>
-                      </div>
-                    </td>
-                  )}
-
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
+                      ) : (
+                        <p className="flex-1 min-w-0">
+                          <span className="truncate">New Agriculturist</span>
+                        </p>
+                      )}
                     </div>
                   </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
-                    </div>
-                  </td>
-
-                  <td scope="col">
-                    <div>
-                      <p>
-                        <ReportType type={report.reportType} />
+                  <td>
+                    <div className="grid place-items-start">
+                      <p
+                        className={`py-1 px-3 rounded-md very-small-text ${
+                          linkVal.status === "expired"
+                            ? "text-red-900 bg-red-100"
+                            : "text-green-900 bg-green-100"
+                        }`}
+                      >
+                        {capitalizeFirstLetter(linkVal.status)}
                       </p>
                     </div>
                   </td>
 
-                  <td className="text-center">
+                  <td>
                     <div>
-                      <ViewUserReportButton
-                        reportId={report.reportId}
-                        myReport={true}
-                      />
+                      <DateWithTimeStamp date={linkVal.dateCreated} />
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <DateWithTimeStamp date={linkVal.dateExpired} />
+                    </div>
+                  </td>
+
+                  {work === "admin" && (
+                    <td>
+                      {linkVal.farmerName ? (
+                        <div>
+                          <p>Farmer Reset Password</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p>Create Agri Account</p>
+                        </div>
+                      )}
+                    </td>
+                  )}
+
+                  <td>
+                    <div className="max-w-[200px] overflow-y-hidden">
+                      <p className="link">{linkVal.link}</p>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div className="table-action">
+                      <CopyTextButton
+                        textToCopy={linkVal.link}
+                        className="slimer-button submit-button"
+                      >
+                        Copy
+                      </CopyTextButton>
+
+                      <DeleteLinkButton
+                        linkId={linkVal.linkId}
+                        className="slimer-button cancel-button"
+                      >
+                        Delete
+                      </DeleteLinkButton>
                     </div>
                   </td>
                 </tr>

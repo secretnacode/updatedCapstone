@@ -173,14 +173,16 @@ export const getAllLinkData = async (): Promise<getAllLinkDataReturnType> => {
         ],
       };
 
-    let resetPassLink = await getRestPasswordLinkQuery();
+    const resetPassLink = await getRestPasswordLinkQuery();
 
     if (work === "admin")
-      resetPassLink = (await getCreateAgriLink()).map((val) => ({
-        ...val,
-        farmerName: null,
-        username: null,
-      }));
+      resetPassLink.push(
+        ...(await getCreateAgriLink()).map((val) => ({
+          ...val,
+          farmerName: null,
+          username: null,
+        }))
+      );
 
     const sortedVal = [...resetPassLink].sort((a, b) => {
       if (a.dateCreated.getTime() > b.dateCreated.getTime()) return 1;
