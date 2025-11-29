@@ -49,6 +49,7 @@ import {
 import {
   baranggayList,
   capitalizeFirstLetter,
+  determineCropStatus,
   getInitials,
   intoFeaturePolygon,
   pathCropAddingCrop,
@@ -1300,50 +1301,53 @@ export const SideComponentMyCropStatus = async () => {
         cropStatus.cropInfoStatus.length > 0 ? (
           <>
             <div className="divide-y divide-gray-100 [&>div]:not-last-of-type:border-b [&>div]:not-last-of-type:border-gray-200">
-              {cropStatus.cropInfoStatus.map((crop) => (
-                <div key={crop.cropId} className=" py-2 ">
-                  <div className="flex items-start justify-between gap-1">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 truncate">
-                        {crop.cropName}
-                      </h4>
+              {cropStatus.cropInfoStatus.map((crop) => {
+                const { status, className } = determineCropStatus({
+                  cropStatus: crop.cropStatus,
+                  datePlanted: crop.datePlanted,
+                  dateHarvested: crop.dateHarvested,
+                  isEnglish: false,
+                });
 
-                      <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5 truncate">
-                        <MapPin className="w-3.5 h-3.5" />
+                return (
+                  <div key={crop.cropId} className=" py-2 ">
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 truncate">
+                          {crop.cropName}
+                        </h4>
 
-                        <span>
-                          {crop.farmAreaMeasurement}
-                          {parseFloat(crop.farmAreaMeasurement) === 1
-                            ? "hectare"
-                            : "hectares"}
-                        </span>
-                      </p>
+                        <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5 truncate">
+                          <MapPin className="w-3.5 h-3.5" />
+
+                          <span>
+                            {crop.farmAreaMeasurement}
+                            {parseFloat(crop.farmAreaMeasurement) === 1
+                              ? "hectare"
+                              : "hectares"}
+                          </span>
+                        </p>
+                      </div>
+
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-semibold text-nowrap ${className}`}
+                      >
+                        {status}
+                      </span>
                     </div>
 
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold text-nowrap ${
-                        crop.cropStatus === "harvested"
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {crop.cropStatus === "harvested"
-                        ? "Naani na"
-                        : "Na taniman na"}
-                    </span>
+                    <div className="text-sm text-gray-500 flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>
+                        Itinanim:{" "}
+                        {crop.datePlanted
+                          ? ReadableDateFormat(crop.datePlanted)
+                          : "Hindi pa naitatala"}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="text-sm text-gray-500 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>
-                      Itinanim:{" "}
-                      {crop.datePlanted
-                        ? ReadableDateFormat(crop.datePlanted)
-                        : "Hindi pa naitatala"}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <SeeAllValButton link="/farmer/crop" />

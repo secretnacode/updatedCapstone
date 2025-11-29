@@ -236,7 +236,7 @@ export const uploadDamageReport = async (
             updateCropStatus({
               datePlanted: reportVal.dateHappen,
               cropId: reportVal.cropId,
-              status: "harvested",
+              cropStatus: "destroyed",
             }),
           ]
         : []),
@@ -315,9 +315,11 @@ export const uploadPlantingReport = async (
         ],
       };
 
+    const status = await getCropStatus(reportVal.cropId);
+
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
     // you can only passed a planted type report if the user last report is about harvest
-    if ((await getCropStatus(reportVal.cropId)).cropStatus === "planted")
+    if (status.cropStatus === "planted")
       return {
         ...returnVal,
         success: false,
@@ -351,7 +353,7 @@ export const uploadPlantingReport = async (
       updateCropStatus({
         datePlanted: reportVal.dateHappen,
         cropId: reportVal.cropId,
-        status: "planted",
+        cropStatus: "planted",
       }),
       addPlantedCrop({
         plantedId: CreateUUID(),
@@ -438,7 +440,7 @@ export const uploadHarvestingReport = async (
     const crop = await getCropStatusAndExpectedHarvest(reportVal.cropId);
 
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
-    // you can only passed a planted type report if the user last report is about harvest
+    // you can only passed a harvest type report if the user last report is about planted
     if (crop.cropStatus !== "planted")
       return {
         ...returnVal,
@@ -488,7 +490,7 @@ export const uploadHarvestingReport = async (
       updateCropStatus({
         datePlanted: reportVal.dateHappen,
         cropId: reportVal.cropId,
-        status: "harvested",
+        cropStatus: "harvested",
       }),
       addHarvestedCrop({
         harvestId: CreateUUID(),

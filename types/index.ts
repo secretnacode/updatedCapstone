@@ -1567,7 +1567,7 @@ export type openCamPropType = {
   isPassing: boolean;
 };
 
-export type cropStatusType = "planted" | "harvested";
+export type cropStatusType = "planted" | "harvested" | "destroyed";
 
 export type determineCropStatusParamType = {
   cropStatus: cropStatusType;
@@ -1588,7 +1588,7 @@ export type getCropStatusAndExpectedHarvestReturnType =
 export type updateCropPantedPropType = {
   cropId: string;
   datePlanted: Date;
-  status: cropStatusType;
+  cropStatus: cropStatusType;
 };
 
 export type addPlantedCropParamType = {

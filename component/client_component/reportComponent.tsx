@@ -615,9 +615,9 @@ const DamageReport: FC<ReportContentPropType> = ({
           title="Mag-ulat tungkol sa pagtatanim?"
           message={
             <>
-              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong pag
-              tatanim? Pag-ito ay ipinasa, hindi na ito muling maibabalik ang
-              estado ng iyong pananim.
+              Sigurado ka bang magpapasa ka ng ulat patungkol sa pagkasira ng
+              iyong pananim? Pag-ito ay ipinasa, hindi na ito muling maibabalik
+              ang estado ng iyong pananim.
             </>
           }
           onClose={() => setOpenModal(false)}
@@ -848,8 +848,8 @@ const PlantingReport: FC<ReportContentPropType> = ({
           title="Mag-ulat tungkol sa pagtatanim?"
           message={
             <>
-              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong pag
-              tatanim? Pag-ito ay ipinasa, hindi na ito muling maibabalik ang
+              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong
+              pagtatanim? Pag-ito ay ipinasa, hindi na ito muling maibabalik ang
               estado ng iyong pananim.
             </>
           }
@@ -1563,15 +1563,17 @@ export const UserReportDetails: FC<UserReportDetailsPropType> = ({
           </div>
 
           <div className="space-y-5">
-            <div
-              className={`px-3 py-1 w-fit rounded-lg text-sm tracking-wide font-semibold ${
-                !userReport.verificationStatus
-                  ? "bg-yellow-100 text-yellow-900"
-                  : "bg-green-100 text-green-900"
-              }`}
-            >
-              {reportStatus()}
-            </div>
+            {work === "leader" && (
+              <div
+                className={`px-3 py-1 w-fit rounded-lg text-sm tracking-wide font-semibold ${
+                  !userReport.verificationStatus
+                    ? "bg-yellow-100 text-yellow-900"
+                    : "bg-green-100 text-green-900"
+                }`}
+              >
+                {reportStatus()}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-6 [&_.date-report]:flex [&_.date-report]:flex-row [&_.date-report]:justify-start [&_.date-report]:items-center [&_.date-report]:gap-2 [&_.date-report]:[&>svg]:text-gray-500 [&_.date-report]:[&>p]:text-sm [&_.date-report]:[&>p]:text-gray-600 [&_.date-report]:[&>p]:tracking-wide [&>div]:p-3 [&>div]:bg-gray-100 [&>div]:rounded-lg [&>div]:[&>p]:font-semibold">
               {!myReport && (

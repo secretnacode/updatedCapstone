@@ -23,6 +23,7 @@ export const cropStatus = async (): Promise<
 > => ({
   planted: "planted",
   harvested: "harvested",
+  destroyed: "destroyed",
 });
 
 /**
@@ -341,14 +342,14 @@ export const getCropStatusAndExpectedHarvest = async (
 export const updateCropStatus = async ({
   cropId,
   datePlanted,
-  status,
+  cropStatus,
 }: updateCropPantedPropType) => {
   try {
     await pool.query(
       `update capstone.crop set "cropStatus" = $1, "${
-        status === "harvested" ? "dateHarvested" : "datePlanted"
+        cropStatus === "planted" ? "datePlanted" : "dateHarvested"
       }" = $2 where "cropId" = $3`,
-      [status, datePlanted, cropId]
+      [cropStatus, datePlanted, cropId]
     );
   } catch (error) {
     console.error(

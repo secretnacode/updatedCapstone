@@ -23,8 +23,6 @@ import {
   FormCropModalPropType,
   AddCropModalPropType,
   AllFarmerCropPropType,
-  cropStatusType,
-  determineCropStatusReturnType,
   GetAllCropInfoQueryReturnType,
   profileButtonIdType,
 } from "@/types";
@@ -135,18 +133,6 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
     setCropIdToModify(null);
   };
 
-  const cropStatus = (
-    status: cropStatusType,
-    datePlanted: Date,
-    dateHarvested: Date
-  ): determineCropStatusReturnType =>
-    determineCropStatus({
-      cropStatus: status,
-      dateHarvested: dateHarvested,
-      datePlanted: datePlanted,
-      isEnglish: false,
-    });
-
   const handleCloseAddModal = () => {
     deleteParams(paramName);
 
@@ -236,11 +222,12 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             </>
           }
           tableCell={myCropInfoList.map((crop) => {
-            const { className, status } = cropStatus(
-              crop.cropStatus,
-              crop.datePlanted,
-              crop.dateHarvested
-            );
+            const { className, status } = determineCropStatus({
+              cropStatus: crop.cropStatus,
+              datePlanted: crop.datePlanted,
+              dateHarvested: crop.dateHarvested,
+              isEnglish: false,
+            });
 
             return (
               <tr key={crop.cropId}>

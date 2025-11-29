@@ -655,13 +655,14 @@ export const determineCropStatus = ({
     ? new Date(new Date(dateHarvested).getTime() + fiveDaysLater)
     : undefined;
 
+  const vacant = {
+    status: isEnglish ? "Vacant" : "Bakante",
+    className: "bg-gray-100 text-gray-800",
+  };
+
   switch (cropStatus) {
     case `planted`:
-      if (!planted5DaysAgo)
-        return {
-          status: isEnglish ? "Vacant" : "Bakante",
-          className: "bg-gray-100 text-gray-800",
-        };
+      if (!planted5DaysAgo) return vacant;
 
       if (new Date() >= planted5DaysAgo)
         return {
@@ -674,21 +675,21 @@ export const determineCropStatus = ({
         className: "bg-lime-100 text-lime-800",
       };
 
+    case `destroyed`:
     case `harvested`:
-      if (!harvested5DaysAgo)
-        return {
-          status: isEnglish ? "Vacant" : "Bakante",
-          className: "bg-gray-100 text-gray-800",
-        };
+      if (!harvested5DaysAgo) return vacant;
 
-      if (new Date() >= harvested5DaysAgo)
-        return {
-          status: isEnglish ? "Vacant" : "Bakante",
-          className: "bg-gray-100 text-gray-800",
-        };
+      if (new Date() >= harvested5DaysAgo) return vacant;
 
       return {
-        status: isEnglish ? "Harvested" : "Naani na",
+        status:
+          cropStatus === "harvested"
+            ? isEnglish
+              ? "Harvested"
+              : "Naani na"
+            : isEnglish
+            ? "All was Damage"
+            : "Nasira lahat",
         className: "bg-yellow-100 text-yellow-800",
       };
 
