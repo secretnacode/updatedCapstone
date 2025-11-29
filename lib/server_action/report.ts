@@ -55,6 +55,7 @@ import {
   capitalizeFirstLetter,
   CreateUUID,
   missingFormValNotif,
+  newApprovedReportNotifMessage,
   newReportPassNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { cloudinary } from "@/util/configuration";
@@ -240,8 +241,8 @@ export const uploadDamageReport = async (
           : reportVal.totalDamageArea,
       }),
       addNewReportNotif({
-        farmerId: userId,
-        work: work,
+        reportId,
+        work,
         reportType: "damage",
       }),
       ...(reportVal.allDamage
@@ -378,8 +379,8 @@ export const uploadPlantingReport = async (
       }),
       insertImage(reportVal.reportPicture, reportId),
       addNewReportNotif({
-        farmerId: userId,
-        work: work,
+        reportId,
+        work,
         reportType: "planting",
       }),
     ]);
@@ -520,8 +521,8 @@ export const uploadHarvestingReport = async (
       }),
       insertImage(reportVal.reportPicture, reportId),
       addNewReportNotif({
-        farmerId: userId,
-        work: work,
+        reportId,
+        work,
         reportType: "harvesting",
       }),
     ]);
@@ -577,11 +578,11 @@ const insertImage = async (images: File[], reportId: string) =>
   });
 
 const addNewReportNotif = async ({
-  farmerId,
+  reportId,
   work,
   reportType,
 }: addNewReportNotifParamType) => {
-  const farmerName = await getFarmerName(farmerId);
+  const farmerName = await getFarmerName(reportId);
 
   if (work === "farmer") {
     const { title, message } = newReportPassNotifMessage(
@@ -591,12 +592,12 @@ const addNewReportNotif = async ({
     );
 
     await addNewUserNotif({
-      recipientId: await getFarmerLeaderId(farmerId),
+      recipientId: await getFarmerLeaderId(reportId),
       recipientType: "leader",
       notifType: "new pass report",
       title,
       message,
-      actionId: farmerId,
+      actionId: reportId,
       actionType: "report",
     });
   } else {
@@ -613,10 +614,10 @@ const addNewReportNotif = async ({
         addNewUserNotif({
           recipientId: val.agriId,
           recipientType: "agriculturist",
-          notifType: "new pass report",
+          notifType: "new approved report",
           title,
           message,
-          actionId: farmerId,
+          actionId: reportId,
           actionType: "report",
         })
       )
@@ -833,9 +834,42 @@ export const changeApproveOrJustApproveReport = async ({
 
     if (isChange) console.log("description changed");
 
+    const farmerName = await getFarmerName(reportId);
+
+    const messageEnglish = newApprovedReportNotifMessage(
+      capitalizeFirstLetter(farmerName),
+      true
+    );
+    const messageTagalog = newApprovedReportNotifMessage(
+      capitalizeFirstLetter(farmerName),
+      true
+    );
+
     await Promise.all([
       ApprovedOrgMemberQuery(reportId),
       isChange ? changeTheReportDescription(newDesc, reportId) : undefined,
+      ...(
+        await getAllAgriId()
+      ).map((val) =>
+        addNewUserNotif({
+          recipientId: val.agriId,
+          recipientType: "agriculturist",
+          notifType: "new pass report",
+          title: messageEnglish.title,
+          message: messageEnglish.message,
+          actionId: reportId,
+          actionType: "report",
+        })
+      ),
+      addNewUserNotif({
+        recipientId: await getFarmerIdOfReport(reportId),
+        recipientType: "farmer",
+        notifType: "new pass report",
+        title: messageTagalog.title,
+        message: messageTagalog.message,
+        actionId: reportId,
+        actionType: "report",
+      }),
     ]);
 
     revalidatePath(`/farmerLeader/validateReport`);

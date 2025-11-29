@@ -1967,7 +1967,7 @@ export const agriculturistCreateLinkTableReturnType = {};
 
 export type formHintPropType = { message: string };
 
-export type notifRecipientType = "agriculturist" | "leader";
+export type notifRecipientType = "agriculturist" | farmerRoleType;
 
 export type notifType = "new user" | "new pass report" | "new approved report";
 
@@ -1984,7 +1984,7 @@ export type newNotifParamType = {
 };
 
 export type addNewReportNotifParamType = {
-  farmerId: string;
+  reportId: string;
   work: allUserRoleType;
   reportType: reportTypeStateType;
 };

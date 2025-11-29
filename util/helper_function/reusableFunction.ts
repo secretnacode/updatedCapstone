@@ -860,3 +860,19 @@ export const newReportPassNotifMessage = (
           : "pagtatanim"
       } ng kanyang pananim`,
 });
+
+/**
+ * function for new approved notif message
+ * @param name name of the one who approved
+ * @param isEnglish if will be passed to the agriculturist
+ * @returns
+ */
+export const newApprovedReportNotifMessage = (
+  name: string,
+  isEnglish: boolean
+) => ({
+  title: isEnglish ? "New Report was Approved" : "Naaprubahan na Ulat",
+  message: isEnglish
+    ? `${name} has just approved a new report`
+    : `Naaprubahan na ni ${name} ang iyong ulat`,
+});
