@@ -401,9 +401,19 @@ const DamageReport: FC<ReportContentPropType> = ({
       handleDoneLoading();
       setOpenModal(false);
 
-      if (state.success) setOpenReportModal(false);
+      if (state.success) {
+        selectedFile.forEach((val) => URL.revokeObjectURL(val.urlObj));
+
+        setOpenReportModal(false);
+      }
     }
-  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
+  }, [
+    isPassing,
+    state.success,
+    selectedFile,
+    handleDoneLoading,
+    setOpenReportModal,
+  ]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -412,12 +422,17 @@ const DamageReport: FC<ReportContentPropType> = ({
         ...Array.from(e.target.files as FileList).map((file) => ({
           picId: CreateUUID(),
           file: file,
+          urlObj: URL.createObjectURL(file),
         })),
       ]);
     }
   };
 
   const handleRemovePicture = (picId: string) => {
+    URL.revokeObjectURL(
+      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+    );
+
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
 
@@ -568,7 +583,7 @@ const DamageReport: FC<ReportContentPropType> = ({
               className="relative aspect-square group"
             >
               <Image
-                src={URL.createObjectURL(image.file)}
+                src={image.urlObj}
                 alt={`Larawan ${index + 1} ng gagawing ulat`}
                 fill
                 unoptimized
@@ -652,9 +667,19 @@ const PlantingReport: FC<ReportContentPropType> = ({
       handleDoneLoading();
       setOpenModal(false);
 
-      if (state.success) setOpenReportModal(false);
+      if (state.success) {
+        selectedFile.forEach((val) => URL.revokeObjectURL(val.urlObj));
+
+        setOpenReportModal(false);
+      }
     }
-  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
+  }, [
+    isPassing,
+    state.success,
+    selectedFile,
+    handleDoneLoading,
+    setOpenReportModal,
+  ]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -663,12 +688,17 @@ const PlantingReport: FC<ReportContentPropType> = ({
         ...Array.from(e.target.files as FileList).map((file) => ({
           picId: CreateUUID(),
           file: file,
+          urlObj: URL.createObjectURL(file),
         })),
       ]);
     }
   };
 
   const handleRemovePicture = (picId: string) => {
+    URL.revokeObjectURL(
+      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+    );
+
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
 
@@ -787,7 +817,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
               className="relative aspect-square group"
             >
               <Image
-                src={URL.createObjectURL(image.file)}
+                src={image.urlObj}
                 alt={`Larawan ${index + 1} ng gagawing ulat`}
                 fill
                 unoptimized
@@ -868,10 +898,21 @@ const HarvestingReport: FC<ReportContentPropType> = ({
   useEffect(() => {
     if (!isPassing) {
       handleDoneLoading();
+      setOpenModal(false);
 
-      if (state.success) setOpenReportModal(false);
+      if (state.success) {
+        selectedFile.forEach((val) => URL.revokeObjectURL(val.urlObj));
+
+        setOpenReportModal(false);
+      }
     }
-  }, [isPassing, state.success, handleDoneLoading, setOpenReportModal]);
+  }, [
+    isPassing,
+    state.success,
+    selectedFile,
+    handleDoneLoading,
+    setOpenReportModal,
+  ]);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -880,12 +921,17 @@ const HarvestingReport: FC<ReportContentPropType> = ({
         ...Array.from(e.target.files as FileList).map((file) => ({
           picId: CreateUUID(),
           file: file,
+          urlObj: URL.createObjectURL(file),
         })),
       ]);
     }
   };
 
   const handleRemovePicture = (picId: string) => {
+    URL.revokeObjectURL(
+      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+    );
+
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
 
@@ -1000,7 +1046,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
               className="relative aspect-square group"
             >
               <Image
-                src={URL.createObjectURL(image.file)}
+                src={image.urlObj}
                 alt={`Larawan ${index + 1} ng gagawing ulat`}
                 fill
                 unoptimized
@@ -1137,14 +1183,17 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
         canvas.toBlob(
           (blob) => {
             if (blob) {
+              const newFile = new File([blob], `captureImage.jpg`, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+
               setSelectedFile((prev) => [
                 ...prev,
                 {
                   picId: CreateUUID(),
-                  file: new File([blob], `captureImage.jpg`, {
-                    type: "image/jpeg",
-                    lastModified: Date.now(),
-                  }),
+                  file: newFile,
+                  urlObj: URL.createObjectURL(newFile),
                 },
               ]);
               handleSetNotification([

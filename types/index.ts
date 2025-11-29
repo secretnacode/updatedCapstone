@@ -271,6 +271,7 @@ export type uploadHarvestingReportFormType =
   FormActionBaseType<uploadHarvestingReportType>;
 
 export type AddReportPictureType = {
+  urlObj: string;
   picId: string;
   file: File;
 }[];
