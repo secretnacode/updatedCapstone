@@ -222,9 +222,9 @@ export const GetFarmerRole = async (
 };
 
 /**
- * query to get the role of the farmer (e.g. member or leader)
- * @param userId id params of the current farmer user
- * @returns the role of the farmer user
+ * query to get the role of the agriculturist (e.g. adming or agriculturist)
+ * @param userId id params of the current agriculturist user
+ * @returns the role of the agriculturist user
  */
 export const GetAgriRole = async (
   userId: string
@@ -833,6 +833,22 @@ export const updatePassword = async (userId: string, newPass: string) => {
       `update capstone.auth set "password" = $1 where "authId" = $2`,
       [newPass, userId]
     );
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`
+    );
+  }
+};
+
+/**
+ * query for getting all the agri id for notification
+ * @returns
+ */
+export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
+  try {
+    return (await pool.query(`select "agriId" from capstone.agriculturist`))
+      .rows;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(

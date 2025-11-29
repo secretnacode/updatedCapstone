@@ -823,3 +823,16 @@ export const accountStatusStyle = (status: farmerAuthStatusType) => {
       return "border border-red-400 bg-red-100 text-red-700";
   }
 };
+
+/**
+ * function for new user notification message
+ * @param name name of the new user
+ * @param isEnglish if will be recieve by agriculturist or not
+ * @returns title and message object that can be used in the table notification
+ */
+export const newUserNotifMessage = (name: string, isEnglish: boolean) => ({
+  title: isEnglish ? "New User" : "Panibagong Magsasaka",
+  message: isEnglish
+    ? `${name} has just signed up`
+    : `Kaka-rehistro lamang ni ${name}`,
+});

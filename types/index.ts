@@ -1966,3 +1966,19 @@ export type authBaseDesignPropType = { isEnglish: boolean } & ChildrenPropType;
 export const agriculturistCreateLinkTableReturnType = {};
 
 export type formHintPropType = { message: string };
+
+export type notifRecipientType = "agriculturist" | "leader";
+
+export type notifType = "new user" | "new pass report" | "new approved report";
+
+export type notifActionType = "report" | "account";
+
+export type newNotifParamType = {
+  recipientId: string;
+  recipientType: notifRecipientType;
+  title: string;
+  message: string;
+  actionId: string;
+  actionType: notifActionType;
+  notifType: notifType;
+};

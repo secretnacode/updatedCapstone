@@ -212,10 +212,12 @@ export const organizationNameIsExist = async (
  */
 export const getFarmerLeaderId = async (userId: string) => {
   try {
-    return await pool.query(
-      `select o."farmerLeadId" from capstone.org o join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1`,
-      [userId]
-    );
+    return (
+      await pool.query(
+        `select o."farmerLeadId" from capstone.org o join capstone.farmer f on o."orgId" = f."orgId" where f."farmerId" = $1`,
+        [userId]
+      )
+    ).rows[0].farmerLeadId;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(

@@ -9,14 +9,20 @@ import { farmerFirstDetailFormSchema } from "@/util/helper_function/validation/v
 import { ProtectedAction } from "@/lib/protectedActions";
 import {
   CreateNewOrg,
+  getFarmerLeaderId,
   organizationNameIsExist,
   UpdateUserOrg,
 } from "@/util/queries/org";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { NotifToUriComponent } from "@/util/helper_function/reusableFunction";
-import { FarmerFirstDetailQuery } from "@/util/queries/user";
+import {
+  capitalizeFirstLetter,
+  newUserNotifMessage,
+  NotifToUriComponent,
+} from "@/util/helper_function/reusableFunction";
+import { FarmerFirstDetailQuery, getAllAgriId } from "@/util/queries/user";
 import { DeleteSession } from "../session";
+import { addNewUserNotif } from "@/util/queries/notification";
 
 /**
  * server action that partners with the actionState hook
@@ -97,6 +103,46 @@ export const AddFirstFarmerDetails = async (
       farmerId: authId,
     });
 
+    if (orgRole === "member") {
+      const { title, message } = newUserNotifMessage(
+        capitalizeFirstLetter(newUserVal.firstName) +
+          capitalizeFirstLetter(newUserVal.lastName),
+        false
+      );
+
+      await addNewUserNotif({
+        recipientId: await getFarmerLeaderId(authId),
+        recipientType: "leader",
+        notifType: "new user",
+        title,
+        message,
+        actionId: authId,
+        actionType: "account",
+      });
+    } else {
+      const { title, message } = newUserNotifMessage(
+        capitalizeFirstLetter(newUserVal.firstName) +
+          capitalizeFirstLetter(newUserVal.lastName),
+        true
+      );
+
+      await Promise.all(
+        (
+          await getAllAgriId()
+        ).map((val) =>
+          addNewUserNotif({
+            recipientId: val.agriId,
+            recipientType: "agriculturist",
+            notifType: "new user",
+            title,
+            message,
+            actionId: authId,
+            actionType: "account",
+          })
+        )
+      );
+    }
+
     await DeleteSession();
 
     // no session creation because the user need to be validate first before it proceed to the system
@@ -127,82 +173,3 @@ export const AddFirstFarmerDetails = async (
     };
   }
 };
-
-/**
- * server action for second farmer detail where the user i
- * @param cropList
- * @returns redirect the use if the validation was success
- */
-// export const AddSecondFarmerDetails = async (
-//   cropList: FarmerSecondDetailFormType[]
-// ): Promise<FarmerSecondDetailActionReturnType> => {
-//   try {
-//     const userId = (await ProtectedAction("create:crop")).userId;
-
-//     const validateCropList: CropFormErrorsType[] = cropList.reduce(
-//       (acc: CropFormErrorsType[] | [], crop: FarmerSecondDetailFormType) => {
-//         const validateCrop = ZodValidateForm(
-//           crop,
-//           farmerSecondDetailFormSchema
-//         );
-//         if (!validateCrop.valid)
-//           return [
-//             ...acc,
-//             { cropId: crop.cropId, formError: validateCrop.formError },
-//           ];
-//         return acc;
-//       },
-//       []
-//     );
-
-//     if (validateCropList.length > 0)
-//       return {
-//         success: false,
-//         formList: validateCropList,
-//         notifError: [
-//           {
-//             message:
-//               "May mga kulang sa inilagay mong impormasyon, ayusin to saka mag pasa ulit",
-//             type: "warning",
-//           },
-//         ],
-//       };
-
-//     // one by one inserting the crop information in the database
-//     await Promise.all(
-//       cropList.map(async (crop) => {
-//         const { cropFarmArea, farmAreaMeasurement, ...cropVal } = crop;
-
-//         return CreateNewCropAfterSignUp({
-//           farmArea: ConvertMeassurement(cropFarmArea, farmAreaMeasurement),
-//           userId,
-//           ...cropVal,
-//         });
-//       })
-//     );
-
-//     redirect(
-//       `/?notif=${NotifToUriComponent([
-//         { message: "Matagumpay ang iyong pag si-sign up", type: "success" },
-//         {
-//           message: "Mag intay na aprubahan ang account bago ka makapag login",
-//           type: "success",
-//         },
-//       ])}`
-//     );
-//   } catch (error) {
-//     if (isRedirectError(error)) throw error;
-
-//     const err = error as Error;
-//     console.error(`Error in Adding First Farmer Detial: ${err.message}`);
-//     return {
-//       success: false,
-//       notifError: [
-//         {
-//           message: err.message,
-//           type: "error",
-//         },
-//       ],
-//     };
-//   }
-// };
