@@ -64,6 +64,7 @@ import {
   deleteFarmerButtonPropType,
   getRestPasswordLinkQueryReturnType,
   agriRoleType,
+  formHintPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -120,6 +121,7 @@ import {
   ChevronUp,
   Download,
   Frown,
+  HelpCircle,
   Key,
   List,
   LogOut,
@@ -1497,6 +1499,12 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                 </div>
               </th>
 
+              <th scope="col">
+                <div>
+                  <p>Uri ng ulat</p>
+                </div>
+              </th>
+
               <th scope="col" className="!w-[12%]">
                 <div
                   onClick={() => handleSortCol("title")}
@@ -1516,12 +1524,6 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   <p>Araw ng Pag-uulat</p>
 
                   <SortType col={"dayReported"} />
-                </div>
-              </th>
-
-              <th scope="col">
-                <div>
-                  <p>Uri ng ulat</p>
                 </div>
               </th>
 
@@ -1560,6 +1562,14 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                     </div>
                   </td>
 
+                  <td>
+                    <div>
+                      <p>
+                        <ReportType type={report.reportType} />
+                      </p>
+                    </div>
+                  </td>
+
                   <td className="text-gray-500">
                     <div>
                       <p>{report.title}</p>
@@ -1569,14 +1579,6 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   <td className="text-gray-500">
                     <div>
                       <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
-                    </div>
-                  </td>
-
-                  <td>
-                    <div>
-                      <p>
-                        <ReportType type={report.reportType} />
-                      </p>
                     </div>
                   </td>
 
@@ -3604,5 +3606,49 @@ export const AgriculturistCreateLinkTable: FC<{
         />
       }
     />
+  );
+};
+
+export const FormHint: FC<formHintPropType> = ({ message }) => {
+  const [showText, setShowText] = useState<boolean>(false);
+
+  return (
+    <>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setShowText(true)}
+          className="text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <HelpCircle size={18} />
+        </button>
+
+        {showText && (
+          <div className="absolute mt-2 w-[200px] z-30 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg">
+            <div className="flex items-start gap-2">
+              <div className="flex-1">
+                <p className="text-sm text-gray-700">{message}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowText(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                aria-label="Close hint"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showText && (
+        <div
+          className="z-20 absolute inset-0  bg-red-50"
+          onClick={() => setShowText(false)}
+        />
+      )}
+    </>
   );
 };

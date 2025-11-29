@@ -370,11 +370,14 @@ const DamageReport: FC<ReportContentPropType> = ({
   handleFormError,
   setOpenReportModal,
 }) => {
+  const formRef = useRef<HTMLFormElement>(null);
   const { handleSetNotification } = useNotification();
   const pickFileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<AddReportPictureType>([]);
   const [isPassing, startPassing] = useTransition();
   const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [allDamage, setAllDamage] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const [state, formAction] = useActionState(uploadDamageReport, {
     success: null,
     notifError: null,
@@ -396,6 +399,7 @@ const DamageReport: FC<ReportContentPropType> = ({
   useEffect(() => {
     if (!isPassing) {
       handleDoneLoading();
+      setOpenModal(false);
 
       if (state.success) setOpenReportModal(false);
     }
@@ -417,6 +421,18 @@ const DamageReport: FC<ReportContentPropType> = ({
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
   };
 
+  const handleAllDamage = () => {
+    setAllDamage(!allDamage);
+
+    (
+      document.getElementById(
+        "damageReportTotalDamageInputField"
+      ) as HTMLInputElement
+    ).value = "";
+  };
+
+  const handleSubmit = () => formRef.current?.requestSubmit();
+
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleIsLoading("Ipinapasa na ang iyong ulat");
@@ -427,6 +443,8 @@ const DamageReport: FC<ReportContentPropType> = ({
 
     formData.append("reportType", reportType);
 
+    formData.append("allDamage", String(allDamage));
+
     selectedFile.forEach((image) => {
       formData.append("file", image.file);
     });
@@ -435,13 +453,12 @@ const DamageReport: FC<ReportContentPropType> = ({
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6 ">
+    <form onSubmit={handleFormSubmit} ref={formRef} className="space-y-6 ">
       <div className="space-y-4">
         <FormDivLabelInput
           labelMessage="Pamagat ng ulat:"
           inputName={"reportTitle"}
           formError={state.formError?.reportTitle}
-          inputRequired
           inputPlaceholder="Hal: Mga nasirang palay sa dayap"
           inputClassName="input-red-ring"
         />
@@ -452,25 +469,47 @@ const DamageReport: FC<ReportContentPropType> = ({
           formError={state.formError?.dateHappen}
           inputType="date"
           inputMax={MaxDateToday()}
-          inputRequired
           inputClassName="input-red-ring"
         />
 
-        <FormDivLabelInput
-          labelMessage="Laki ng sira sa iyong pananim:(Ektarya)"
-          inputName={"totalDamageArea"}
-          formError={state.formError?.totalDamageArea}
-          inputType="number"
-          inputMin={0}
-          inputRequired
-          inputClassName="input-red-ring"
-        />
+        <div>
+          <FormDivLabelInput
+            labelMessage="Laki ng sira sa iyong pananim:(Ektarya)"
+            inputName={"totalDamageArea"}
+            formError={state.formError?.totalDamageArea}
+            type="number"
+            inputMin={0}
+            disabled={allDamage}
+            id="damageReportTotalDamageInputField"
+            inputClassName={`input-red-ring ${allDamage ? "" : ""}`}
+            divClassName="flex-1"
+            hintMessage="Pindutin ang pulang pindutan kung lahat ng iyong pananim ay nasira"
+            adjacentBesideLabel={
+              <Button
+                className={`border !rounded-md ${
+                  allDamage
+                    ? "border-red-500 bg-red-500 text-white shadow-md"
+                    : "border-red-300 bg-red-50/20 text-gray-950/80"
+                }`}
+                onClick={handleAllDamage}
+                type="button"
+              >
+                Buong Tinataniman
+              </Button>
+            }
+          />
+
+          {allDamage && (
+            <p className="text-sm text-blue-500">
+              Lahat ng iyong pananim ay nasira
+            </p>
+          )}
+        </div>
 
         <FormDivLabelTextArea
           labelMessage="Karagdagang detalye:"
           name={"reportDescription"}
           formError={state.formError?.reportDescription}
-          required
           placeholder="Hal: May mga bahagyang nasirang palay sa kagagawan ng mga insekto"
           className="input-red-ring"
         />
@@ -550,8 +589,29 @@ const DamageReport: FC<ReportContentPropType> = ({
       <FormCancelSubmitButton
         submitButtonLabel={isPassing ? "Ipinapasa..." : "Ipasa ang Ulat"}
         cancelButtonLabel={"Kanselahin"}
+        submitType={allDamage ? "button" : "submit"}
+        submitOnClick={() => (allDamage ? setOpenModal(true) : undefined)}
         cancelOnClick={() => setOpenReportModal(false)}
       />
+
+      {openModal && (
+        <ModalNotice
+          type="warning"
+          title="Mag-ulat tungkol sa pagtatanim?"
+          message={
+            <>
+              Sigurado ka bang magpapasa ka ng ulat patungkol sa iyong pag
+              tatanim? Pag-ito ay ipinasa, hindi na ito muling maibabalik ang
+              estado ng iyong pananim.
+            </>
+          }
+          onClose={() => setOpenModal(false)}
+          onProceed={handleSubmit}
+          showCancelButton={true}
+          proceed={{ label: "Magpatuloy" }}
+          cancel={{ label: "Kanselahin" }}
+        />
+      )}
     </form>
   );
 };

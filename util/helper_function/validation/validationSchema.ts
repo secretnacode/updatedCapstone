@@ -254,20 +254,35 @@ export const addPlantingReportSchema = farmerBaseReportSchema.extend({
   }),
 });
 
-export const addDamageReportSchema = farmerBaseReportSchema.extend({
-  totalDamageArea: z
-    .string()
-    .min(1, {
-      error: "Mag lagay kung gano kalaki ang nasira sa iyong pananim",
-    })
-    .refine((e) => !isNaN(Number(e)) && Number(e) > 0, {
-      error:
-        "Dapat ang inilagay mo ay numero lamang o mas mataas sa 0 na sukat",
-    }),
-});
+// additional object for report type damage
+export const addDamageReportSchema = farmerBaseReportSchema
+  .extend({
+    totalDamageArea: z
+      .string()
+      .trim()
+      .transform((e) => (e === "" ? null : e))
+      .nullable(),
+    allDamage: z.boolean(),
+  })
+  .refine((val) => (!val.allDamage && val.totalDamageArea) || val.allDamage, {
+    error: "Ilagay kung gano kalaki ang nasira sa iyong pananim",
+    path: ["totalDamageArea"],
+  })
+  .refine(
+    (val) =>
+      !val.totalDamageArea ||
+      (!val.allDamage &&
+        val.totalDamageArea &&
+        (!isNaN(Number(val.totalDamageArea)) ||
+          Number(val.totalDamageArea) > 0)),
+    {
+      error: "Numero lamang ang pwede mong mailagay dito",
+      path: ["totalDamageArea"],
+    }
+  );
 
-export // additional object for report type harvesting
-const addHarvestingReportSchema = farmerBaseReportSchema.extend({
+// additional object for report type harvesting
+export const addHarvestingReportSchema = farmerBaseReportSchema.extend({
   totalHarvest: z
     .number()
     .min(1, { error: "Mag lagay kung gano kadami ang naani(kg)" }),

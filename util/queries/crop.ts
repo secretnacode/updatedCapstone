@@ -335,55 +335,29 @@ export const getCropStatusAndExpectedHarvest = async (
 };
 
 /**
- * query for updating the crop into planted status
- * @param param0 id of the crop and date planted
+ * query for updating the crop status into harvested or planted
+ * @param param0
  */
-export const updateCropIntoPlantedStatus = async ({
-  datePlanted,
+export const updateCropStatus = async ({
   cropId,
+  datePlanted,
+  status,
 }: updateCropPantedPropType) => {
   try {
-    const planted = (await cropStatus()).planted;
-
     await pool.query(
-      `update capstone.crop set "cropStatus" = $1, "datePlanted" = $2 where "cropId" = $3`,
-      [planted, datePlanted, cropId]
+      `update capstone.crop set "cropStatus" = $1, "${
+        status === "harvested" ? "dateHarvested" : "datePlanted"
+      }" = $2 where "cropId" = $3`,
+      [status, datePlanted, cropId]
     );
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng iyong pananim: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
-    );
-  }
-};
-
-/**
- * query for updating the crop into planted status
- * @param param0 id of the crop and date planted
- */
-export const updateCropIntoHarvestedStatus = async ({
-  datePlanted,
-  cropId,
-}: updateCropPantedPropType) => {
-  try {
-    const harvested = (await cropStatus()).harvested;
-
-    await pool.query(
-      `update capstone.crop set "cropStatus" = $1, "dateHarvested" = $2 where "cropId" = $3`,
-      [harvested, datePlanted, cropId]
-    );
-  } catch (error) {
-    console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim: ${
-        (error as Error).message
-      }`
-    );
-    throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng pananim`
+      `May pagkakamali na hindi inaasahang nang yari sa pag babago ng kalagayan ng iyong pananim`
     );
   }
 };

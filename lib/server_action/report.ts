@@ -65,8 +65,7 @@ import {
   getCropStatus,
   getCropStatusAndExpectedHarvest,
   getCropStatusAndPlantedDate,
-  updateCropIntoHarvestedStatus,
-  updateCropIntoPlantedStatus,
+  updateCropStatus,
 } from "@/util/queries/crop";
 import {
   addDamageReport,
@@ -126,6 +125,8 @@ export const uploadDamageReport = async (
       reportPicture: formData.getAll("file") as File[],
       reportType: formData.get("reportType") as reportTypeStateType,
       totalDamageArea: formData.get("totalDamageArea") as string,
+      allDamage:
+        (formData.get("allDamage") as string) === "true" ? true : false,
     };
 
     const returnVal = {
@@ -137,6 +138,7 @@ export const uploadDamageReport = async (
     const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addDamageReportSchema);
+    console.log(validateVal);
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -187,10 +189,9 @@ export const uploadDamageReport = async (
         notifError: missingFormValNotif(),
       };
 
-    if (
-      Number(reportVal.totalDamageArea) >=
-      Number(await getCropFarmArea(reportVal.cropId))
-    )
+    const cropArea = await getCropFarmArea(reportVal.cropId);
+
+    if (Number(reportVal.totalDamageArea) > Number(cropArea))
       return {
         ...returnVal,
         success: false,
@@ -226,8 +227,19 @@ export const uploadDamageReport = async (
         reportId: reportId,
         cropId: reportVal.cropId,
         farmerId: userId,
-        totalDamageArea: reportVal.totalDamageArea,
+        totalDamageArea: reportVal.allDamage
+          ? cropArea
+          : reportVal.totalDamageArea,
       }),
+      ...(reportVal.allDamage
+        ? [
+            updateCropStatus({
+              datePlanted: reportVal.dateHappen,
+              cropId: reportVal.cropId,
+              status: "harvested",
+            }),
+          ]
+        : []),
     ]);
 
     revalidatePath(`/farmer/report`);
@@ -336,9 +348,10 @@ export const uploadPlantingReport = async (
       // did this because the 3 report types uses the same query and their only difference is the reportType,
       // so after the insertion of new report, this is needed to be executed
       updateReportType("planting", reportId),
-      updateCropIntoPlantedStatus({
+      updateCropStatus({
         datePlanted: reportVal.dateHappen,
         cropId: reportVal.cropId,
+        status: "planted",
       }),
       addPlantedCrop({
         plantedId: CreateUUID(),
@@ -472,9 +485,10 @@ export const uploadHarvestingReport = async (
       // so after the insertion of new report, this is needed to be executed to
       // make the report about the harvest because by default its damage report
       updateReportType("harvesting", reportId),
-      updateCropIntoHarvestedStatus({
+      updateCropStatus({
         datePlanted: reportVal.dateHappen,
         cropId: reportVal.cropId,
+        status: "harvested",
       }),
       addHarvestedCrop({
         harvestId: CreateUUID(),

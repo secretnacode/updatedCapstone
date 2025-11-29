@@ -655,6 +655,9 @@ export type FormDivLabelInputPropType = ChildrenPropType &
     inputRequired?: boolean;
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
     logo?: { icon: LucideIcon; style?: string };
+    hintMessage?: string;
+    // element beside the label (e.g. button that can be interacted)
+    adjacentBesideLabel?: ChildrenType;
   };
 
 export type FormDivLabelTextAreaPropType =
@@ -1584,6 +1587,7 @@ export type getCropStatusAndExpectedHarvestReturnType =
 export type updateCropPantedPropType = {
   cropId: string;
   datePlanted: Date;
+  status: cropStatusType;
 };
 
 export type addPlantedCropParamType = {
@@ -1959,3 +1963,5 @@ export type farmerOrgMemberActionPropType = {
 export type authBaseDesignPropType = { isEnglish: boolean } & ChildrenPropType;
 
 export const agriculturistCreateLinkTableReturnType = {};
+
+export type formHintPropType = { message: string };

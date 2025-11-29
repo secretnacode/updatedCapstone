@@ -68,6 +68,7 @@ import Link from "next/link";
 import { getMyRecentReport } from "@/lib/server_action/report";
 import { getMyCropStatusDetail } from "@/lib/server_action/crop";
 import { RenderRedirectNotification } from "../client_component/provider/notificationProvider";
+import { FormHint } from "../client_component/componentForAllUser";
 
 export const Button: FC<ButtonPropType> = ({
   children,
@@ -211,38 +212,52 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   labelOnClick,
   children,
   logo,
+  hintMessage,
+  adjacentBesideLabel,
   ...inputProps
 }) => {
   return (
     <div className={`cursor-pointer div form-div ${divClassName}`}>
-      <label
-        htmlFor={inputName}
-        className={`label flex flex-row items-centers gap-1 ${labelClassName}`}
-        onClick={labelOnClick}
+      <div className="flex items-center gap-2">
+        <label
+          htmlFor={inputName}
+          className={`label flex flex-row items-centers gap-1 ${labelClassName}`}
+          onClick={labelOnClick}
+        >
+          {logo && <logo.icon className={`size-4 ${logo.style ?? ""}`} />}
+
+          <p>
+            {labelMessage}
+            {inputRequired && <span className="text-red-500">*</span>}
+          </p>
+        </label>
+
+        {hintMessage && <FormHint message={hintMessage} />}
+      </div>
+
+      <div
+        className={
+          adjacentBesideLabel ? "flex justify-between items-end gap-6" : ""
+        }
       >
-        {logo && <logo.icon className={`size-4 ${logo.style ?? ""}`} />}
+        <input
+          type={inputType}
+          disabled={inputDisable}
+          name={inputName}
+          value={inputValue}
+          onChange={onChange}
+          placeholder={inputPlaceholder}
+          defaultValue={inputDefaultValue}
+          className={`input ${inputClassName}`}
+          max={inputMax}
+          min={inputMin}
+          required={inputRequired}
+          checked={inputChecked}
+          {...inputProps}
+        />
 
-        <p>
-          {labelMessage}
-          {inputRequired && <span className="text-red-500">*</span>}
-        </p>
-      </label>
-
-      <input
-        type={inputType}
-        disabled={inputDisable}
-        name={inputName}
-        value={inputValue}
-        onChange={onChange}
-        placeholder={inputPlaceholder}
-        defaultValue={inputDefaultValue}
-        className={`input ${inputClassName}`}
-        max={inputMax}
-        min={inputMin}
-        required={inputRequired}
-        checked={inputChecked}
-        {...inputProps}
-      />
+        {adjacentBesideLabel}
+      </div>
 
       {children}
       {formError &&
