@@ -43,6 +43,7 @@ import {
   getToBeDownloadReportReturnType,
   uploadingDamageReportType,
   plantedCropType,
+  addNewReportNotifParamType,
 } from "@/types";
 import { ZodValidateForm } from "../validation/authValidation";
 import {
@@ -51,15 +52,21 @@ import {
   addPlantingReportSchema,
 } from "@/util/helper_function/validation/validationSchema";
 import {
+  capitalizeFirstLetter,
   CreateUUID,
   missingFormValNotif,
+  newReportPassNotifMessage,
 } from "@/util/helper_function/reusableFunction";
 import { cloudinary } from "@/util/configuration";
 import { UploadApiResponse } from "cloudinary";
 import { AddNewFarmerReportImage } from "@/util/queries/image";
-import { GetUserOrgId } from "@/util/queries/org";
+import { getFarmerLeaderId, GetUserOrgId } from "@/util/queries/org";
 import { revalidatePath } from "next/cache";
-import { CheckMyMemberquery } from "@/util/queries/user";
+import {
+  CheckMyMemberquery,
+  getAllAgriId,
+  getFarmerName,
+} from "@/util/queries/user";
 import {
   getCropFarmArea,
   getCropStatus,
@@ -75,6 +82,7 @@ import {
   getPlantedCropType,
   getTotalHarvest,
 } from "@/util/queries/plantedHarvested";
+import { addNewUserNotif } from "@/util/queries/notification";
 
 /**
  * server action to get the farmer report
@@ -231,6 +239,11 @@ export const uploadDamageReport = async (
           ? cropArea
           : reportVal.totalDamageArea,
       }),
+      addNewReportNotif({
+        farmerId: userId,
+        work: work,
+        reportType: "damage",
+      }),
       ...(reportVal.allDamage
         ? [
             updateCropStatus({
@@ -364,6 +377,11 @@ export const uploadPlantingReport = async (
         farmerId: userId,
       }),
       insertImage(reportVal.reportPicture, reportId),
+      addNewReportNotif({
+        farmerId: userId,
+        work: work,
+        reportType: "planting",
+      }),
     ]);
 
     revalidatePath(`/farmer/report`);
@@ -501,6 +519,11 @@ export const uploadHarvestingReport = async (
         farmerId: userId,
       }),
       insertImage(reportVal.reportPicture, reportId),
+      addNewReportNotif({
+        farmerId: userId,
+        work: work,
+        reportType: "harvesting",
+      }),
     ]);
 
     revalidatePath(`/farmer/report`);
@@ -552,6 +575,54 @@ const insertImage = async (images: File[], reportId: string) =>
         pictureUrl: uploadResult.secure_url,
       });
   });
+
+const addNewReportNotif = async ({
+  farmerId,
+  work,
+  reportType,
+}: addNewReportNotifParamType) => {
+  const farmerName = await getFarmerName(farmerId);
+
+  if (work === "farmer") {
+    const { title, message } = newReportPassNotifMessage(
+      capitalizeFirstLetter(farmerName),
+      false,
+      reportType
+    );
+
+    await addNewUserNotif({
+      recipientId: await getFarmerLeaderId(farmerId),
+      recipientType: "leader",
+      notifType: "new pass report",
+      title,
+      message,
+      actionId: farmerId,
+      actionType: "report",
+    });
+  } else {
+    const { title, message } = newReportPassNotifMessage(
+      capitalizeFirstLetter(farmerName),
+      true,
+      reportType
+    );
+
+    await Promise.all(
+      (
+        await getAllAgriId()
+      ).map((val) =>
+        addNewUserNotif({
+          recipientId: val.agriId,
+          recipientType: "agriculturist",
+          notifType: "new pass report",
+          title,
+          message,
+          actionId: farmerId,
+          actionType: "report",
+        })
+      )
+    );
+  }
+};
 
 /**
  * server action for geting the detail if the farmer report

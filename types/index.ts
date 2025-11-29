@@ -1982,3 +1982,9 @@ export type newNotifParamType = {
   actionType: notifActionType;
   notifType: notifType;
 };
+
+export type addNewReportNotifParamType = {
+  farmerId: string;
+  work: allUserRoleType;
+  reportType: reportTypeStateType;
+};

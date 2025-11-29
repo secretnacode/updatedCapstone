@@ -836,3 +836,27 @@ export const newUserNotifMessage = (name: string, isEnglish: boolean) => ({
     ? `${name} has just signed up`
     : `Kaka-rehistro lamang ni ${name}`,
 });
+
+/**
+ * function for new pass report notification message
+ * @param name name of the new user
+ * @param isEnglish if will be recieve by agriculturist or not
+ * @param reportType what kind of report has made
+ * @returns
+ */
+export const newReportPassNotifMessage = (
+  name: string,
+  isEnglish: boolean,
+  reportType: reportTypeStateType
+) => ({
+  title: isEnglish ? "New Report Passed" : "Panibagong Report ang Pinasa",
+  message: isEnglish
+    ? `${name} has just passed a ${reportType} report`
+    : `Nag pasa ng ulat is ${name} patungkol sa ${
+        reportType === "damage"
+          ? "pagkasira"
+          : reportType === "harvesting"
+          ? "pag-aani"
+          : "pagtatanim"
+      } ng kanyang pananim`,
+});

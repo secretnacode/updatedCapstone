@@ -856,3 +856,24 @@ export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
     );
   }
 };
+
+/**
+ * query for getting the farmer name
+ * @param farmerId id of the farmer to be get
+ * @returns farmername
+ */
+export const getFarmerName = async (farmerId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select concat("farmerFirstName", ' ', "farmerLastName") as "farmerName" from capstone.farmer = "farmerId" = $1`,
+        [farmerId]
+      )
+    ).rows[0].farmerName;
+  } catch (error) {
+    console.log((error as Error).message);
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong pangalan`
+    );
+  }
+};
