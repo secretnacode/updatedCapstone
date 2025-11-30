@@ -2189,9 +2189,7 @@ export const AgriculturistFarmerReporTable: FC<
                     onClick={() => handleSortCol("dayReported")}
                     className="cursor-pointer"
                   >
-                    <p>
-                      <p>Date was passed</p>
-                    </p>
+                    <p>Date was passed</p>
 
                     <SortType col={"dayReported"} />
                   </div>

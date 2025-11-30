@@ -129,18 +129,18 @@ export const getTotalHarvest = async (
   try {
     return (
       await pool.query(
-        `select "totalKgHarvest" from capstone.harvest where "reportId" = $1`,
+        `select "totalKgHarvest" from capstone.harvested where "reportId" = $1`,
         [reportId]
       )
     ).rows[0];
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pagka sira: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pag-aani: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pagka sira`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pag-aani`
     );
   }
 };
@@ -157,12 +157,12 @@ export const getPlantedCropType = async (
     ).rows[0];
   } catch (error) {
     console.error(
-      `May pagkakamali na hindi inaasahang nang yari pagkuha ng uri ng iyong tinanim: ${
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pagtatanim: ${
         (error as Error).message
       }`
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari pagkuha ng uri ng iyong tinanim`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha mo ng ulat patungkol sa pagtatanim`
     );
   }
 };
