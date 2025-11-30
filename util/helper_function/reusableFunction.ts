@@ -136,6 +136,10 @@ export const timeStampAmPmFormat = (date: Date) => {
   return `${hours}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
 };
 
+export const dateWithTime = (date: Date) => {
+  return `${ReadableDateFormat(date)} ${timeStampAmPmFormat(date)}`;
+};
+
 export const baranggayList = [
   "balayhangin",
   "bangyas",

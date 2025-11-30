@@ -2005,8 +2005,9 @@ export type getFarmerNameReturnType = {
 };
 
 export type headerUserLogoPropType = {
+  isEnglish: boolean;
   username: string;
-  role: string;
+  role: allUserRoleType;
   email: string;
 };
 
@@ -2015,8 +2016,8 @@ export type getAllUserNotifQueryReturnType = {
   notifType: notifType;
   title: string;
   message: string;
-  createdAt: string;
-  isRead: string;
+  createdAt: Date;
+  isRead: boolean;
   actionId: string;
   actionType: notifActionType;
 };
@@ -2029,3 +2030,12 @@ export type getAllUserNotifReturnType =
   | ServerActionFailBaseType;
 
 export type headerNotificationPropType = { isEnglish: boolean };
+
+export type agriLogoutButtonPropType = {
+  openModal: boolean;
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
+  handleLogout: () => void;
+};
+
+// logo for the icon in the header and navbar for the navbar button
+export type agriLogoutPropType = { useFor: "logo" | "navbar" };

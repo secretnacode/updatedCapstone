@@ -26,9 +26,9 @@ import {
   userWorkReturnType,
 } from "@/types";
 import {
-  AgriLogoutButton,
+  AgriLogout,
   BurgerNav,
-  FarmerLogoutButton,
+  FarmerLogout,
   HeaderNotification,
   HeaderUserLogo,
 } from "../client_component/componentForAllUser";
@@ -191,10 +191,9 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
         <span className="nav-span">Profile</span>
       </Link>
 
-      <FarmerLogoutButton />
+      <FarmerLogout useFor={"navbar"} />
     </>
   );
-
   return <Navbar>{Links}</Navbar>;
 };
 
@@ -250,7 +249,7 @@ const AgriculturistNav: FC<agriculturistNavPropType> = ({ pages }) => {
         </Link>
       ))}
 
-      <AgriLogoutButton />
+      <AgriLogout useFor={"navbar"} />
     </Navbar>
   );
 };
@@ -338,25 +337,21 @@ const TopNavbar: FC<topNavbarPropType> = async ({ isEnglish, currentPage }) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <HeaderNotification isEnglish />
+        <HeaderNotification isEnglish={isEnglish} />
 
         {name.success ? (
           <HeaderUserLogo
             username={name.username}
-            role={
-              isEnglish
-                ? name.role
-                : name.role === "farmer"
-                ? "Magsasaka"
-                : "Pinuno"
-            }
+            role={name.role}
             email={name.email}
+            isEnglish={isEnglish}
           />
         ) : (
           <HeaderUserLogo
             username={"Magsasaka"}
-            role={"Farmer"}
+            role={"farmer"}
             email={"Farmer123@gmail.coms"}
+            isEnglish={isEnglish}
           />
         )}
       </div>
