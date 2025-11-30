@@ -1637,7 +1637,7 @@ export type MyPreviousReportPropType = { user: farmerRoleType };
 
 export type NoContentYetPropType = ChildrenPropType & {
   message: string;
-  logo: LucideIcon;
+  logo?: LucideIcon;
   parentDiv?: string;
   logoClassName?: string;
   textClassName?: string;
@@ -1884,7 +1884,7 @@ export type plantedCropType = (typeof plantedCrop)[number];
 
 export type getPlantedCropTypeReturnType = { cropType: plantedCropType };
 
-export type navbarComponentPropType =
+export type navbarComponentPropType = { children: ChildrenType } & (
   | {
       forAgri?: true;
       currentPage?: agriPages;
@@ -1892,7 +1892,8 @@ export type navbarComponentPropType =
   | {
       forAgri?: false;
       currentPage?: farmerPages;
-    };
+    }
+);
 
 type farmerPages =
   | "Home"
@@ -1988,3 +1989,43 @@ export type addNewReportNotifParamType = {
   work: allUserRoleType;
   reportType: reportTypeStateType;
 };
+
+export type topNavbarPropType = {
+  isEnglish: boolean;
+  currentPage: agriPages | farmerPages;
+};
+
+export type getUserNameReturnType =
+  | { success: true; username: string; role: allUserRoleType; email: string }
+  | ServerActionFailBaseType;
+
+export type getFarmerNameReturnType = {
+  farmerFirstName: string;
+  farmerLastName: string;
+};
+
+export type headerUserLogoPropType = {
+  username: string;
+  role: string;
+  email: string;
+};
+
+export type getAllUserNotifQueryReturnType = {
+  notifId: string;
+  notifType: notifType;
+  title: string;
+  message: string;
+  createdAt: string;
+  isRead: string;
+  actionId: string;
+  actionType: notifActionType;
+};
+
+export type getAllUserNotifReturnType =
+  | {
+      success: true;
+      notifs: getAllUserNotifQueryReturnType[];
+    }
+  | ServerActionFailBaseType;
+
+export type headerNotificationPropType = { isEnglish: boolean };

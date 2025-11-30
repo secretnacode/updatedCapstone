@@ -2,9 +2,15 @@
 
 import {
   CheckMyMemberquery,
+  GetAgriRole,
+  GetFarmerRole,
   blockOrDelteUserAccountQuery,
+  getAgriEmail,
+  getAgriName,
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
+  getFarmerEmail,
+  getFarmerName,
   getPassword,
   getUserLocation,
   isAdminAgri,
@@ -25,6 +31,7 @@ import {
   getAllFarmerForResetPassReturnType,
   getFamerLeaderDashboardDataReturnType,
   getFarmerDashboardDataReturnType,
+  getUserNameReturnType,
   newUserValNeedInfoReturnType,
   pathToRevalidateAfterAgriDeleteFarmer,
   reportSequenceAndUserLocReturnType,
@@ -1054,4 +1061,51 @@ export const checkUserAlreadyLogin =
     }
   };
 
-// export const deleteUser = async;
+export const getUserName = async (): Promise<getUserNameReturnType> => {
+  try {
+    const { userId, work } = await ProtectedAction("read:user");
+
+    if (work === "leader" || work === "farmer") {
+      const [{ farmerFirstName, farmerLastName }, { orgRole }, email] =
+        await Promise.all([
+          getFarmerName(userId),
+          GetFarmerRole(userId),
+          getFarmerEmail(userId),
+        ]);
+
+      return {
+        success: true,
+        username: `${farmerFirstName} ${farmerLastName}`,
+        role: orgRole,
+        email,
+      };
+    }
+
+    const [agriName, { agriRole }, email] = await Promise.all([
+      getAgriName(userId),
+      GetAgriRole(userId),
+      getAgriEmail(userId),
+    ]);
+
+    return {
+      success: true,
+      username: agriName,
+      role: agriRole,
+      email,
+    };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Error occured in the header: ${err.message}`);
+
+    return {
+      success: false,
+      notifError: [
+        {
+          message: err.message,
+          type: "error",
+        },
+      ],
+    };
+  }
+};

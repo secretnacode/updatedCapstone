@@ -582,11 +582,11 @@ const addNewReportNotif = async ({
   work,
   reportType,
 }: addNewReportNotifParamType) => {
-  const farmerName = await getFarmerName(reportId);
+  const { farmerFirstName, farmerLastName } = await getFarmerName(reportId);
 
   if (work === "farmer") {
     const { title, message } = newReportPassNotifMessage(
-      capitalizeFirstLetter(farmerName),
+      capitalizeFirstLetter(`${farmerFirstName} ${farmerLastName}`),
       false,
       reportType
     );
@@ -602,7 +602,7 @@ const addNewReportNotif = async ({
     });
   } else {
     const { title, message } = newReportPassNotifMessage(
-      capitalizeFirstLetter(farmerName),
+      capitalizeFirstLetter(`${farmerFirstName} ${farmerLastName}`),
       true,
       reportType
     );
@@ -834,14 +834,14 @@ export const changeApproveOrJustApproveReport = async ({
 
     if (isChange) console.log("description changed");
 
-    const farmerName = await getFarmerName(reportId);
+    const { farmerFirstName, farmerLastName } = await getFarmerName(reportId);
 
     const messageEnglish = newApprovedReportNotifMessage(
-      capitalizeFirstLetter(farmerName),
+      capitalizeFirstLetter(`${farmerFirstName} ${farmerLastName}`),
       true
     );
     const messageTagalog = newApprovedReportNotifMessage(
-      capitalizeFirstLetter(farmerName),
+      capitalizeFirstLetter(`${farmerFirstName} ${farmerLastName}`),
       true
     );
 

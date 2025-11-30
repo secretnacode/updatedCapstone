@@ -116,12 +116,13 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
 
   return (
     <>
-      {!isViewing && <BackButton label={isEnglish ? "Go back" : "Bumalik"} />}
-
       <div className="grid md:grid-cols-4 gap-6">
-        {/* Left Column - Profile Info */}
         <div>
-          <div className="sticky top-8">
+          <div className="sticky top-[105px] space-y-5">
+            {!isViewing && (
+              <BackButton label={isEnglish ? "Go back" : "Bumalik"} />
+            )}
+
             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
               <div className="flex flex-col items-center">
                 <div
@@ -219,7 +220,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
           </div>
         </div>
 
-        <div className="md:col-span-3">
+        <div className="md:col-span-3  mt-[57px]">
           {AvailOrg.success ? (
             <UserProFile
               userFarmerInfo={userFarmerInfo.farmerInfo}

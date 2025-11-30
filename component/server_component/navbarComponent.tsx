@@ -13,26 +13,33 @@ import Link from "next/link";
 import { FC, ReactNode } from "react";
 import {
   NotifToUriComponent,
+  UnexpectedErrorMessage,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
 import {
   AgriculturistNavLinkType,
   agriculturistNavPropType,
   farmerNavPropType,
+  getUserNameReturnType,
   navbarComponentPropType,
+  topNavbarPropType,
   userWorkReturnType,
 } from "@/types";
 import {
   AgriLogoutButton,
   BurgerNav,
   FarmerLogoutButton,
+  HeaderNotification,
+  HeaderUserLogo,
 } from "../client_component/componentForAllUser";
-import { userWork } from "@/lib/server_action/user";
+import { getUserName, userWork } from "@/lib/server_action/user";
 import { redirect } from "next/navigation";
+import { RenderNotification } from "../client_component/provider/notificationProvider";
 
 export const NavbarComponent: FC<navbarComponentPropType> = async ({
   currentPage,
   forAgri,
+  children,
 }) => {
   let val: userWorkReturnType;
 
@@ -76,32 +83,42 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
   };
 
   return (
-    <div className="md:w-64 w-full min-h-full bg-white">
-      <div className="md:sticky top-0 relative">
-        <Link
-          href={logoLink()}
-          className="p-6 md:border-b md:border-gray-200 inline-block w-full"
-        >
-          <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
-            AgroFarm
-          </h1>
-        </Link>
+    <>
+      <div className="md:w-64 w-full min-h-full bg-white border-gray-300 border-r">
+        <div className="md:sticky top-0 relative">
+          <Link href={logoLink()} className="mt-5 mb-3 inline-block w-full">
+            <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
+              AgroFarm
+            </h1>
+          </Link>
 
-        <div className="md:block hidden">
-          {val.work === "admin" || val.work === "agriculturist"
-            ? AgriNavbar
-            : FarmerNavbar}
-        </div>
-
-        <div className="md:hidden block absolute left-0 top-0">
-          <BurgerNav>
+          <div className="md:block hidden">
             {val.work === "admin" || val.work === "agriculturist"
               ? AgriNavbar
               : FarmerNavbar}
-          </BurgerNav>
+          </div>
+
+          <div className="md:hidden block absolute left-0 top-0">
+            <BurgerNav>
+              {val.work === "admin" || val.work === "agriculturist"
+                ? AgriNavbar
+                : FarmerNavbar}
+            </BurgerNav>
+          </div>
         </div>
       </div>
-    </div>
+
+      {currentPage && (
+        <div className="w-full">
+          <TopNavbar
+            isEnglish={val.work === "admin" || val.work === "agriculturist"}
+            currentPage={currentPage}
+          />
+
+          {children}
+        </div>
+      )}
+    </>
   );
 };
 
@@ -243,5 +260,106 @@ const Navbar: FC<{ children: ReactNode }> = ({ children }) => {
     <nav className="flex-1 py-4">
       <div className="px-3 space-y-1">{children}</div>
     </nav>
+  );
+};
+
+const TopNavbar: FC<topNavbarPropType> = async ({ isEnglish, currentPage }) => {
+  let name: getUserNameReturnType;
+
+  try {
+    name = await getUserName();
+  } catch (error) {
+    console.log((error as Error).message);
+
+    name = {
+      success: false,
+      notifError: [
+        {
+          message: isEnglish
+            ? UnexpectedErrorMessageEnglish()
+            : UnexpectedErrorMessage(),
+          type: "error",
+        },
+      ],
+    };
+  }
+
+  const currentPageTitle = () => {
+    switch (currentPage) {
+      case "Home":
+        return isEnglish
+          ? "Welcome back to AgroFarm"
+          : "Maligayang pag babalik sa AgroFarm";
+      case "Reports":
+        return "";
+      case "Crops":
+        return "";
+      case "Farmer Users":
+        return "";
+      case "Validate Farmer":
+        return "";
+      case "Organizations":
+        return "";
+      case "Create Link":
+        return "";
+      case "Ulat":
+        return "";
+      case "Pananim":
+        return "";
+      case "Ulat ng miyembro":
+        return "";
+      case "Mga miyembro":
+        return "";
+      case "Profile":
+        return "";
+    }
+  };
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) {
+      return isEnglish ? "Good Morning," : "Magandang Umaga";
+    } else if (hour >= 12 && hour < 17) {
+      return isEnglish ? "Good Afternoon," : "Magandang Tanghali";
+    } else {
+      return isEnglish ? "Good Evening," : "Magandang Gabi";
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-20 bg-white flex justify-between items-center px-6 py-3 border-b border-gray-300">
+      {!name.success && <RenderNotification notif={name.notifError} />}
+      <div className="flex flex-col">
+        <h2 className="text-lg font-semibold text-gray-800 ">
+          {greeting()}, {name.success ? name.username : "Farmer User"}
+        </h2>
+        <p className="text-sm text-gray-500">{currentPageTitle()}</p>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <HeaderNotification isEnglish />
+
+        {name.success ? (
+          <HeaderUserLogo
+            username={name.username}
+            role={
+              isEnglish
+                ? name.role
+                : name.role === "farmer"
+                ? "Magsasaka"
+                : "Pinuno"
+            }
+            email={name.email}
+          />
+        ) : (
+          <HeaderUserLogo
+            username={"Magsasaka"}
+            role={"Farmer"}
+            email={"Farmer123@gmail.coms"}
+          />
+        )}
+      </div>
+    </header>
   );
 };

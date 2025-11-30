@@ -22,16 +22,14 @@ export default async function Page() {
   return (
     <div>
       {userInfo.success ? (
-        <div className="h-full space-y-5">
-          <FarmerUserProfile
-            userFarmerInfo={{
-              farmerInfo: userInfo.farmerInfo,
-              cropInfo: userInfo.cropInfo,
-              orgInfo: userInfo.orgInfo,
-            }}
-            isViewing={false}
-          />
-        </div>
+        <FarmerUserProfile
+          userFarmerInfo={{
+            farmerInfo: userInfo.farmerInfo,
+            cropInfo: userInfo.cropInfo,
+            orgInfo: userInfo.orgInfo,
+          }}
+          isViewing={false}
+        />
       ) : (
         <RenderRedirectNotification notif={userInfo.notifError} />
       )}

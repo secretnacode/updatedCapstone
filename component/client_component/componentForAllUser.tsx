@@ -65,6 +65,11 @@ import {
   getRestPasswordLinkQueryReturnType,
   agriRoleType,
   formHintPropType,
+  headerUserLogoPropType,
+  getAllUserNotifQueryReturnType,
+  headerNotificationPropType,
+  notifActionType,
+  notifType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -81,6 +86,7 @@ import {
   FormDivLabelInput,
   FormDivLabelSelect,
   ModalNotice,
+  NoContentYet,
   ReportStatus,
   ReportType,
   SubmitButton,
@@ -116,10 +122,13 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import {
   AlertTriangle,
+  Bell,
+  BellOff,
   CalendarDays,
   ChevronDown,
   ChevronUp,
   Download,
+  FileText,
   Frown,
   HelpCircle,
   Key,
@@ -153,6 +162,8 @@ import { createPortal } from "react-dom";
 import { getToBeDownloadReport } from "@/lib/server_action/report";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { getAllUserNotif } from "@/lib/server_action/notif";
+import Link from "next/link";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
   const { handleSetNotification } = useNotification();
@@ -3650,5 +3661,274 @@ export const FormHint: FC<formHintPropType> = ({ message }) => {
         />
       )}
     </>
+  );
+};
+
+export const HeaderNotification: FC<headerNotificationPropType> = ({
+  isEnglish,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const [notif, setNotif] = useState<getAllUserNotifQueryReturnType[]>([]);
+
+  const [openNotif, setOpenNotif] = useState<boolean>(false);
+  useEffect(() => {
+    const getNotif = async () => {
+      try {
+        const notif = await getAllUserNotif();
+
+        if (!notif.success) throw new Error(notif.notifError[0].message);
+
+        setNotif([
+          {
+            notifId: "notif_001",
+            notifType: "new user",
+            title: "New User Registration",
+            message:
+              "John Doe has registered a new account and is awaiting approval.",
+            createdAt: "2024-12-01T08:30:00Z",
+            isRead: "false",
+            actionId: "user_12345",
+            actionType: "account",
+          },
+          {
+            notifId: "notif_002",
+            notifType: "new pass report",
+            title: "New Password Report Submitted",
+            message:
+              "A user has reported a compromised password for 'facebook.com'.",
+            createdAt: "2024-12-01T09:15:00Z",
+            isRead: "false",
+            actionId: "report_67890",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_003",
+            notifType: "new approved report",
+            title: "Report Approved",
+            message:
+              "Your report for 'linkedin.com' password breach has been approved and added to the database.",
+            createdAt: "2024-12-01T10:00:00Z",
+            isRead: "true",
+            actionId: "report_54321",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_004",
+            notifType: "new user",
+            title: "New User Registration",
+            message:
+              "Sarah Smith has created an account from IP 192.168.1.100.",
+            createdAt: "2024-11-30T14:20:00Z",
+            isRead: "true",
+            actionId: "user_98765",
+            actionType: "account",
+          },
+          {
+            notifId: "notif_005",
+            notifType: "new pass report",
+            title: "Critical Password Report",
+            message:
+              "Multiple users have reported a security breach for 'gmail.com' credentials.",
+            createdAt: "2024-11-30T16:45:00Z",
+            isRead: "false",
+            actionId: "report_11223",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_006",
+            notifType: "new approved report",
+            title: "Report Approved",
+            message:
+              "The password breach report for 'twitter.com' has been verified and approved.",
+            createdAt: "2024-11-30T11:30:00Z",
+            isRead: "true",
+            actionId: "report_44556",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_007",
+            notifType: "new user",
+            title: "New User Registration",
+            message: "Mike Johnson registered from mobile device.",
+            createdAt: "2024-11-29T07:00:00Z",
+            isRead: "true",
+            actionId: "user_33445",
+            actionType: "account",
+          },
+          {
+            notifId: "notif_008",
+            notifType: "new pass report",
+            title: "Password Breach Reported",
+            message:
+              "User reported compromised credentials for 'instagram.com'.",
+            createdAt: "2024-11-29T13:15:00Z",
+            isRead: "false",
+            actionId: "report_77889",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_009",
+            notifType: "new approved report",
+            title: "Report Approved",
+            message:
+              "Your report for 'netflix.com' has been approved after security review.",
+            createdAt: "2024-11-28T15:45:00Z",
+            isRead: "true",
+            actionId: "report_99001",
+            actionType: "report",
+          },
+          {
+            notifId: "notif_010",
+            notifType: "new user",
+            title: "New User Registration",
+            message:
+              "Emily Chen has completed registration and email verification.",
+            createdAt: "2024-11-28T09:30:00Z",
+            isRead: "true",
+            actionId: "user_55667",
+            actionType: "account",
+          },
+        ]);
+      } catch (error) {
+        console.error((error as Error).message);
+
+        handleSetNotification([
+          {
+            message: isEnglish
+              ? UnexpectedErrorMessageEnglish()
+              : UnexpectedErrorMessage(),
+            type: "error",
+          },
+        ]);
+      }
+    };
+
+    getNotif();
+  }, [isEnglish, handleSetNotification]);
+
+  const handleLink = (actionType: notifActionType, notifType: notifType) => {
+    if (isEnglish) {
+      const base = "/agriculturist";
+
+      if (actionType === "report") return base + "/farmerReports";
+
+      return base + "/validateFarmer";
+    }
+
+    if (notifType === "new pass report") return "/farmerLeader/validateReport";
+    else if (notifType === "new user") return "/farmerLeader/orgMember";
+    else return "/farmer/report";
+  };
+
+  return (
+    <>
+      <div className="relative" onClick={() => setOpenNotif(true)}>
+        <Button className="relative rounded-2xl hover:bg-gray-100 !p-3">
+          <Bell className="size-5 text-muted-foreground" />
+          {notif.length > 0 && (
+            <div className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-md">
+              <p>{notif.length}</p>
+            </div>
+          )}
+        </Button>
+
+        {openNotif && (
+          <div className="w-80 p-1 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-10 right-0">
+            <div className="p-3 border-b">
+              <h3 className="font-semibold text-foreground">Notifications</h3>
+            </div>
+
+            <div className="h-100 overflow-x-auto">
+              {notif.length > 0 ? (
+                notif.map((val) => (
+                  <Link
+                    href={handleLink(val.actionType, val.notifType)}
+                    key={val.notifId}
+                    className="p-3"
+                  >
+                    <div className="flex gap-3">
+                      <div className="grid place-items-center">
+                        <div className="p-3 bg-emerald-50 rounded-full grid place-items-center">
+                          {val.notifType === "new user" ? (
+                            <User className="size-4 text-emerald-600" />
+                          ) : val.notifType === "new pass report" ? (
+                            <FileText className="size-4 text-blue-600" />
+                          ) : val.notifType === "new approved report" ? (
+                            <FileText className="size-4 text-blue-600" />
+                          ) : (
+                            <Bell />
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">
+                          {val.title}
+                        </p>
+
+                        <p className="text-xs text-gray-700">{val.message}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <NoContentYet
+                  message={
+                    isEnglish
+                      ? "No Notification Yet"
+                      : "Wala ka pang notification"
+                  }
+                  logo={BellOff}
+                  parentDiv="!m-4"
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* for wrapping the header(can only wrapp the header because it uses relative position and cant wrap the whole page) */}
+      {openNotif && (
+        <div
+          className="absolute inset-0 h-full
+           z-10"
+          onClick={() => setOpenNotif(false)}
+        />
+      )}
+
+      {/* for wrapping the whole content(but will not work for header because it uses z-20) */}
+      {openNotif &&
+        createPortal(
+          <div
+            className="absolute inset-0 h-full
+             z-10"
+            onClick={() => setOpenNotif(false)}
+          />,
+          document.body
+        )}
+    </>
+  );
+};
+
+export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
+  username,
+  role,
+  email,
+}) => {
+  console.log(email);
+  return (
+    <div className="rounded-full flex items-center gap-2 hover:bg-gray-100 p-1">
+      <div
+        className={`size-10 rounded-full bg-gradient-to-br from-green-200 to-green-400 text-green-700 grid place-items-center cursor-pointer font-bold`}
+      >
+        {username.split(" ")[0].charAt(0).toUpperCase()}
+      </div>
+
+      <div className="block text-left mr-4">
+        <p className="text-sm font-medium text-gray-800">{username}</p>
+
+        <p className="text-xs text-gray-500 font-semibold">{role}</p>
+      </div>
+    </div>
   );
 };

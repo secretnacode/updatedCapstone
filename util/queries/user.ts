@@ -4,13 +4,16 @@ import {
   agriAuthQueryReturnType,
   agriculturistRoleType,
   agriIsExistParamType,
+  agriRoleType,
   allType,
   allUserRoleType,
   barangayType,
   farmerAuthStatusType,
   FarmerFirstDetailType,
+  farmerRoleType,
   getCountNotVerifiedFarmerParamType,
   getFarmerDataForResetingPassReturnType,
+  getFarmerNameReturnType,
   GetFarmerOrgMemberQueryReturnType,
   GetFarmerProfileOrgInfoQueryReturnType,
   GetFarmerProfilePersonalInfoQueryReturnType,
@@ -201,7 +204,7 @@ export const FarmerFirstDetailQuery = async (
  */
 export const GetFarmerRole = async (
   userId: string
-): Promise<{ orgRole: string }> => {
+): Promise<{ orgRole: farmerRoleType }> => {
   try {
     return (
       await pool.query(
@@ -228,7 +231,7 @@ export const GetFarmerRole = async (
  */
 export const GetAgriRole = async (
   userId: string
-): Promise<{ agriRole: string }> => {
+): Promise<{ agriRole: agriRoleType }> => {
   try {
     return (
       await pool.query(
@@ -852,7 +855,7 @@ export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang impoprmasyon ng mga agriculturist`
     );
   }
 };
@@ -862,18 +865,82 @@ export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
  * @param farmerId id of the farmer to be get
  * @returns farmername
  */
-export const getFarmerName = async (farmerId: string): Promise<string> => {
+export const getFarmerName = async (
+  farmerId: string
+): Promise<getFarmerNameReturnType> => {
   try {
     return (
       await pool.query(
-        `select concat("farmerFirstName", ' ', "farmerLastName") as "farmerName" from capstone.farmer = "farmerId" = $1`,
+        `select "farmerFirstName", "farmerLastName" from capstone.farmer where "farmerId" = $1`,
         [farmerId]
       )
-    ).rows[0].farmerName;
+    ).rows[0];
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong pangalan`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong pangalan`
     );
+  }
+};
+
+/**
+ * query for getting the agri name
+ * @param agriId id of the agriculturist to be get
+ * @returns agriname
+ */
+export const getAgriName = async (agriId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "name" from capstone.agriculturist where "agriId" = $1`,
+        [agriId]
+      )
+    ).rows[0].name;
+  } catch (error) {
+    console.log((error as Error).message);
+
+    throw new Error(`Unexpected error occured while getting your name`);
+  }
+};
+
+/**
+ * query for getting the farmer username in the auth db
+ * @param farmerId id of the farmer
+ * @returns username/email
+ */
+export const getFarmerEmail = async (farmerId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "username" from capstone.auth where "authId" = $1`,
+        [farmerId]
+      )
+    ).rows[0].username;
+  } catch (error) {
+    console.log((error as Error).message);
+
+    throw new Error(
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong username pangalan`
+    );
+  }
+};
+
+/**
+ * query for getting the agriculturist email
+ * @param agriId id of the agriculturist
+ * @returns email
+ */
+export const getAgriEmail = async (agriId: string): Promise<string> => {
+  try {
+    return (
+      await pool.query(
+        `select "email" from capstone.agriculturist where "agriId" = $1`,
+        [agriId]
+      )
+    ).rows[0].email;
+  } catch (error) {
+    console.log((error as Error).message);
+
+    throw new Error(`Unexpected error occured while getting your email`);
   }
 };

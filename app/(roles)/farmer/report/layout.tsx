@@ -5,10 +5,8 @@ export default function Layout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <>
-      <NavbarComponent forAgri={false} currentPage="Ulat" />
-
+    <NavbarComponent forAgri={false} currentPage="Ulat">
       <main className="flex-1 p-8">{children}</main>
-    </>
+    </NavbarComponent>
   );
 }

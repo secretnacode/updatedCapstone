@@ -1255,12 +1255,16 @@ export const NoContentYet: FC<NoContentYetPropType> = ({
 }) => {
   return (
     <div
-      className={`div text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 m-8 space-y-3 ${parentDiv}`}
+      className={`div text-center py-12 px-5 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 m-8 space-y-3 ${parentDiv}`}
     >
       <div
-        className={`flex justify-center items-center gap-3 ${textWrapperDivClassName}`}
+        className={`flex justify-center items-center flex-wrap gap-3 ${textWrapperDivClassName}`}
       >
-        <Logo className={`size-15 text-gray-400 stroke-1.5 ${logoClassName}`} />
+        {Logo && (
+          <Logo
+            className={`size-15 text-gray-400 stroke-1.5 ${logoClassName}`}
+          />
+        )}
         <p
           className={`p font-semibold text-gray-500 !text-xl ${textClassName}`}
         >

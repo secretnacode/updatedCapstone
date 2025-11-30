@@ -7,10 +7,8 @@ export default function Layout({
   children: Readonly<ReactNode>;
 }>) {
   return (
-    <>
-      <NavbarComponent forAgri={false} currentPage="Ulat ng miyembro" />
-
+    <NavbarComponent forAgri={false} currentPage="Ulat ng miyembro">
       <main className="flex-1 p-8">{children}</main>
-    </>
+    </NavbarComponent>
   );
 }

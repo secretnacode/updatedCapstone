@@ -34,26 +34,26 @@ export default async function Page({
 
   return (
     <>
-      <NavbarComponent forAgri={false} currentPage="Home" />
+      <NavbarComponent forAgri={false} currentPage="Home">
+        <main className="flex-1 p-8">
+          <div>
+            {message && <RenderRedirectNotification notif={message} />}
 
-      <main className="flex-1 p-8">
-        <div>
-          {message && <RenderRedirectNotification notif={message} />}
-
-          {userRole.success ? (
-            userRole.role === "leader" ? (
-              <FarmerLeadDashBoard />
+            {userRole.success ? (
+              userRole.role === "leader" ? (
+                <FarmerLeadDashBoard />
+              ) : (
+                <FarmerDashBoard />
+              )
             ) : (
-              <FarmerDashBoard />
-            )
-          ) : (
-            <>
-              <RenderRedirectNotification notif={userRole.notifError} />
-              <DashboardNoValComponent />
-            </>
-          )}
-        </div>
-      </main>
+              <>
+                <RenderRedirectNotification notif={userRole.notifError} />
+                <DashboardNoValComponent />
+              </>
+            )}
+          </div>
+        </main>
+      </NavbarComponent>
     </>
   );
 }
