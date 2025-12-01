@@ -6,9 +6,9 @@ export default function Layout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <>
-      <NavbarComponent forAgri={true} currentPage="Validate Farmer" />
-
-      <main className="flex-1 p-8">{children}</main>
+      <NavbarComponent forAgri={true} currentPage="Validate Farmer">
+        <main className="flex-1 p-8">{children}</main>
+      </NavbarComponent>
     </>
   );
 }

@@ -1901,7 +1901,8 @@ type farmerPages =
   | "Pananim"
   | "Ulat ng miyembro"
   | "Mga miyembro"
-  | "Profile";
+  | "Profile"
+  | "Frmer Profile";
 
 type agriPages =
   | "Home"
@@ -1910,7 +1911,8 @@ type agriPages =
   | "Farmer Users"
   | "Validate Farmer"
   | "Organizations"
-  | "Create Link";
+  | "Create Link"
+  | "Frmer Profile";
 
 export type farmerNavPropType = { role: farmerRoleType; pages?: farmerPages };
 
