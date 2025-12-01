@@ -430,7 +430,7 @@ const DamageReport: FC<ReportContentPropType> = ({
 
   const handleRemovePicture = (picId: string) => {
     URL.revokeObjectURL(
-      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+      selectedFile.filter((file) => file.picId === picId)[0].urlObj
     );
 
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
@@ -584,13 +584,14 @@ const DamageReport: FC<ReportContentPropType> = ({
             >
               <Image
                 src={image.urlObj}
-                alt={`Larawan ${index + 1} ng gagawing ulat`}
+                alt={image.picId}
                 fill
                 unoptimized
                 className="object-cover rounded-lg"
               />
 
               <button
+                type="button"
                 onClick={() => handleRemovePicture(image.picId)}
                 className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
@@ -696,7 +697,7 @@ const PlantingReport: FC<ReportContentPropType> = ({
 
   const handleRemovePicture = (picId: string) => {
     URL.revokeObjectURL(
-      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+      selectedFile.filter((file) => file.picId === picId)[0].urlObj
     );
 
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));
@@ -929,7 +930,7 @@ const HarvestingReport: FC<ReportContentPropType> = ({
 
   const handleRemovePicture = (picId: string) => {
     URL.revokeObjectURL(
-      selectedFile.filter((file) => file.picId !== picId)[0].urlObj
+      selectedFile.filter((file) => file.picId === picId)[0].urlObj
     );
 
     setSelectedFile((prev) => prev.filter((file) => file.picId !== picId));

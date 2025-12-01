@@ -210,7 +210,7 @@ export const organizationNameIsExist = async (
  * @param userId farmer user that wants to get their farmerLeader id
  * @returns id of the leader
  */
-export const getFarmerLeaderId = async (userId: string) => {
+export const getFarmerLeaderId = async (userId: string): Promise<string> => {
   try {
     return (
       await pool.query(
@@ -221,7 +221,7 @@ export const getFarmerLeaderId = async (userId: string) => {
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng importmasyon`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon`
     );
   }
 };

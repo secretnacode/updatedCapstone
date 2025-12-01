@@ -1985,6 +1985,7 @@ export type newNotifParamType = {
 };
 
 export type addNewReportNotifParamType = {
+  farmerId: string;
   reportId: string;
   work: allUserRoleType;
   reportType: reportTypeStateType;

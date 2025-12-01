@@ -241,6 +241,7 @@ export const uploadDamageReport = async (
           : reportVal.totalDamageArea,
       }),
       addNewReportNotif({
+        farmerId: userId,
         reportId,
         work,
         reportType: "damage",
@@ -304,10 +305,12 @@ export const uploadPlantingReport = async (
       notifError: null,
       formError: null,
     };
+    console.log("1");
 
     const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
+    console.log("2");
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -315,6 +318,7 @@ export const uploadPlantingReport = async (
         formError: validateVal.formError,
         notifError: missingFormValNotif(),
       };
+    console.log("3");
 
     if (reportVal.reportType !== "planting")
       return {
@@ -331,6 +335,7 @@ export const uploadPlantingReport = async (
 
     const status = await getCropStatus(reportVal.cropId);
 
+    console.log("4");
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
     // you can only passed a planted type report if the user last report is about harvest
     if (status.cropStatus === "planted")
@@ -348,6 +353,7 @@ export const uploadPlantingReport = async (
 
     const reportId = CreateUUID();
 
+    console.log("5");
     await addNewReport({
       reportId: reportId,
       cropId: reportVal.cropId,
@@ -360,6 +366,7 @@ export const uploadPlantingReport = async (
       verificationStatus: work === "leader" ? true : false,
     });
 
+    console.log("6");
     await Promise.all([
       // did this because the 3 report types uses the same query and their only difference is the reportType,
       // so after the insertion of new report, this is needed to be executed
@@ -379,6 +386,7 @@ export const uploadPlantingReport = async (
       }),
       insertImage(reportVal.reportPicture, reportId),
       addNewReportNotif({
+        farmerId: userId,
         reportId,
         work,
         reportType: "planting",
@@ -521,6 +529,7 @@ export const uploadHarvestingReport = async (
       }),
       insertImage(reportVal.reportPicture, reportId),
       addNewReportNotif({
+        farmerId: userId,
         reportId,
         work,
         reportType: "harvesting",
@@ -578,11 +587,12 @@ const insertImage = async (images: File[], reportId: string) =>
   });
 
 const addNewReportNotif = async ({
+  farmerId,
   reportId,
   work,
   reportType,
 }: addNewReportNotifParamType) => {
-  const { farmerFirstName, farmerLastName } = await getFarmerName(reportId);
+  const { farmerFirstName, farmerLastName } = await getFarmerName(farmerId);
 
   if (work === "farmer") {
     const { title, message } = newReportPassNotifMessage(
@@ -592,7 +602,7 @@ const addNewReportNotif = async ({
     );
 
     await addNewUserNotif({
-      recipientId: await getFarmerLeaderId(reportId),
+      recipientId: await getFarmerLeaderId(farmerId),
       recipientType: "leader",
       notifType: "new pass report",
       title,
@@ -614,7 +624,7 @@ const addNewReportNotif = async ({
         addNewUserNotif({
           recipientId: val.agriId,
           recipientType: "agriculturist",
-          notifType: "new approved report",
+          notifType: "new pass report",
           title,
           message,
           actionId: reportId,
@@ -854,7 +864,7 @@ export const changeApproveOrJustApproveReport = async ({
         addNewUserNotif({
           recipientId: val.agriId,
           recipientType: "agriculturist",
-          notifType: "new pass report",
+          notifType: "new approved report",
           title: messageEnglish.title,
           message: messageEnglish.message,
           actionId: reportId,
@@ -864,7 +874,7 @@ export const changeApproveOrJustApproveReport = async ({
       addNewUserNotif({
         recipientId: await getFarmerIdOfReport(reportId),
         recipientType: "farmer",
-        notifType: "new pass report",
+        notifType: "new approved report",
         title: messageTagalog.title,
         message: messageTagalog.message,
         actionId: reportId,
