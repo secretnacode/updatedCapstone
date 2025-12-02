@@ -230,8 +230,8 @@ export type GetUserReportReturnType = {
   reportId: string;
   cropName: string;
   verificationStatus: boolean;
-  dayReported: string;
-  dayHappen: string;
+  dayReported: Date;
+  dayHappen: Date;
   title: string;
   reportType: reportTypeStateType;
 };

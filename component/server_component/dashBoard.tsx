@@ -127,7 +127,7 @@ export const FarmerDashBoard = async () => {
             },
             cardContent: String(data.cardValue.countMadeReportToday),
             contentLabel: "Mga Ulat mo ngayon",
-            link: "/farmer/report",
+            link: "/farmer/report?filter=today",
           }}
           card2={{
             logo: {
@@ -155,7 +155,7 @@ export const FarmerDashBoard = async () => {
             },
             cardContent: String(data.cardValue.countPendingReport),
             contentLabel: "Hindi kumpirmadong mga ulat",
-            link: "/farmer/report",
+            link: "/farmer/report?filter=unvalidated",
           }}
           lineChart={{
             title: "Bilang ng aking mga ulat",

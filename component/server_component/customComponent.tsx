@@ -1086,44 +1086,31 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
   }
 
   return (
-    <div className="component">
-      <div className="card-title-wrapper">
+    <div className="component !p-0">
+      <div className="card-title-wrapper p-4 border-b border-gray-200 !mb-0">
         <p className="">Mga Dati ng Ulat na Ipinasa</p>
       </div>
 
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-200">
         {recentReport.success ? (
           recentReport.recentReport.length > 0 ? (
             recentReport.recentReport.map((report) => (
               <div
                 key={report.reportId}
-                className="hover:bg-gray-50 transition-colors cursor-pointer py-2"
+                className="hover:bg-gray-50 transition-colors cursor-pointer py-2 px-4"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${reportTypeColor(
-                          report.reportType
-                        )}`}
-                      >
-                        {translateReportType({ type: report.reportType })}
-                      </span>
+                <div className="flex justify-between items-center mb-4">
+                  <p
+                    className={`px-2 py-1 rounded text-xs font-semibold ${reportTypeColor(
+                      report.reportType
+                    )}`}
+                  >
+                    {translateReportType({ type: report.reportType })}
+                  </p>
 
-                      <h3 className="font-medium text-gray-900">
-                        {report.title}
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {ReadableDateFormat(report.dayReported)}
-                      </span>
-                    </div>
-                  </div>
-                  {user !== "leader" ? (
+                  {user !== "leader" && (
                     <div
-                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
+                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border [&>svg]:size-4 ${
                         report.verificationStatus
                           ? "text-green-600 bg-green-50 border-green-200"
                           : "text-amber-600 bg-amber-50 border-amber-200"
@@ -1134,14 +1121,36 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
                         {report.verificationStatus ? "Naaprubahan" : "Hindi pa"}
                       </span>
                     </div>
-                  ) : (
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-sm text-gray-900">
+                      Pamagat:{" "}
+                      <span className="font-bold text-gray-600">
+                        {report.title}
+                      </span>
+                    </h3>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {ReadableDateFormat(report.dayReported)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="">
                     <Link
                       href={viewFarmerReportPath(report.reportId)}
-                      className="button slimer-button submit-button"
+                      className={`button slimer-button submit-button ${
+                        user !== "leader" ? "text-sm" : ""
+                      }`}
                     >
                       Tingnan
                     </Link>
-                  )}
+                  </div>
                 </div>
               </div>
             ))

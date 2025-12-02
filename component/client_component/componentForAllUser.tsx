@@ -1486,40 +1486,49 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
     col,
   }) => <SortColBy<GetOrgMemberReportQueryType> sortCol={sortCol} col={col} />;
 
-  // useEffect for filter search param only
+  const handleFilterParam = useCallback(
+    (filter: string) => {
+      if (filter === "today")
+        setTableList(
+          memberReport.filter(
+            (val) =>
+              val.dayReported.toISOString().split("T")[0] ===
+              new Date().toISOString().split("T")[0]
+          )
+        );
+      else if (filter === "unvalidated")
+        setTableList(memberReport.filter((val) => !val.verificationStatus));
+
+      setIsFiltered(true);
+    },
+    [memberReport]
+  );
+
+  const handleReportIdParam = useCallback(
+    (reportId: string) => {
+      setOpenReport(reportId);
+
+      setTableList(memberReport.filter((val) => val.reportId === reportId));
+
+      setIsFiltered(true);
+    },
+    [memberReport]
+  );
+
   useEffect(() => {
-    const param = getParams("filter");
+    const filter = getParams("filter");
+    const reportId = getParams("reportId");
 
-    if (!param) return;
+    if (filter) return handleFilterParam(filter);
+    else if (reportId) return handleReportIdParam(reportId);
 
-    if (param === "today")
-      setTableList(
-        memberReport.filter(
-          (val) =>
-            val.dayReported.toISOString().split("T")[0] ===
-            new Date().toISOString().split("T")[0]
-        )
-      );
-    else if (param === "unvalidated")
-      setTableList(memberReport.filter((val) => !val.verificationStatus));
-
-    setIsFiltered(true);
     return;
-  }, [getParams, memberReport, handleSortCol]);
+  }, [getParams, handleFilterParam, handleReportIdParam]);
 
   const clearFilter = () => {
     setIsFiltered(false);
     setTableList(memberReport);
   };
-
-  // useEffect for view report only
-  useEffect(() => {
-    const param = getParams("reportId");
-
-    if (!param) return;
-
-    return setOpenReport(param);
-  }, [getParams]);
 
   return (
     <>
@@ -1735,36 +1744,45 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
   const [tableList, setTableList] =
     useState<GetFarmerOrgMemberQueryReturnType[]>(orgMember);
 
-  const SortType: FC<{ col: keyof GetFarmerOrgMemberQueryReturnType }> = ({
-    col,
-  }) => (
-    <SortColBy<GetFarmerOrgMemberQueryReturnType> sortCol={sortCol} col={col} />
+  const handleFilterParam = useCallback(
+    (filter: string) => {
+      if (filter === "unvalidated")
+        setTableList(orgMember.filter((val) => !val.verified));
+
+      setIsFiltered(true);
+    },
+    [orgMember]
+  );
+
+  const handleNewUserParam = useCallback(
+    (newUser: string) => {
+      setTableList(orgMember.filter((val) => val.farmerId === newUser));
+
+      setIsFiltered(true);
+    },
+    [orgMember]
   );
 
   useEffect(() => {
     const filter = getParams("filter");
     const newUser = getParams("newUser");
 
-    if (filter) {
-      if (filter === "unvalidated")
-        setTableList(orgMember.filter((val) => !val.verified));
+    if (filter) return handleFilterParam(filter);
+    else if (newUser) return handleNewUserParam(newUser);
 
-      setIsFiltered(true);
-
-      return;
-    } else if (newUser) {
-      setTableList(orgMember.filter((val) => val.farmerId === newUser));
-
-      setIsFiltered(true);
-      return;
-    }
     return;
-  }, [getParams, orgMember]);
+  }, [getParams, handleFilterParam, handleNewUserParam]);
 
   const clearFilter = () => {
     setIsFiltered(false);
     setTableList(orgMember);
   };
+
+  const SortType: FC<{ col: keyof GetFarmerOrgMemberQueryReturnType }> = ({
+    col,
+  }) => (
+    <SortColBy<GetFarmerOrgMemberQueryReturnType> sortCol={sortCol} col={col} />
+  );
 
   return (
     <TableWithFilter<GetFarmerOrgMemberQueryReturnType>
@@ -1948,15 +1966,50 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
 };
 
 export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
+  const { getParams } = useSearchParam();
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const { sortCol, setSortCol, handleSortCol } =
     useSortColumnHandler<GetUserReportReturnType>();
   const [tableList, setTableList] = useState<GetUserReportReturnType[]>(report);
+
+  const handleFilterParam = useCallback(
+    (filter: string) => {
+      if (filter === "today")
+        setTableList(
+          report.filter(
+            (val) =>
+              val.dayReported.toISOString().split("T")[0] ===
+              new Date().toISOString().split("T")[0]
+          )
+        );
+      else if (filter === "unvalidated")
+        setTableList(report.filter((val) => !val.verificationStatus));
+
+      setIsFiltered(true);
+    },
+    [report]
+  );
+
+  useEffect(() => {
+    const filter = getParams("filter");
+    // const newUser = getParams("newUser");
+
+    if (filter) return handleFilterParam(filter);
+    // else if (newUser) return handleNewUserParam(newUser);
+
+    return;
+  }, [getParams, handleFilterParam]);
+
+  const clearFilter = () => {
+    setIsFiltered(false);
+    setTableList(report);
+  };
 
   const SortType: FC<{ col: keyof GetUserReportReturnType }> = ({ col }) => (
     <SortColBy<GetUserReportReturnType> sortCol={sortCol} col={col} />
   );
 
-  const leaderFilter = () => {
+  const leaderFilter = useCallback(() => {
     if (work === "leader")
       return {
         filterBy: {
@@ -1994,11 +2047,12 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
         },
       },
     };
-  };
+  }, [report, work]);
 
   return (
     <TableWithFilter<GetUserReportReturnType>
       isEnglish={false}
+      isFiltered={{ isFilter: isFiltered, clearFilter: clearFilter }}
       setTableList={setTableList}
       sortCol={sortCol}
       setSortCol={setSortCol}
@@ -2116,13 +2170,13 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
 
                   <td className="text-gray-500">
                     <div>
-                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
+                      <p>{ReadableDateFormat(report.dayReported)}</p>
                     </div>
                   </td>
 
                   <td className="text-gray-500">
                     <div>
-                      <p>{ReadableDateFormat(new Date(report.dayHappen))}</p>
+                      <p>{ReadableDateFormat(report.dayHappen)}</p>
                     </div>
                   </td>
 
