@@ -1087,7 +1087,7 @@ export const MyPreviousReport: FC<MyPreviousReportPropType> = async ({
 
   return (
     <div className="component !p-0">
-      <div className="card-title-wrapper p-4 border-b border-gray-200 !mb-0">
+      <div className="card-title-wrapper p-4 pt-5 border-b border-gray-200 !mb-0">
         <p className="">Mga Dati ng Ulat na Ipinasa</p>
       </div>
 
