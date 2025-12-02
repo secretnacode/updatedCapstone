@@ -133,7 +133,7 @@ export const FarmerDetailForm: FC<FarmerDetailFormPropType> = ({ orgList }) => {
             />
 
             <FormDivLabelInput
-              labelMessage="Karagdagang Pagkakilanlan:"
+              labelMessage="Karagdagang Pagkakilanlan(opsyonal):"
               inputName="extensionName"
               inputValue={newUserVal.extensionName ?? ""}
               onChange={handleChangeVal}
@@ -143,7 +143,7 @@ export const FarmerDetailForm: FC<FarmerDetailFormPropType> = ({ orgList }) => {
           </div>
 
           <FormDivLabelInput
-            labelMessage="Alyas:"
+            labelMessage="Alyas(opsyonal):"
             inputName="alias"
             inputValue={newUserVal.alias ?? ""}
             onChange={handleChangeVal}

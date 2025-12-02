@@ -805,6 +805,8 @@ export type TableCellPropType = ChildrenPropType & {
 
 export type TableComponentPropType = {
   tableClassName?: string;
+  noContentlogo: LucideIcon;
+  logoClassName?: string;
   noContentMessage: string;
   listCount: number;
   tableHeaderCell: Readonly<ReactNode>;
@@ -1708,6 +1710,11 @@ type filterSortBaseType<T> = {
 export type tableWithFilterPropType<T> = filterSortBaseType<T> &
   Pick<useSortColumnHandlerReturnType<T>, "sortCol" | "setSortCol"> & {
     setTableList: Dispatch<SetStateAction<T[]>>;
+    isFiltered?: {
+      isFilter: boolean;
+      clearFilter: () => void;
+    };
+    isEnglish?: boolean;
     table: ChildrenType;
     additionalFilter?: {
       filterBy: { [key in keyof T]?: allType[] }; // how will the table be filter by (e.g. all is not verified)
@@ -2014,21 +2021,28 @@ export type headerUserLogoPropType = {
   email: string;
 };
 
-export type getAllUserNotifQueryReturnType = {
+type getAllNotifBaseType = {
   notifId: string;
   notifType: notifType;
   title: string;
   message: string;
-  createdAt: Date;
   isRead: boolean;
   actionId: string;
   actionType: notifActionType;
 };
 
+export type getAllUserNotifQueryReturnType = getAllNotifBaseType & {
+  pastTime: timeStampzType;
+};
+
+export type getAllUserNotifClientToRenderType = getAllNotifBaseType & {
+  pastTime: string;
+};
+
 export type getAllUserNotifReturnType =
   | {
       success: true;
-      notifs: getAllUserNotifQueryReturnType[];
+      notifs: getAllUserNotifClientToRenderType[];
     }
   | ServerActionFailBaseType;
 

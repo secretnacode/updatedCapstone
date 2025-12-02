@@ -23,13 +23,11 @@ import {
   seeAllValButtonPropType,
   TableComponentPropType,
   tableNoDataPropType,
-  timeStampzType,
 } from "@/types";
 import { FC } from "react";
 import {
   Calendar,
   CheckCircle,
-  ClipboardX,
   Clock,
   Eye,
   EyeClosed,
@@ -56,6 +54,7 @@ import {
   ReadableDateFormat,
   reportStatus,
   reportTypeColor,
+  timePass,
   translateReportType,
   UnexpectedErrorMessage,
   viewFarmerReportPath,
@@ -568,6 +567,8 @@ export const ModalNotice: FC<ModalNoticePropType> = ({
  */
 export const TableComponent: FC<TableComponentPropType> = ({
   tableClassName,
+  noContentlogo: Logo,
+  logoClassName = "",
   noContentMessage,
   listCount,
   tableHeaderCell,
@@ -578,7 +579,9 @@ export const TableComponent: FC<TableComponentPropType> = ({
       {listCount === 0 ? (
         <div className="div text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
           <div className="div space-y-3">
-            <ClipboardX className="logo !size-20 stroke-1 table-no-content" />
+            <Logo
+              className={`logo !size-20 stroke-1 table-no-content ${logoClassName}`}
+            />
             <p className="p text-gray-500 !text-xl">{noContentMessage}</p>
           </div>
         </div>
@@ -844,18 +847,6 @@ export const RecentReportWidget: FC<RecentReportWidgetPropType> = ({
   widgetTitle,
   linkFor,
 }) => {
-  const timePass = (pastTime: timeStampzType) => {
-    if ((pastTime.days ?? 0) > 0) {
-      return `${pastTime.days} ${pastTime.days === 1 ? "day" : "days"}`;
-    } else if ((pastTime.hours ?? 0) > 0) {
-      return `${pastTime.hours} ${pastTime.hours === 1 ? "hr" : "hrs"}`;
-    } else if ((pastTime.minutes ?? 0) > 0) {
-      return `${pastTime.minutes} min`;
-    } else {
-      return "Just now";
-    }
-  };
-
   return (
     <div className="component">
       <div className=" card-title-wrapper">

@@ -53,7 +53,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.orgMemberTotalReportToday),
             contentLabel: "Mga napasang ulat",
-            link: "/farmerLeader/validateReport",
+            link: "/farmerLeader/validateReport?filter=today",
           }}
           card2={{
             logo: {
@@ -67,7 +67,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.totalUnvalidatedReport),
             contentLabel: "Hindi kumpirmadong ulat",
-            link: "/farmerLeader/validateReport",
+            link: "/farmerLeader/validateReport?filter=unvalidated",
           }}
           card3={{
             logo: {
@@ -81,7 +81,7 @@ export const FarmerLeadDashBoard = async () => {
             },
             cardContent: String(data.cardValue.totalUnverfiedUser),
             contentLabel: "Hindi beripikadong user",
-            link: "/farmerLeader/orgMember",
+            link: "/farmerLeader/orgMember?filter=unvalidated",
           }}
           lineChart={{
             title: "Bilang ng mga Ulat sa Organisasyon",

@@ -55,10 +55,41 @@ export const getAllUserNotifQuery = async (
   try {
     return (
       await pool.query(
-        `select "notifId", "notifType", "title", "message", "createdAt", "isRead", "actionId", "actionType" from capstone.notification where "recipientId" = $1`,
-        [userId]
+        `select "notifId", "notifType", "title", "message", current_timestamp - "createdAt" as "pastTime", "isRead", "actionId", "actionType" from capstone.notification where "recipientId" = $1 order by case when "isRead" = $2 then $3 else $4 end asc`,
+        [userId, false, 1, 2]
       )
     ).rows;
+  } catch (error) {
+    console.error((error as Error).message);
+    throw new Error(UnexpectedErrorMessageEnglish());
+  }
+};
+
+/**
+ * query for updating the notification into read state
+ * @param notifId id to be updated
+ */
+export const updateIsReadNotifQuery = async (notifId: string) => {
+  try {
+    await pool.query(
+      `update capstone.notification set "isRead" = $1 where "notifId" = $2`,
+      [true, notifId]
+    );
+  } catch (error) {
+    console.error((error as Error).message);
+    throw new Error(UnexpectedErrorMessageEnglish());
+  }
+};
+
+/**
+ * query for deleting the notif
+ * @param notifId id of the notif to be deleted
+ */
+export const deleteNotifQuery = async (notifId: string) => {
+  try {
+    await pool.query(`delete from capstone.notification where "notifId" = $1`, [
+      notifId,
+    ]);
   } catch (error) {
     console.error((error as Error).message);
     throw new Error(UnexpectedErrorMessageEnglish());

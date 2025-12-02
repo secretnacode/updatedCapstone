@@ -5,6 +5,7 @@ import {
   FC,
   FormEvent,
   memo,
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -66,12 +67,12 @@ import {
   agriRoleType,
   formHintPropType,
   headerUserLogoPropType,
-  getAllUserNotifQueryReturnType,
   headerNotificationPropType,
   notifActionType,
   notifType,
   agriLogoutButtonPropType,
   agriLogoutPropType,
+  getAllUserNotifClientToRenderType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -121,6 +122,7 @@ import {
   translateReportType,
   UnexpectedErrorMessage,
   UnexpectedErrorMessageEnglish,
+  viewFarmerReportPath,
 } from "@/util/helper_function/reusableFunction";
 import {
   AlertTriangle,
@@ -129,11 +131,13 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronUp,
+  ClipboardX,
   Download,
   FileText,
   Frown,
   HelpCircle,
   Key,
+  Link2Off,
   List,
   LogOut,
   Menu,
@@ -143,7 +147,9 @@ import {
   Plus,
   Search,
   Sprout,
+  Trash2,
   User,
+  UserRoundX,
   X,
 } from "lucide-react";
 import { useDebounce } from "./customHook/debounceHook";
@@ -153,8 +159,12 @@ import {
   createSignUpLinkForAgri,
   deleteLink,
 } from "@/lib/server_action/link";
-import { ViewUserReportButton } from "./reportComponent";
-import { useFilterSortTable, useSortColumnHandler } from "./customHook";
+import { UserReportModal, ViewUserReportButton } from "./reportComponent";
+import {
+  useFilterSortTable,
+  useSearchParam,
+  useSortColumnHandler,
+} from "./customHook";
 import {
   DynamicLink,
   FarmerOrgMemberAction,
@@ -164,7 +174,11 @@ import { createPortal } from "react-dom";
 import { getToBeDownloadReport } from "@/lib/server_action/report";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { getAllUserNotif } from "@/lib/server_action/notif";
+import {
+  deleteNotif,
+  getAllUserNotif,
+  updateIsReadNotif,
+} from "@/lib/server_action/notif";
 import Link from "next/link";
 
 export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
@@ -1313,18 +1327,21 @@ export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
   );
 };
 
-export function TableWithFilter<
+export const TableWithFilter = <
   T extends Record<string, string | number | Date | boolean | null>
 >({
   obj,
   table,
   additionalFilter,
   sortCol,
+  isFiltered,
+  isEnglish = true,
   setSortCol,
   setTableList,
-}: tableWithFilterPropType<T>) {
+}: tableWithFilterPropType<T>) => {
   const [searchVal, setSearchVal] = useState<string | null>(null);
   const [filterCol, setFilterCol] = useState<filteType<T>>(null);
+
   const sortedObj = useFilterSortTable<T>({
     obj,
     sortCol,
@@ -1332,17 +1349,93 @@ export function TableWithFilter<
     filterCol,
   });
 
-  // will always update the state in the parent of this component after the sorting of data
+  // Memoize the effect dependency
   useEffect(() => setTableList(sortedObj), [sortedObj, setTableList]);
 
-  const handleFilterOptionLabel = (data: allType): string => {
+  // Memoize the label handler
+  const handleFilterOptionLabel = useCallback((data: allType): string => {
     if (data === typeof "number" || data === typeof "boolean")
       return String(data);
 
     if (data instanceof Date) return ReadableDateFormat(data);
 
     return String(data);
-  };
+  }, []);
+
+  // Memoize the clear handler
+  const handleClear = useCallback(() => {
+    setSearchVal("");
+    setFilterCol(null);
+    setSortCol(null);
+    isFiltered?.clearFilter();
+  }, [setSortCol, isFiltered]);
+
+  const handleFilterToggle = useCallback((col: string, option: allType) => {
+    setFilterCol((prev) =>
+      prev?.val === option ? null : { col, val: option }
+    );
+  }, []);
+
+  const filterOptions = useMemo(() => {
+    if (!additionalFilter) return null;
+
+    const firstKey = Object.keys(additionalFilter.filterBy)[0];
+    if (!additionalFilter.filterBy[firstKey]?.length) return null;
+
+    return (
+      <div className="flex gap-2 flex-wrap items-center w-full">
+        <span className="text-xs font-medium text-muted-foreground text-nowrap inline-block">
+          {isEnglish ? "Filter by:" : "Salain sa pamamagitan ng:"}
+        </span>
+
+        <div className="flex flex-wrap gap-2 items-center flex-1">
+          {Object.keys(additionalFilter.filterBy).map((col, colIndex) =>
+            additionalFilter.filterBy[col]!.map((option, optIndex) => (
+              <div key={`${option}-${optIndex}`} className="flex">
+                <button
+                  onClick={() => handleFilterToggle(col, option)}
+                  className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize cursor-pointer ${
+                    filterCol?.val === option
+                      ? "bg-green-500 text-white"
+                      : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
+                  }`}
+                >
+                  {additionalFilter.handleFilterLabel[col]!(
+                    handleFilterOptionLabel(option)
+                  )}
+                </button>
+
+                {Object.keys(additionalFilter.filterBy).length > colIndex + 1 &&
+                  optIndex === additionalFilter.filterBy[col]!.length - 1 && (
+                    <div className="ml-2 border-l" />
+                  )}
+              </div>
+            ))
+          )}
+
+          {(searchVal || filterCol || sortCol || isFiltered?.isFilter) && (
+            <Button
+              onClick={handleClear}
+              className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
+            >
+              <X className="w-4 h-4 mr-1" />
+              {isEnglish ? "Clear" : "Ibalik sa dati"}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }, [
+    isEnglish,
+    additionalFilter,
+    filterCol,
+    sortCol,
+    searchVal,
+    isFiltered,
+    handleFilterToggle,
+    handleClear,
+    handleFilterOptionLabel,
+  ]);
 
   return (
     <div className="space-y-4">
@@ -1356,70 +1449,13 @@ export function TableWithFilter<
           />
         </div>
 
-        {additionalFilter &&
-          //added this so the "Filter by" can be removed if theres no value to be filtered, can be deleted if cause an error
-          additionalFilter?.filterBy[Object.keys(additionalFilter.filterBy)[0]]!
-            .length > 0 && (
-            <div className="flex gap-2 flex-wrap items-center w-full">
-              <span className="text-xs font-medium text-muted-foreground text-nowrap inline-block">
-                Filter by:
-              </span>
-
-              <div className={`flex flex-wrap gap-2 items-center flex-1`}>
-                {Object.keys(additionalFilter.filterBy).map((col, colIndex) =>
-                  additionalFilter.filterBy[col]!.map((option, optIndex) => (
-                    <div key={`${option}-${optIndex}`} className="flex">
-                      <button
-                        onClick={() =>
-                          setFilterCol(
-                            filterCol?.val === option
-                              ? null
-                              : { col: col, val: option }
-                          )
-                        }
-                        className={`px-3 py-1 rounded-full very-very-small-text font-medium transition-colors my-1 capitalize cursor-pointer ${
-                          filterCol?.val === option
-                            ? "bg-green-500 text-white"
-                            : "bg-green-50/50 text-foreground hover:bg-green-100/70 ring ring-gray-500"
-                        }`}
-                      >
-                        {additionalFilter.handleFilterLabel[col]!(
-                          handleFilterOptionLabel(option)
-                        )}
-                      </button>
-
-                      {Object.keys(additionalFilter.filterBy).length >
-                        colIndex + 1 &&
-                        optIndex ===
-                          additionalFilter.filterBy[col]!.length - 1 && (
-                          <div className="ml-2 border-l" />
-                        )}
-                    </div>
-                  ))
-                )}
-
-                {(searchVal || filterCol || sortCol) && (
-                  <Button
-                    onClick={() => {
-                      setSearchVal("");
-                      setFilterCol(null);
-                      setSortCol(null);
-                    }}
-                    className="ml-auto slimer-button ring very-small-text ring-gray-500 text-red-500 scale-105 hover:!text-black hover:!ring-0 hover:bg-red-100"
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Clear
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
+        {filterOptions}
       </div>
 
       {table}
     </div>
   );
-}
+};
 
 export const SortColBy = <T,>({ col, sortCol }: sortColByPropType<T>) => (
   <span className="inline-block [&>svg]:w-4 [&>svg]:h-4">
@@ -1438,6 +1474,9 @@ export const SortColBy = <T,>({ col, sortCol }: sortColByPropType<T>) => (
 export const ValidateReportTable: FC<validateReportTablePropType> = ({
   memberReport,
 }) => {
+  const { getParams } = useSearchParam();
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
+  const [openReport, setOpenReport] = useState<string | null>(null);
   const { sortCol, setSortCol, handleSortCol } =
     useSortColumnHandler<GetOrgMemberReportQueryType>();
   const [tableList, setTableList] =
@@ -1447,185 +1486,250 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
     col,
   }) => <SortColBy<GetOrgMemberReportQueryType> sortCol={sortCol} col={col} />;
 
+  // useEffect for filter search param only
+  useEffect(() => {
+    const param = getParams("filter");
+
+    if (!param) return;
+
+    if (param === "today")
+      setTableList(
+        memberReport.filter(
+          (val) =>
+            val.dayReported.toISOString().split("T")[0] ===
+            new Date().toISOString().split("T")[0]
+        )
+      );
+    else if (param === "unvalidated")
+      setTableList(memberReport.filter((val) => !val.verificationStatus));
+
+    setIsFiltered(true);
+    return;
+  }, [getParams, memberReport, handleSortCol]);
+
+  const clearFilter = () => {
+    setIsFiltered(false);
+    setTableList(memberReport);
+  };
+
+  // useEffect for view report only
+  useEffect(() => {
+    const param = getParams("reportId");
+
+    if (!param) return;
+
+    return setOpenReport(param);
+  }, [getParams]);
+
   return (
-    <TableWithFilter<GetOrgMemberReportQueryType>
-      setTableList={setTableList}
-      sortCol={sortCol}
-      setSortCol={setSortCol}
-      obj={memberReport}
-      additionalFilter={{
-        filterBy: {
-          reportType: Array.from(
-            new Set(memberReport.map((val) => val.reportType))
-          ),
-          verificationStatus: Array.from(
-            new Set(memberReport.map((val) => val.verificationStatus))
-          ),
-        },
-        handleFilterLabel: {
-          reportType: (val: string) => {
-            const forceType = val as reportTypeStateType;
-
-            return translateReportType({ type: forceType, isEnglish: false });
+    <>
+      <TableWithFilter<GetOrgMemberReportQueryType>
+        isEnglish={false}
+        isFiltered={{ isFilter: isFiltered, clearFilter: clearFilter }}
+        setTableList={setTableList}
+        sortCol={sortCol}
+        setSortCol={setSortCol}
+        obj={memberReport}
+        additionalFilter={{
+          filterBy: {
+            reportType: Array.from(
+              new Set(memberReport.map((val) => val.reportType))
+            ),
+            verificationStatus: Array.from(
+              new Set(memberReport.map((val) => val.verificationStatus))
+            ),
           },
+          handleFilterLabel: {
+            reportType: (val: string) => {
+              const forceType = val as reportTypeStateType;
 
-          verificationStatus: (label) =>
-            reportStatus({ val: label === "true" }),
-        },
-      }}
-      table={
-        <TableComponent
-          noContentMessage="Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
-          listCount={memberReport.length}
-          tableHeaderCell={
-            <>
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("farmerFirstName")}
-                  className="cursor-pointer"
-                >
-                  <p>Unang pangalan</p>
+              return translateReportType({ type: forceType, isEnglish: false });
+            },
 
-                  <SortType col={"farmerFirstName"} />
-                </div>
-              </th>
+            verificationStatus: (label) =>
+              reportStatus({ val: label === "true" }),
+          },
+        }}
+        table={
+          <TableComponent
+            noContentMessage={
+              memberReport.length > 0
+                ? "Walang tumutugma sa iyong hinahanap"
+                : "Ang mga miyembro ng iyong organisasyon ay wala pang pinapasang ulat"
+            }
+            noContentlogo={ClipboardX}
+            listCount={tableList.length}
+            tableHeaderCell={
+              <>
+                <th scope="col" className="!w-[12%]">
+                  <div
+                    onClick={() => handleSortCol("farmerFirstName")}
+                    className="cursor-pointer"
+                  >
+                    <p>Unang pangalan</p>
 
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("farmerLastName")}
-                  className="cursor-pointer"
-                >
-                  <p>Apelyido</p>
+                    <SortType col={"farmerFirstName"} />
+                  </div>
+                </th>
 
-                  <SortType col={"farmerLastName"} />
-                </div>
-              </th>
+                <th scope="col" className="!w-[12%]">
+                  <div
+                    onClick={() => handleSortCol("farmerLastName")}
+                    className="cursor-pointer"
+                  >
+                    <p>Apelyido</p>
 
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("farmerAlias")}
-                  className="cursor-pointer"
-                >
-                  <p>Alyas</p>
+                    <SortType col={"farmerLastName"} />
+                  </div>
+                </th>
 
-                  <SortType col={"farmerAlias"} />
-                </div>
-              </th>
+                <th scope="col" className="!w-[12%]">
+                  <div
+                    onClick={() => handleSortCol("farmerAlias")}
+                    className="cursor-pointer"
+                  >
+                    <p>Alyas</p>
 
-              <th scope="col">
-                <div>
-                  <p>Uri ng ulat</p>
-                </div>
-              </th>
+                    <SortType col={"farmerAlias"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[12%]">
-                <div
-                  onClick={() => handleSortCol("title")}
-                  className="cursor-pointer"
-                >
-                  <p>Pamagat ng ulat</p>
+                <th scope="col">
+                  <div>
+                    <p>Uri ng ulat</p>
+                  </div>
+                </th>
 
-                  <SortType col={"title"} />
-                </div>
-              </th>
+                <th scope="col" className="!w-[12%]">
+                  <div
+                    onClick={() => handleSortCol("title")}
+                    className="cursor-pointer"
+                  >
+                    <p>Pamagat ng ulat</p>
 
-              <th scope="col">
-                <div
-                  onClick={() => handleSortCol("dayReported")}
-                  className="cursor-pointer"
-                >
-                  <p>Araw ng Pag-uulat</p>
+                    <SortType col={"title"} />
+                  </div>
+                </th>
 
-                  <SortType col={"dayReported"} />
-                </div>
-              </th>
+                <th scope="col">
+                  <div
+                    onClick={() => handleSortCol("dayReported")}
+                    className="cursor-pointer"
+                  >
+                    <p>Araw ng Pag-uulat</p>
 
-              <th scope="col">
-                <div>
-                  <p>Kalagayan ng ulat</p>
-                </div>
-              </th>
+                    <SortType col={"dayReported"} />
+                  </div>
+                </th>
 
-              <th scope="col" className="!w-[16.5%]">
-                <div>
-                  <p>Aksyon</p>
-                </div>
-              </th>
-            </>
-          }
-          tableCell={
-            <>
-              {tableList.map((report) => (
-                <tr key={report.reportId}>
-                  <td className=" text-gray-900 font-medium">
-                    <div>
-                      <p>{report.farmerFirstName}</p>
-                    </div>
-                  </td>
+                <th scope="col">
+                  <div>
+                    <p>Kalagayan ng ulat</p>
+                  </div>
+                </th>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{report.farmerLastName}</p>
-                    </div>
-                  </td>
+                <th scope="col" className="!w-[16.5%]">
+                  <div>
+                    <p>Aksyon</p>
+                  </div>
+                </th>
+              </>
+            }
+            tableCell={
+              <>
+                {tableList.map((report) => (
+                  <tr key={report.reportId}>
+                    <td className=" text-gray-900 font-medium">
+                      <div>
+                        <p>{report.farmerFirstName}</p>
+                      </div>
+                    </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{report.farmerAlias}</p>
-                    </div>
-                  </td>
+                    <td className="text-gray-500">
+                      <div>
+                        <p>{report.farmerLastName}</p>
+                      </div>
+                    </td>
 
-                  <td>
-                    <div>
-                      <p>
-                        <ReportType type={report.reportType} />
-                      </p>
-                    </div>
-                  </td>
+                    <td className="text-gray-500">
+                      <div>
+                        <p>{report.farmerAlias}</p>
+                      </div>
+                    </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{report.title}</p>
-                    </div>
-                  </td>
+                    <td>
+                      <div>
+                        <p>
+                          <ReportType type={report.reportType} />
+                        </p>
+                      </div>
+                    </td>
 
-                  <td className="text-gray-500">
-                    <div>
-                      <p>{ReadableDateFormat(new Date(report.dayReported))}</p>
-                    </div>
-                  </td>
+                    <td className="text-gray-500">
+                      <div>
+                        <p>{report.title}</p>
+                      </div>
+                    </td>
 
-                  <td>
-                    <div>
-                      <p>
-                        <ReportStatus
-                          verificationStatus={report.verificationStatus}
+                    <td className="text-gray-500">
+                      <div>
+                        <p>
+                          {ReadableDateFormat(new Date(report.dayReported))}
+                        </p>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div>
+                        <p>
+                          <ReportStatus
+                            verificationStatus={report.verificationStatus}
+                          />
+                        </p>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div>
+                        <ViewUserReportButton
+                          reportId={report.reportId}
+                          farmerName={
+                            report.farmerFirstName + " " + report.farmerLastName
+                          }
                         />
-                      </p>
-                    </div>
-                  </td>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </>
+            }
+          />
+        }
+      />
 
-                  <td>
-                    <div>
-                      <ViewUserReportButton
-                        reportId={report.reportId}
-                        farmerName={
-                          report.farmerFirstName + " " + report.farmerLastName
-                        }
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </>
-          }
-        />
-      }
-    />
+      {openReport &&
+        createPortal(
+          <UserReportModal
+            reportId={openReport}
+            closeModal={() => setOpenReport(null)}
+            farmerName={
+              memberReport.filter((val) => val.reportId === openReport)[0]
+                .farmerFirstName +
+              " " +
+              memberReport.filter((val) => val.reportId === openReport)[0]
+                .farmerLastName
+            }
+            myReport={false}
+          />,
+          document.body
+        )}
+    </>
   );
 };
 
 export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
+  const { getParams } = useSearchParam();
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const { sortCol, setSortCol, handleSortCol } =
     useSortColumnHandler<GetFarmerOrgMemberQueryReturnType>();
   const [tableList, setTableList] =
@@ -1637,9 +1741,36 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
     <SortColBy<GetFarmerOrgMemberQueryReturnType> sortCol={sortCol} col={col} />
   );
 
+  useEffect(() => {
+    const filter = getParams("filter");
+    const newUser = getParams("newUser");
+
+    if (filter) {
+      if (filter === "unvalidated")
+        setTableList(orgMember.filter((val) => !val.verified));
+
+      setIsFiltered(true);
+
+      return;
+    } else if (newUser) {
+      setTableList(orgMember.filter((val) => val.farmerId === newUser));
+
+      setIsFiltered(true);
+      return;
+    }
+    return;
+  }, [getParams, orgMember]);
+
+  const clearFilter = () => {
+    setIsFiltered(false);
+    setTableList(orgMember);
+  };
+
   return (
     <TableWithFilter<GetFarmerOrgMemberQueryReturnType>
+      isEnglish={false}
       setTableList={setTableList}
+      isFiltered={{ isFilter: isFiltered, clearFilter: clearFilter }}
       sortCol={sortCol}
       setSortCol={setSortCol}
       obj={orgMember}
@@ -1649,14 +1780,19 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
           barangay: Array.from(new Set(orgMember.map((val) => val.barangay))),
         },
         handleFilterLabel: {
-          verified: (val) => (val === "true" ? "Kumpirmahin" : "Kumpirmado"),
+          verified: (val) => (val === "true" ? "Beripikahin" : "Kumpirmado"),
           barangay: (val) => capitalizeFirstLetter(val),
         },
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang miyembro sa iyong organisasyon"
-          listCount={orgMember.length}
+          noContentlogo={UserRoundX}
+          noContentMessage={
+            orgMember.length > 0
+              ? "Walang tumutugma sa iyong hinahanap"
+              : "Wala ka pang miyembro sa iyong organisasyon"
+          }
+          listCount={tableList.length}
           tableHeaderCell={
             <>
               <th scope="col" className="!w-[17%]">
@@ -1733,10 +1869,10 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                       : member.status === "block"
                       ? "bg-amber-50 hover:!bg-amber-100/50"
                       : ""
-                  }`}
+                  } `}
                 >
                   <td className=" text-gray-900 font-medium">
-                    <div>
+                    <div className=" ">
                       <p
                         className={`${
                           member.status === "delete" &&
@@ -1862,6 +1998,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
 
   return (
     <TableWithFilter<GetUserReportReturnType>
+      isEnglish={false}
       setTableList={setTableList}
       sortCol={sortCol}
       setSortCol={setSortCol}
@@ -1869,8 +2006,13 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
       additionalFilter={{ ...leaderFilter() }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-          listCount={report.length}
+          noContentlogo={ClipboardX}
+          noContentMessage={
+            report.length > 0
+              ? "Walang tumutugma sa iyong hinahanap"
+              : "Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
+          }
+          listCount={tableList.length}
           tableHeaderCell={
             <>
               <th scope="col">
@@ -2163,8 +2305,13 @@ export const AgriculturistFarmerReporTable: FC<
         }}
         table={
           <TableComponent
-            noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-            listCount={report.length}
+            noContentlogo={ClipboardX}
+            noContentMessage={
+              report.length > 0
+                ? "No match found for your search"
+                : "The farmer haven't passed a report yet"
+            }
+            listCount={tableList.length}
             tableHeaderCell={
               <>
                 <th scope="col">
@@ -2356,8 +2503,13 @@ export const AgriculturistFarmerUserTable: FC<
         }}
         table={
           <TableComponent
-            noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-            listCount={farmer.length}
+            noContentlogo={UserRoundX}
+            noContentMessage={
+              farmer.length > 0
+                ? "No match found for your search"
+                : "There's no verified user yet"
+            }
+            listCount={tableList.length}
             tableHeaderCell={
               <>
                 <th scope="col">
@@ -2578,8 +2730,13 @@ export const AgriculturistValidateFarmerTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-          listCount={farmer.length}
+          noContentlogo={UserRoundX}
+          noContentMessage={
+            farmer.length > 0
+              ? "No match found for your search"
+              : "There's no new user yet"
+          }
+          listCount={tableList.length}
           tableHeaderCell={
             <>
               <th scope="col">
@@ -2736,8 +2893,13 @@ export const AgriculturistFarmerOrgTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-          listCount={orgVal.length}
+          noContentlogo={UserRoundX}
+          noContentMessage={
+            orgVal.length > 0
+              ? "No match found for your search"
+              : "There's no organization yet"
+          }
+          listCount={tableList.length}
           tableHeaderCell={
             <>
               <th scope="col">
@@ -2876,8 +3038,13 @@ export const AgriculturistOrgMemberTable: FC<
       }}
       table={
         <TableComponent
-          noContentMessage="Wala ka pang naisusumiteng ulat. Magsagawa ng panibagong ulat."
-          listCount={orgMem.length}
+          noContentlogo={UserRoundX}
+          noContentMessage={
+            orgMem.length > 0
+              ? "No match found for your search"
+              : "There's no member in this organization yet"
+          }
+          listCount={tableList.length}
           tableHeaderCell={
             <>
               <th scope="col" className="!w-[17%]">
@@ -2905,7 +3072,7 @@ export const AgriculturistOrgMemberTable: FC<
                   onClick={() => handleSortCol("barangay")}
                   className="cursor-pointer "
                 >
-                  <p>Baranggay</p>
+                  <p>Residential barangay</p>
                   <SortType col={"barangay"} />
                 </div>
               </th>
@@ -3559,8 +3726,13 @@ export const AgriculturistCreateLinkTable: FC<{
       }}
       table={
         <TableComponent
-          noContentMessage="There's no link has been created yet"
-          listCount={links.length}
+          noContentlogo={Link2Off}
+          noContentMessage={
+            links.length > 0
+              ? "No match found for your search"
+              : "There's no link has been created yet"
+          }
+          listCount={tableList.length}
           tableClassName="!shadow-none"
           tableHeaderCell={
             <>
@@ -3771,10 +3943,12 @@ export const FormHint: FC<formHintPropType> = ({ message }) => {
 export const HeaderNotification: FC<headerNotificationPropType> = ({
   isEnglish,
 }) => {
+  const router = useRouter();
   const { handleSetNotification } = useNotification();
-  const [notif, setNotif] = useState<getAllUserNotifQueryReturnType[]>([]);
-
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const [notif, setNotif] = useState<getAllUserNotifClientToRenderType[]>([]);
   const [openNotif, setOpenNotif] = useState<boolean>(false);
+
   useEffect(() => {
     const getNotif = async () => {
       try {
@@ -3815,45 +3989,127 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
     }
 
     if (notifType === "new pass report")
-      return `/farmerLeader/validateReport?view=${actionId}`;
+      return `/farmerLeader/validateReport?reportId=${actionId}`;
     else if (notifType === "new user")
-      return `/farmerLeader/orgMember?view=${actionId}`;
-    else return `/farmer/report?view=${actionId}`;
+      return `/farmerLeader/orgMember?newUser=${actionId}`;
+    else return viewFarmerReportPath(actionId);
   };
+
+  // will only called if the notif is not read yet
+  const handleNotifIsView = async (
+    notifId: string,
+    isRead: boolean,
+    link: string
+  ) => {
+    try {
+      if (!isRead) {
+        handleIsLoading(isEnglish ? "Redirecting" : "Dinadala na");
+        const res = await updateIsReadNotif(notifId);
+
+        if (!res.success) return handleSetNotification(res.notifError);
+
+        setNotif(
+          notif.map((val) =>
+            val.notifId === notifId ? { ...val, isRead: true } : val
+          )
+        );
+      }
+
+      setOpenNotif(false);
+
+      startTransition(() => {
+        router.push(link);
+      });
+    } catch (error) {
+      console.error((error as Error).message);
+
+      handleSetNotification([
+        {
+          message: isEnglish
+            ? UnexpectedErrorMessageEnglish()
+            : UnexpectedErrorMessage(),
+          type: "error",
+        },
+      ]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  const handleDeleteNotif = async (notifId: string) => {
+    try {
+      const res = await deleteNotif(notifId);
+
+      handleSetNotification(res.notifMessage);
+
+      setNotif(notif.filter((val) => val.notifId !== notifId));
+    } catch (error) {
+      console.error((error as Error).message);
+
+      handleSetNotification([
+        {
+          message: isEnglish
+            ? UnexpectedErrorMessageEnglish()
+            : UnexpectedErrorMessage(),
+          type: "error",
+        },
+      ]);
+    }
+  };
+
+  const isReadLenght = useMemo(
+    () => notif.filter((val) => !val.isRead).length,
+    [notif]
+  );
 
   return (
     <>
-      <div className="relative" onClick={() => setOpenNotif(true)}>
-        <Button className="relative rounded-2xl hover:bg-gray-100 !p-3">
+      <div className="relative">
+        <Button
+          className="relative rounded-2xl hover:bg-gray-100 !p-3"
+          onClick={() => setOpenNotif(true)}
+        >
           <Bell className="size-5 text-muted-foreground" />
-          {notif.length > 0 && (
+          {isReadLenght > 0 && (
             <div className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-md">
-              <p>{notif.filter((val) => !val.isRead).length}</p>
+              <p>{isReadLenght}</p>
             </div>
           )}
         </Button>
 
         {openNotif && (
-          <div className="w-80 p-1 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-10 right-0">
-            <div className="p-3 border-b border-gray-200">
+          <div className="w-85 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-10 right-0 overflow-hidden">
+            <div className="px-5 pb-2 pt-3 border-b border-gray-200 flex justify-between items-center gap-4">
               <h3 className="font-semibold text-foreground">
                 {isEnglish ? "Notifications" : "Mga Notipikasyon"}
               </h3>
+
+              <Button className="!p-0" onClick={() => setOpenNotif(false)}>
+                <X className="size-5 text-gray-600 cursor-pointer" />
+              </Button>
             </div>
 
             <div className="max-h-100 overflow-x-auto ">
               {notif.length > 0 ? (
                 notif.map((val) => (
-                  <Link
-                    href={handleLink(
-                      val.actionId,
-                      val.actionType,
-                      val.notifType
-                    )}
+                  <div
                     key={val.notifId}
-                    className="py-3 px-2 flex gap-3 relative"
+                    className={`py-3 px-2 flex gap-3 relative border-l-3 cursor-pointer group ${
+                      val.isRead
+                        ? "border-transparent bg-gray-200/50"
+                        : "border-green-500/50 hover:bg-gray-50 transition-all"
+                    }`}
+                    onClick={() =>
+                      handleNotifIsView(
+                        val.notifId,
+                        val.isRead,
+                        handleLink(val.actionId, val.actionType, val.notifType)
+                      )
+                    }
                   >
-                    <div className="grid place-items-center [&>div]:p-3 [&>div]:rounded-full [&>div]:grid [&>div]:place-items-center [&_svg]:size-4">
+                    <div
+                      className={`grid ml-2 place-items-center [&>div]:p-3 [&>div]:rounded-full [&>div]:grid [&>div]:place-items-center [&_svg]:size-4 `}
+                    >
                       {val.notifType === "new user" ? (
                         <div
                           className={
@@ -3906,33 +4162,56 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
                         </div>
                       )}
                     </div>
-                    <div>
-                      <p
-                        className={`text-sm font-medium ${
-                          val.isRead ? "text-gray-800/70" : "text-gray-800"
-                        }`}
-                      >
-                        {val.title}
-                      </p>
 
-                      <p
-                        className={`text-xs ${
-                          val.isRead ? "text-gray-700/50" : "text-gray-700"
-                        } `}
-                      >
-                        {val.message}
-                      </p>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <p
+                          className={`text-sm font-medium ${
+                            val.isRead ? "text-gray-800/70" : "text-gray-800"
+                          }`}
+                        >
+                          {val.title}
+                        </p>
 
-                      <p
-                        className={`text-xs mt-1 flex justify-between items-center ${
-                          val.isRead ? "text-green-800/50 " : "text-green-800 "
-                        }`}
-                      >
-                        <span>{ReadableDateFormat(val.createdAt)}</span>
-                        <span>{timeStampAmPmFormat(val.createdAt)}</span>
-                      </p>
+                        <p
+                          className={`text-xs ${
+                            val.isRead ? "text-gray-700/50" : "text-gray-700"
+                          } `}
+                        >
+                          {val.message}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col justify-start gap-2">
+                        <p
+                          className={`text-[10px] flex justify-between items-center ${
+                            val.isRead
+                              ? "text-green-800/50 "
+                              : "text-green-800 "
+                          }`}
+                        >
+                          {val.pastTime}
+                        </p>
+
+                        <div className="opacity-0 group-hover:opacity-100 transition-all">
+                          <div className="flex-1 flex justify-center items-center">
+                            <Button
+                              className="!p-2 aspect-square !rounded-full hover:bg-red-700/10 cursor-pointer "
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNotif(val.notifId);
+                              }}
+                            >
+                              <Trash2
+                                className={`size-4  
+                            ${val.isRead ? "text-red-500/70" : "text-red-500"}`}
+                              />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 ))
               ) : (
                 <NoContentYet
@@ -3953,8 +4232,7 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
       {/* for wrapping the header(can only wrapp the header because it uses relative position and cant wrap the whole page) */}
       {openNotif && (
         <div
-          className="absolute inset-0 h-full
-           z-10"
+          className="absolute inset-0 h-full z-10"
           onClick={() => setOpenNotif(false)}
         />
       )}
@@ -3963,8 +4241,7 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
       {openNotif &&
         createPortal(
           <div
-            className="absolute inset-0 h-full
-             z-10"
+            className="absolute inset-0 min-h-full z-10"
             onClick={() => setOpenNotif(false)}
           />,
           document.body
@@ -3982,22 +4259,24 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
   const [openInfo, setOpenInfo] = useState<boolean>(false);
   return (
     <>
-      <div
-        className="relative rounded-full flex items-center gap-2 hover:bg-gray-100 p-1 cursor-pointer"
-        onClick={() => setOpenInfo(true)}
-      >
+      <div className="relative">
         <div
-          className={`size-10 rounded-full bg-gradient-to-br from-green-200 to-green-400 text-green-700 grid place-items-center cursor-pointer font-bold`}
+          className="rounded-full flex items-center gap-2 hover:bg-gray-100 p-1 cursor-pointer"
+          onClick={() => setOpenInfo(true)}
         >
-          {username.split(" ")[0].charAt(0).toUpperCase()}
-        </div>
+          <div
+            className={`size-10 rounded-full bg-gradient-to-br from-green-200 to-green-400 text-green-700 grid place-items-center cursor-pointer font-bold`}
+          >
+            {username.split(" ")[0].charAt(0).toUpperCase()}
+          </div>
 
-        <div className="block text-left mr-4">
-          <p className="text-sm font-medium text-gray-800">{username}</p>
+          <div className="block text-left mr-4">
+            <p className="text-sm font-medium text-gray-800">{username}</p>
 
-          <p className="text-xs text-gray-500 font-semibold">
-            {isEnglish ? role : role === "farmer" ? "Magsasaka" : "Pinuno"}
-          </p>
+            <p className="text-xs text-gray-500 font-semibold">
+              {isEnglish ? role : role === "farmer" ? "Magsasaka" : "Pinuno"}
+            </p>
+          </div>
         </div>
 
         {openInfo && (
@@ -4012,10 +4291,15 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-2 p-3 border-b border-gray-200 hover:bg-gray-50">
-              <User className="mr-2 h-4 w-4" />
-              {isEnglish ? "My Profile" : "Aking Profile"}
-            </div>
+            {(role === "farmer" || role === "leader") && (
+              <Link
+                href={"/farmer/profile"}
+                className="flex items-center gap-2 p-3 border-b border-gray-200 hover:bg-gray-50"
+              >
+                <User className="mr-2 h-4 w-4" />
+                {isEnglish ? "My Profile" : "Aking Profile"}
+              </Link>
+            )}
 
             {role === "farmer" || role === "leader" ? (
               <FarmerLogout useFor={"logo"} />

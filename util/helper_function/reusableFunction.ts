@@ -9,6 +9,7 @@ import {
   NotificationBaseType,
   reportStatusParamType,
   reportTypeStateType,
+  timeStampzType,
   translateReportTypeParamType,
 } from "@/types";
 import { redirect } from "next/navigation";
@@ -880,3 +881,20 @@ export const newApprovedReportNotifMessage = (
     ? `${name} has just approved a new report`
     : `Naaprubahan na ni ${name} ang iyong ulat`,
 });
+
+/**
+ * function for returning the time that passes(e.g. 5h ago)
+ * @param pastTime time taht comes from db(current_timestamp - "reportDate" as pastTime)
+ * @returns time that passes
+ */
+export const timePass = (pastTime: timeStampzType) => {
+  if ((pastTime.days ?? 0) > 0) {
+    return `${pastTime.days} ${pastTime.days === 1 ? "day" : "days"} ago`;
+  } else if ((pastTime.hours ?? 0) > 0) {
+    return `${pastTime.hours} ${pastTime.hours === 1 ? "hr" : "hrs"} ago`;
+  } else if ((pastTime.minutes ?? 0) > 0) {
+    return `${pastTime.minutes} min ago`;
+  } else {
+    return "Just now";
+  }
+};

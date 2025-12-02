@@ -110,19 +110,16 @@ export function useFilterSortTable<
 export function useSortColumnHandler<T>(): useSortColumnHandlerReturnType<T> {
   const [sortCol, setSortCol] = useState<sortColType<T>>(null);
 
-  const handleSortCol = useCallback(
-    (col: keyof T) => {
-      console.log(col);
-      if (sortCol?.sortType === "asc" && sortCol.column === col)
-        return setSortCol({ column: col, sortType: "desc" });
+  const handleSortCol = useCallback((col: keyof T) => {
+    setSortCol((prev) => {
+      if (prev?.sortType === "asc" && prev.column === col)
+        return { column: col, sortType: "desc" };
 
-      if (sortCol?.sortType === "desc" && sortCol.column === col)
-        return setSortCol(null);
+      if (prev?.sortType === "desc" && prev.column === col) return null;
 
-      return setSortCol({ column: col, sortType: "asc" });
-    },
-    [sortCol]
-  );
+      return { column: col, sortType: "asc" };
+    });
+  }, []);
 
   return { sortCol, handleSortCol, setSortCol };
 }

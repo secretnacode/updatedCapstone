@@ -27,7 +27,7 @@ import {
   profileButtonIdType,
 } from "@/types";
 import { useLoading } from "./provider/loadingProvider";
-import { ClipboardPlus } from "lucide-react";
+import { ClipboardPlus, WheatOff } from "lucide-react";
 import {
   accountStatusStyle,
   capitalizeFirstLetter,
@@ -179,8 +179,9 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
         </div>
 
         <TableComponent
+          noContentlogo={WheatOff}
           noContentMessage={
-            "Wala ka pang nakalista na impormasyon ng iyong pananim"
+            "Wala ka pang nakalistang impormasyon patungkol sa iyong pananim"
           }
           tableClassName="!shadow-none"
           listCount={myCropInfoList.length}
@@ -613,8 +614,13 @@ export const AllFarmerCrop: FC<AllFarmerCropPropType> = ({ cropInfo }) => {
           }}
           table={
             <TableComponent
-              noContentMessage="There's no crop"
-              listCount={cropInfo.length}
+              noContentlogo={WheatOff}
+              noContentMessage={
+                cropInfo.length > 0
+                  ? "No match found for your search"
+                  : "There's no farmer crop was listed yet"
+              }
+              listCount={tableList.length}
               tableHeaderCell={
                 <>
                   <th scope="col">
