@@ -1441,6 +1441,8 @@ export const EditableUserReportDetails: FC<
       });
 
       handleSetNotification(res.notifMessage);
+
+      closeModal();
     } catch (error) {
       console.error((error as Error).message);
       handleSetNotification([
