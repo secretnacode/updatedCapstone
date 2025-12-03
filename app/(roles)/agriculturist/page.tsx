@@ -58,7 +58,7 @@ export default async function Page({
                 },
                 cardContent: String(data.cardValue.toalNewFarmerReportToday),
                 contentLabel: "Count of report",
-                link: "/agriculturist/farmerReports",
+                link: "/agriculturist/farmerReports?filter=today",
               }}
               card2={{
                 logo: {
@@ -86,7 +86,7 @@ export default async function Page({
                 },
                 cardContent: String(data.cardValue.totalNotVerifiedFarmer),
                 contentLabel: "Total of unverified farmer",
-                link: "/agriculturist/validateFarmer",
+                link: "/agriculturist/validateFarmer?filter=unvalidated",
               }}
               lineChart={{
                 title: "Report count of all farmers",

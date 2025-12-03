@@ -1380,6 +1380,7 @@ export const TableWithFilter = <
     if (!additionalFilter) return null;
 
     const firstKey = Object.keys(additionalFilter.filterBy)[0];
+
     if (!additionalFilter.filterBy[firstKey]?.length) return null;
 
     return (
@@ -2209,6 +2210,9 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
 export const AgriculturistFarmerReporTable: FC<
   agriculturistFarmerReporTablePropType
 > = ({ report }) => {
+  const { getParams } = useSearchParam();
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
+  const [openReport, setOpenReport] = useState<string | null>(null);
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
   const [openOpt, setOpenOpt] = useState<boolean>(false);
@@ -2216,6 +2220,48 @@ export const AgriculturistFarmerReporTable: FC<
     useSortColumnHandler<GetAllFarmerReportQueryReturnType>();
   const [tableList, setTableList] =
     useState<GetAllFarmerReportQueryReturnType[]>(report);
+
+  const handleFilterParam = useCallback(
+    (filter: string) => {
+      if (filter === "today")
+        setTableList(
+          report.filter(
+            (val) =>
+              val.dayReported.toISOString().split("T")[0] ===
+              new Date().toISOString().split("T")[0]
+          )
+        );
+
+      setIsFiltered(true);
+    },
+    [report]
+  );
+
+  const handleReportIdParam = useCallback(
+    (reportId: string) => {
+      setOpenReport(reportId);
+
+      setTableList(report.filter((val) => val.reportId === reportId));
+
+      setIsFiltered(true);
+    },
+    [report]
+  );
+
+  useEffect(() => {
+    const filter = getParams("filter");
+    const reportId = getParams("reportId");
+
+    if (filter) return handleFilterParam(filter);
+    else if (reportId) return handleReportIdParam(reportId);
+
+    return;
+  }, [getParams, handleFilterParam, handleReportIdParam]);
+
+  const clearFilter = () => {
+    setIsFiltered(false);
+    setTableList(report);
+  };
 
   const SortType: FC<{ col: keyof GetAllFarmerReportQueryReturnType }> = ({
     col,
@@ -2339,6 +2385,7 @@ export const AgriculturistFarmerReporTable: FC<
       <TableWithFilter<GetAllFarmerReportQueryReturnType>
         setTableList={setTableList}
         sortCol={sortCol}
+        isFiltered={{ isFilter: isFiltered, clearFilter: clearFilter }}
         setSortCol={setSortCol}
         obj={report}
         additionalFilter={{
@@ -2511,6 +2558,19 @@ export const AgriculturistFarmerReporTable: FC<
           />
         }
       />
+
+      {openReport &&
+        createPortal(
+          <UserReportModal
+            reportId={openReport}
+            closeModal={() => setOpenReport(null)}
+            farmerName={
+              report.filter((val) => val.reportId === openReport)[0].farmerName
+            }
+            myReport={false}
+          />,
+          document.body
+        )}
     </div>
   );
 };
@@ -2743,6 +2803,8 @@ export const AgriculturistFarmerUserTable: FC<
 export const AgriculturistValidateFarmerTable: FC<
   agriculturistValidateFarmerTablePropType
 > = ({ farmer }) => {
+  const { getParams } = useSearchParam();
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const { sortCol, setSortCol, handleSortCol } =
     useSortColumnHandler<ViewAllUnvalidatedFarmerQueryReturnQuery>();
   const [tableList, setTableList] =
@@ -2757,9 +2819,44 @@ export const AgriculturistValidateFarmerTable: FC<
     />
   );
 
+  const handleFilterParam = useCallback(
+    (filter: string) => {
+      if (filter === "unvalidated")
+        setTableList(farmer.filter((val) => !val.verified));
+
+      setIsFiltered(true);
+    },
+    [farmer]
+  );
+
+  const handleNewUserParam = useCallback(
+    (newUser: string) => {
+      setTableList(farmer.filter((val) => val.farmerId === newUser));
+
+      setIsFiltered(true);
+    },
+    [farmer]
+  );
+
+  useEffect(() => {
+    const filter = getParams("filter");
+    const newUser = getParams("newUser");
+
+    if (filter) return handleFilterParam(filter);
+    else if (newUser) return handleNewUserParam(newUser);
+
+    return;
+  }, [getParams, handleFilterParam, handleNewUserParam]);
+
+  const clearFilter = () => {
+    setIsFiltered(false);
+    setTableList(farmer);
+  };
+
   return (
     <TableWithFilter<ViewAllUnvalidatedFarmerQueryReturnQuery>
       setTableList={setTableList}
+      isFiltered={{ isFilter: isFiltered, clearFilter: clearFilter }}
       sortCol={sortCol}
       setSortCol={setSortCol}
       obj={farmer}
@@ -4037,9 +4134,9 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
       const base = "/agriculturist";
 
       if (actionType === "report")
-        return base + `/farmerReports?view=${actionId}`;
+        return base + `/farmerReports?reportId=${actionId}`;
 
-      return base + `/validateFarmer?view=${actionId}`;
+      return base + `/validateFarmer?newUser=${actionId}`;
     }
 
     if (notifType === "new pass report")

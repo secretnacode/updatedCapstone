@@ -844,9 +844,7 @@ export const changeApproveOrJustApproveReport = async ({
 
     if (isChange) console.log("description changed");
 
-    const farmerId = await getFarmerIdOfReport(reportId);
-
-    const { farmerFirstName, farmerLastName } = await getFarmerName(farmerId);
+    const { farmerFirstName, farmerLastName } = await getFarmerName(userId);
 
     const messageEnglish = newApprovedReportNotifMessage(
       capitalizeFirstLetter(`${farmerFirstName} ${farmerLastName}`),
@@ -874,7 +872,7 @@ export const changeApproveOrJustApproveReport = async ({
         })
       ),
       addNewUserNotif({
-        recipientId: farmerId,
+        recipientId: await getFarmerIdOfReport(reportId),
         recipientType: "farmer",
         notifType: "new approved report",
         title: messageTagalog.title,
