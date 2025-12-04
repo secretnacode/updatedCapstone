@@ -3978,12 +3978,14 @@ export const AgriculturistCreateLinkTable: FC<{
                     <div className="grid place-items-start">
                       <p
                         className={`py-1 px-3 rounded-md very-small-text ${
-                          linkVal.status === "expired"
+                          linkVal.status === "expired" || linkVal.isUsed
                             ? "text-red-900 bg-red-100"
                             : "text-green-900 bg-green-100"
                         }`}
                       >
-                        {capitalizeFirstLetter(linkVal.status)}
+                        {capitalizeFirstLetter(
+                          linkVal.isUsed ? "Used" : linkVal.status
+                        )}
                       </p>
                     </div>
                   </td>

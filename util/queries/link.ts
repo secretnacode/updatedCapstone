@@ -85,7 +85,7 @@ export const getRestPasswordLinkQuery = async (): Promise<
 
     return (
       await pool.query(
-        `select l."linkId", l."link", l."dateCreated", l."dateExpired", case when now() > l."dateExpired" then '${
+        `select l."linkId", l."link", l."dateCreated", l."dateExpired", "isUsed", case when now() > l."dateExpired" then '${
           status[1]
         }' else '${
           status[0]
@@ -115,7 +115,7 @@ export const getCreateAgriLink = async (): Promise<
 
     return (
       await pool.query(
-        `select "linkId", "link", "dateCreated", "dateExpired", case when now() > "dateExpired" then '${
+        `select "linkId", "link", "dateCreated", "dateExpired", "isUsed", case when now() > "dateExpired" then '${
           status[1]
         }' else '${
           status[0]

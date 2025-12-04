@@ -1463,6 +1463,7 @@ export type getCreateAgriLinkReturnType = {
   dateCreated: Date;
   dateExpired: Date;
   status: linkStatusType;
+  isUsed: boolean;
 };
 
 export type getRestPasswordLinkQueryReturnType = getCreateAgriLinkReturnType & {
@@ -2056,3 +2057,12 @@ export type agriLogoutButtonPropType = {
 
 // logo for the icon in the header and navbar for the navbar button
 export type agriLogoutPropType = { useFor: "logo" | "navbar" };
+
+export type agriSignupParamType = {
+  token: string;
+  agriId: string; // comes from clerk
+  name: string;
+  email: string;
+};
+
+export type agriAuthSignUpPropType = { token: string };

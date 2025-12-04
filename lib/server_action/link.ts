@@ -4,7 +4,6 @@ import {
   checkCreateAgriToken,
   createResetPassWordLinkQuery,
   createSignUpLinkForAgriQuery,
-  updateAgriLinkIsUse,
   deleteResetPassLink,
   getCreateAgriLink,
   getRestPasswordLinkQuery,
@@ -18,6 +17,7 @@ import {
   getFarmerIdOfResetPass,
   getResetPassExpirationDate,
   getResetPassLinkId,
+  updateAgriLinkIsUse,
 } from "@/util/queries/link";
 import { ProtectedAction } from "../protectedActions";
 import {
@@ -289,6 +289,11 @@ export const deleteLink = async (
   }
 };
 
+/**
+ * will check the token if is existing and if used but will not updated its status into "used" and will be updated later intead
+ * @param token value of the token
+ * @returns
+ */
 export const checkSignUp = async (
   token: string
 ): Promise<serverActionOptionalNotifMessage> => {
@@ -315,12 +320,47 @@ export const checkSignUp = async (
         ],
       };
 
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    console.log(`Error making a new user: ${err}`);
+    return {
+      success: false,
+      notifError: [
+        {
+          message: `Unexpected error occured while making validating the link for sign up`,
+          type: "error",
+        },
+      ],
+    };
+  }
+};
+
+/**
+ * will be used after the user was redirected in the signUpFallback,
+ * meaning the user is already signed in and will make the link status into "used"
+ * @param token value of the token
+ * @returns
+ */
+export const checkAlreadySignUpAgri = async (
+  token: string
+): Promise<serverActionOptionalNotifMessage> => {
+  try {
+    if (!(await checkCreateAgriToken(token)))
+      return {
+        success: false,
+        notifError: [
+          {
+            message: "You are unauthorized to access the page",
+            type: "warning",
+          },
+        ],
+      };
+
     await updateAgriLinkIsUse(token);
 
     return { success: true };
   } catch (error) {
-    if (isRedirectError(error)) throw error;
-
     const err = error as Error;
     console.log(`Error making a new user: ${err}`);
     return {

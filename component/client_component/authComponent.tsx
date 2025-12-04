@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  agriAuthSignUpPropType,
   AuthLoginType,
   AuthSignUpType,
   ErrorResponseType,
@@ -19,7 +20,12 @@ import {
 } from "react";
 import { TriangleAlert, X } from "lucide-react";
 import { useNotification } from "./provider/notificationProvider";
-import { agriSignIn, LoginAuth, SignUpAuth } from "@/lib/server_action/auth";
+import {
+  agriSignIn,
+  agriSignUp,
+  LoginAuth,
+  SignUpAuth,
+} from "@/lib/server_action/auth";
 import { useLoading } from "./provider/loadingProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { SignIn, SignUp, useAuth, useUser } from "@clerk/nextjs";
@@ -28,7 +34,11 @@ import {
   ClerkModalLoading,
   FormDivLabelInput,
 } from "../server_component/customComponent";
-import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
+import {
+  NotifToUriComponent,
+  UnexpectedErrorMessageEnglish,
+} from "@/util/helper_function/reusableFunction";
+import { useRouter } from "next/navigation";
 
 /**
  * Auth form component that renders the login form(default) or the sign up form
@@ -357,8 +367,6 @@ export const AgriAuth: FC = () => {
   const { handleIsLoading, handleDoneLoading } = useLoading();
   const { handleSetNotification } = useNotification();
 
-  console.log("start");
-
   useEffect(() => {
     if (!isSignedIn || !user?.primaryEmailAddress) return;
 
@@ -370,7 +378,6 @@ export const AgriAuth: FC = () => {
 
         const res = await agriSignIn(user.id, email);
 
-        console.log("middle");
         if (!res.success) return await signOut();
 
         handleSetNotification(res.notifMessage);
@@ -385,8 +392,6 @@ export const AgriAuth: FC = () => {
         }
       } finally {
         handleDoneLoading();
-
-        console.log("end");
       }
     };
 
@@ -403,13 +408,94 @@ export const AgriAuth: FC = () => {
   return null;
 };
 
-export const AgriSignUp: FC = () => {
-  const { isLoaded } = useAuth();
+export const AgriAuthSignUp: FC<agriAuthSignUpPropType> = ({ token }) => {
+  const router = useRouter();
+  const { signOut } = useAuth();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+  const { handleSetNotification } = useNotification();
 
-  return <>{isLoaded ? <SignUp /> : <ClerkModalLoading />}</>;
+  useEffect(() => {
+    const userAuth = async () => {
+      try {
+        handleIsLoading("Redirecting!!!");
+
+        if (!isLoaded) return;
+
+        if (!isSignedIn || !user?.primaryEmailAddress || !user.fullName)
+          throw new Error("The user is missing some important detail");
+
+        const res = await agriSignUp({
+          token: token,
+          agriId: user.id,
+          email: user.primaryEmailAddress.emailAddress,
+          name: user.fullName,
+        });
+
+        console.log("done signing up");
+
+        handleSetNotification(res.notifMessage);
+
+        console.log("past notification");
+
+        await signOut();
+
+        return false;
+      } catch (error) {
+        console.log("catch");
+
+        if (!isRedirectError(error)) {
+          console.log("not redirect error");
+          const err = error as Error;
+          console.error(err.message);
+
+          handleSetNotification([
+            { message: UnexpectedErrorMessageEnglish(), type: "error" },
+          ]);
+
+          return false;
+        }
+      } finally {
+        handleDoneLoading();
+      }
+    };
+
+    if (!userAuth())
+      router.push(
+        `/agriAuth/signIn?notif=${NotifToUriComponent([
+          {
+            message: "The creation of account is unsuccessful",
+            type: "error",
+          },
+        ])}`
+      );
+
+    // will only render if the isLoaded value changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
+
+  return null;
 };
 
-export const AgriSignIn = () => {
+export const AgriSignUp: FC<{ token: string }> = ({ token }) => {
+  const { isLoaded, isSignedIn, signOut } = useAuth();
+
+  useEffect(() => {
+    if (isSignedIn) signOut();
+  }, [isSignedIn, signOut]);
+
+  return (
+    <>
+      {isLoaded && !isSignedIn ? (
+        <SignUp forceRedirectUrl={`/agriAuth/${token}/signUpFallback`} />
+      ) : (
+        <ClerkModalLoading />
+      )}
+    </>
+  );
+};
+
+export const AgriSignIn: FC = () => {
   const { isLoaded } = useAuth();
 
   return (

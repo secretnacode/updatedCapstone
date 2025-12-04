@@ -746,10 +746,10 @@ export const isAdminAgri = async (adminId: string) => {
 /**
  * was created for the roles of the agriculturist to avoid typography
  */
-const agriculturistRole: agriculturistRoleType = {
+export const agriculturistRole = async (): Promise<agriculturistRoleType> => ({
   admin: "admin",
   agriculturist: "agriculturist",
-};
+});
 
 /**
  * query for inserting a new value in the agriculturist table
@@ -759,9 +759,11 @@ export const insertNewAgriculturist = async (
   data: insertNewAgriculturistParamType
 ) => {
   try {
+    const { agriculturist } = await agriculturistRole();
+
     await pool.query(
       `insert into capstone.agriculturist ("agriId", "agriRole", "email", "name") values ($1, $2, $3, $4)`,
-      [data.agriId, agriculturistRole.agriculturist, data.userName, data.name]
+      [data.agriId, agriculturist, data.userName, data.name]
     );
   } catch (error) {
     console.log((error as Error).message);

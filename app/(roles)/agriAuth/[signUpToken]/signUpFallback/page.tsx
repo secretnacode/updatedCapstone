@@ -1,5 +1,6 @@
-import { AgriSignUp } from "@/component/client_component/authComponent";
-import { checkSignUp } from "@/lib/server_action/link";
+import { AgriAuthSignUp } from "@/component/client_component/authComponent";
+import { LoadingScreen } from "@/component/server_component/customComponent";
+import { checkAlreadySignUpAgri } from "@/lib/server_action/link";
 import { serverActionOptionalNotifMessage } from "@/types";
 import {
   RedirectUnauthorizedWithNotif,
@@ -16,7 +17,7 @@ export default async function Page({
   const token = (await params).signUpToken;
 
   try {
-    checkToken = await checkSignUp(token);
+    checkToken = await checkAlreadySignUpAgri(token);
   } catch (error) {
     console.error((error as Error).message);
 
@@ -29,8 +30,9 @@ export default async function Page({
   if (!checkToken.success) RedirectUnauthorizedWithNotif(checkToken.notifError);
 
   return (
-    <div className="clerk-modal">
-      <AgriSignUp token={token} />
+    <div>
+      <LoadingScreen />
+      <AgriAuthSignUp token={token} />
     </div>
   );
 }

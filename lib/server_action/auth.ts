@@ -6,6 +6,7 @@ import {
   AuthSignUpType,
   serverActionNormalReturnType,
   AuthResponseType,
+  agriSignupParamType,
 } from "@/types";
 import {
   CreateUUID,
@@ -16,8 +17,10 @@ import {
 import { CreateSession } from "@/lib/session";
 import {
   agriAuthQuery,
+  agriculturistRole,
   CheckUsername,
   getFarmerIdByAuthId,
+  insertNewAgriculturist,
   InsertNewUser,
   isFarmerVerified,
   UserLogin,
@@ -30,6 +33,7 @@ import {
   authLogInSchema,
   authSignUpSchema,
 } from "@/util/helper_function/validation/validationSchema";
+import { checkCreateAgriToken } from "@/util/queries/link";
 
 /**
  * used for login authentication of the user and validating the user input before redirecting the user into another page if the user
@@ -220,7 +224,54 @@ export const agriSignIn = async (
     if (isRedirectError(error)) throw error;
 
     const err = error as Error;
-    console.log(`Error making a new user: ${err}`);
+    console.log(`Error signing in: ${err}`);
+    return {
+      success: false,
+      notifMessage: [{ message: UnexpectedErrorMessage(), type: "error" }],
+    };
+  }
+};
+
+export const agriSignUp = async ({
+  token,
+  agriId,
+  name,
+  email,
+}: agriSignupParamType): Promise<serverActionNormalReturnType> => {
+  try {
+    if (!(await checkCreateAgriToken(token)))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "You are unauthorized to access the page",
+            type: "warning",
+          },
+        ],
+      };
+
+    await insertNewAgriculturist({
+      agriId: agriId,
+      userName: email,
+      name: name,
+    });
+
+    await CreateSession(agriId, (await agriculturistRole()).agriculturist);
+
+    redirect(
+      `/agriculturist?notif=${NotifToUriComponent([
+        {
+          message: "You've successfully created an account!!!",
+          type: "success",
+        },
+      ])}`
+    );
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    const err = error as Error;
+    console.log(`Error making a new agriculturist: ${err}`);
+
     return {
       success: false,
       notifMessage: [{ message: UnexpectedErrorMessage(), type: "error" }],
