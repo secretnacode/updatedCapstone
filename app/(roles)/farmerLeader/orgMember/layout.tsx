@@ -8,7 +8,7 @@ export default function Layout({
 }>) {
   return (
     <NavbarComponent forAgri={false} currentPage="Mga miyembro">
-      <main className="flex-1 p-8">{children}</main>
+      <main className="main-wrapper">{children}</main>
     </NavbarComponent>
   );
 }

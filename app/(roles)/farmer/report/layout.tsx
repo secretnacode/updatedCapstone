@@ -6,7 +6,7 @@ export default function Layout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <NavbarComponent forAgri={false} currentPage="Ulat">
-      <main className="flex-1 p-8">{children}</main>
+      <main className="main-wrapper">{children}</main>
     </NavbarComponent>
   );
 }

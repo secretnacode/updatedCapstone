@@ -1847,7 +1847,7 @@ export type profileButtonIdType =
   | "profile-org-info"
   | "profile-change-pass";
 
-export type BurgerNavPropType = ChildrenPropType;
+export type BurgerNavPropType = ChildrenPropType & { isEnglish: boolean };
 
 export type reportDownloadType = reportTypeStateType | "all";
 
@@ -2004,6 +2004,8 @@ export type addNewReportNotifParamType = {
 export type topNavbarPropType = {
   isEnglish: boolean;
   currentPage: agriPages | farmerPages;
+  burgerNav: ChildrenType;
+  logoLink: string;
 };
 
 export type getUserNameReturnType =
@@ -2066,3 +2068,5 @@ export type agriSignupParamType = {
 };
 
 export type agriAuthSignUpPropType = { token: string };
+
+export type lineGraphFilterType = "week" | "month" | "year";

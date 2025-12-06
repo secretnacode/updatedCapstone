@@ -739,7 +739,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
           <div className="mt-4 very-small-text text-gray-600 w-full">
             <div className="flex justify-between items-end gap-4">
               <p className="flex flex-wrap gap-1">
-                <span className="">{isEnglish ? "Now" : "Ngayong"}: </span>
+                <span>{isEnglish ? "Now" : "Ngayong"}: </span>
 
                 <span className="text-gray-700">
                   {ReadableDateFormat(
@@ -762,14 +762,14 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
         <>
           <RenderRedirectNotification notif={currentWeather.notifError} />
 
-          <div className="component">
+          <div className="component h-full">
             <div className="card-title-wrapper flex justify-start items-center gap-2">
               <CloudOff className="logo text-gray-500" />
               <p>{isEnglish ? "Weather Today" : "Panahon ngayon"}</p>
             </div>
 
-            <div className="flex justify-between items-center py-4 text-center">
-              <div className="w-full space-y-2">
+            <div className="flex justify-between items-center xl:py-4 text-center">
+              <div className="w-full xl:space-y-2">
                 <AlertCircle className="h-8 w-8 mx-auto text-yellow-400" />
 
                 <p className="text-lg font-bold">
@@ -784,7 +784,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
               </div>
             </div>
 
-            <div className="mt-4 very-small-text text-gray-500 flex justify-between items-center border-t border-gray-400 pt-2">
+            <div className="mt-4 very-small-text text-gray-500 flex sm:hidden xl:flex justify-between items-center border-t border-gray-400 pt-2">
               <p>
                 <span className="">
                   {isEnglish ? "Last check" : "Huling suri"}:{" "}

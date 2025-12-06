@@ -7,7 +7,7 @@ export default function Layout({
   return (
     <>
       <NavbarComponent forAgri={true} currentPage="Farmer Users">
-        <main className="flex-1 p-8">{children}</main>
+        <main className="main-wrapper">{children}</main>
       </NavbarComponent>
     </>
   );

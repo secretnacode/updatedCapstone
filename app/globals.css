@@ -19,6 +19,7 @@
   --color-primary-hover-color: var(--primary-hover-color);
   --color-primary-active-color: var(--primary-active-color);
 
+  /* from right position (e.g. toast)  */
   --animate-toLeft: toLeft 1s ease-in-out;
   @keyframes toLeft {
     from {
@@ -36,6 +37,27 @@
     }
     to {
       transform: translateX(110%);
+    }
+  }
+
+  /* from left position (e.g. left side nav)  */
+  --animate-slideIn: slideIn 0.5s ease-in-out;
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0%);
+    }
+  }
+
+  --animate-slideOut: slideOut 0.5s ease-in-out;
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
     }
   }
 }
@@ -357,8 +379,8 @@ body {
   .profile-component > div:last-of-type > div:nth-child(2) {
     @apply grid gap-4;
   }
-  main {
-    @apply w-full;
+  .main-wrapper {
+    @apply w-full flex-1 p-5 md:p-6 lg:p-8;
   }
 }
 

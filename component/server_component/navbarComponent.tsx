@@ -84,8 +84,8 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
 
   return (
     <>
-      <div className="md:w-64 w-full min-h-full bg-white border-gray-300 border-r">
-        <div className="md:sticky top-0 relative">
+      <div className="hidden md:block w-64 min-h-full bg-white border-gray-300 border-r">
+        <div className="sticky top-0">
           <Link href={logoLink()} className="mt-5 mb-3 inline-block w-full">
             <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
               AgroFarm
@@ -97,14 +97,6 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
               ? AgriNavbar
               : FarmerNavbar}
           </div>
-
-          <div className="md:hidden block absolute left-0 top-0">
-            <BurgerNav>
-              {val.work === "admin" || val.work === "agriculturist"
-                ? AgriNavbar
-                : FarmerNavbar}
-            </BurgerNav>
-          </div>
         </div>
       </div>
 
@@ -113,6 +105,12 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
           <TopNavbar
             isEnglish={val.work === "admin" || val.work === "agriculturist"}
             currentPage={currentPage}
+            burgerNav={
+              val.work === "admin" || val.work === "agriculturist"
+                ? AgriNavbar
+                : FarmerNavbar
+            }
+            logoLink={logoLink()}
           />
 
           {children}
@@ -257,12 +255,17 @@ const AgriculturistNav: FC<agriculturistNavPropType> = ({ pages }) => {
 const Navbar: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <nav className="flex-1 py-4">
-      <div className="px-3 space-y-1">{children}</div>
+      <div className="md:px-3 space-y-1">{children}</div>
     </nav>
   );
 };
 
-const TopNavbar: FC<topNavbarPropType> = async ({ isEnglish, currentPage }) => {
+const TopNavbar: FC<topNavbarPropType> = async ({
+  isEnglish,
+  currentPage,
+  burgerNav,
+  logoLink,
+}) => {
   let name: getUserNameReturnType;
 
   try {
@@ -327,16 +330,29 @@ const TopNavbar: FC<topNavbarPropType> = async ({ isEnglish, currentPage }) => {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white flex justify-between items-center px-6 py-3 border-b border-gray-300">
+    <header className="sticky top-0 z-20 bg-white flex justify-between md:justify-end lg:justify-between items-center px-4 py-2 md:px-6 md:py-3 border-b border-gray-300">
       {!name.success && <RenderNotification notif={name.notifError} />}
-      <div className="flex flex-col">
+
+      <div className="block: md:hidden">
+        <BurgerNav isEnglish={isEnglish}>{burgerNav}</BurgerNav>
+      </div>
+
+      <div className="relative grid place-items-center md:hidden">
+        <Link href={logoLink} className="absolute inline-block -left-8">
+          <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
+            AgroFarm
+          </h1>
+        </Link>
+      </div>
+
+      <div className="hidden lg:flex flex-col">
         <h2 className="text-lg font-semibold text-gray-800 ">
           {greeting()}, {name.success ? name.username : "Farmer User"}
         </h2>
         <p className="text-sm text-gray-500">{currentPageTitle()}</p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         <HeaderNotification isEnglish={isEnglish} />
 
         {name.success ? (

@@ -746,7 +746,7 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
           <div
             className={`p-2 inline-block rounded-md shadow-md ${logo.iconWrapperStyle}`}
           >
-            <logo.icon className={`size-8 ${logo.iconStyle}`} />
+            <logo.icon className={`size-5 md:size-8 ${logo.iconStyle}`} />
           </div>
 
           <p
@@ -759,11 +759,12 @@ export const DashboardCard: FC<DashboardCardPropType> = ({
         <p className="card-value">{cardContent}</p>
 
         <div>
-          <div className="flex xl:justify-between lg:justify-end justify-between items-center gap-4">
+          <div className="flex justify-between items-center gap-4">
             <p className="card-label min-w-0 truncate text-nowrap ">
               {contentLabel}
             </p>
-            <Link href={link} className="card-link xl:block lg:hidden block">
+
+            <Link href={link} className="card-link">
               {isEnglish ? "See More" : "Tingnan"}
             </Link>
           </div>

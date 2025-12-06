@@ -24,7 +24,7 @@ export default async function Layout({
           currentPage={"Frmer Profile"}
           forAgri={val.work === "admin" || val.work === "agriculturist"}
         >
-          <main className="flex-1 p-8">{children}</main>
+          <main className="main-wrapper">{children}</main>
         </NavbarComponent>
       </div>
     </ClerkProvider>

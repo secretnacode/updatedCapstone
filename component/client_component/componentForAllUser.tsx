@@ -73,6 +73,7 @@ import {
   agriLogoutButtonPropType,
   agriLogoutPropType,
   getAllUserNotifClientToRenderType,
+  lineGraphFilterType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -126,6 +127,7 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import {
   AlertTriangle,
+  ArrowLeft,
   Bell,
   BellOff,
   CalendarDays,
@@ -849,9 +851,8 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
   user,
   data,
 }) => {
-  const [formatChart, setFormatChart] = useState<"week" | "month" | "year">(
-    "week"
-  );
+  const [formatChart, setFormatChart] = useState<lineGraphFilterType>("week");
+  const [showOption, setShowOption] = useState<boolean>(false);
 
   const isEnglish = user === "agriculturist";
 
@@ -892,7 +893,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
 
   const [barData, setBarData] = useState<barDataStateType>(week);
 
-  const handleChangChartData = (val: "week" | "month" | "year") => {
+  const handleChangChartData = (val: lineGraphFilterType) => {
     switch (val) {
       case "week":
         setFormatChart("week");
@@ -932,42 +933,94 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
     }
   };
 
+  const buttonLabel = (val: lineGraphFilterType) => {
+    switch (val) {
+      case "week":
+        return isEnglish ? "Week" : "Linggo";
+      case "month":
+        return isEnglish ? "Months" : "Buwan";
+      case "year":
+        return isEnglish ? "Year" : "Taon";
+    }
+  };
+
+  const selectOption = (val: lineGraphFilterType) => {
+    handleChangChartData(val);
+
+    setShowOption(false);
+  };
+
+  const options: lineGraphFilterType[] = ["week", "month", "year"];
+
   const buttonStyle = `!text-white !bg-green-500 shadow-md`;
 
   return (
     <div className="component">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="font-semibold">{title}</h1>
+        <div className="text-sm sm:text-base">
+          <h1 className="font-semibold ">{title}</h1>
           <p className="text-gray-600">{desc()}</p>
         </div>
 
-        <div className="flex justify-center items-center gap-2 [&>button]:text-green-700 [&>button]:bg-green-100 [&>button]:!rounded-lg [&>button]:px-4 [&>button]:py-2 [&>button]:font-semibold">
+        <div className="hidden lg:flex justify-center items-center gap-2 [&>button]:text-green-700 [&>button]:bg-green-100 [&>button]:!rounded-lg [&>button]:px-4 [&>button]:py-2 [&>button]:font-semibold">
           <Button
             className={`${formatChart === "week" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("week")}
           >
-            {isEnglish ? "Week" : "Linggo"}
+            {buttonLabel("week")}
           </Button>
           <Button
             className={`${formatChart === "month" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("month")}
           >
-            {isEnglish ? "Months" : "Buwan"}
+            {buttonLabel("month")}
           </Button>
           <Button
             className={`${formatChart === "year" ? buttonStyle : ""}`}
             onClick={() => handleChangChartData("year")}
           >
-            {isEnglish ? "Year" : "Taon"}
+            {buttonLabel("year")}
           </Button>
+        </div>
+
+        <div className="relative lg:hidden">
+          <Button
+            type="button"
+            className="flex justify-between items-center gap-2 relative text-green-700 bg-green-500/10 hover:bg-green-500/20 !rounded-lg px-4 py-2 font-semibold"
+            onClick={() => setShowOption(!showOption)}
+          >
+            <span className="flex items-center gap-1">
+              <Plus className="size-4 stroke-3" />
+              {buttonLabel(formatChart)}
+            </span>
+
+            <ChevronDown
+              className={`logo transition-transform duration-300 ${
+                showOption ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
+
+          {showOption && (
+            <div className="absolute top-full right-0 mt-2 w-fit bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 animate-in fade-in slide-in-from-top-2 duration-200">
+              {options.map((val) => (
+                <div
+                  key={val}
+                  className="py-2 px-4 cursor-pointer hover:bg-green-500/5"
+                  onClick={() => selectOption(val)}
+                >
+                  {buttonLabel(val)}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <LineChart
         xAxis={[{ scaleType: "point", data: barData.label }]}
         yAxis={[{ min: 0, max: Math.max(...barData.data) + 5 }]}
-        margin={{ right: 30, left: 0, bottom: 0 }}
+        margin={{ right: 0, left: 0, bottom: 0 }}
         series={[
           {
             data: barData.data,
@@ -3711,18 +3764,52 @@ export const TableComponentLoading: FC<TableComponentLoadingPropType> = ({
   );
 };
 
-export const BurgerNav: FC<BurgerNavPropType> = ({ children }) => {
+export const BurgerNav: FC<BurgerNavPropType> = ({ children, isEnglish }) => {
   const [viewNav, setViewNav] = useState<boolean>(false);
+
+  const closeNav = () => {
+    const navbar = document.getElementById("burgerNavWrapper");
+
+    if (navbar?.classList.contains("animate-slideIn"))
+      navbar.classList.remove("animate-slideIn");
+
+    navbar?.classList.add("animate-slideOut");
+
+    setTimeout(() => setViewNav(false), 500);
+  };
 
   return (
     <div>
-      <Menu className="size-10" onClick={() => setViewNav(!viewNav)} />
+      <Menu
+        className="size-7 cursor-pointer"
+        onClick={() => setViewNav(true)}
+      />
 
       {viewNav && (
-        <div className="com">
-          <div onClick={() => setViewNav(false)} />
-          {children}
-        </div>
+        <>
+          <div
+            className="absolute inset-0 z-20 component animate-slideIn !rounded-none h-screen w-1/2 sm:w-2/5"
+            id="burgerNavWrapper"
+          >
+            <div
+              onClick={closeNav}
+              className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer mb-2"
+            >
+              <ArrowLeft className="size-5" />
+              {isEnglish ? "Back" : "Bumalik"}
+            </div>
+
+            <div>{children}</div>
+          </div>
+
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              closeNav();
+            }}
+            className="fixed inset-0 bg-black/10 backdrop-blur-xs   z-10"
+          />
+        </>
       )}
     </div>
   );
@@ -3893,7 +3980,7 @@ export const AgriculturistCreateLinkTable: FC<{
                   className="cursor-pointer"
                 >
                   <p>Name</p>
-
+                  BurgerNav
                   <SortType col={"username"} />
                 </div>
               </th>
@@ -4219,186 +4306,187 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
     <>
       <div className="relative">
         <Button
-          className="relative rounded-2xl hover:bg-gray-100 !p-3"
+          className="relative rounded-xl md:rounded-2xl hover:bg-gray-100 !p-2 md:!p-3"
           onClick={() => setOpenNotif(true)}
         >
           <Bell className="size-5 text-muted-foreground" />
           {isReadLenght > 0 && (
-            <div className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-md">
+            <div className="absolute -top-1 -right-1 size-4 md:size-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-md">
               <p>{isReadLenght}</p>
             </div>
           )}
         </Button>
 
         {openNotif && (
-          <div className="w-85 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-10 right-0 overflow-hidden">
-            <div className="px-5 pb-2 pt-3 border-b border-gray-200 flex justify-between items-center gap-4">
-              <h3 className="font-semibold text-foreground">
-                {isEnglish ? "Notifications" : "Mga Notipikasyon"}
-              </h3>
+          <>
+            <div className="w-85 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-10 right-0 overflow-hidden z-20">
+              <div className="px-5 pb-2 pt-3 border-b border-gray-200 flex justify-between items-center gap-4">
+                <h3 className="font-semibold text-foreground">
+                  {isEnglish ? "Notifications" : "Mga Notipikasyon"}
+                </h3>
 
-              <Button className="!p-0" onClick={() => setOpenNotif(false)}>
-                <X className="size-5 text-gray-600 cursor-pointer" />
-              </Button>
-            </div>
+                <Button className="!p-0" onClick={() => setOpenNotif(false)}>
+                  <X className="size-5 text-gray-600 cursor-pointer" />
+                </Button>
+              </div>
 
-            <div className="max-h-100 overflow-x-auto ">
-              {notif.length > 0 ? (
-                notif.map((val) => (
-                  <div
-                    key={val.notifId}
-                    className={`py-3 px-2 flex gap-3 relative border-l-3 cursor-pointer group ${
-                      val.isRead
-                        ? "border-transparent bg-gray-200/50"
-                        : "border-green-500/50 hover:bg-gray-50 transition-all"
-                    }`}
-                    onClick={() =>
-                      handleNotifIsView(
-                        val.notifId,
-                        val.isRead,
-                        handleLink(val.actionId, val.actionType, val.notifType)
-                      )
-                    }
-                  >
+              <div className="max-h-100 overflow-x-auto ">
+                {notif.length > 0 ? (
+                  notif.map((val) => (
                     <div
-                      className={`grid ml-2 place-items-center [&>div]:p-3 [&>div]:rounded-full [&>div]:grid [&>div]:place-items-center [&_svg]:size-4 `}
+                      key={val.notifId}
+                      className={`py-3 px-2 flex gap-3 relative border-l-3 cursor-pointer group ${
+                        val.isRead
+                          ? "border-transparent bg-gray-200/50"
+                          : "border-green-500/50 hover:bg-gray-50 transition-all"
+                      }`}
+                      onClick={() =>
+                        handleNotifIsView(
+                          val.notifId,
+                          val.isRead,
+                          handleLink(
+                            val.actionId,
+                            val.actionType,
+                            val.notifType
+                          )
+                        )
+                      }
                     >
-                      {val.notifType === "new user" ? (
-                        <div
-                          className={
-                            val.isRead ? "bg-emerald-100/70" : "bg-emerald-100"
-                          }
-                        >
-                          <User
+                      <div
+                        className={`grid ml-2 place-items-center [&>div]:p-3 [&>div]:rounded-full [&>div]:grid [&>div]:place-items-center [&_svg]:size-4 `}
+                      >
+                        {val.notifType === "new user" ? (
+                          <div
                             className={
                               val.isRead
-                                ? "text-emerald-700/70"
-                                : "text-emerald-700"
+                                ? "bg-emerald-100/70"
+                                : "bg-emerald-100"
                             }
-                          />
-                        </div>
-                      ) : val.notifType === "new pass report" ? (
-                        <div
-                          className={
-                            val.isRead ? "bg-blue-100/70" : "bg-blue-100"
-                          }
-                        >
-                          <FileText
+                          >
+                            <User
+                              className={
+                                val.isRead
+                                  ? "text-emerald-700/70"
+                                  : "text-emerald-700"
+                              }
+                            />
+                          </div>
+                        ) : val.notifType === "new pass report" ? (
+                          <div
                             className={
-                              val.isRead ? "text-blue-700/70" : "text-blue-700"
+                              val.isRead ? "bg-blue-100/70" : "bg-blue-100"
                             }
-                          />
-                        </div>
-                      ) : val.notifType === "new approved report" ? (
-                        <div
-                          className={
-                            val.isRead ? "bg-blue-100/70" : "bg-blue-100"
-                          }
-                        >
-                          <FileText
+                          >
+                            <FileText
+                              className={
+                                val.isRead
+                                  ? "text-blue-700/70"
+                                  : "text-blue-700"
+                              }
+                            />
+                          </div>
+                        ) : val.notifType === "new approved report" ? (
+                          <div
                             className={
-                              val.isRead ? "text-blue-700/70" : "text-blue-700"
+                              val.isRead ? "bg-blue-100/70" : "bg-blue-100"
                             }
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className={
-                            val.isRead ? "bg-gray-100/70" : "bg-gray-100"
-                          }
-                        >
-                          <Bell
+                          >
+                            <FileText
+                              className={
+                                val.isRead
+                                  ? "text-blue-700/70"
+                                  : "text-blue-700"
+                              }
+                            />
+                          </div>
+                        ) : (
+                          <div
                             className={
-                              val.isRead ? "text-gray-700/70" : "text-gray-700"
+                              val.isRead ? "bg-gray-100/70" : "bg-gray-100"
                             }
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1">
-                        <p
-                          className={`text-sm font-medium ${
-                            val.isRead ? "text-gray-800/70" : "text-gray-800"
-                          }`}
-                        >
-                          {val.title}
-                        </p>
-
-                        <p
-                          className={`text-xs ${
-                            val.isRead ? "text-gray-700/50" : "text-gray-700"
-                          } `}
-                        >
-                          {val.message}
-                        </p>
+                          >
+                            <Bell
+                              className={
+                                val.isRead
+                                  ? "text-gray-700/70"
+                                  : "text-gray-700"
+                              }
+                            />
+                          </div>
+                        )}
                       </div>
 
-                      <div className="flex flex-col justify-start gap-2">
-                        <p
-                          className={`text-[10px] flex justify-between items-center ${
-                            val.isRead
-                              ? "text-green-800/50 "
-                              : "text-green-800 "
-                          }`}
-                        >
-                          {val.pastTime}
-                        </p>
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1">
+                          <p
+                            className={`text-sm font-medium ${
+                              val.isRead ? "text-gray-800/70" : "text-gray-800"
+                            }`}
+                          >
+                            {val.title}
+                          </p>
 
-                        <div className="opacity-0 group-hover:opacity-100 transition-all">
-                          <div className="flex-1 flex justify-center items-center">
-                            <Button
-                              className="!p-2 aspect-square !rounded-full hover:bg-red-700/10 cursor-pointer "
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNotif(val.notifId);
-                              }}
-                            >
-                              <Trash2
-                                className={`size-4  
+                          <p
+                            className={`text-xs ${
+                              val.isRead ? "text-gray-700/50" : "text-gray-700"
+                            } `}
+                          >
+                            {val.message}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col justify-start gap-2">
+                          <p
+                            className={`text-[10px] flex justify-between items-center ${
+                              val.isRead
+                                ? "text-green-800/50 "
+                                : "text-green-800 "
+                            }`}
+                          >
+                            {val.pastTime}
+                          </p>
+
+                          <div className="opacity-0 group-hover:opacity-100 transition-all">
+                            <div className="flex-1 flex justify-center items-center">
+                              <Button
+                                className="!p-2 aspect-square !rounded-full hover:bg-red-700/10 cursor-pointer "
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteNotif(val.notifId);
+                                }}
+                              >
+                                <Trash2
+                                  className={`size-4  
                             ${val.isRead ? "text-red-500/70" : "text-red-500"}`}
-                              />
-                            </Button>
+                                />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <NoContentYet
-                  message={
-                    isEnglish
-                      ? "No notification yet"
-                      : "Wala ka pang notipikasyon"
-                  }
-                  logo={BellOff}
-                  parentDiv="!m-4"
-                />
-              )}
+                  ))
+                ) : (
+                  <NoContentYet
+                    message={
+                      isEnglish
+                        ? "No notification yet"
+                        : "Wala ka pang notipikasyon"
+                    }
+                    logo={BellOff}
+                    parentDiv="!m-4"
+                  />
+                )}
+              </div>
             </div>
-          </div>
+
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setOpenNotif(false)}
+            />
+          </>
         )}
       </div>
-
-      {/* for wrapping the header(can only wrapp the header because it uses relative position and cant wrap the whole page) */}
-      {openNotif && (
-        <div
-          className="absolute inset-0 h-full z-10"
-          onClick={() => setOpenNotif(false)}
-        />
-      )}
-
-      {/* for wrapping the whole content(but will not work for header because it uses z-20) */}
-      {openNotif &&
-        createPortal(
-          <div
-            className="absolute inset-0 min-h-full z-10"
-            onClick={() => setOpenNotif(false)}
-          />,
-          document.body
-        )}
     </>
   );
 };
@@ -4418,12 +4506,12 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
           onClick={() => setOpenInfo(true)}
         >
           <div
-            className={`size-10 rounded-full bg-gradient-to-br from-green-200 to-green-400 text-green-700 grid place-items-center cursor-pointer font-bold`}
+            className={`size-8 md:size-10 rounded-full bg-gradient-to-br from-green-200 to-green-400 text-green-700 grid place-items-center cursor-pointer font-bold`}
           >
             {username.split(" ")[0].charAt(0).toUpperCase()}
           </div>
 
-          <div className="block text-left mr-4">
+          <div className="hidden md:block text-left mr-4">
             <p className="text-sm font-medium text-gray-800">{username}</p>
 
             <p className="text-xs text-gray-500 font-semibold">
@@ -4433,55 +4521,41 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
         </div>
 
         {openInfo && (
-          <div className="w-56  bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-12 right-20 overflow-hidden">
-            <div className="p-3 border-b border-gray-200 ">
-              <p className="font-medium text-gray-800 flex">
-                <span className="block min-w-0 truncate">{username}</span>
-              </p>
+          <>
+            <div className="w-56 bg-white rounded-2xl shadow-2xl border border-gray-200 absolute top-12 right-0 md:right-20 overflow-hidden z-20">
+              <div className="p-3 border-b border-gray-200 ">
+                <p className="font-medium text-gray-800 flex">
+                  <span className="block min-w-0 truncate">{username}</span>
+                </p>
 
-              <p className="text-sm font-semibold flex text-green-800/70">
-                <span className="block min-w-0 truncate">{email}</span>
-              </p>
+                <p className="text-sm font-semibold flex text-green-800/70">
+                  <span className="block min-w-0 truncate">{email}</span>
+                </p>
+              </div>
+
+              {(role === "farmer" || role === "leader") && (
+                <Link
+                  href={"/farmer/profile"}
+                  className="flex items-center gap-2 p-3 border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  {isEnglish ? "My Profile" : "Aking Profile"}
+                </Link>
+              )}
+
+              {role === "farmer" || role === "leader" ? (
+                <FarmerLogout useFor={"logo"} />
+              ) : (
+                <AgriLogout useFor={"logo"} />
+              )}
             </div>
-
-            {(role === "farmer" || role === "leader") && (
-              <Link
-                href={"/farmer/profile"}
-                className="flex items-center gap-2 p-3 border-b border-gray-200 hover:bg-gray-50"
-              >
-                <User className="mr-2 h-4 w-4" />
-                {isEnglish ? "My Profile" : "Aking Profile"}
-              </Link>
-            )}
-
-            {role === "farmer" || role === "leader" ? (
-              <FarmerLogout useFor={"logo"} />
-            ) : (
-              <AgriLogout useFor={"logo"} />
-            )}
-          </div>
+            <div
+              className="fixed inset-0 h-full z-10"
+              onClick={() => setOpenInfo(false)}
+            />
+          </>
         )}
       </div>
-
-      {/* for wrapping the header(can only wrapp the header because it uses relative position and cant wrap the whole page) */}
-      {openInfo && (
-        <div
-          className="absolute inset-0 h-full
-           z-10"
-          onClick={() => setOpenInfo(false)}
-        />
-      )}
-
-      {/* for wrapping the whole content(but will not work for header because it uses z-20) */}
-      {openInfo &&
-        createPortal(
-          <div
-            className="absolute inset-0 h-full
-             z-10"
-            onClick={() => setOpenInfo(false)}
-          />,
-          document.body
-        )}
     </>
   );
 };

@@ -186,14 +186,14 @@ export const DashboardComponent: FC<DashboardComponentPropType> = ({
   return (
     <div className="grid xl:grid-cols-4 grid-cols-1 xl:gap-4 gap-6">
       <div className="xl:col-span-3 lg:col-span-1 flex flex-col xl:gap-4 gap-6">
-        <div className="grid xl:grid-cols-3 grid-cols-2 xl:gap-4 gap-6 [&>div]:shadow-sm ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           <DashboardCard {...card1} isEnglish={isEnglish} />
 
           <DashboardCard {...card2} isEnglish={isEnglish} />
 
           <DashboardCard {...card3} isEnglish={isEnglish} />
 
-          <div className="xl:hidden block">
+          <div className="xl:hidden block ">
             <Suspense fallback={<WeatherSideComponentLoading />}>
               <WeatherComponent userLocation={userLocation} user={user} />
             </Suspense>

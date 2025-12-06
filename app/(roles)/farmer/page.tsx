@@ -35,7 +35,7 @@ export default async function Page({
   return (
     <>
       <NavbarComponent forAgri={false} currentPage="Home">
-        <main className="flex-1 p-8">
+        <main className="main-wrapper">
           <div>
             {message && <RenderRedirectNotification notif={message} />}
 
