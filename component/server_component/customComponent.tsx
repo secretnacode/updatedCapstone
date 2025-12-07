@@ -213,7 +213,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
   children,
   logo,
   hintMessage,
-  adjacentBesideLabel,
+  adjacentBesideLabel = { children: <></>, classNameWrapper: "" },
   ...inputProps
 }) => {
   return (
@@ -236,9 +236,9 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
       </div>
 
       <div
-        className={
+        className={`${adjacentBesideLabel.classNameWrapper} ${
           adjacentBesideLabel ? "flex justify-between items-end gap-6" : ""
-        }
+        }`}
       >
         <input
           type={inputType}
@@ -256,7 +256,7 @@ export const FormDivLabelInput: FC<FormDivLabelInputPropType> = ({
           {...inputProps}
         />
 
-        {adjacentBesideLabel}
+        {adjacentBesideLabel.children}
       </div>
 
       {children}
@@ -587,16 +587,14 @@ export const TableComponent: FC<TableComponentPropType> = ({
         </div>
       ) : (
         <div
-          className={`div rounded-lg border border-gray-200 w-full ${tableClassName}`}
+          className={`div rounded-lg border border-gray-200 w-full overflow-x-auto ${tableClassName}`}
         >
-          <div className="div overflow-x-auto">
-            <table className="table-style farmerReportTable">
-              <thead>
-                <tr className="">{tableHeaderCell}</tr>
-              </thead>
-              <tbody className="">{tableCell}</tbody>
-            </table>
-          </div>
+          <table className="table-style farmerReportTable">
+            <thead>
+              <tr className="">{tableHeaderCell}</tr>
+            </thead>
+            <tbody className="">{tableCell}</tbody>
+          </table>
         </div>
       )}
     </>

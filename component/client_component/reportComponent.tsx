@@ -32,6 +32,7 @@ import {
   Calendar,
   CalendarArrowUp,
   Camera,
+  ChevronDown,
   CircleUser,
   FileText,
   Info,
@@ -111,7 +112,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
         <div className="modal-form">
           <div className="absolute inset-0" onClick={handleCloseModal} />
 
-          <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
+          <div className="relative bg-white rounded-xl shadow-xl w-md sm:w-lg md:w-xl lg:w-3xl max-h-[90vh] overflow-auto">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold">
                 Maggawa ng Panibagong Ulat
@@ -137,6 +138,7 @@ export const AddReportComponent: FC<addReportComponentPropType> = ({
 
 const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
   const { handleSetNotification } = useNotification();
+  const [showOption, setShowOption] = useState<boolean>(false);
   const [formError, setFormError] = useState<createReportFormErrorType>(null);
   const [defaultReport, setDefaultReport] =
     useState<reportTypeStateType>("damage");
@@ -209,8 +211,14 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
   const handleSetReportType = (type: reportTypeStateType) =>
     setDefaultReport(type);
 
-  const handleSetSelectedCrop = (cropId: string) => {
+  const handleSetSelectedCrop = (
+    cropId: string,
+    datePlanted: Date,
+    cropStatus: cropStatusType
+  ) => {
     setSelectedCrop(cropId);
+    handleSetDefaultReport(datePlanted, cropStatus);
+    setShowOption(false);
   };
 
   const handleFormError = useCallback(
@@ -230,35 +238,61 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
               <span className="text-red-500">*</span>
             </label>
 
-            <div className="w-full grid grid-cols-4 gap-4">
-              {cropList.map((list) => (
-                <div key={list.cropId}>
-                  <label
-                    htmlFor={list.cropId}
-                    className={`button !rounded-lg border-2 ${
-                      selectedCrop === list.cropId
-                        ? "bg-green-50 border-green-500 shadow-lg"
-                        : "bg-white border-green-200 hover:border-green-300 hover:shadow-md"
-                    }`}
-                    onClick={() => {
-                      handleSetSelectedCrop(list.cropId);
-                      handleSetDefaultReport(list.datePlanted, list.cropStatus);
-                    }}
-                  >
-                    <h4>{list.cropName}</h4>
-                  </label>
-                  <input
-                    name="cropList"
-                    defaultValue={list.cropId}
-                    className="hidden"
-                  />
+            <div className="relative">
+              <Button
+                type="button"
+                className={`relative button !rounded-lg border-2 ${
+                  showOption
+                    ? "bg-green-50 border-green-500 shadow-lg"
+                    : "bg-white border-green-200 hover:border-green-300 hover:shadow-md"
+                }`}
+                onClick={() => setShowOption(true)}
+              >
+                <span>
+                  {capitalizeFirstLetter(
+                    cropList.find((val) => val.cropId === selectedCrop)
+                      ?.cropName ?? "Hindi makita"
+                  )}
+                </span>
 
-                  {formError?.cropId?.map((error, index) => (
-                    <p key={error + index} className="p-error p">
-                      {error}
-                    </p>
-                  ))}
-                </div>
+                <ChevronDown
+                  className={`logo transition-transform duration-300 ${
+                    showOption ? "rotate-180" : ""
+                  }`}
+                />
+              </Button>
+
+              {showOption && (
+                <>
+                  <div className="absolute top-full mt-1 left-12 w-fit text-nowrap bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {cropList.map((val) => (
+                      <div
+                        key={val.cropId}
+                        className="py-2 px-4 cursor-pointer hover:bg-green-500/5"
+                        onClick={() => {
+                          handleSetSelectedCrop(
+                            val.cropId,
+                            val.datePlanted,
+                            val.cropStatus
+                          );
+                        }}
+                      >
+                        {val.cropName}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    className="fixed inset-0"
+                    onClick={() => setShowOption(false)}
+                  />
+                </>
+              )}
+
+              {formError?.cropId?.map((error, index) => (
+                <p key={error + index} className="p-error p">
+                  {error}
+                </p>
               ))}
             </div>
           </div>
@@ -268,7 +302,8 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
               Uri ng ulat na iyong gagawin:
               <span className="text-red-500">*</span>
             </label>
-            <div className="flex gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
+
+            <div className="flex flex-col lg:flex-row gap-4 [&>button]:border-2 [&>button]:!rounded-lg">
               <Button
                 onClick={() => handleSetReportType("planting")}
                 className={
@@ -322,7 +357,6 @@ const CreateReport: FC<createReportPropType> = ({ setOpenReportModal }) => {
                 </span>
               </Button>
             </div>
-
             {formError?.cropId?.map((error, index) => (
               <p key={error + index} className="p-error p">
                 {error}
@@ -499,19 +533,22 @@ const DamageReport: FC<ReportContentPropType> = ({
             inputClassName={`input-red-ring ${allDamage ? "" : ""}`}
             divClassName="flex-1"
             hintMessage="Pindutin ang pulang pindutan kung lahat ng iyong pananim ay nasira"
-            adjacentBesideLabel={
-              <Button
-                className={`border !rounded-md ${
-                  allDamage
-                    ? "border-red-500 bg-red-500 text-white shadow-md"
-                    : "border-red-300 bg-red-50/20 text-gray-950/80"
-                }`}
-                onClick={handleAllDamage}
-                type="button"
-              >
-                Buong Tinataniman
-              </Button>
-            }
+            adjacentBesideLabel={{
+              children: (
+                <Button
+                  className={`border !block h-full !px-4 text-sm !rounded-md ${
+                    allDamage
+                      ? "border-red-500 bg-red-500 text-white shadow-md"
+                      : "border-red-300 bg-red-50/20 text-gray-950/80"
+                  }`}
+                  onClick={handleAllDamage}
+                  type="button"
+                >
+                  Buong Tinataniman
+                </Button>
+              ),
+              classNameWrapper: "!gap-4 md:!gap-6",
+            }}
           />
 
           {allDamage && (
@@ -1279,6 +1316,8 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
 
 export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
   label = "Tingnan ang ulat",
+  shorterLabel = { label: "Tingnan", className: "" },
+  labelClassName = "",
   className = "",
   reportId,
   farmerName,
@@ -1293,7 +1332,8 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
         onClick={() => setViewReport(true)}
         className={className}
       >
-        {label}
+        <span className={labelClassName}>{label}</span>
+        <span className={shorterLabel.className}>{shorterLabel.label}</span>
       </SubmitButton>
 
       {viewReport &&

@@ -258,10 +258,13 @@ body {
     @apply bg-yellow-100 text-yellow-800;
   }
   .nav-link {
-    @apply flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors;
+    @apply flex items-center gap-3 md:gap-1 lg:gap-2 px-3 py-2 text-gray-700 rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors;
   }
   .nav-span {
     @apply text-sm font-medium;
+  }
+  .nav-logo {
+    @apply size-6 md:size-5 lg:size-6;
   }
   .nav-divider {
     @apply text-lg font-serif tracking-wide text-gray-400 font-bold my-3 ml-1;
@@ -380,7 +383,7 @@ body {
     @apply grid gap-4;
   }
   .main-wrapper {
-    @apply w-full flex-1 p-5 md:p-6 lg:p-8;
+    @apply w-full p-5 md:p-6 lg:p-8;
   }
 }
 

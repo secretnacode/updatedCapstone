@@ -29,7 +29,7 @@ export default async function Page({
   }
 
   return (
-    <div className="component">
+    <div className="component w-full">
       <div className="space-y-6">
         <div>
           <div className="flex justify-between items-center">

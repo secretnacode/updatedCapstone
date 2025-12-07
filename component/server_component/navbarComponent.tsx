@@ -84,7 +84,7 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
 
   return (
     <>
-      <div className="hidden md:block w-64 min-h-full bg-white border-gray-300 border-r">
+      <div className="hidden md:block min-w-fit w-64 min-h-full bg-white border-gray-300 border-r">
         <div className="sticky top-0">
           <Link href={logoLink()} className="mt-5 mb-3 inline-block w-full">
             <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
@@ -92,7 +92,7 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
             </h1>
           </Link>
 
-          <div className="md:block hidden">
+          <div>
             {val.work === "admin" || val.work === "agriculturist"
               ? AgriNavbar
               : FarmerNavbar}
@@ -131,7 +131,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
           pages === "Home" ? "bg-green-50 text-green-700" : ""
         }`}
       >
-        <Home className="logo" />
+        <Home className="nav-logo" />
         <span className="nav-span">Home</span>
       </Link>
 
@@ -141,7 +141,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
           pages === "Ulat" ? "bg-green-50 text-green-700" : ""
         }`}
       >
-        <ClipboardPlus className="logo" />
+        <ClipboardPlus className="nav-logo" />
         <span className="nav-span">Ulat</span>
       </Link>
 
@@ -151,7 +151,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
           pages === "Pananim" ? "bg-green-50 text-green-700" : ""
         }`}
       >
-        <Sprout className="logo" />
+        <Sprout className="nav-logo" />
         <span className="nav-span">Pananim</span>
       </Link>
 
@@ -163,7 +163,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
               pages === "Ulat ng miyembro" ? "bg-green-50 text-green-700" : ""
             }`}
           >
-            <ClipboardCheck className="logo" />
+            <ClipboardCheck className="nav-logo" />
             <span className="nav-span">Ulat ng miyembro</span>
           </Link>
 
@@ -173,7 +173,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
               pages === "Mga miyembro" ? "bg-green-50 text-green-700" : ""
             }`}
           >
-            <ContactRound className="logo" />
+            <ContactRound className="nav-logo" />
             <span className="nav-span">Mga miyembro</span>
           </Link>
         </>
@@ -185,7 +185,7 @@ const FarmerNav: FC<farmerNavPropType> = ({ role, pages }) => {
           pages === "Profile" ? "bg-green-50 text-green-700" : ""
         }`}
       >
-        <UserPen className="logo" />
+        <UserPen className="nav-logo" />
         <span className="nav-span">Profile</span>
       </Link>
 
@@ -242,7 +242,7 @@ const AgriculturistNav: FC<agriculturistNavPropType> = ({ pages }) => {
             pages === link.linkName ? "bg-green-50 text-green-700" : ""
           }`}
         >
-          <link.logo className="logo"></link.logo>
+          <link.logo className="nav-logo"></link.logo>
           <span className="nav-span">{link.linkName}</span>
         </Link>
       ))}
@@ -254,7 +254,7 @@ const AgriculturistNav: FC<agriculturistNavPropType> = ({ pages }) => {
 
 const Navbar: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <nav className="flex-1 py-4">
+    <nav className="py-4">
       <div className="md:px-3 space-y-1">{children}</div>
     </nav>
   );

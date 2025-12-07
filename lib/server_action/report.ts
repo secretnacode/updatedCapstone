@@ -305,12 +305,11 @@ export const uploadPlantingReport = async (
       notifError: null,
       formError: null,
     };
-    console.log("1");
 
     const { userId, work } = await ProtectedAction("create:report");
 
     const validateVal = ZodValidateForm(reportVal, addPlantingReportSchema);
-    console.log("2");
+
     if (!validateVal.valid)
       return {
         ...returnVal,
@@ -318,7 +317,6 @@ export const uploadPlantingReport = async (
         formError: validateVal.formError,
         notifError: missingFormValNotif(),
       };
-    console.log("3");
 
     if (reportVal.reportType !== "planting")
       return {
@@ -335,7 +333,6 @@ export const uploadPlantingReport = async (
 
     const status = await getCropStatus(reportVal.cropId);
 
-    console.log("4");
     // if the cropStatus is equasl to planted, it means the user already passed a report type planted
     // you can only passed a planted type report if the user last report is about harvest
     if (status.cropStatus === "planted")
@@ -353,7 +350,6 @@ export const uploadPlantingReport = async (
 
     const reportId = CreateUUID();
 
-    console.log("5");
     await addNewReport({
       reportId: reportId,
       cropId: reportVal.cropId,
@@ -366,7 +362,6 @@ export const uploadPlantingReport = async (
       verificationStatus: work === "leader" ? true : false,
     });
 
-    console.log("6");
     await Promise.all([
       // did this because the 3 report types uses the same query and their only difference is the reportType,
       // so after the insertion of new report, this is needed to be executed

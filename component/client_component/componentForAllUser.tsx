@@ -1506,7 +1506,7 @@ export const TableWithFilter = <
         {filterOptions}
       </div>
 
-      {table}
+      <div className="w-full overflow-hidden">{table}</div>
     </div>
   );
 };
@@ -2134,7 +2134,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                 </div>
               </th>
 
-              <th scope="col">
+              <th scope="col" className="hidden xl:table-cell">
                 <div
                   onClick={() => handleSortCol("cropName")}
                   className="cursor-pointer"
@@ -2153,7 +2153,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                 </th>
               )}
 
-              <th scope="col">
+              <th scope="col" className="hidden lg:table-cell">
                 <div
                   onClick={() => handleSortCol("dayReported")}
                   className="cursor-pointer"
@@ -2164,7 +2164,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                 </div>
               </th>
 
-              <th scope="col">
+              <th scope="col" className="hidden sm:table-cell">
                 <div
                   onClick={() => handleSortCol("dayHappen")}
                   className="cursor-pointer"
@@ -2198,7 +2198,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                     </div>
                   </td>
 
-                  <td className="text-gray-500">
+                  <td className="text-gray-500 hidden xl:table-cell">
                     <div>
                       <p>{report.cropName}</p>
                     </div>
@@ -2222,13 +2222,13 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                     </td>
                   )}
 
-                  <td className="text-gray-500">
+                  <td className="text-gray-500 hidden lg:table-cell">
                     <div>
                       <p>{ReadableDateFormat(report.dayReported)}</p>
                     </div>
                   </td>
 
-                  <td className="text-gray-500">
+                  <td className="text-gray-500 hidden sm:table-cell">
                     <div>
                       <p>{ReadableDateFormat(report.dayHappen)}</p>
                     </div>
@@ -2247,6 +2247,12 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                       <ViewUserReportButton
                         reportId={report.reportId}
                         myReport={true}
+                        className="!px-3 lg:!px-6 text-sm lg:text-base"
+                        labelClassName="inline md:hidden lg:inline"
+                        shorterLabel={{
+                          label: "Tingnan",
+                          className: "hidden md:inline lg:hidden",
+                        }}
                       />
                     </div>
                   </td>
@@ -3536,7 +3542,7 @@ const FarmerLogoutButton: FC<agriLogoutButtonPropType> = ({
         className="group nav-link w-full"
         onClick={() => setOpenModal(true)}
       >
-        <LogOut className="logo" />
+        <LogOut className="nav-logo" />
 
         <span className="nav-span">Mag-log out</span>
       </button>
@@ -3650,7 +3656,7 @@ const AgriLogoutButton: FC<agriLogoutButtonPropType> = ({
         className="group nav-link w-full"
         onClick={() => setOpenModal(true)}
       >
-        <LogOut className="logo" />
+        <LogOut className="nav-logo" />
 
         <span className="nav-span">Log out</span>
       </button>

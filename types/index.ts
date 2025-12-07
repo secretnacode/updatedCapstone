@@ -658,7 +658,7 @@ export type FormDivLabelInputPropType = ChildrenPropType &
     logo?: { icon: LucideIcon; style?: string };
     hintMessage?: string;
     // element beside the label (e.g. button that can be interacted)
-    adjacentBesideLabel?: ChildrenType;
+    adjacentBesideLabel?: { children: ChildrenType; classNameWrapper?: string };
   };
 
 export type FormDivLabelTextAreaPropType =
@@ -1122,6 +1122,8 @@ export type ViewUserReportTableDataPropType = {
   reportId: string;
   farmerName?: string;
   label?: string;
+  labelClassName?: string;
+  shorterLabel?: { label: string; className?: string };
   className?: string;
   myReport?: boolean;
 };
