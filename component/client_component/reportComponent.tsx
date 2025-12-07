@@ -1316,7 +1316,7 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
 
 export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
   label = "Tingnan ang ulat",
-  shorterLabel = { label: "Tingnan", className: "" },
+  shorterLabel,
   labelClassName = "",
   className = "",
   reportId,
@@ -1333,7 +1333,12 @@ export const ViewUserReportButton: FC<ViewUserReportTableDataPropType> = ({
         className={className}
       >
         <span className={labelClassName}>{label}</span>
-        <span className={shorterLabel.className}>{shorterLabel.label}</span>
+
+        {shorterLabel && (
+          <span className={shorterLabel.className ?? ""}>
+            {shorterLabel.label}
+          </span>
+        )}
       </SubmitButton>
 
       {viewReport &&

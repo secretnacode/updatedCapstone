@@ -1402,10 +1402,8 @@ export const TableWithFilter = <
     filterCol,
   });
 
-  // Memoize the effect dependency
   useEffect(() => setTableList(sortedObj), [sortedObj, setTableList]);
 
-  // Memoize the label handler
   const handleFilterOptionLabel = useCallback((data: allType): string => {
     if (data === typeof "number" || data === typeof "boolean")
       return String(data);
@@ -1415,7 +1413,6 @@ export const TableWithFilter = <
     return String(data);
   }, []);
 
-  // Memoize the clear handler
   const handleClear = useCallback(() => {
     setSearchVal("");
     setFilterCol(null);
@@ -1506,7 +1503,7 @@ export const TableWithFilter = <
         {filterOptions}
       </div>
 
-      <div className="w-full overflow-hidden">{table}</div>
+      {table}
     </div>
   );
 };
@@ -1624,7 +1621,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
             listCount={tableList.length}
             tableHeaderCell={
               <>
-                <th scope="col" className="!w-[12%]">
+                <th scope="col">
                   <div
                     onClick={() => handleSortCol("farmerFirstName")}
                     className="cursor-pointer"
@@ -1635,7 +1632,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[12%]">
+                <th scope="col">
                   <div
                     onClick={() => handleSortCol("farmerLastName")}
                     className="cursor-pointer"
@@ -1646,7 +1643,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[12%]">
+                <th scope="col" className="hidden xl:table-cell">
                   <div
                     onClick={() => handleSortCol("farmerAlias")}
                     className="cursor-pointer"
@@ -1663,7 +1660,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[12%]">
+                <th scope="col" className="hidden lg:table-cell">
                   <div
                     onClick={() => handleSortCol("title")}
                     className="cursor-pointer"
@@ -1674,7 +1671,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </div>
                 </th>
 
-                <th scope="col">
+                <th scope="col" className="hidden xl:table-cell">
                   <div
                     onClick={() => handleSortCol("dayReported")}
                     className="cursor-pointer"
@@ -1685,13 +1682,13 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                   </div>
                 </th>
 
-                <th scope="col">
+                <th scope="col" className="hidden sm:table-cell">
                   <div>
                     <p>Kalagayan ng ulat</p>
                   </div>
                 </th>
 
-                <th scope="col" className="!w-[16.5%]">
+                <th scope="col">
                   <div>
                     <p>Aksyon</p>
                   </div>
@@ -1714,7 +1711,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                       </div>
                     </td>
 
-                    <td className="text-gray-500">
+                    <td className="text-gray-500 hidden xl:table-cell">
                       <div>
                         <p>{report.farmerAlias}</p>
                       </div>
@@ -1728,13 +1725,13 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                       </div>
                     </td>
 
-                    <td className="text-gray-500">
+                    <td className="text-gray-500 hidden lg:table-cell">
                       <div>
                         <p>{report.title}</p>
                       </div>
                     </td>
 
-                    <td className="text-gray-500">
+                    <td className="text-gray-500 hidden xl:table-cell">
                       <div>
                         <p>
                           {ReadableDateFormat(new Date(report.dayReported))}
@@ -1742,7 +1739,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                       </div>
                     </td>
 
-                    <td>
+                    <td className="hidden sm:table-cell">
                       <div>
                         <p>
                           <ReportStatus
@@ -1759,6 +1756,11 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
                           farmerName={
                             report.farmerFirstName + " " + report.farmerLastName
                           }
+                          labelClassName="hidden xl:inline"
+                          shorterLabel={{
+                            label: "Tingnan",
+                            className: "inline xl:hidden",
+                          }}
                         />
                       </div>
                     </td>
@@ -2248,10 +2250,10 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
                         reportId={report.reportId}
                         myReport={true}
                         className="!px-3 lg:!px-6 text-sm lg:text-base"
-                        labelClassName="inline md:hidden lg:inline"
+                        labelClassName="hidden lg:inline"
                         shorterLabel={{
                           label: "Tingnan",
-                          className: "hidden md:inline lg:hidden",
+                          className: "inline lg:hidden",
                         }}
                       />
                     </div>

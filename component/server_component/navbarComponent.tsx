@@ -84,7 +84,7 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
 
   return (
     <>
-      <div className="hidden md:block min-w-fit w-64 min-h-full bg-white border-gray-300 border-r">
+      <div className="hidden md:block w-55 lg:w-60 min-h-full bg-white border-gray-300 border-r">
         <div className="sticky top-0">
           <Link href={logoLink()} className="mt-5 mb-3 inline-block w-full">
             <h1 className="title font-serif font-bold italic !text-2xl !text-green-800 tracking-wide !mb-0 text-center">
@@ -101,7 +101,7 @@ export const NavbarComponent: FC<navbarComponentPropType> = async ({
       </div>
 
       {currentPage && (
-        <div className="w-full">
+        <div className="flex-1 min-w-0">
           <TopNavbar
             isEnglish={val.work === "admin" || val.work === "agriculturist"}
             currentPage={currentPage}
