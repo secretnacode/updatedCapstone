@@ -115,7 +115,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
 
   return (
     <>
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid xl:grid-cols-4 gap-6">
         <div>
           <div className="sticky top-[105px] space-y-5">
             {!isViewing && (
@@ -123,84 +123,86 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
             )}
 
             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 min-h-fit">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`relative w-32 h-32 rounded-full bg-gradient-to-br ${logoColor()} flex items-center justify-center`}
-                >
-                  <span className="text-4xl font-bold">
-                    {getInitials(
-                      userFarmerInfo.farmerInfo.farmerFirstName,
-                      userFarmerInfo.farmerInfo.farmerLastName
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Basic Info */}
-              <div className="space-y-4">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
-                    {userFarmerInfo.farmerInfo.farmerLastName}
-                  </h2>
-
-                  {userFarmerInfo.farmerInfo.farmerAlias && (
-                    <p className="text-gray-500 text-sm">
-                      &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-start gap-2 text-gray-600">
-                  <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
-
-                  <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
-                </div>
-
-                <div className="flex justify-center items-center [&_svg]:size-5">
-                  {userFarmerInfo.farmerInfo.status === "active" ? (
-                    <>
-                      <p
-                        className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${
-                          userFarmerInfo.farmerInfo.verified
-                            ? "bg-green-50 text-green-700 border-green-500"
-                            : "bg-yellow-50 text-yellow-700 border-yellow-900"
-                        }`}
-                      >
-                        {userFarmerInfo.farmerInfo.verified ? (
-                          <>
-                            <CircleCheck />
-                            {isEnglish
-                              ? "Verified Account"
-                              : "Beripikado ang Account"}
-                          </>
-                        ) : (
-                          <>
-                            <TriangleAlert />
-                            {isEnglish
-                              ? "Pending Verification"
-                              : "Hindi pa Beripikado"}
-                          </>
-                        )}
-                      </p>
-                    </>
-                  ) : (
-                    <p
-                      className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${accountStatusStyle(
-                        userFarmerInfo.farmerInfo.status
-                      )}`}
-                    >
-                      {userFarmerInfo.farmerInfo.status === "block" ? (
-                        <UserX />
-                      ) : (
-                        <CircleX />
+              <div className="flex xl:flex-col gap-8 items-center justify-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`relative w-32 h-32 rounded-full bg-gradient-to-br ${logoColor()} flex items-center justify-center`}
+                  >
+                    <span className="text-4xl font-bold">
+                      {getInitials(
+                        userFarmerInfo.farmerInfo.farmerFirstName,
+                        userFarmerInfo.farmerInfo.farmerLastName
                       )}
+                    </span>
+                  </div>
+                </div>
 
-                      {isEnglish
-                        ? `The user is ${userFarmerInfo.farmerInfo.status}`
-                        : `Ang accout ay naka ${userFarmerInfo.farmerInfo.status}`}
-                    </p>
-                  )}
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {userFarmerInfo.farmerInfo.farmerFirstName}{" "}
+                      {userFarmerInfo.farmerInfo.farmerLastName}
+                    </h2>
+
+                    {userFarmerInfo.farmerInfo.farmerAlias && (
+                      <p className="text-gray-500 text-sm">
+                        &quot;{userFarmerInfo.farmerInfo.farmerAlias}&quot;
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-start gap-2 text-gray-600">
+                    <MapPinHouse className="h-5 w-5 flex-shrink-0 mt-0.5" />
+
+                    <p>Laguna, Calauan, {userFarmerInfo.farmerInfo.barangay}</p>
+                  </div>
+
+                  <div className="flex justify-center items-center [&_svg]:size-5">
+                    {userFarmerInfo.farmerInfo.status === "active" ? (
+                      <>
+                        <p
+                          className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${
+                            userFarmerInfo.farmerInfo.verified
+                              ? "bg-green-50 text-green-700 border-green-500"
+                              : "bg-yellow-50 text-yellow-700 border-yellow-900"
+                          }`}
+                        >
+                          {userFarmerInfo.farmerInfo.verified ? (
+                            <>
+                              <CircleCheck />
+                              {isEnglish
+                                ? "Verified Account"
+                                : "Beripikado ang Account"}
+                            </>
+                          ) : (
+                            <>
+                              <TriangleAlert />
+                              {isEnglish
+                                ? "Pending Verification"
+                                : "Hindi pa Beripikado"}
+                            </>
+                          )}
+                        </p>
+                      </>
+                    ) : (
+                      <p
+                        className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${accountStatusStyle(
+                          userFarmerInfo.farmerInfo.status
+                        )}`}
+                      >
+                        {userFarmerInfo.farmerInfo.status === "block" ? (
+                          <UserX />
+                        ) : (
+                          <CircleX />
+                        )}
+
+                        {isEnglish
+                          ? `The user is ${userFarmerInfo.farmerInfo.status}`
+                          : `Ang accout ay naka ${userFarmerInfo.farmerInfo.status}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -219,7 +221,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
           </div>
         </div>
 
-        <div className="md:col-span-3  mt-[57px]">
+        <div className="xl:col-span-3 xl:mt-[57px]">
           {AvailOrg.success ? (
             <UserProFile
               userFarmerInfo={userFarmerInfo.farmerInfo}
