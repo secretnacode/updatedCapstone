@@ -38,8 +38,8 @@ export default async function Page({
     <div>
       {message && <RenderRedirectNotification notif={message} />}
 
-      <div className="grid grid-cols-4 gap-4 h-full">
-        <div className="col-span-3 h-full">
+      <div className="grid xl:grid-cols-4 grid-cols-1 gap-4 h-full">
+        <div className="xl:col-span-3 h-full">
           {cropInfo.success ? (
             <FarmerCropPage
               myCropInfoList={cropInfo.myCropInfoList}
@@ -56,7 +56,7 @@ export default async function Page({
           )}
         </div>
 
-        <div className="side-bar-wrapper ">
+        <div className="side-bar-wrapper">
           <Suspense fallback={<ReportCountPerCropLoading />}>
             <ReportCountPerCrop />
           </Suspense>

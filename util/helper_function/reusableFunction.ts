@@ -411,7 +411,7 @@ export function ViewCrop(
   if (goToMap)
     document
       .getElementById("mapCanvas")
-      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 /**

@@ -645,7 +645,7 @@ export const getReportCountPerCropQuery = async (
   try {
     return (
       await pool.query(
-        `select count(r."reportId") as "reportCount", c."cropName", c."cropId" from capstone.report r join capstone.crop c on r."cropId" = c."cropId" where c."farmerId" = $1 group by c."cropName", c."cropId"`,
+        `select count(r."reportId") as "reportCount", c."cropName", c."cropId" from capstone.report r right join capstone.crop c on r."cropId" = c."cropId" where c."farmerId" = $1 group by c."cropName", c."cropId"`,
         [farmerId]
       )
     ).rows;

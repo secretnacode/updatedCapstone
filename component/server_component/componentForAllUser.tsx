@@ -24,7 +24,6 @@ import {
   CalendarDays,
   CircleCheck,
   CircleX,
-  ClipboardX,
   CloudOff,
   FileText,
   KeyRound,
@@ -841,18 +840,12 @@ export const ReportCountPerCrop: FC = async () => {
     };
   }
 
-  const NoValueInPieChart: FC<{ hasCrop?: boolean }> = ({
-    hasCrop = false,
-  }) => (
+  const NoValueInPieChart: FC = () => (
     <div className="no-val">
-      {hasCrop ? (
-        <ClipboardX className="!size-10 text-gray-400 mb-4" />
-      ) : (
-        <WheatOff className="!size-10 text-gray-400 mb-4" />
-      )}
+      <WheatOff className="!size-10 text-gray-400 mb-4" />
 
       <p className="text-xl font-semibold text-gray-700 mb-1">
-        {hasCrop ? "Wala ka pang Ulat" : "Wala ka pang pananim"}
+        Wala ka pang pananim
       </p>
     </div>
   );
@@ -865,21 +858,17 @@ export const ReportCountPerCrop: FC = async () => {
         </div>
 
         {reportCount.success ? (
-          reportCount.reportCountVal.length > 0 ? (
-            <PieChartCard
-              data={reportCount.reportCountVal.map((val) => ({
-                id: val.cropId,
-                value: val.reportCount,
-                label: val.cropName,
-              }))}
-            />
-          ) : (
-            <NoValueInPieChart hasCrop={true} />
-          )
+          <PieChartCard
+            data={reportCount.reportCountVal.map((val) => ({
+              id: val.cropId,
+              value: val.reportCount,
+              label: val.cropName,
+            }))}
+          />
         ) : (
           <>
             <RenderRedirectNotification notif={reportCount.notifError} />
-            <NoValueInPieChart hasCrop={false} />
+            <NoValueInPieChart />
           </>
         )}
       </div>
@@ -1105,13 +1094,15 @@ export const LatestReport = async () => {
 
                       <div className="flex justify-start items-center text-xs text-gray-500">
                         <Calendar className="w-3.5 h-3.5 mr-1" />
-                        <span>{ReadableDateFormat(val.dayReported)}</span>
+                        <span className="flex-1 min-w-0 truncate">
+                          {ReadableDateFormat(val.dayReported)}
+                        </span>
                       </div>
                     </div>
 
                     <Link
                       href={viewFarmerReportPath(val.reportId)}
-                      className="button submit-button slimer-button flex-shrink-0 ml-3 very-small"
+                      className="button submit-button slimer-button flex-shrink-0 text-sm"
                     >
                       Tingnan
                     </Link>

@@ -165,7 +165,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
       </div>
 
       <div className="component">
-        <div className="mb-4 flex flex-row justify-between items-center">
+        <div className="mb-4 flex flex-row justify-between items-center gap-4">
           <p className="table-title">Impormasyon ng iyong mga pananim</p>
 
           <SubmitButton
@@ -174,7 +174,8 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
             onClick={() => handleOpenModal({ modalName: "addModal" })}
           >
             <ClipboardPlus className="logo !size-5" />
-            <span>Magdagdag ng pananim</span>
+            <span className="hidden sm:inline">Magdagdag ng pananim</span>
+            <span className="inline sm:hidden">Magdagdag</span>
           </SubmitButton>
         </div>
 
@@ -187,13 +188,13 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
           listCount={myCropInfoList.length}
           tableHeaderCell={
             <>
-              <th scope="col" className="!w-[15%]">
+              <th scope="col">
                 <div>
                   <p>Pangalan</p>
                 </div>
               </th>
 
-              <th scope="col">
+              <th scope="col" className="hidden lg:table-cell">
                 <div>
                   <p>Lokasyon</p>
                 </div>
@@ -205,20 +206,22 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                 </div>
               </th>
 
-              <th scope="col" className="!w-[20%]">
+              <th scope="col" className="hidden sm:table-cell">
                 <div>
                   <p>Estado ng pananim</p>
                 </div>
               </th>
 
-              <th scope="col">
+              <th scope="col" className="hidden lg:table-cell">
                 <div>
                   <p>Araw ng kaganapan</p>
                 </div>
               </th>
 
-              <th scope="col" className="!w-[21.5%]">
-                <p>Aksyon</p>
+              <th scope="col">
+                <div>
+                  <p>Aksyon</p>
+                </div>
               </th>
             </>
           }
@@ -238,7 +241,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   </div>
                 </td>
 
-                <td className="text-color">
+                <td className="text-color hidden lg:table-cell">
                   <div>
                     <p>{crop.cropLocation}</p>
                   </div>
@@ -250,7 +253,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   </div>
                 </td>
 
-                <td className="text-color ">
+                <td className="text-color hidden sm:table-cell">
                   <div>
                     <p
                       className={`py-1 px-3 rounded-2xl w-fit very-very-small-text ${className}`}
@@ -260,7 +263,7 @@ export const FarmerCropPage: FC<FarmerCropPagePropType> = ({
                   </div>
                 </td>
 
-                <td className="text-color">
+                <td className="text-color hidden lg:table-cell">
                   <div>
                     <p>
                       {!crop.cropStatus
