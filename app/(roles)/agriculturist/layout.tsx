@@ -25,7 +25,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   return (
     <ClerkProvider>
-      <div className="min-h-screen">{children}</div>
+      <div className="min-h-screen md:flex">{children}</div>
     </ClerkProvider>
   );
 }
