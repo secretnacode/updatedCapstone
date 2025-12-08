@@ -1193,6 +1193,8 @@ export type getReportCountThisYearReturnType = {
 
 export type farmerRoleType = "leader" | "farmer";
 
+export type farmerRoleInDbType = undefined | "leader" | "member";
+
 export type agriRoleType = "agriculturist" | "admin";
 
 export type allUserRoleType = farmerRoleType | agriRoleType;
@@ -2011,7 +2013,12 @@ export type topNavbarPropType = {
 };
 
 export type getUserNameReturnType =
-  | { success: true; username: string; role: allUserRoleType; email: string }
+  | {
+      success: true;
+      username: string;
+      role: agriRoleType | farmerRoleInDbType;
+      email: string;
+    }
   | ServerActionFailBaseType;
 
 export type getFarmerNameReturnType = {
@@ -2022,7 +2029,7 @@ export type getFarmerNameReturnType = {
 export type headerUserLogoPropType = {
   isEnglish: boolean;
   username: string;
-  role: allUserRoleType;
+  role: agriRoleType | farmerRoleInDbType;
   email: string;
 };
 

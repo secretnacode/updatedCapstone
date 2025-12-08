@@ -365,7 +365,7 @@ const TopNavbar: FC<topNavbarPropType> = async ({
         ) : (
           <HeaderUserLogo
             username={"Magsasaka"}
-            role={"farmer"}
+            role={"member"}
             email={"Farmer123@gmail.coms"}
             isEnglish={isEnglish}
           />

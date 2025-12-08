@@ -10,7 +10,7 @@ import {
   barangayType,
   farmerAuthStatusType,
   FarmerFirstDetailType,
-  farmerRoleType,
+  farmerRoleInDbType,
   getCountNotVerifiedFarmerParamType,
   getFarmerDataForResetingPassReturnType,
   getFarmerNameReturnType,
@@ -204,7 +204,7 @@ export const FarmerFirstDetailQuery = async (
  */
 export const GetFarmerRole = async (
   userId: string
-): Promise<{ orgRole: farmerRoleType }> => {
+): Promise<{ orgRole: farmerRoleInDbType }> => {
   try {
     return (
       await pool.query(

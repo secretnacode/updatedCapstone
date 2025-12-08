@@ -4523,7 +4523,7 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
             <p className="text-sm font-medium text-gray-800">{username}</p>
 
             <p className="text-xs text-gray-500 font-semibold">
-              {isEnglish ? role : role === "farmer" ? "Magsasaka" : "Pinuno"}
+              {isEnglish ? role : role === "leader" ? "Pinuno" : "Magsasaka"}
             </p>
           </div>
         </div>
@@ -4541,17 +4541,17 @@ export const HeaderUserLogo: FC<headerUserLogoPropType> = ({
                 </p>
               </div>
 
-              {(role === "farmer" || role === "leader") && (
+              {(role === "leader" || role === "member") && (
                 <Link
                   href={"/farmer/profile"}
                   className="flex items-center gap-2 p-3 border-b border-gray-200 hover:bg-gray-50"
                 >
                   <User className="mr-2 h-4 w-4" />
-                  {isEnglish ? "My Profile" : "Aking Profile"}
+                  Aking Profile
                 </Link>
               )}
 
-              {role === "farmer" || role === "leader" ? (
+              {role === "leader" || role === "member" ? (
                 <FarmerLogout useFor={"logo"} />
               ) : (
                 <AgriLogout useFor={"logo"} />
