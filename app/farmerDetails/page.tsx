@@ -25,7 +25,7 @@ export default async function Page() {
     };
   }
   return (
-    <div className="min-h-screen bg-green-100/10 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-800/10 mb-4">

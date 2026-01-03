@@ -1428,7 +1428,7 @@ export const SideComponentMyCropStatusLoading = () => {
 export const SeeAllValButton: FC<seeAllValButtonPropType> = ({ link }) => (
   <Link
     href={link}
-    className="p-2 bg-gray-100/80 border-t-2 border-gray-200 rounded-b-md text-sm text-green-600 hover:text-green-700 font-medium tracking-wide flex justify-center items-center"
+    className="p-2 bg-gray-100/80 border-t-2 border-gray-200 rounded-b-md text-sm text-green-600 hover:text-green-700 font-medium tracking-wide flex justify-center items-center "
   >
     Tingnan lahat
     <ChevronRight className="w-4 h-4" />

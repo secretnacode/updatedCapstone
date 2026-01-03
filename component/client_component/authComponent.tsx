@@ -257,11 +257,15 @@ const ModalNotif: FC<{
 }> = ({ isSignUp }): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const handleRemoveModal = () => modalRef.current?.classList.add("!hidden");
+
   return (
     <>
       {isSignUp && (
         <div className="modal-form" ref={modalRef}>
-          <div className="bg-white border border-gray-800 rounded-lg shadow-xl w-[80%] max-w-[420px] transform transition-all overflow-hidden animate-toLeft">
+          <div className="absolute inset-0" onClick={handleRemoveModal} />
+
+          <div className="relative bg-white border border-gray-800 rounded-lg shadow-xl w-[80%] max-w-[420px] transform transition-all overflow-hidden animate-toLeft">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b bg-yellow-50">
               <div className="flex items-center gap-2">
@@ -271,7 +275,7 @@ const ModalNotif: FC<{
                 </h3>
               </div>
               <button
-                onClick={() => modalRef.current?.classList.add("hidden")}
+                onClick={handleRemoveModal}
                 className="p-1  hover:bg-yellow-200 rounded-full transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5 text-gray-500" />
@@ -344,7 +348,7 @@ const ModalNotif: FC<{
 
               {/* Action Button */}
               <button
-                onClick={() => modalRef.current?.classList.add("!hidden")}
+                onClick={handleRemoveModal}
                 className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2.5 px-4 rounded-lg cursor-pointer transition-colors"
               >
                 Naintindihan ko

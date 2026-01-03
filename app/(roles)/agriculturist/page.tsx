@@ -40,7 +40,7 @@ export default async function Page({
   return (
     <>
       <NavbarComponent forAgri={true} currentPage="Home">
-        <main className="main-wrapper">
+        <main className="main-wrapper ">
           {message && <RenderRedirectNotification notif={message} />}
 
           {data.success ? (

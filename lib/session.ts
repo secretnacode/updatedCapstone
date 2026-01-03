@@ -125,7 +125,9 @@ export const GetSession = async (): Promise<SessionValueType | null> => {
  * function for updating the role of the session val, used after the sign up
  * @param role value of the role you want to chang into
  */
-export const UpdateSessionRole = async (role: "leader" | "farmer") => {
+export const UpdateSessionRole = async (
+  role: "leader" | "farmer" | "newUser"
+) => {
   try {
     const cookie = await GetCookieId();
 

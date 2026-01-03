@@ -3988,7 +3988,6 @@ export const AgriculturistCreateLinkTable: FC<{
                   className="cursor-pointer"
                 >
                   <p>Name</p>
-                  BurgerNav
                   <SortType col={"username"} />
                 </div>
               </th>

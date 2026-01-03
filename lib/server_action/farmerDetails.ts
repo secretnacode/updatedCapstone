@@ -173,3 +173,97 @@ export const AddFirstFarmerDetails = async (
     };
   }
 };
+
+function maximumProfit(prices: number[], k: number): number {
+  let total = 0;
+  let transacLeft = k;
+  let storedValue: number | null = null;
+  let moveToIndex: number | null = null;
+
+  for (const [index, price] of prices.entries()) {
+    if (transacLeft === 0) break;
+
+    if (moveToIndex) {
+      if (moveToIndex > index) continue;
+    }
+
+    if (!storedValue) {
+      storedValue = price;
+      continue;
+    }
+
+    const res = calculateTransac({
+      currentIndex: index,
+      storedValue: storedValue,
+      alreadyMoved: moveToIndex !== null,
+      transacLeft: transacLeft,
+      isNormalTransac: transacLeft % 2 === 0,
+      prices: prices,
+    });
+
+    if (res.continue) {
+      moveToIndex = res.moveToIndex;
+
+      continue;
+    } else total = res.profit;
+
+    moveToIndex = null;
+    transacLeft -= 1;
+  }
+
+  return total;
+}
+
+type transacReturn =
+  | { continue: true; moveToIndex: number }
+  | { continue: false; profit: number };
+type calculateTransacPropType = {
+  currentIndex: number;
+  storedValue: number;
+  alreadyMoved: boolean;
+  transacLeft: number;
+  isNormalTransac: boolean;
+  prices: number[];
+};
+
+function calculateTransac({
+  currentIndex,
+  storedValue,
+  alreadyMoved,
+  transacLeft,
+  isNormalTransac,
+  prices,
+}: calculateTransacPropType): transacReturn {
+  // will check the remaining array val if its the last transac
+  if (transacLeft === 1) {
+    const remainingPrices = prices.slice(
+      currentIndex - (prices.length - 1) + 1
+    );
+    return {
+      continue: false,
+      profit: isNormalTransac
+        ? Math.max(...remainingPrices)
+        : Math.min(...remainingPrices),
+    };
+  }
+
+  // checked if already moved, if not will check which price is much higer
+  if (!alreadyMoved && isNormalTransac)
+    if (prices[currentIndex] < prices[currentIndex + 1])
+      return { continue: true, moveToIndex: currentIndex + 1 };
+
+  const bestToBuy = isNormalTransac
+    ? storedValue < prices[currentIndex]
+    : storedValue > prices[currentIndex];
+
+  // will check if the next price is much higher than the stored value, if yes will proceed to check the
+  if (bestToBuy)
+    return {
+      continue: false,
+      profit: isNormalTransac
+        ? storedValue - prices[currentIndex]
+        : prices[currentIndex] - storedValue,
+    };
+
+  return { continue: true, moveToIndex: currentIndex + 1 };
+}

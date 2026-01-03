@@ -206,7 +206,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
                 </div>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-5 ">
                 <h3 className="font-semibold text-gray-900">
                   {isEnglish ? "Shortcut:" : "Tingnan:"}
                 </h3>

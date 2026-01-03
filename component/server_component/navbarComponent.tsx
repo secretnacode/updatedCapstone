@@ -321,11 +321,11 @@ const TopNavbar: FC<topNavbarPropType> = async ({
     const hour = new Date().getHours();
 
     if (hour >= 5 && hour < 12) {
-      return isEnglish ? "Good Morning," : "Magandang Umaga";
+      return isEnglish ? "Good Morning" : "Magandang Umaga";
     } else if (hour >= 12 && hour < 17) {
-      return isEnglish ? "Good Afternoon," : "Magandang Tanghali";
+      return isEnglish ? "Good Afternoon" : "Magandang Tanghali";
     } else {
-      return isEnglish ? "Good Evening," : "Magandang Gabi";
+      return isEnglish ? "Good Evening" : "Magandang Gabi";
     }
   };
 

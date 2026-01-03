@@ -10,6 +10,7 @@ import {
   getCountNotVerifiedFarmer,
   getFarmerDataForResetingPass,
   getFarmerEmail,
+  getFarmerIdByAuthId,
   getFarmerName,
   getPassword,
   getUserLocation,
@@ -65,7 +66,7 @@ import {
 } from "@/util/helper_function/reusableFunction";
 import { ZodValidateForm } from "../validation/authValidation";
 import { changePasswordSchema } from "@/util/helper_function/validation/validationSchema";
-import { DeleteSession, GetSession } from "../session";
+import { DeleteSession, GetSession, UpdateSessionRole } from "../session";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 /**
@@ -1035,6 +1036,15 @@ export const checkUserAlreadyLogin =
 
       if (session.work === "admin" || session.work === "agriculturist")
         redirect("/agriAuth/fallback");
+
+      const farmerId = await getFarmerIdByAuthId(session.userId);
+
+      // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
+      if (!farmerId) {
+        await UpdateSessionRole("newUser");
+
+        redirect("/farmerDetails");
+      }
 
       redirect(
         `/farmer/?notif=${NotifToUriComponent([
