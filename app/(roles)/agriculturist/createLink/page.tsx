@@ -7,6 +7,14 @@ import { RenderNotification } from "@/component/client_component/provider/notifi
 import { getAllLinkData } from "@/lib/server_action/link";
 import { getAllLinkDataReturnType } from "@/types";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Create link page where the admin can create reset password link and new agriculturist link where the user who will sign up in that link will automatically be a agriculturist. on the other hand, agriculturist can only make a link for reset password",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

@@ -2,6 +2,14 @@ import { AgriculturistValidateFarmerTable } from "@/component/client_component/c
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { ViewAllUnvalidatedFarmer } from "@/lib/server_action/farmerUser";
 import { ViewAllUnvalidatedFarmerReturnType } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Validating page where it can only validate the newly signed in farmer that has no organization and a new farmer leader",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

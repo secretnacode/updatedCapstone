@@ -2,6 +2,13 @@ import { AgriculturistFarmerUserTable } from "@/component/client_component/compo
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { ViewAllValidatedFarmerUser } from "@/lib/server_action/farmerUser";
 import { ViewAllValidatedFarmerUserReturnType } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description: "Page where it will list all the existing farmer user",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

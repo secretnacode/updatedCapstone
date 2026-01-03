@@ -1,7 +1,14 @@
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GoBackButton } from "@/component/client_component/unauthorizedComponent";
 import { NotificationBaseType } from "@/types";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Unauthorized page of AgroFarm where the user will be redirected if a certain action was done and the user is not prohibited to do that action",
+};
 
 export default async function Page({
   searchParams,

@@ -3,6 +3,14 @@ import { RenderRedirectNotification } from "@/component/client_component/provide
 import { GetAllFarmerReport } from "@/lib/server_action/report";
 import { GetAllFarmerReportReturnType } from "@/types";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Reprot page where it will show all the passed report of the farmers",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

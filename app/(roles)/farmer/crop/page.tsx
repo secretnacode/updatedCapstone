@@ -9,6 +9,14 @@ import {
 import { GetMyCropInfo } from "@/lib/server_action/crop";
 import { GetMyCropInfoReturnType, NotificationBaseType } from "@/types";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Crop page that shows all the existing crops info of the farmer, the farmer can also add a crop info",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

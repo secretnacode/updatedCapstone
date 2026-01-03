@@ -5,6 +5,14 @@ import {
   RedirectUnauthorizedWithNotif,
   UnexpectedErrorMessage,
 } from "@/util/helper_function/reusableFunction";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "For farmer that wants to reset their password after requesting a password reset to their local agriculturist",
+  robots: { index: false, follow: false },
+};
 
 export default async function Page({
   params,

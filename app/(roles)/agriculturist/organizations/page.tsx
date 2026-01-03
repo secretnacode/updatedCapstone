@@ -3,6 +3,13 @@ import { RenderRedirectNotification } from "@/component/client_component/provide
 import { GetAllOrganization } from "@/lib/server_action/org";
 import { GetAllOrganizationReturnType } from "@/types";
 export const dynamic = "force-dynamic";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description: "Organization page where it shows all the existing organization",
+  robots: { index: false, follow: false },
+};
 
 export default async function Page() {
   let availableOrgs: GetAllOrganizationReturnType;

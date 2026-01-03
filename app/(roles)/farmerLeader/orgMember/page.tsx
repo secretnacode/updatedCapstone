@@ -2,6 +2,14 @@ import { OrgMemberTable } from "@/component/client_component/componentForAllUser
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GetFarmerOrgMember } from "@/lib/server_action/farmerUser";
 import { GetFarmerOrgMemberReturnType } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Page that show all the member of the organization and where the leader can also delete and block the farmer's account",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

@@ -3,6 +3,14 @@ import { RenderRedirectNotification } from "@/component/client_component/provide
 import { newUserValNeedInfo } from "@/lib/server_action/user";
 import { newUserValNeedInfoReturnType } from "@/types";
 import { User } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Page for new user where the user will add their personal information",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

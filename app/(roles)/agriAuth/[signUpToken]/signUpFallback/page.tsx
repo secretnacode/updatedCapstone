@@ -6,6 +6,14 @@ import {
   RedirectUnauthorizedWithNotif,
   UnexpectedErrorMessageEnglish,
 } from "@/util/helper_function/reusableFunction";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Fallback page for sign up where it will check if the token is existing and is valid before signing up the user in the database",
+  robots: { index: false, follow: false },
+};
 
 export default async function Page({
   params,

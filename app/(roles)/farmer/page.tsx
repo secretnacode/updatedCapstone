@@ -8,6 +8,14 @@ import { NavbarComponent } from "@/component/server_component/navbarComponent";
 import { checkFarmerRole } from "@/lib/server_action/user";
 import { checkFarmerRoleReturnType, NotificationBaseType } from "@/types";
 import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Dashboard page of the farmer where it will show a brief information about the farmer's reports and crop",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

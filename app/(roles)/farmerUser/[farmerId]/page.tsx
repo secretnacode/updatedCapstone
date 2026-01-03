@@ -4,6 +4,13 @@ import { GetFarmerUserProfileInfoReturnType } from "@/types";
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { FC } from "react";
 import { BackButton } from "@/component/client_component/componentForAllUser";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description: "Profile of the user that was visited",
+  robots: { index: false, follow: false },
+};
 
 export default async function Page({
   params,

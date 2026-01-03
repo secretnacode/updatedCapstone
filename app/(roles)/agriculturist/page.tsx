@@ -12,6 +12,14 @@ import {
 } from "@/types";
 import { UnexpectedErrorMessageEnglish } from "@/util/helper_function/reusableFunction";
 import { Archive, FileText, UserRound } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Dashboard of admin and agriculturist where it summarize the reports that was passed by farmers",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

@@ -3,6 +3,13 @@ import { RenderRedirectNotification } from "@/component/client_component/provide
 import { GetAllOrgMemberList } from "@/lib/server_action/org";
 import { GetAllOrgMemberListReturnType } from "@/types";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description: "Page that shows all the members within the organization",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

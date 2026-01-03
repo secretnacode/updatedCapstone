@@ -2,6 +2,14 @@ import { ValidateReportTable } from "@/component/client_component/componentForAl
 import { RenderRedirectNotification } from "@/component/client_component/provider/notificationProvider";
 import { GetOrgMemberReport } from "@/lib/server_action/report";
 import { GetOrgMemberReportReturnType } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Validating the report of the member before the report reach the agriculturist and admin",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

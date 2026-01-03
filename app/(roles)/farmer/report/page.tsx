@@ -6,6 +6,14 @@ import {
 } from "@/component/client_component/reportComponent";
 import { GetFarmerReport } from "@/lib/server_action/report";
 import { GetFarmerReportReturnType } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description:
+    "Reporting page where all the farmer can make a report and pass it",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

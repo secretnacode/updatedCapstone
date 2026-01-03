@@ -5,6 +5,12 @@ import { checkUserAlreadyLogin } from "@/lib/server_action/user";
 import { checkUserAlreadyLoginReturnType, NotificationBaseType } from "@/types";
 import { UnexpectedErrorMessage } from "@/util/helper_function/reusableFunction";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AgroFarm",
+  description: "Reporting system for calauan that specialized in rice crops",
+};
 
 export default async function Page({
   searchParams,
