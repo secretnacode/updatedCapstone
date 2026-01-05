@@ -4,7 +4,8 @@ import {
   CheckMyMemberquery,
   GetAgriRole,
   GetFarmerRole,
-  blockOrDelteUserAccountQuery,
+  blockUnblockUser,
+  deletUser,
   getAgriEmail,
   getAgriName,
   getCountNotVerifiedFarmer,
@@ -100,7 +101,7 @@ export const DeleteMyOrgMember = async (
         ],
       };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "delete");
+    await deletUser(farmerId, work);
 
     revalidatePath(`/farmerLeader/orgMember`);
 
@@ -142,7 +143,7 @@ export const DeleteFarmerUser = async (
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "delete");
+    await deletUser(farmerId, work);
 
     revalidatePath(path);
 
@@ -198,7 +199,7 @@ export const blockMyOrgMember = async (
         ],
       };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+    await blockUnblockUser(farmerId, work, true);
 
     revalidatePath(`/farmerLeader/orgMember`);
 
@@ -239,9 +240,11 @@ export const blockFarmerUser = async (
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+    await blockUnblockUser(farmerId, work, true);
 
     revalidatePath(`/agriculturist/farmerUsers`);
+
+    console.log("blocking farmer by admin");
 
     return {
       success: true,
@@ -295,7 +298,7 @@ export const unblockMyOrgMember = async (
         ],
       };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "block");
+    await blockUnblockUser(farmerId, work, false);
 
     revalidatePath(`/farmerLeader/orgMember`);
 
@@ -336,7 +339,7 @@ export const unblockFarmerUser = async (
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
 
-    await blockOrDelteUserAccountQuery(farmerId, work, "unblock");
+    await blockUnblockUser(farmerId, work, false);
 
     revalidatePath(`/agriculturist/farmerUsers`);
 

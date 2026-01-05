@@ -5,7 +5,6 @@ import {
   agriculturistRoleType,
   agriIsExistParamType,
   agriRoleType,
-  allType,
   allUserRoleType,
   barangayType,
   farmerAuthStatusType,
@@ -387,51 +386,58 @@ export const GetFarmerProfileOrgInfoQuery = async (
 };
 
 /**
- * query for mutating the farmer auth status(active, delete, block)
- * @param farmerId id of the farmer to be mutated
- * @param role role of the user who will make this action(deleting or blocking the user)
- * @param action block or delete
+ * query for deleting a farmer user
+ * @param farmerId id of the farmer
+ * @param role role of the user who will perform the action
  */
-export const blockOrDelteUserAccountQuery = async (
-  farmerId: string,
-  role: allUserRoleType,
-  action: "block" | "delete" | "unblock"
-): Promise<void> => {
+export const deletUser = async (farmerId: string, role: allUserRoleType) => {
   try {
     const status = await farmerAuthStatus();
 
-    let query = "";
-    let param: allType[] = [];
-
-    if (action === "block" || action === "unblock") {
-      query = `update capstone.auth set "status" = $1 where "authId" = $2`;
-
-      if (action === "block") param = [status.active, farmerId];
-      else param = [status.block, farmerId];
-    } else if (action === "delete") {
-      query = `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "authId" = $4`;
-
-      param = ["", await Hash(CreateUUID()), status.delete, farmerId];
-    }
-
-    await pool.query(query, param);
+    await pool.query(
+      `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "authId" = $4`,
+      ["", await Hash(CreateUUID()), status.delete, farmerId]
+    );
   } catch (error) {
     const message =
       role === "admin" || role === "agriculturist"
-        ? `Unexpected error while ${
-            action === "delete"
-              ? "deleting"
-              : action === "block"
-              ? "blocking"
-              : "unblocking"
-          } the user`
-        : `May pagkakamali na hindi inaasahang nang yari sa pag ${
-            action === "delete"
-              ? "tatanggal"
-              : action === "block"
-              ? "b-block"
-              : "u-unblock"
-          } ng account ng user`;
+        ? `Unexpected error while deleting the user`
+        : `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user`;
+
+    console.error(`${message}: ${(error as Error).message}`);
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * query for blocking and unblocking a farmer user
+ * @param farmerId id of the farmer
+ * @param role role of the user who will perform the action
+ * @param isBlock if the user will be block or unblock
+ */
+export const blockUnblockUser = async (
+  farmerId: string,
+  role: allUserRoleType,
+  isBlock: boolean
+) => {
+  try {
+    const status = await farmerAuthStatus();
+
+    let param = [];
+
+    if (isBlock) param = [status.block, farmerId];
+    else param = [status.active, farmerId];
+
+    await pool.query(
+      `update capstone.auth set "status" = $1 where "authId" = $2`,
+      param
+    );
+  } catch (error) {
+    const message =
+      role === "admin" || role === "agriculturist"
+        ? `Unexpected error while blocking the user`
+        : `May pagkakamali na hindi inaasahang nang yari sa pag b-block ng account ng user`;
 
     console.error(`${message}: ${(error as Error).message}`);
 
