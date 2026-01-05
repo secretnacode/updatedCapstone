@@ -101,11 +101,13 @@ export function DateToYYMMDD(date: Date) {
  * @returns a date from 10 years ago
  */
 export function Date10YearsAgo() {
+  const date = new Date();
+
   return new Date(
-    `${new Date().getFullYear() - 10}-${new Date()
-      .getMonth()
+    `${date.getFullYear() - 10}-${date.getMonth().toString() + 1}-${date
+      .getDate()
       .toString()
-      .padStart(2, "0")}-${new Date().getDate().toString().padStart(2, "0")}`
+      .padStart(2, "0")}`
   );
 }
 
