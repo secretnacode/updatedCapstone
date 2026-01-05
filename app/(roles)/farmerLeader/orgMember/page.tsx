@@ -7,7 +7,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "AgroFarm",
   description:
-    "Page that show all the member of the organization and where the leader can also delete and block the farmer's account",
+    "Page that show all the member of the organization and where the leader can also validate, delete, and block the farmer's account",
   robots: { index: false, follow: false },
 };
 
