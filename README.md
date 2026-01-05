@@ -1,4 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Reporting system for Calauan, Laguna that's specialized for rice farmers
+
+A seamless reporting system built by using Next.js together with other tools
+
+## The working website is:
+
+```bash
+https://updated-capstone-brown.vercel.app/
+```
+
+## Features:
+
+- Role-Based Access Control
+- Mobile-First Access
+- Visual Summaries
+- Category Filters
+- Keyword Search
+- Secure Login
+- Filtered Downloads
+
+## Introduction
+
+we have 4 role:
+
+- Admin
+- Agriculturist
+- Farmer Leader
+- Farmer
+
+## Sign In
+
+<img width="1917" height="926" alt="Screenshot 2026-01-05 130329" src="https://github.com/user-attachments/assets/4064c67e-e99c-4ecd-ab5a-40514472a9a0" />
+
+this is the landing page where its also a sign in page for farmer and farmer leader
+
+## Sign Up
+
+<img width="1919" height="927" alt="Screenshot 2026-01-05 130528" src="https://github.com/user-attachments/assets/60edb3b8-36e0-4800-8e57-67ee58b9929a" />
+
+this is the sign up page for the new user
+
+## Fill up form after sign in
+
+<img width="1914" height="918" alt="Screenshot 2026-01-05 130855" src="https://github.com/user-attachments/assets/91feb1c9-3e8a-4136-be60-43804e59d84e" />
+
+after the sign up, it will redirect the user to a new page for user information, the user role(normal farmer / farmer leader) will be determined by what the user will select in the organization section, if the user create another organization, it only means that the user is a leader(role), but if the user didnt pick an org(no org) or pick an existing org, the user is a normal farmer(role)
+
+after the user sign up the form, the user will be redirected to the landing page with a notification, meaning the user was done filling up the form. The user need to wait before the user can use the system, because user's account need to be validated by agriculturist(if the user is leader and has no org) or farmer leader(user within an organization)
+
+if the user log in but the form wasnt done yet(e.g. after sign in, the user do something and forget about the user form), the user will be redirected to the form page again
+
+## Farmer Dashboard
+
+
 
 ## Getting Started
 
