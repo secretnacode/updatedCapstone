@@ -61,7 +61,7 @@ this is the farmer dashboard where it will be show a simple info about the user 
 
 this is the table where it will show all the passed reports of the user
 
-the user can create a report by pressing the "Gumawa button" 
+the user can create a report by pressing the "Gumawa button"
 
 if you dont have a information about the crop, you cant make a report yet, crop info is needed when making a report, so you need to make a crop info first(refer to the farmer crop page)
 
@@ -137,7 +137,7 @@ has the same function as farmer crop page
 
 <img width="1918" height="923" alt="image" src="https://github.com/user-attachments/assets/697ad0be-ec10-41b1-a00c-75190fac407b" />
 
-this is a page where the leader can validate the member's report 
+this is a page where the leader can validate the member's report
 
 ## Farmer Leader Farmer Member page
 
@@ -149,13 +149,13 @@ a page where you can manage the account of your member, you can verify, block, a
 
 has the same function as farmer Profile page
 
-## Agriculturist and Admin Dashboard 
+## Agriculturist and Admin Dashboard
 
 <img width="1912" height="916" alt="image" src="https://github.com/user-attachments/assets/95891c99-440d-4556-810d-c1448c93045e" />
 
 dashboard of admin and agri where it will shows a breif data about all the farmers report
 
-## Agriculturist and Admin Report Page 
+## Agriculturist and Admin Report Page
 
 <img width="1918" height="924" alt="image" src="https://github.com/user-attachments/assets/f6ac6be9-2f38-409d-a593-b0d0555cf86c" />
 
@@ -165,35 +165,35 @@ Report page where it will see all the report of the farmer
 
 the agri and admin can also download the report base on the filtered option
 
-## Agriculturist and Admin Crop Page 
+## Agriculturist and Admin Crop Page
 
 <img width="1918" height="918" alt="image" src="https://github.com/user-attachments/assets/a49f9678-2414-4292-b745-9cc8ead3820a" />
 
 the user can see all the crop location of all farmer
 
-## Agriculturist and Admin Farmer User Page 
+## Agriculturist and Admin Farmer User Page
 
 <img width="1917" height="920" alt="image" src="https://github.com/user-attachments/assets/9a21a888-dda6-4f52-ae19-c6a18c76bed5" />
 
 the user can block or delete any farmer user
 
-if the user press the profile button, it will redirect the user to another page where it will show the user profile info and org info 
+if the user press the profile button, it will redirect the user to another page where it will show the user profile info and org info
 
 <img width="1917" height="924" alt="image" src="https://github.com/user-attachments/assets/d496f92d-3f66-4d8b-ae41-4f91ddfb8bcf" />
 
-## Agriculturist and Admin Verify User Page 
+## Agriculturist and Admin Verify User Page
 
 <img width="1919" height="914" alt="image" src="https://github.com/user-attachments/assets/62127a15-72c2-4fd7-970d-19527d4d0b09" />
 
 this is the page where the user can verify the user acount that is leader role or user that has no org
 
-## Agriculturist and Admin Organization Page 
+## Agriculturist and Admin Organization Page
 
 <img width="1919" height="926" alt="image" src="https://github.com/user-attachments/assets/e5c87afe-37f6-4850-a4a1-e016cf796e59" />
 
 the user will see all the existing organization
 
-if the user press the View Org, the user will be redirected to another page where it will show all the member in that organization 
+if the user press the View Org, the user will be redirected to another page where it will show all the member in that organization
 
 <img width="1913" height="923" alt="image" src="https://github.com/user-attachments/assets/e35ed6e5-49fb-4e8b-b270-cd58e1ddc0e7" />
 
@@ -211,17 +211,18 @@ this modal is consist of all farmer user's account, just find the user that requ
 
 <img width="1919" height="929" alt="image" src="https://github.com/user-attachments/assets/716f9b0f-ea81-481e-82b2-8d69f29fbbd8" />
 
-this is where the admin and agriculturist differ, the admin has additional option in create link which is the Create Agriculturist, this means the user who will sign up in that link will automatically be a agriculturist 
+this is where the admin and agriculturist differ, the admin has additional option in create link which is the Create Agriculturist, this means the user who will sign up in that link will automatically be a agriculturist
 
 ## Admin Create Link Page
 
 <img width="1919" height="930" alt="image" src="https://github.com/user-attachments/assets/9d2a9d5d-6bac-49e7-8a44-5fbdad7fb897" />
 
-this page is where the admin will 
+this page is where the admin will
 
 ## Teck Stack
 
 FronEnd:
+
 - Next.js
 - Tailwind
 - Lucide-React
@@ -230,6 +231,7 @@ FronEnd:
 - React Maplibre
 
 BackEnd:
+
 - Next.js(server action)
 - Zod
 - PG(PostgreSQL command)
@@ -291,6 +293,3 @@ pnpm dev
 # or
 bun dev
 ```
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-zzz
