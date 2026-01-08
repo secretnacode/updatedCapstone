@@ -1157,9 +1157,11 @@ const OpenCam: FC<openCamPropType> = ({ setSelectedFile, isPassing }) => {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: { facingMode: "environment" },
       });
+
       setOpenCam(true);
+
       setStream(mediaStream);
     } catch (error) {
       const err = error as Error;
