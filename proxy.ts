@@ -44,8 +44,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
           `/?notif=${NotifToUriComponent([
             { message: "Log in expired, log in again!", type: "warning" },
           ])}`,
-          req.url
-        )
+          req.url,
+        ),
       );
 
     const accessiblePath = authorizedPath.get(session.work);
@@ -67,8 +67,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
         `/?notif=${NotifToUriComponent([
           { message: "Log in expired, log in again!", type: "warning" },
         ])}`,
-        req.url
-      )
+        req.url,
+      ),
     );
   }
 });

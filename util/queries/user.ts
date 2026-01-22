@@ -442,7 +442,7 @@ export const deletUserPermanently = async () => {
     const status = await farmerAuthStatus();
 
     await pool.query(
-      `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "status" = $5 and "deletedAt" <= now() - interval '30 days'`,
+      `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "status" = $4 and "deletedAt" <= now() - interval '30 days'`,
       ["", await Hash(CreateUUID()), status.deletePermanently, status.delete],
     );
   } catch (error) {
