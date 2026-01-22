@@ -107,9 +107,17 @@ export function Date10YearsAgo() {
     `${date.getFullYear() - 10}-${date.getMonth().toString() + 1}-${date
       .getDate()
       .toString()
-      .padStart(2, "0")}`
+      .padStart(2, "0")}`,
   );
 }
+
+/**
+ * reusable function for getting the date 30 days after base from the given date
+ * @param date base of the date
+ * @returns 30 days after base from the given date
+ */
+export const date30DaysAfter = (date: Date) =>
+  new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
 
 /**
  * transforming the date object into human readable date (e.g. Jul. 20, 2025)
@@ -172,7 +180,7 @@ export const RedirectLoginFirst = () => {
   return redirect(
     `/?notif=${NotifToUriComponent([
       { message: "Mag log in muna!!!", type: "warning" },
-    ])}`
+    ])}`,
   );
 };
 
@@ -191,7 +199,7 @@ export const RedirectLoginWithNotif = (error: NotificationBaseType[]) => {
  * @returns redirect function with its message
  */
 export const RedirectUnauthorizedWithNotif = (
-  notif: NotificationBaseType[]
+  notif: NotificationBaseType[],
 ) => {
   return redirect(`/unauthorized?notif=${NotifToUriComponent(notif)}`);
 };
@@ -204,7 +212,7 @@ export const RedirectUnauthorizedWithNotif = (
  */
 export const redirectWithNotifMessage = (
   path: string,
-  notif: NotificationBaseType[]
+  notif: NotificationBaseType[],
 ) => {
   return redirect(`${path}?notif=${NotifToUriComponent(notif)}`);
 };
@@ -261,7 +269,7 @@ export const viewFarmerReportPath = (id: string) =>
  * @returns longitude and latitude object
  */
 export function getPointCoordinate(
-  brgy: barangayType | "calauan"
+  brgy: barangayType | "calauan",
 ): getPointCoordinateReturnType {
   return {
     longitude: pointCoordinates[brgy][0],
@@ -283,11 +291,11 @@ export function getBrgyCoordinate(brgy: brangayWithCalauanType): LngLatLike {
 export function pointIsInsidePolygon(
   lng: number,
   lat: number,
-  brgy: barangayType
+  brgy: barangayType,
 ) {
   return booleanPointInPolygon(
     point([lng, lat]),
-    polygon(polygonCoordinates[brgy])
+    polygon(polygonCoordinates[brgy]),
   );
 }
 
@@ -399,7 +407,7 @@ export function ViewCrop(
   lat: number,
   brgy: barangayType,
   mapRef: RefObject<MapRef | null>,
-  goToMap: boolean = true
+  goToMap: boolean = true,
 ) {
   mapRef.current?.flyTo({
     center: [
@@ -430,7 +438,8 @@ export const makeWeatherIcon = ({
 }): LucideIcon => {
   // ☀️ CLEAR CONDITIONS
   if (code === 1000) {
-    if (isDay === 1) return Sun; // Sunny
+    if (isDay === 1)
+      return Sun; // Sunny
     else return Moon; // Clear
   }
 
@@ -442,7 +451,8 @@ export const makeWeatherIcon = ({
 
   // ☔ CLOUDY AND  MIGHT RAIN WHILE IN DAY / NIGHT
   if (code === 1063) {
-    if (isDay === 1) return CloudSunRain; // IN DAY
+    if (isDay === 1)
+      return CloudSunRain; // IN DAY
     else return CloudMoonRain; // IN NIGHT
   }
 
@@ -502,7 +512,7 @@ export const makeWeatherIcon = ({
  */
 export const translateWeatherConditionToTagalog = (
   englishText: string,
-  isEnglish: boolean
+  isEnglish: boolean,
 ): string => {
   // Normalize the input text for consistent matching (e.g., trim whitespace)
   const normalizedText = englishText.trim();
@@ -695,8 +705,8 @@ export const determineCropStatus = ({
               ? "Harvested"
               : "Naani na"
             : isEnglish
-            ? "All was Damage"
-            : "Nasira lahat",
+              ? "All was Damage"
+              : "Nasira lahat",
         className: "bg-yellow-100 text-yellow-800",
       };
 
@@ -790,8 +800,8 @@ export const reportStatus = ({
       ? "Verified"
       : "Naipasa"
     : isEnglish
-    ? "Not Verified"
-    : "Beripikahin";
+      ? "Not Verified"
+      : "Beripikahin";
 
 /**
  * function that returns a featureCollection Type that can be passed in the map component
@@ -813,7 +823,7 @@ export const cityToHighLightInMap = (data: barangayType[]) =>
           name: cur,
         },
       ];
-    }, [])
+    }, []),
   );
 
 /**
@@ -854,7 +864,7 @@ export const newUserNotifMessage = (name: string, isEnglish: boolean) => ({
 export const newReportPassNotifMessage = (
   name: string,
   isEnglish: boolean,
-  reportType: reportTypeStateType
+  reportType: reportTypeStateType,
 ) => ({
   title: isEnglish ? "New Report Passed" : "Panibagong Report ang Pinasa",
   message: isEnglish
@@ -863,8 +873,8 @@ export const newReportPassNotifMessage = (
         reportType === "damage"
           ? "pagkasira"
           : reportType === "harvesting"
-          ? "pag-aani"
-          : "pagtatanim"
+            ? "pag-aani"
+            : "pagtatanim"
       } ng kanyang pananim`,
 });
 
@@ -876,7 +886,7 @@ export const newReportPassNotifMessage = (
  */
 export const newApprovedReportNotifMessage = (
   name: string,
-  isEnglish: boolean
+  isEnglish: boolean,
 ) => ({
   title: isEnglish ? "New Report was Approved" : "Naaprubahan na Ulat",
   message: isEnglish

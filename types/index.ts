@@ -82,10 +82,19 @@ export type QueryUserLoginReturnType =
     }
   | {
       exist: true;
-      data: { authId: string; password: string; status: farmerAuthStatusType };
+      data: {
+        authId: string;
+        password: string;
+        status: farmerAuthStatusType;
+        deletedAt: Date;
+      };
     };
 
-export type farmerAuthStatusType = "active" | "block" | "delete";
+export type farmerAuthStatusType =
+  | "active"
+  | "block"
+  | "delete"
+  | "deletePermanently";
 
 export type AuthResponseType<T> = {
   notifError: NotificationBaseType[];

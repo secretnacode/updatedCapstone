@@ -62,6 +62,7 @@ import {
   accountStatusStyle,
   capitalizeFirstLetter,
   converTimeToAMPM,
+  date30DaysAfter,
   DateToYYMMDD,
   determineCropStatus,
   getInitials,
@@ -249,31 +250,7 @@ export const FarmerOrgMemberAction: FC<farmerOrgMemberActionPropType> = ({
 }) => {
   return (
     <div className="flex justify-center items-center gap-2">
-      {status === "delete" ? (
-        <>
-          {deletedAt ? (
-            <>
-              <RecoverMyOrgMemberButton farmerId={farmerId} />
-              <p className="flex flex-col justify-center items-start text-xs text-gray-500">
-                <span>Maibabalik Hanggang:</span>
-
-                <span className="font-bold text-gray-400">
-                  {DateToYYMMDD(deletedAt)}
-                </span>
-              </p>
-            </>
-          ) : (
-            <>
-              <DynamicLink
-                baseLink="farmerUser"
-                dynamicId={farmerId}
-                label="Profile"
-                className="!bg-green-500 hover:!bg-green-600"
-              />
-            </>
-          )}
-        </>
-      ) : (
+      {status !== "delete" && status !== "deletePermanently" && (
         <>
           <DynamicLink
             baseLink="farmerUser"
@@ -299,6 +276,30 @@ export const FarmerOrgMemberAction: FC<farmerOrgMemberActionPropType> = ({
           <DeleteMyOrgMemberButton
             farmerId={farmerId}
             farmerName={farmerName}
+          />
+        </>
+      )}
+
+      {status === "delete" && (
+        <>
+          <RecoverMyOrgMemberButton farmerId={farmerId} />
+          <p className="flex flex-col justify-center items-start text-xs text-gray-500">
+            <span>Maibabalik Hanggang:</span>
+
+            <span className="font-bold text-gray-400">
+              {deletedAt && DateToYYMMDD(date30DaysAfter(deletedAt))}
+            </span>
+          </p>
+        </>
+      )}
+
+      {status === "deletePermanently" && (
+        <>
+          <DynamicLink
+            baseLink="farmerUser"
+            dynamicId={farmerId}
+            label="Profile"
+            className="!bg-green-500 hover:!bg-green-600"
           />
         </>
       )}

@@ -10,6 +10,8 @@ import {
 } from "@/types";
 import {
   CreateUUID,
+  date30DaysAfter,
+  DateToYYMMDD,
   missingFormValNotif,
   NotifToUriComponent,
   UnexpectedErrorMessage,
@@ -42,7 +44,7 @@ import { checkCreateAgriToken } from "@/util/queries/link";
  * @returns an object of success, if the success is a truthy value, it comes with the object url that contains the url the user will be redirected at based on the users role, and if the success value is falsey, it will return a error object that will be used by notification context
  */
 export async function LoginAuth(
-  data: AuthLoginType
+  data: AuthLoginType,
 ): Promise<AuthResponseType<AuthLoginType>> {
   // let work = ""
   try {
@@ -56,7 +58,7 @@ export async function LoginAuth(
 
     // will check if the user is existing
     const userCredentials: QueryUserLoginReturnType = await UserLogin(
-      data.username
+      data.username,
     );
 
     if (!userCredentials.exist)
@@ -66,7 +68,7 @@ export async function LoginAuth(
 
     const compare = await ComparePassword(
       data.password,
-      userCredentials.data.password
+      userCredentials.data.password,
     );
 
     // if its allready existing, will compare the user passwod input and the hash password that is in the database and will compare it
@@ -94,6 +96,24 @@ export async function LoginAuth(
         ],
       };
 
+    if (userCredentials.data.status === "delete")
+      return {
+        notifError: [
+          {
+            message: `Tinanggal ang iyong account`,
+            type: "warning",
+          },
+          {
+            message: `Kausapin ang iyong leader o ang agriculturist para maibalik ito`,
+            type: "warning",
+          },
+          {
+            message: `Pwede lamang itong maibalik hanggang ${DateToYYMMDD(date30DaysAfter(userCredentials.data.deletedAt))}`,
+            type: "warning",
+          },
+        ],
+      };
+
     const farmerId = await getFarmerIdByAuthId(userCredentials.data.authId);
 
     // this means the user already sign up but didnt insert its personal information(no farmerId was crerated) so the user will be redirected in the farmerDetails instead to finish that
@@ -115,13 +135,13 @@ export async function LoginAuth(
 
     await CreateSession(
       farmerId.farmerId,
-      farmerId.orgRole === "leader" ? farmerId.orgRole : "farmer"
+      farmerId.orgRole === "leader" ? farmerId.orgRole : "farmer",
     );
 
     redirect(
       `/farmer/?notif=${NotifToUriComponent([
         { message: "Matagumpay ang iyong pag lologin", type: "success" },
-      ])}`
+      ])}`,
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;
@@ -129,7 +149,7 @@ export async function LoginAuth(
     console.log(
       `May pagkakamali na hindi inaasahan sa pag lologin ${
         (error as Error).message
-      }`
+      }`,
     );
     return {
       notifError: [
@@ -148,7 +168,7 @@ export async function LoginAuth(
  * @returns an object of success, if the success is a truthy value, it comes with the object url that contains the url the user will be redirected at to fill up the user's info, and if the success value is falsey, it will return a error object that will be used by notification context
  */
 export async function SignUpAuth(
-  data: AuthSignUpType
+  data: AuthSignUpType,
 ): Promise<AuthResponseType<AuthSignUpType>> {
   try {
     // validating the all the value ({username, password, confirmPassword})
@@ -202,7 +222,7 @@ export async function SignUpAuth(
  */
 export const agriSignIn = async (
   id: string,
-  email: string
+  email: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const agriVal = await agriAuthQuery({ id, email });
@@ -218,7 +238,7 @@ export const agriSignIn = async (
     redirect(
       `/agriculturist?notif=${NotifToUriComponent([
         { message: "You've successfully logged in!!!", type: "success" },
-      ])}`
+      ])}`,
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;
@@ -264,7 +284,7 @@ export const agriSignUp = async ({
           message: "You've successfully created an account!!!",
           type: "success",
         },
-      ])}`
+      ])}`,
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;

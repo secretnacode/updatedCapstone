@@ -116,6 +116,7 @@ import {
   accountStatusStyle,
   baranggayList,
   capitalizeFirstLetter,
+  date30DaysAfter,
   DateToYYMMDD,
   handleFarmerNumber,
   NotifToUriComponent,
@@ -2894,53 +2895,57 @@ export const AgriculturistFarmerUserTable: FC<
 
                       <td>
                         <div className="flex flex-row justify-center items-center gap-2">
-                          {farmer.status === "delete" ? (
-                            <>
-                              {farmer.deletedAt ? (
-                                <>
-                                  <RecoverFarmerButton
+                          {farmer.status !== "delete" &&
+                            farmer.status !== "deletePermanently" && (
+                              <>
+                                <DynamicLink
+                                  baseLink="farmerUser"
+                                  dynamicId={farmer.farmerId}
+                                  label="Profile"
+                                  className="!bg-green-500 hover:!bg-green-600"
+                                />
+
+                                {farmer.status === "block" ? (
+                                  <UnblockFarmerButton
                                     farmerId={farmer.farmerId}
                                   />
-                                  <p className="flex flex-col justify-center items-start text-xs text-gray-500">
-                                    <span>Recoverable Until:</span>
-
-                                    <span className="font-bold text-gray-400">
-                                      {DateToYYMMDD(farmer.deletedAt)}
-                                    </span>
-                                  </p>
-                                </>
-                              ) : (
-                                <>
-                                  <DynamicLink
-                                    baseLink="farmerUser"
-                                    dynamicId={farmer.farmerId}
-                                    label="Profile"
-                                    className="!bg-green-500 hover:!bg-green-600"
+                                ) : (
+                                  <BlockFarmerButton
+                                    farmerId={farmer.farmerId}
                                   />
-                                </>
-                              )}
+                                )}
+
+                                <DeleteFarmerButton
+                                  farmerId={farmer.farmerId}
+                                  farmerName={farmer.farmerName}
+                                  path="/agriculturist/farmerUsers"
+                                />
+                              </>
+                            )}
+
+                          {farmer.status === "delete" && (
+                            <>
+                              <RecoverFarmerButton farmerId={farmer.farmerId} />
+                              <p className="flex flex-col justify-center items-start text-xs text-gray-500">
+                                <span>Recoverable Until:</span>
+
+                                <span className="font-bold text-gray-400">
+                                  {farmer.deletedAt &&
+                                    DateToYYMMDD(
+                                      date30DaysAfter(farmer.deletedAt),
+                                    )}
+                                </span>
+                              </p>
                             </>
-                          ) : (
+                          )}
+
+                          {farmer.status === "deletePermanently" && (
                             <>
                               <DynamicLink
                                 baseLink="farmerUser"
                                 dynamicId={farmer.farmerId}
                                 label="Profile"
                                 className="!bg-green-500 hover:!bg-green-600"
-                              />
-
-                              {farmer.status === "block" ? (
-                                <UnblockFarmerButton
-                                  farmerId={farmer.farmerId}
-                                />
-                              ) : (
-                                <BlockFarmerButton farmerId={farmer.farmerId} />
-                              )}
-
-                              <DeleteFarmerButton
-                                farmerId={farmer.farmerId}
-                                farmerName={farmer.farmerName}
-                                path="/agriculturist/farmerUsers"
                               />
                             </>
                           )}

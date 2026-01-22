@@ -34,6 +34,7 @@ export const farmerAuthStatus = async (): Promise<
   Record<farmerAuthStatusType, farmerAuthStatusType>
 > => ({
   delete: "delete",
+  deletePermanently: "deletePermanently",
   active: "active",
   block: "block",
 });
@@ -101,12 +102,10 @@ export const UserLogin = async (
   username: string,
 ): Promise<QueryUserLoginReturnType> => {
   try {
-    const del = (await farmerAuthStatus()).delete;
-
     // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     const query = await pool.query(
-      `select "authId", "password", "status" from capstone.auth where "username" = $1 and "status" <> $2`,
-      [username, del],
+      `select "authId", "password", "status", "deletedAt" from capstone.auth where "username" = $1`,
+      [username],
     );
 
     if (!query.rows[0])
@@ -436,28 +435,20 @@ export const recoverUser = async (farmerId: string, role: allUserRoleType) => {
 };
 
 /**
- * query for deleting a farmer user
- * @param farmerId id of the farmer
- * @param role role of the user who will perform the action
+ * query for deleting a farmer user permanently
  */
-export const deletUserPermanently = async (
-  farmerId: string,
-  role: allUserRoleType,
-) => {
+export const deletUserPermanently = async () => {
   try {
     const status = await farmerAuthStatus();
 
     await pool.query(
-      `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "authId" = $4`,
-      ["", await Hash(CreateUUID()), status.delete, farmerId],
+      `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "status" = $5 and "deletedAt" <= now() - interval '30 days'`,
+      ["", await Hash(CreateUUID()), status.deletePermanently, status.delete],
     );
   } catch (error) {
-    const message =
-      role === "admin" || role === "agriculturist"
-        ? `Unexpected error while deleting the user`
-        : `May pagkakamali na hindi inaasahang nang yari sa pag tatanggal ng account ng user`;
+    const message = `Unexpected error while deleting the user: ${(error as Error).message}`;
 
-    console.error(`${message}: ${(error as Error).message}`);
+    console.error(message);
 
     throw new Error(message);
   }
