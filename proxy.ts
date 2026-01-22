@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GetSession } from "./lib/session";
 import { NotifToUriComponent } from "./util/helper_function/reusableFunction";
 import { clerkMiddleware } from "@clerk/nextjs/server";
+import { CRON_API } from "./util/configuration";
 
 const authorizedPath = new Map<string, string[]>();
 authorizedPath.set(`farmer`, [`/farmer`]);
@@ -25,6 +26,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     if (
       publicPath.some((path) => pathname.startsWith(path)) ||
       pathname === "/"
+    )
+      return res;
+
+    // for cron api only so that if the request comes from the api, it will check if the request has a header and will check if its equall to the saved api in the env file
+    if (
+      pathname.startsWith("/api") &&
+      CRON_API === req.headers.get("authorization_key")
     )
       return res;
 

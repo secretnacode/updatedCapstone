@@ -74,6 +74,7 @@ import {
   agriLogoutPropType,
   getAllUserNotifClientToRenderType,
   lineGraphFilterType,
+  recoverUserPropType,
 } from "@/types";
 import {
   ApprovedFarmerAcc,
@@ -107,6 +108,8 @@ import {
   blockFarmerUser,
   unblockMyOrgMember,
   unblockFarmerUser,
+  recoverMyOrgMember,
+  recoverFarmerUser,
 } from "@/lib/server_action/user";
 import { LineChart, PieChart } from "@mui/x-charts";
 import {
@@ -193,7 +196,7 @@ export const MyProfileForm: FC<MyProfileFormPropType> = ({ userInfo }) => {
     useState<GetFarmerProfilePersonalInfoQueryReturnType>(userInfo);
 
   const handleChangeState = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setUserInfoState((prev) => ({
       ...prev,
@@ -388,7 +391,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
         setOtherOrg(true);
       else setOtherOrg(false);
     },
-    [isChangingVal]
+    [isChangingVal],
   );
 
   const handleReset = useCallback(() => {
@@ -435,7 +438,7 @@ export const MyOrganizationForm: FC<MyOrganizationFormPropType> = ({
       handleReset,
       handleDoneLoading,
       orgInfo,
-    ]
+    ],
   );
 
   return (
@@ -631,8 +634,8 @@ const DeleteUser: FC<DeleteUserPropType> = ({
                   : `Burahin ang farmer user na si `}
                 <span className="italic">{farmerName}</span>
                 {isEnglish
-                  ? `?. If the user was deleted, it will deleted permanently`
-                  : `?. Kapag ito ay binura mo, ito
+                  ? `?. If the user account did not recovered within 30 days, it will deleted permanently`
+                  : `?. Kapag ito ay hindi na-ibalik sa loon ng tatlongpung(30) araw, ito
         ay mawawala na ng tuluyan at hindi na maibabalik`}
               </>
             }
@@ -647,7 +650,7 @@ const DeleteUser: FC<DeleteUserPropType> = ({
             }}
             cancel={{ label: isEnglish ? "Back" : "Bumalik" }}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -718,6 +721,73 @@ export const DeleteFarmerButton: FC<deleteFarmerButtonPropType> = ({
       isEnglish={true}
       deleteOnClick={handleDeleteFarmerUser}
     />
+  );
+};
+
+const RecoverUser: FC<recoverUserPropType> = ({
+  isEnglish,
+  recoverOnClick,
+}) => {
+  return (
+    <button
+      className="slimer-button bg-green-500 hover:bg-green-600 text-white text-nowrap"
+      onClick={recoverOnClick}
+    >
+      {isEnglish ? "Recover" : "Ibalik"}
+    </button>
+  );
+};
+
+export const RecoverMyOrgMemberButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleRecoverOrgMember = async () => {
+    try {
+      handleIsLoading("Bina-balik na ang account....");
+
+      const recover = await recoverMyOrgMember(farmerId);
+
+      handleSetNotification(recover.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <RecoverUser isEnglish={false} recoverOnClick={handleRecoverOrgMember} />
+  );
+};
+
+export const RecoverFarmerButton: FC<blockMyOrgMemberButtonPropType> = ({
+  farmerId,
+}) => {
+  const { handleSetNotification } = useNotification();
+  const { handleIsLoading, handleDoneLoading } = useLoading();
+
+  const handleRecoverFarmerUser = async () => {
+    try {
+      handleIsLoading("Recovering the farmer account....");
+
+      const recover = await recoverFarmerUser(farmerId);
+
+      handleSetNotification(recover.notifMessage);
+    } catch (error) {
+      const err = error as Error;
+
+      handleSetNotification([{ message: err.message, type: "error" }]);
+    } finally {
+      handleDoneLoading();
+    }
+  };
+
+  return (
+    <RecoverUser isEnglish={true} recoverOnClick={handleRecoverFarmerUser} />
   );
 };
 
@@ -869,18 +939,18 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
           : curVal.dayOfWeek,
       ],
     }),
-    { data: [], label: [] }
+    { data: [], label: [] },
   );
 
   const month = data.month.reduce(
     (
       acc: barDataStateType,
-      curVal: getReportCountThisAndPrevMonthReturnType
+      curVal: getReportCountThisAndPrevMonthReturnType,
     ) => ({
       data: [...acc.data, Number(curVal.reportCount)],
       label: [...acc.label, curVal.weekLabel],
     }),
-    { data: [], label: [] }
+    { data: [], label: [] },
   );
 
   const year = data.year.reduce(
@@ -888,7 +958,7 @@ export const LineChartComponent: FC<LineChartComponentPropType> = ({
       data: [...acc.data, Number(curVal.reportCount)],
       label: [...acc.label, curVal.month],
     }),
-    { data: [], label: [] }
+    { data: [], label: [] },
   );
 
   const [barData, setBarData] = useState<barDataStateType>(week);
@@ -1091,7 +1161,7 @@ export const CreateResetPasswordButton: FC<
     return farmerData?.filter(
       (item) =>
         item.farmerName.toLowerCase().includes(searchItem) ||
-        item.username.toLowerCase().includes(searchItem)
+        item.username.toLowerCase().includes(searchItem),
     );
   }, [debounceVal, farmerData]);
 
@@ -1100,7 +1170,7 @@ export const CreateResetPasswordButton: FC<
       handleIsLoading("Creating a link for the farmer...");
 
       handleSetNotification(
-        (await createResetPassWordLink(farmerId)).notifMessage
+        (await createResetPassWordLink(farmerId)).notifMessage,
       );
     } catch (error) {
       console.error((error as Error).message);
@@ -1381,7 +1451,7 @@ export const PieChartCard: FC<PieChartCardPropType> = ({ data }) => {
 };
 
 export const TableWithFilter = <
-  T extends Record<string, string | number | Date | boolean | null>
+  T extends Record<string, string | number | Date | boolean | null>,
 >({
   obj,
   table,
@@ -1422,7 +1492,7 @@ export const TableWithFilter = <
 
   const handleFilterToggle = useCallback((col: string, option: allType) => {
     setFilterCol((prev) =>
-      prev?.val === option ? null : { col, val: option }
+      prev?.val === option ? null : { col, val: option },
     );
   }, []);
 
@@ -1452,7 +1522,7 @@ export const TableWithFilter = <
                   }`}
                 >
                   {additionalFilter.handleFilterLabel[col]!(
-                    handleFilterOptionLabel(option)
+                    handleFilterOptionLabel(option),
                   )}
                 </button>
 
@@ -1461,7 +1531,7 @@ export const TableWithFilter = <
                     <div className="ml-2 border-l" />
                   )}
               </div>
-            ))
+            )),
           )}
 
           {(searchVal || filterCol || sortCol || isFiltered?.isFilter) && (
@@ -1544,15 +1614,15 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
           memberReport.filter(
             (val) =>
               val.dayReported.toISOString().split("T")[0] ===
-              new Date().toISOString().split("T")[0]
-          )
+              new Date().toISOString().split("T")[0],
+          ),
         );
       else if (filter === "unvalidated")
         setTableList(memberReport.filter((val) => !val.verificationStatus));
 
       setIsFiltered(true);
     },
-    [memberReport]
+    [memberReport],
   );
 
   const handleReportIdParam = useCallback(
@@ -1563,7 +1633,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
 
       setIsFiltered(true);
     },
-    [memberReport]
+    [memberReport],
   );
 
   useEffect(() => {
@@ -1593,10 +1663,10 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
         additionalFilter={{
           filterBy: {
             reportType: Array.from(
-              new Set(memberReport.map((val) => val.reportType))
+              new Set(memberReport.map((val) => val.reportType)),
             ),
             verificationStatus: Array.from(
-              new Set(memberReport.map((val) => val.verificationStatus))
+              new Set(memberReport.map((val) => val.verificationStatus)),
             ),
           },
           handleFilterLabel: {
@@ -1786,7 +1856,7 @@ export const ValidateReportTable: FC<validateReportTablePropType> = ({
             }
             myReport={false}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -1807,7 +1877,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
 
       setIsFiltered(true);
     },
-    [orgMember]
+    [orgMember],
   );
 
   const handleNewUserParam = useCallback(
@@ -1816,7 +1886,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
 
       setIsFiltered(true);
     },
-    [orgMember]
+    [orgMember],
   );
 
   useEffect(() => {
@@ -1941,8 +2011,8 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                     member.status === "delete"
                       ? "bg-red-50 hover:!bg-red-100/50"
                       : member.status === "block"
-                      ? "bg-amber-50 hover:!bg-amber-100/50"
-                      : ""
+                        ? "bg-amber-50 hover:!bg-amber-100/50"
+                        : ""
                   } `}
                 >
                   <td className=" text-gray-900 font-medium">
@@ -2009,6 +2079,7 @@ export const OrgMemberTable: FC<orgMemberTablePropType> = ({ orgMember }) => {
                       verificationStatus={member.verified}
                       status={member.status}
                       farmerName={member.farmerName}
+                      deletedAt={member.deletedAt}
                     />
                   </td>
                 </tr>
@@ -2035,15 +2106,15 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
           report.filter(
             (val) =>
               val.dayReported.toISOString().split("T")[0] ===
-              new Date().toISOString().split("T")[0]
-          )
+              new Date().toISOString().split("T")[0],
+          ),
         );
       else if (filter === "unvalidated")
         setTableList(report.filter((val) => !val.verificationStatus));
 
       setIsFiltered(true);
     },
-    [report]
+    [report],
   );
 
   useEffect(() => {
@@ -2084,7 +2155,7 @@ export const MyReportTable: FC<myReportTablePropType> = ({ report, work }) => {
       filterBy: {
         reportType: Array.from(new Set(report.map((val) => val.reportType))),
         verificationStatus: Array.from(
-          new Set(report.map((val) => val.verificationStatus))
+          new Set(report.map((val) => val.verificationStatus)),
         ),
       },
       handleFilterLabel: {
@@ -2289,13 +2360,13 @@ export const AgriculturistFarmerReporTable: FC<
           report.filter(
             (val) =>
               val.dayReported.toISOString().split("T")[0] ===
-              new Date().toISOString().split("T")[0]
-          )
+              new Date().toISOString().split("T")[0],
+          ),
         );
 
       setIsFiltered(true);
     },
-    [report]
+    [report],
   );
 
   const handleReportIdParam = useCallback(
@@ -2306,7 +2377,7 @@ export const AgriculturistFarmerReporTable: FC<
 
       setIsFiltered(true);
     },
-    [report]
+    [report],
   );
 
   useEffect(() => {
@@ -2452,10 +2523,10 @@ export const AgriculturistFarmerReporTable: FC<
         additionalFilter={{
           filterBy: {
             verificationStatus: Array.from(
-              new Set(report.map((val) => val.verificationStatus))
+              new Set(report.map((val) => val.verificationStatus)),
             ),
             reportType: Array.from(
-              new Set(report.map((val) => val.reportType))
+              new Set(report.map((val) => val.reportType)),
             ),
           },
 
@@ -2588,7 +2659,7 @@ export const AgriculturistFarmerReporTable: FC<
                       <div>
                         <p
                           className={`${reportTypeColor(
-                            report.reportType
+                            report.reportType,
                           )} text-xs py-1 px-3 rounded-2xl tracking-wider`}
                         >
                           {capitalizeFirstLetter(report.reportType)}
@@ -2630,7 +2701,7 @@ export const AgriculturistFarmerReporTable: FC<
             }
             myReport={false}
           />,
-          document.body
+          document.body,
         )}
     </div>
   );
@@ -2664,7 +2735,7 @@ export const AgriculturistFarmerUserTable: FC<
           filterBy: {
             orgRole: Array.from(new Set(farmer.map((val) => val.orgRole))),
             orgName: Array.from(
-              new Set(farmer.map((val) => val.orgName).filter((val) => val))
+              new Set(farmer.map((val) => val.orgName).filter((val) => val)),
             ),
             status: Array.from(new Set(farmer.map((val) => val.status))),
           },
@@ -2762,8 +2833,8 @@ export const AgriculturistFarmerUserTable: FC<
                         farmer.status === "delete"
                           ? "bg-red-50 hover:!bg-red-100/50"
                           : farmer.status === "block"
-                          ? "bg-amber-50 hover:!bg-amber-100/50"
-                          : ""
+                            ? "bg-amber-50 hover:!bg-amber-100/50"
+                            : ""
                       }`}
                     >
                       <td className=" text-gray-900 font-medium ">
@@ -2805,7 +2876,7 @@ export const AgriculturistFarmerUserTable: FC<
                         <div>
                           <p>
                             {capitalizeFirstLetter(
-                              farmer.orgRole ?? "No organization"
+                              farmer.orgRole ?? "No organization",
                             )}
                           </p>
                         </div>
@@ -2823,15 +2894,41 @@ export const AgriculturistFarmerUserTable: FC<
 
                       <td>
                         <div className="flex flex-row justify-center items-center gap-2">
-                          <DynamicLink
-                            baseLink="farmerUser"
-                            dynamicId={farmer.farmerId}
-                            label="Profile"
-                            className="!bg-green-500 hover:!bg-green-600"
-                          />
-
-                          {farmer.status !== "delete" && (
+                          {farmer.status === "delete" ? (
                             <>
+                              {farmer.deletedAt ? (
+                                <>
+                                  <RecoverFarmerButton
+                                    farmerId={farmer.farmerId}
+                                  />
+                                  <p className="flex flex-col justify-center items-start text-xs text-gray-500">
+                                    <span>Recoverable Until:</span>
+
+                                    <span className="font-bold text-gray-400">
+                                      {DateToYYMMDD(farmer.deletedAt)}
+                                    </span>
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <DynamicLink
+                                    baseLink="farmerUser"
+                                    dynamicId={farmer.farmerId}
+                                    label="Profile"
+                                    className="!bg-green-500 hover:!bg-green-600"
+                                  />
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <DynamicLink
+                                baseLink="farmerUser"
+                                dynamicId={farmer.farmerId}
+                                label="Profile"
+                                className="!bg-green-500 hover:!bg-green-600"
+                              />
+
                               {farmer.status === "block" ? (
                                 <UnblockFarmerButton
                                   farmerId={farmer.farmerId}
@@ -2887,7 +2984,7 @@ export const AgriculturistValidateFarmerTable: FC<
 
       setIsFiltered(true);
     },
-    [farmer]
+    [farmer],
   );
 
   const handleNewUserParam = useCallback(
@@ -2896,7 +2993,7 @@ export const AgriculturistValidateFarmerTable: FC<
 
       setIsFiltered(true);
     },
-    [farmer]
+    [farmer],
   );
 
   useEffect(() => {
@@ -2925,13 +3022,13 @@ export const AgriculturistValidateFarmerTable: FC<
         filterBy: {
           orgRole: Array.from(
             new Set(
-              farmer.map((val) => val.orgRole).filter((val) => val !== null)
-            )
+              farmer.map((val) => val.orgRole).filter((val) => val !== null),
+            ),
           ),
           orgName: Array.from(
             new Set(
-              farmer.map((val) => val.orgName).filter((val) => val !== null)
-            )
+              farmer.map((val) => val.orgName).filter((val) => val !== null),
+            ),
           ),
         },
 
@@ -3036,7 +3133,7 @@ export const AgriculturistValidateFarmerTable: FC<
                     <div>
                       <p>
                         {capitalizeFirstLetter(
-                          farmer.orgRole ?? "No organization"
+                          farmer.orgRole ?? "No organization",
                         )}
                       </p>
                     </div>
@@ -3094,8 +3191,8 @@ export const AgriculturistFarmerOrgTable: FC<
         filterBy: {
           orgName: Array.from(
             new Set(
-              orgVal.map((val) => val.orgName).filter((val) => val !== null)
-            )
+              orgVal.map((val) => val.orgName).filter((val) => val !== null),
+            ),
           ),
         },
 
@@ -3562,7 +3659,7 @@ const FarmerLogoutButton: FC<agriLogoutButtonPropType> = ({
             proceed={{ label: "Mag-log out" }}
             cancel={{ label: "Kanselahin" }}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -3596,7 +3693,7 @@ const FarmerLogoutLogoButton: FC<agriLogoutButtonPropType> = ({
             proceed={{ label: "Mag-log out" }}
             cancel={{ label: "Kanselahin" }}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -3676,7 +3773,7 @@ const AgriLogoutButton: FC<agriLogoutButtonPropType> = ({
             proceed={{ label: "Log out" }}
             cancel={{ label: "Cancel" }}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -3710,7 +3807,7 @@ const AgriLogoutLogoButton: FC<agriLogoutButtonPropType> = ({
             proceed={{ label: "Log out" }}
             cancel={{ label: "Cancel" }}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -3722,7 +3819,7 @@ const ColCell = memo(
       <th key={index + "cell" + uniqueName} scope="col" className="p-4">
         <div className="" />
       </th>
-    ))
+    )),
 );
 ColCell.displayName = "ColCell";
 
@@ -3734,7 +3831,7 @@ const RowCell = memo(({ rows, cols }: { rows: unknown[]; cols: unknown[] }) =>
     >
       <ColCell cols={cols} uniqueName="rowNum" />
     </tr>
-  ))
+  )),
 );
 RowCell.displayName = "RowCell";
 
@@ -4078,7 +4175,7 @@ export const AgriculturistCreateLinkTable: FC<{
                         }`}
                       >
                         {capitalizeFirstLetter(
-                          linkVal.isUsed ? "Used" : linkVal.status
+                          linkVal.isUsed ? "Used" : linkVal.status,
                         )}
                       </p>
                     </div>
@@ -4224,7 +4321,7 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
   const handleLink = (
     actionId: string,
     actionType: notifActionType,
-    notifType: notifType
+    notifType: notifType,
   ) => {
     if (isEnglish) {
       const base = "/agriculturist";
@@ -4246,7 +4343,7 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
   const handleNotifIsView = async (
     notifId: string,
     isRead: boolean,
-    link: string
+    link: string,
   ) => {
     try {
       if (!isRead) {
@@ -4257,8 +4354,8 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
 
         setNotif(
           notif.map((val) =>
-            val.notifId === notifId ? { ...val, isRead: true } : val
-          )
+            val.notifId === notifId ? { ...val, isRead: true } : val,
+          ),
         );
       }
 
@@ -4306,7 +4403,7 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
 
   const isReadLenght = useMemo(
     () => notif.filter((val) => !val.isRead).length,
-    [notif]
+    [notif],
   );
 
   return (
@@ -4354,8 +4451,8 @@ export const HeaderNotification: FC<headerNotificationPropType> = ({
                           handleLink(
                             val.actionId,
                             val.actionType,
-                            val.notifType
-                          )
+                            val.notifType,
+                          ),
                         )
                       }
                     >

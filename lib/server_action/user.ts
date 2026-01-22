@@ -20,6 +20,7 @@ import {
   isFarmer,
   isFarmerLeader,
   isFarmerVerified,
+  recoverUser,
   updatePassword,
 } from "@/util/queries/user";
 import { ProtectedAction } from "../protectedActions";
@@ -76,16 +77,16 @@ import { redirect } from "next/navigation";
  * @returns notifMessage that will be consumed by the notification provider
  */
 export const DeleteMyOrgMember = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { userId, work } = await ProtectedAction(
-      "delete:farmer:org:member:user"
+      "delete:farmer:org:member:user",
     );
 
     const checkAuthorization = await farmerLeaderValidationForImportantAction(
       farmerId,
-      userId
+      userId,
     );
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
@@ -117,7 +118,7 @@ export const DeleteMyOrgMember = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May hindi inaasahang pag kakamali habang tinatanggal ang farmer: ${err}`
+      `May hindi inaasahang pag kakamali habang tinatanggal ang farmer: ${err}`,
     );
     return {
       success: false,
@@ -133,7 +134,7 @@ export const DeleteMyOrgMember = async (
  */
 export const DeleteFarmerUser = async (
   farmerId: string,
-  path: pathToRevalidateAfterAgriDeleteFarmer
+  path: pathToRevalidateAfterAgriDeleteFarmer,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { work } = await ProtectedAction("delete:farmer:user");
@@ -169,21 +170,121 @@ export const DeleteFarmerUser = async (
 };
 
 /**
+ * server action for recovering the deleted account of a user
+ * @param farmerId
+ * @returns
+ */
+export const recoverMyOrgMember = async (
+  farmerId: string,
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { userId, work } = await ProtectedAction(
+      "update:farmer:org:member:user",
+    );
+
+    const checkAuthorization = await farmerLeaderValidationForImportantAction(
+      farmerId,
+      userId,
+    );
+
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    if (!(await CheckMyMemberquery(farmerId, userId)))
+      return {
+        success: false,
+        notifMessage: [
+          {
+            message: "Ang user na ibabalik mo ay hindi mo kamiyembro!!!",
+            type: "warning",
+          },
+        ],
+      };
+
+    await recoverUser(farmerId, work);
+
+    revalidatePath(`/farmerLeader/orgMember`);
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Matagumpay ang pag babalik ng account ng farmer",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+    console.log(
+      `May hindi inaasahang pag kakamali habang ibinabalik ang farmer account: ${err}`,
+    );
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
+ * recovering the farmer user account
+ * @param farmerId id of the farmer to be recover
+ * @returns
+ */
+export const recoverFarmerUser = async (
+  farmerId: string,
+): Promise<serverActionNormalReturnType> => {
+  try {
+    const { work } = await ProtectedAction("update:farmer:user");
+
+    const checkAuthorization = await agriValidationForImportantAction(farmerId);
+
+    if (!checkAuthorization.success)
+      return { success: false, notifMessage: checkAuthorization.notifError };
+
+    await recoverUser(farmerId, work);
+
+    revalidatePath(`/agriculturist/farmerUsers`);
+
+    console.log("Recovering farmer by admin");
+
+    return {
+      success: true,
+      notifMessage: [
+        {
+          message: "Successfully recovered the farmer account",
+          type: "success",
+        },
+      ],
+    };
+  } catch (error) {
+    const err = error as Error;
+
+    console.log(`Unexpected error occured while recovering the farmer: ${err}`);
+
+    return {
+      success: false,
+      notifMessage: [{ message: err.message, type: "error" }],
+    };
+  }
+};
+
+/**
  * server action for blocking the org member of the leader
  * @param farmerId id of the member
  * @returns
  */
 export const blockMyOrgMember = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { userId, work } = await ProtectedAction(
-      "update:farmer:org:member:user"
+      "update:farmer:org:member:user",
     );
 
     const checkAuthorization = await farmerLeaderValidationForImportantAction(
       farmerId,
-      userId
+      userId,
     );
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
@@ -215,7 +316,7 @@ export const blockMyOrgMember = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May hindi inaasahang pag kakamali habang bino-block ang farmer account: ${err}`
+      `May hindi inaasahang pag kakamali habang bino-block ang farmer account: ${err}`,
     );
     return {
       success: false,
@@ -230,7 +331,7 @@ export const blockMyOrgMember = async (
  * @returns
  */
 export const blockFarmerUser = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { work } = await ProtectedAction("update:farmer:user");
@@ -250,7 +351,7 @@ export const blockFarmerUser = async (
       success: true,
       notifMessage: [
         {
-          message: "Successfully blocked the farmer account",
+          message: "Successfully block the farmer account",
           type: "success",
         },
       ],
@@ -273,16 +374,16 @@ export const blockFarmerUser = async (
  * @returns
  */
 export const unblockMyOrgMember = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { userId, work } = await ProtectedAction(
-      "update:farmer:org:member:user"
+      "update:farmer:org:member:user",
     );
 
     const checkAuthorization = await farmerLeaderValidationForImportantAction(
       farmerId,
-      userId
+      userId,
     );
     if (!checkAuthorization.success)
       return { success: false, notifMessage: checkAuthorization.notifError };
@@ -314,7 +415,7 @@ export const unblockMyOrgMember = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May hindi inaasahang pag kakamali habang inu-unblock ang farmer account: ${err}`
+      `May hindi inaasahang pag kakamali habang inu-unblock ang farmer account: ${err}`,
     );
     return {
       success: false,
@@ -329,7 +430,7 @@ export const unblockMyOrgMember = async (
  * @returns
  */
 export const unblockFarmerUser = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<serverActionNormalReturnType> => {
   try {
     const { work } = await ProtectedAction("update:farmer:user");
@@ -347,7 +448,7 @@ export const unblockFarmerUser = async (
       success: true,
       notifMessage: [
         {
-          message: "Successfully blocked the farmer account",
+          message: "Successfully unblock the farmer account",
           type: "success",
         },
       ],
@@ -379,7 +480,7 @@ export const newUserValNeedInfo =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang mga organisasyon: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang mga organisasyon: ${err.message}`,
       );
       return {
         success: false,
@@ -405,7 +506,7 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May Hindi inaasahang pag kakamali habang chinecheck and farmer user: ${err.message}`
+      `May Hindi inaasahang pag kakamali habang chinecheck and farmer user: ${err.message}`,
     );
     return {
       success: false,
@@ -428,7 +529,7 @@ export const checkFarmerRole = async (): Promise<checkFarmerRoleReturnType> => {
  */
 const reportSequenceAndUserLoc = async (
   userId: string,
-  work: allUserRoleType
+  work: allUserRoleType,
 ): Promise<reportSequenceAndUserLocReturnType> => {
   try {
     const [reportSequence, userLocation] = await Promise.all([
@@ -451,7 +552,7 @@ const reportSequenceAndUserLoc = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`
+      `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`,
     );
     return {
       success: false,
@@ -473,7 +574,7 @@ export const getFamerLeaderDashboardData =
   async (): Promise<getFamerLeaderDashboardDataReturnType> => {
     try {
       const { userId, work } = await ProtectedAction(
-        "read:farmer:member:report"
+        "read:farmer:member:report",
       );
 
       const [
@@ -507,7 +608,7 @@ export const getFamerLeaderDashboardData =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng mga ulat: ${err.message}`,
       );
       return {
         success: false,
@@ -558,7 +659,7 @@ export const getFarmerDashboardData =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng iyong mga ulat: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon ng iyong mga ulat: ${err.message}`,
       );
       return {
         success: false,
@@ -615,7 +716,7 @@ export const getAgriculturistDashboardData =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang kinukuha ang impormasyon: ${err.message}`,
       );
       return {
         success: false,
@@ -645,7 +746,7 @@ export const getAllFarmerForResetPass =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `Error occured while fetching all the farmer's data for resetting password: ${err.message}`
+        `Error occured while fetching all the farmer's data for resetting password: ${err.message}`,
       );
       return {
         success: false,
@@ -669,7 +770,7 @@ export const getAllFarmerForResetPass =
  */
 const farmerAndFarmerLeaderAuthorization = async (
   farmerId: string,
-  role: allUserRoleType
+  role: allUserRoleType,
 ): Promise<serverActionOptionalNotifMessage> => {
   try {
     if (!["farmer", "leader"].includes(role))
@@ -709,7 +810,7 @@ const farmerAndFarmerLeaderAuthorization = async (
   } catch (error) {
     const err = error as Error;
     console.log(
-      `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+      `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`,
     );
     return {
       success: false,
@@ -740,7 +841,7 @@ export const farmerAuthorization =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`,
       );
       return {
         success: false,
@@ -762,7 +863,7 @@ export const farmerLeaderAuthorization =
   async (): Promise<serverActionOptionalNotifMessage> => {
     try {
       const { work, userId } = await ProtectedAction(
-        "authorization:farmer:leader"
+        "authorization:farmer:leader",
       );
 
       const auth = await farmerAndFarmerLeaderAuthorization(userId, work);
@@ -783,7 +884,7 @@ export const farmerLeaderAuthorization =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`
+        `May Hindi inaasahang pag kakamali habang chinecheck and farmer: ${err.message}`,
       );
       return {
         success: false,
@@ -832,7 +933,7 @@ export const agriculturistAuthorization =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `Error occured while checking if the user is authorized: ${err.message}`
+        `Error occured while checking if the user is authorized: ${err.message}`,
       );
       return {
         success: false,
@@ -866,7 +967,7 @@ export const adminAgriAuthorization =
     } catch (error) {
       const err = error as Error;
       console.log(
-        `Error occured while checking if the user is authorized: ${err.message}`
+        `Error occured while checking if the user is authorized: ${err.message}`,
       );
       return {
         success: false,
@@ -901,7 +1002,7 @@ export const changeFarmerPass = async ({
 
     const { valid, formError } = ZodValidateForm(
       { currentPass, newPass, confirmNewPass },
-      changePasswordSchema
+      changePasswordSchema,
     );
     if (!valid)
       return { success: false, formError, notifMessage: missingFormValNotif() };
@@ -910,9 +1011,7 @@ export const changeFarmerPass = async ({
     if (
       !(await ComparePassword(
         currentPass,
-        (
-          await getPassword(userId)
-        ).password
+        (await getPassword(userId)).password,
       ))
     )
       return {
@@ -935,7 +1034,7 @@ export const changeFarmerPass = async ({
   } catch (error) {
     const err = error as Error;
     console.log(
-      `Error occured while checking if the user is authorized: ${err.message}`
+      `Error occured while checking if the user is authorized: ${err.message}`,
     );
     return {
       success: false,
@@ -956,7 +1055,7 @@ export const farmerLogout = async (): Promise<ServerActionFailBaseType> => {
     redirect(
       `/?notif=${NotifToUriComponent([
         { message: "Matagumpay ang iyong pag lologout", type: "success" },
-      ])}`
+      ])}`,
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;
@@ -1052,7 +1151,7 @@ export const checkUserAlreadyLogin =
       redirect(
         `/farmer/?notif=${NotifToUriComponent([
           { message: "Matagumpay ang iyong pag lologin", type: "success" },
-        ])}`
+        ])}`,
       );
     } catch (error) {
       if (isRedirectError(error)) throw error;

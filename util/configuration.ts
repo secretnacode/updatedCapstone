@@ -16,3 +16,5 @@ cloudinary.config({
 });
 
 export { cloudinary };
+
+export const CRON_API = process.env.CRON_JOB_API;

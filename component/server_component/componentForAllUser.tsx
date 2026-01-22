@@ -53,6 +53,7 @@ import {
   BackButton,
   BlockMyOrgMemberButton,
   UnblockMyOrgMemberButton,
+  RecoverMyOrgMemberButton,
 } from "../client_component/componentForAllUser";
 import { AvailableOrg } from "@/lib/server_action/org";
 import Link from "next/link";
@@ -131,7 +132,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
                     <span className="text-4xl font-bold">
                       {getInitials(
                         userFarmerInfo.farmerInfo.farmerFirstName,
-                        userFarmerInfo.farmerInfo.farmerLastName
+                        userFarmerInfo.farmerInfo.farmerLastName,
                       )}
                     </span>
                   </div>
@@ -188,7 +189,7 @@ export const FarmerUserProfile: FC<FarmerUserProfilePropType> = async ({
                     ) : (
                       <p
                         className={`rounded-lg px-2 py-2 flex justify-center items-center gap-2 text-sm border font-medium ${accountStatusStyle(
-                          userFarmerInfo.farmerInfo.status
+                          userFarmerInfo.farmerInfo.status,
                         )}`}
                       >
                         {userFarmerInfo.farmerInfo.status === "block" ? (
@@ -244,19 +245,44 @@ export const FarmerOrgMemberAction: FC<farmerOrgMemberActionPropType> = ({
   verificationStatus,
   farmerName,
   status,
+  deletedAt,
 }) => {
   return (
     <div className="flex justify-center items-center gap-2">
-      <DynamicLink
-        baseLink="farmerUser"
-        dynamicId={farmerId}
-        className={
-          verificationStatus ? "!bg-green-500 hover:!bg-green-600" : ""
-        }
-      />
-
-      {status !== "delete" && (
+      {status === "delete" ? (
         <>
+          {deletedAt ? (
+            <>
+              <RecoverMyOrgMemberButton farmerId={farmerId} />
+              <p className="flex flex-col justify-center items-start text-xs text-gray-500">
+                <span>Maibabalik Hanggang:</span>
+
+                <span className="font-bold text-gray-400">
+                  {DateToYYMMDD(deletedAt)}
+                </span>
+              </p>
+            </>
+          ) : (
+            <>
+              <DynamicLink
+                baseLink="farmerUser"
+                dynamicId={farmerId}
+                label="Profile"
+                className="!bg-green-500 hover:!bg-green-600"
+              />
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          <DynamicLink
+            baseLink="farmerUser"
+            dynamicId={farmerId}
+            className={
+              verificationStatus ? "!bg-green-500 hover:!bg-green-600" : ""
+            }
+          />
+
           {verificationStatus ? (
             status === "block" ? (
               <UnblockMyOrgMemberButton farmerId={farmerId} />
@@ -478,7 +504,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         inputDisable={true}
         inputName={"orgId"}
         inputDefaultValue={
-          userOrgInfo?.orgName ?? isEnglish
+          (userOrgInfo?.orgName ?? isEnglish)
             ? "Not in any Organization"
             : "Wala sa organisasyon"
         }
@@ -494,7 +520,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         inputDisable={true}
         inputName={"leaderName"}
         inputDefaultValue={
-          userOrgInfo?.farmerLeader ?? isEnglish
+          (userOrgInfo?.farmerLeader ?? isEnglish)
             ? "Not in any Organization"
             : "Wala sa organisasyon"
         }
@@ -508,7 +534,7 @@ export const ViewUserOrganizationInfo: FC<UserOrganizationInfoFormPropType> = ({
         inputDisable={true}
         inputName={"orgRole"}
         inputDefaultValue={
-          userOrgInfo?.orgRole ?? userOrgInfo?.farmerLeader ?? isEnglish
+          (userOrgInfo?.orgRole ?? userOrgInfo?.farmerLeader ?? isEnglish)
             ? "Not in any Organization"
             : "Wala sa organisasyon"
         }
@@ -526,7 +552,7 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
   const cropStatus = (
     crop: cropStatusType,
     datePlanted: Date,
-    dateHarvested: Date
+    dateHarvested: Date,
   ) =>
     determineCropStatus({
       cropStatus: crop,
@@ -538,15 +564,15 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
   const gradientStyle = (
     crop: cropStatusType,
     datePlanted: Date,
-    dateHarvested: Date
+    dateHarvested: Date,
   ) => {
     const fiveDaysLater = 1000 * 60 * 60 * 24 * 5;
 
     const planted5DaysAgo = new Date(
-      new Date(datePlanted).getTime() + fiveDaysLater
+      new Date(datePlanted).getTime() + fiveDaysLater,
     );
     const harvested5DaysAgo = new Date(
-      new Date(dateHarvested).getTime() + fiveDaysLater
+      new Date(dateHarvested).getTime() + fiveDaysLater,
     );
 
     if (!datePlanted || !dateHarvested) return "from-gray-100";
@@ -574,7 +600,7 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
           const { className, status } = cropStatus(
             crop.cropStatus,
             crop.datePlanted,
-            crop.dateHarvested
+            crop.dateHarvested,
           );
 
           return (
@@ -583,7 +609,7 @@ export const ViewUserCropInfo: FC<viewUserCropInfoPropType> = ({
               className={`border border-gray-300/70 rounded-md p-6 bg-gradient-to-br ${gradientStyle(
                 crop.cropStatus,
                 crop.datePlanted,
-                crop.dateHarvested
+                crop.dateHarvested,
               )} to-white hover:shadow-md transition-shadow`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -723,7 +749,7 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
               <p className="card-label">
                 {translateWeatherConditionToTagalog(
                   currentWeather.weatherData.condition.text,
-                  isEnglish
+                  isEnglish,
                 )}
               </p>
             </div>
@@ -745,15 +771,15 @@ export const WeatherComponent: FC<WeatherComponentPropType> = async ({
                 <span className="text-gray-700">
                   {ReadableDateFormat(
                     new Date(
-                      currentWeather.weatherData.last_updated.split(" ")[0]
-                    )
+                      currentWeather.weatherData.last_updated.split(" ")[0],
+                    ),
                   )}
                 </span>
               </p>
 
               <span className="text-nowrap inline-flex">
                 {converTimeToAMPM(
-                  currentWeather.weatherData.last_updated.split(" ")[1]
+                  currentWeather.weatherData.last_updated.split(" ")[1],
                 )}
               </span>
             </div>
@@ -1081,7 +1107,7 @@ export const LatestReport = async () => {
                   <div className="flex items-center justify-evenly gap-2">
                     <div
                       className={`flex-shrink-0 p-2 rounded-lg ${reportTypeColor(
-                        val.reportType
+                        val.reportType,
                       )} flex items-center justify-center`}
                     >
                       {reportTypeIcon(val.reportType)}

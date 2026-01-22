@@ -219,12 +219,11 @@ export type HandleInsertCropType = {
   farmArea: string;
 };
 
-export type NavbarType =
-  | {
-      page: string;
-      pageLabel: string;
-      logo: LucideIcon;
-    }[];
+export type NavbarType = {
+  page: string;
+  pageLabel: string;
+  logo: LucideIcon;
+}[];
 
 export type GetUserReportReturnType = {
   reportId: string;
@@ -388,6 +387,7 @@ export type GetFarmerOrgMemberQueryReturnType = {
   verified: boolean;
   cropNum: number;
   status: farmerAuthStatusType;
+  deletedAt?: Date;
 };
 
 export type GetFarmerOrgMemberReturnType =
@@ -765,6 +765,7 @@ export type ViewAllVerifiedFarmerUserQueryReturnType = {
   orgRole: string;
   orgName: string;
   status: farmerAuthStatusType;
+  deletedAt?: Date;
 };
 
 export type ViewAllValidatedFarmerUserReturnType =
@@ -1022,7 +1023,7 @@ export type FormCropModalPropType = {
   hideCropModal: () => void;
   formSubmit: (
     e: FormEvent<HTMLFormElement>,
-    cropInfo: FarmerSecondDetailFormType
+    cropInfo: FarmerSecondDetailFormType,
   ) => void;
   formTitle: string;
   buttonLabel: { submit: string; cancel: string };
@@ -1043,7 +1044,7 @@ export type EditCropModalPropType = {
 export type CropFormPropType = {
   currentCrops: FarmerSecondDetailFormType;
   handleChangeVal: (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
   mapRef: Ref<MapRef>;
   mapHeight: string | number;
@@ -1967,6 +1968,11 @@ export type blockUserPropType = {
   blockOnClick: () => void;
 };
 
+export type recoverUserPropType = {
+  isEnglish: boolean;
+  recoverOnClick: () => void;
+};
+
 export type blockMyOrgMemberButtonPropType = { farmerId: string };
 
 export type farmerOrgMemberActionPropType = {
@@ -1974,6 +1980,7 @@ export type farmerOrgMemberActionPropType = {
   verificationStatus: boolean;
   farmerName: string;
   status: farmerAuthStatusType;
+  deletedAt?: Date;
 };
 
 export type authBaseDesignPropType = { isEnglish: boolean } & ChildrenPropType;

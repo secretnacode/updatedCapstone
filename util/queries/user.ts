@@ -49,17 +49,17 @@ export const CheckUsername = async (username: string): Promise<boolean> => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.auth where username = $1)`,
-        [username]
+        [username],
       )
     ).rows[0].exists;
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag susuri ng username ng user: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag susuri ng username ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag susuri ng username ng user`,
     );
   }
 };
@@ -77,16 +77,16 @@ export const InsertNewUser = async (data: NewUserType): Promise<void> => {
 
     await pool.query(
       `insert into capstone.auth ("authId", "username", "password", "status") values ($1, $2, $3, $4)`,
-      [data.userId, data.username, data.password, active]
+      [data.userId, data.username, data.password, active],
     );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag lalagay ng impormasyon sa database: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag lalagay ng impormasyon sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag lalagay ng impormasyon sa database`,
     );
   }
 };
@@ -98,7 +98,7 @@ export const InsertNewUser = async (data: NewUserType): Promise<void> => {
  * @throws {Error} if the network is request fails
  */
 export const UserLogin = async (
-  username: string
+  username: string,
 ): Promise<QueryUserLoginReturnType> => {
   try {
     const del = (await farmerAuthStatus()).delete;
@@ -106,7 +106,7 @@ export const UserLogin = async (
     // returns a boolean that indicates whether the username exists in the database, the 1 in the select subquery will be returned if the where clause is satisfied, and if the 1 is returned it means it was existing
     const query = await pool.query(
       `select "authId", "password", "status" from capstone.auth where "username" = $1 and "status" <> $2`,
-      [username, del]
+      [username, del],
     );
 
     if (!query.rows[0])
@@ -123,10 +123,10 @@ export const UserLogin = async (
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`,
     );
   }
 };
@@ -137,23 +137,23 @@ export const UserLogin = async (
  * @returns farmerId
  */
 export const getFarmerIdByAuthId = async (
-  authId: string
+  authId: string,
 ): Promise<{ farmerId: string; orgRole: string }> => {
   try {
     return (
       await pool.query(
         `select f."farmerId", f."orgRole" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where a."authId" = $1`,
-        [authId]
+        [authId],
       )
     ).rows[0];
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag lologin ng user`,
     );
   }
 };
@@ -164,7 +164,7 @@ export const getFarmerIdByAuthId = async (
  * @returns the farmerId that was inserted
  */
 export const FarmerFirstDetailQuery = async (
-  data: FarmerFirstDetailType
+  data: FarmerFirstDetailType,
 ): Promise<void> => {
   try {
     await pool.query(
@@ -182,16 +182,16 @@ export const FarmerFirstDetailQuery = async (
         data.verified,
         data.dateCreated,
         data.countFamilyMember,
-      ]
+      ],
     );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag sisign up ng user: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag sisign up ng user`
+      `May pagkakamali na hindi inaasahang nang yari sa pag sisign up ng user`,
     );
   }
 };
@@ -202,23 +202,23 @@ export const FarmerFirstDetailQuery = async (
  * @returns the role of the farmer user
  */
 export const GetFarmerRole = async (
-  userId: string
+  userId: string,
 ): Promise<{ orgRole: farmerRoleInDbType }> => {
   try {
     return (
       await pool.query(
         `select "orgRole" from capstone.farmer where "farmerId" = $1`,
-        [userId]
+        [userId],
       )
     ).rows[0];
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng magsasaka: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng magsasaka`,
     );
   }
 };
@@ -229,23 +229,23 @@ export const GetFarmerRole = async (
  * @returns the role of the agriculturist user
  */
 export const GetAgriRole = async (
-  userId: string
+  userId: string,
 ): Promise<{ agriRole: agriRoleType }> => {
   try {
     return (
       await pool.query(
         `select "agriRole" from capstone.agriculturist where "agriId" = $1`,
-        [userId]
+        [userId],
       )
     ).rows[0];
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng agriculturist: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng agriculturist`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng role ng agriculturist`,
     );
   }
 };
@@ -256,15 +256,15 @@ export const GetAgriRole = async (
  * @returns all the user info that is within the organization
  */
 export const GetFarmerOrgMemberQuery = async (
-  leaderId: string
+  leaderId: string,
 ): Promise<GetFarmerOrgMemberQueryReturnType[]> => {
   try {
     const status = await farmerAuthStatus();
 
     return (
       await pool.query(
-        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum", a."status" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId" join capstone.auth a on f."farmerId" = a."authId" where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId", a."authId" order by case when a."status" = $3 then $4 when a."status" = $5 then $6 else $7 end asc`,
-        [leaderId, "member", status.active, 1, status.block, 2, 3]
+        `select f."farmerId", concat( f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."mobileNumber", f."barangay", f."verified", count(c."cropId") as "cropNum", a."status", a."deletedAt" from capstone.farmer f left join capstone.crop c on f."farmerId" = c."farmerId" left join capstone.auth a on f."farmerId" = a."authId" where f."orgId" = (select "orgId" from capstone.farmer where "farmerId" = $1) and f."orgRole" = $2 group by f."farmerId", a."authId", a."deletedAt" order by case when a."status" = $3 then $4 when a."status" = $5 then $6 else $7 end asc`,
+        [leaderId, "member", status.active, 1, status.block, 2, 3],
       )
     ).rows;
   } catch (error) {
@@ -272,10 +272,10 @@ export const GetFarmerOrgMemberQuery = async (
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng detalye sa database: ${
         (error as Error).message
       }`,
-      error
+      error,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng detalye sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng detalye sa database`,
     );
   }
 };
@@ -288,16 +288,16 @@ export const ApprovedOrgMemberAccQuery = async (farmerId: string) => {
   try {
     await pool.query(
       `update capstone.farmer set "verified" = $1 where "farmerId" = $2`,
-      [true, farmerId]
+      [true, farmerId],
     );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng mag sasaka sa database: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng mag sasaka sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag aapruba ng mag sasaka sa database`,
     );
   }
 };
@@ -310,23 +310,23 @@ export const ApprovedOrgMemberAccQuery = async (farmerId: string) => {
  */
 export const CheckMyMemberquery = async (
   farmerId: string,
-  leaderId: string
+  leaderId: string,
 ): Promise<boolean> => {
   try {
     return (
       await pool.query(
         `select exists(select 1 from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" where f."farmerId" = $1 and o."farmerLeadId" = $2)`,
-        [farmerId, leaderId]
+        [farmerId, leaderId],
       )
     ).rows[0].exists;
   } catch (error) {
     console.error(
       `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo`
+      `May hindi inaasahang pagkakamali sa database habang tsinetsek kung ang user nato ay ka miyembro mo`,
     );
   }
 };
@@ -337,23 +337,23 @@ export const CheckMyMemberquery = async (
  * @returns info of the farmer
  */
 export const GetFarmerProfilePersonalInfoQuery = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<GetFarmerProfilePersonalInfoQueryReturnType> => {
   try {
     return (
       await pool.query(
         `select f."farmerId", f."farmerFirstName", f."farmerAlias", f."mobileNumber", f."barangay", f."birthdate", f."verified", f."farmerLastName", f."farmerMiddleName", f."farmerExtensionName", f."familyMemberCount", a."status" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where f."farmerId" = $1`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0];
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personal na impormasyon: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personal na impormasyon`
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang mga personal na impormasyon`,
     );
   }
 };
@@ -364,23 +364,23 @@ export const GetFarmerProfilePersonalInfoQuery = async (
  * @returns org info of the farmer
  */
 export const GetFarmerProfileOrgInfoQuery = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<GetFarmerProfileOrgInfoQueryReturnType> => {
   try {
     return (
       await pool.query(
         `select f."orgId", f."orgRole", o."orgName", concat(fl."farmerFirstName", ' ', fl."farmerLastName") as "farmerLeader" from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.farmer fl on o."farmerLeadId" = fl."farmerId" where f."farmerId" = $1`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0];
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng organisasyon: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng organisasyon`
+      `May pagkakamali na hindi inaasahang nang yari sa database habang kinukuha ang impormasyon ng organisasyon`,
     );
   }
 };
@@ -395,8 +395,61 @@ export const deletUser = async (farmerId: string, role: allUserRoleType) => {
     const status = await farmerAuthStatus();
 
     await pool.query(
+      `update capstone.auth set "status" = $1, "deletedAt" = now() where "authId" = $2`,
+      [status.delete, farmerId],
+    );
+  } catch (error) {
+    const message =
+      role === "admin" || role === "agriculturist"
+        ? `Unexpected error while deleting the user`
+        : `May pagkakamali na hindi inaasahang nang yari sa pagstring tatanggal ng account ng user`;
+
+    console.error(`${message}: ${(error as Error).message}`);
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * query for recovering the user account after the deletion
+ * @param farmerId id of the farmer
+ * @param role role of the user who will perform the action
+ */
+export const recoverUser = async (farmerId: string, role: allUserRoleType) => {
+  try {
+    const status = await farmerAuthStatus();
+
+    await pool.query(
+      `update capstone.auth set "status" = $1, "deletedAt" = $2 where "authId" = $3`,
+      [status.active, null, farmerId],
+    );
+  } catch (error) {
+    const message =
+      role === "admin" || role === "agriculturist"
+        ? `Unexpected error while recovering the user`
+        : `May pagkakamali na hindi inaasahang nang yari sa pag babalik ng account ng user`;
+
+    console.error(`${message}: ${(error as Error).message}`);
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * query for deleting a farmer user
+ * @param farmerId id of the farmer
+ * @param role role of the user who will perform the action
+ */
+export const deletUserPermanently = async (
+  farmerId: string,
+  role: allUserRoleType,
+) => {
+  try {
+    const status = await farmerAuthStatus();
+
+    await pool.query(
       `update capstone.auth set "username" = $1, "password" = $2, "status" = $3 where "authId" = $4`,
-      ["", await Hash(CreateUUID()), status.delete, farmerId]
+      ["", await Hash(CreateUUID()), status.delete, farmerId],
     );
   } catch (error) {
     const message =
@@ -419,7 +472,7 @@ export const deletUser = async (farmerId: string, role: allUserRoleType) => {
 export const blockUnblockUser = async (
   farmerId: string,
   role: allUserRoleType,
-  isBlock: boolean
+  isBlock: boolean,
 ) => {
   try {
     const status = await farmerAuthStatus();
@@ -431,7 +484,7 @@ export const blockUnblockUser = async (
 
     await pool.query(
       `update capstone.auth set "status" = $1 where "authId" = $2`,
-      param
+      param,
     );
   } catch (error) {
     const message =
@@ -452,7 +505,7 @@ export const blockUnblockUser = async (
  */
 export const UpdateUserProfileInfoQuery = async (
   userId: string,
-  newProfileInfo: GetFarmerProfilePersonalInfoQueryReturnType
+  newProfileInfo: GetFarmerProfilePersonalInfoQueryReturnType,
 ): Promise<void> => {
   try {
     await pool.query(
@@ -468,16 +521,16 @@ export const UpdateUserProfileInfoQuery = async (
         newProfileInfo.farmerExtensionName,
         newProfileInfo.familyMemberCount,
         userId,
-      ]
+      ],
     );
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng user sa database: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng user sa database`
+      `May pagkakamali na hindi inaasahang nang yari sa pag uupdate ng user sa database`,
     );
   }
 };
@@ -494,18 +547,18 @@ export const ViewAllVerifiedFarmerUserQuery = async (): Promise<
 
     return (
       await pool.query(
-        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgRole", o."orgName", a."status" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" left join capstone.auth a on a."authId" = f."farmerId" where f."verified" = $1 group by f."farmerId", o."orgId", a."status" order by case when a."status" = $2 then $3 when a."status" = $4 then $5 else $6 end asc`,
-        [true, status.active, 1, status.block, 2, 3]
+        `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."orgRole", o."orgName", a."status", a."deletedAt" from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" left join capstone.report r on f."farmerId" = r."farmerId" left join capstone.crop c on f."farmerId" = c."farmerId" left join capstone.auth a on a."authId" = f."farmerId" where f."verified" = $1 group by f."farmerId", o."orgId", a."status", a."deletedAt" order by case when a."status" = $2 then $3 when a."status" = $4 then $5 else $6 end asc`,
+        [true, status.active, 1, status.block, 2, 3],
       )
     ).rows;
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga validated na magsasaka: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga validated na  magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga validated na  magsasaka`,
     );
   }
 };
@@ -517,17 +570,17 @@ export const ViewAllUnvalidatedFarmerQuery = async (): Promise<
     return (
       await pool.query(
         `select f."farmerId", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName", f."farmerAlias", f."dateCreated", f."verified", f."orgRole", o."orgName"  from capstone.farmer f left join capstone.org o on f."orgId" = o."orgId" where (f."verified" = $1 and f."orgId" is null) or (f."orgRole" = $2 and f."verified" = $3) order by case when f."orgId" is null then $4 else $5 end asc`,
-        [false, "leader", false, 1, 2]
+        [false, "leader", false, 1, 2],
       )
     ).rows;
   } catch (error) {
     console.error(
       `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon ng mga hindi pa validated na magsasaka`,
     );
   }
 };
@@ -537,17 +590,17 @@ export const farmerIsExist = async (farmerId: string): Promise<boolean> => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.farmer where "farmerId" = $1)`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0].exists;
   } catch (error) {
     console.log(
       `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka: ${
         (error as Error).message
-      }`
+      }`,
     );
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari sa pag checheck ng magsasaka`,
     );
   }
 };
@@ -561,12 +614,12 @@ export const getFarmerLeadId = async (userId: string) => {
   try {
     return await pool.query(
       `select c."cropName" from capstone.crop c join capstone.farmer f on c."farmerId" = f."farmerId" where f."farmerId" = $1`,
-      [userId]
+      [userId],
     );
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa iyong leader`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng impormasyon sa iyong leader`,
     );
   }
 };
@@ -577,7 +630,7 @@ export const getFarmerLeadId = async (userId: string) => {
  * @returns count
  */
 export const getCountNotVerifiedFarmer = async (
-  param: getCountNotVerifiedFarmerParamType
+  param: getCountNotVerifiedFarmerParamType,
 ): Promise<number> => {
   try {
     const status = await farmerAuthStatus();
@@ -599,13 +652,13 @@ export const getCountNotVerifiedFarmer = async (
     return (
       await pool.query(
         `select count(f."farmerId") from capstone.farmer f join capstone.org o on f."orgId" = o."orgId" join capstone.auth a on f."farmerId" = a."authId" where ${dynamicVal.filter}`,
-        dynamicVal.param
+        dynamicVal.param,
       )
     ).rows[0].count;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong user na hindi pa naaprubahan`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng mga bagong user na hindi pa naaprubahan`,
     );
   }
 };
@@ -616,19 +669,19 @@ export const getCountNotVerifiedFarmer = async (
  * @returns location
  */
 export const getUserLocation = async (
-  userId: string
+  userId: string,
 ): Promise<barangayType> => {
   try {
     return (
       await pool.query(
         `select "barangay" from capstone.farmer where "farmerId" = $1`,
-        [userId]
+        [userId],
       )
     ).rows[0].barangay;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng barangay na iyong tinitirhan`
+      `May pagkakamali na hindi inaasahang nang yari sa pag kuha ng barangay na iyong tinitirhan`,
     );
   }
 };
@@ -645,7 +698,7 @@ export const getFarmerDataForResetingPass = async (): Promise<
     return (
       await pool.query(
         `select f."farmerId", a."username", concat(f."farmerFirstName", ' ', f."farmerLastName") as "farmerName" from capstone.farmer f join capstone.auth a on f."farmerId" = a."authId" where a."status" <> $1 order by a."username"`,
-        [status.delete]
+        [status.delete],
       )
     ).rows;
   } catch (error) {
@@ -664,13 +717,13 @@ export const isFarmer = async (farmerId: string): Promise<boolean> => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.farmer where "farmerId" = $1)`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang magsasaka`,
     );
   }
 };
@@ -680,13 +733,13 @@ export const isFarmerLeader = async (userId: string) => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.farmer where "farmerId" = $1 and "orgRole" = $2)`,
-        [userId, "leader"]
+        [userId, "leader"],
       )
     ).rows[0].exist;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer leader ang magsasaka`
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer leader ang magsasaka`,
     );
   }
 };
@@ -701,13 +754,13 @@ export const isFarmerVerified = async (farmerId: string): Promise<boolean> => {
     return (
       await pool.query(
         `select "verified" from capstone.farmer where "farmerId" = $1`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0].verified;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang ay beripikado`
+      `May pagkakamali na hindi inaasahang nang yari habang chinecheck kung farmer ang ay beripikado`,
     );
   }
 };
@@ -722,13 +775,13 @@ export const isAgriculturist = async (agriId: string): Promise<boolean> => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.agriculturist where "agriId" = $1)`,
-        [agriId]
+        [agriId],
       )
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `Error occured while checking the agriculturist's verification`
+      `Error occured while checking the agriculturist's verification`,
     );
   }
 };
@@ -738,13 +791,13 @@ export const isAdminAgri = async (adminId: string) => {
     return (
       await pool.query(
         `select exists(select 1 from capstone.agriculturist where "agriId" = $1 and "agriRole" = $2)`,
-        [adminId, "admin"]
+        [adminId, "admin"],
       )
     ).rows[0].exists;
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `Error occured while checking the agriculturist's verification`
+      `Error occured while checking the agriculturist's verification`,
     );
   }
 };
@@ -762,14 +815,14 @@ export const agriculturistRole = async (): Promise<agriculturistRoleType> => ({
  * @param data
  */
 export const insertNewAgriculturist = async (
-  data: insertNewAgriculturistParamType
+  data: insertNewAgriculturistParamType,
 ) => {
   try {
     const { agriculturist } = await agriculturistRole();
 
     await pool.query(
       `insert into capstone.agriculturist ("agriId", "agriRole", "email", "name") values ($1, $2, $3, $4)`,
-      [data.agriId, agriculturist, data.userName, data.name]
+      [data.agriId, agriculturist, data.userName, data.name],
     );
   } catch (error) {
     console.log((error as Error).message);
@@ -789,7 +842,7 @@ export const agriAuthQuery = async ({
   try {
     const res = await pool.query(
       `select "agriId" ,"agriRole", "name" from capstone.agriculturist where "agriId" = $1 and "email" = $2`,
-      [id, email]
+      [id, email],
     );
 
     if (!res.rows[0])
@@ -805,7 +858,7 @@ export const agriAuthQuery = async ({
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `Error occured while checking the agriculturist's verification`
+      `Error occured while checking the agriculturist's verification`,
     );
   }
 };
@@ -816,19 +869,19 @@ export const agriAuthQuery = async ({
  * @returns password object
  */
 export const getPassword = async (
-  userId: string
+  userId: string,
 ): Promise<{ password: string }> => {
   try {
     return (
       await pool.query(
         `select "password" from capstone.auth where "authId" = $1`,
-        [userId]
+        [userId],
       )
     ).rows[0];
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong password`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong password`,
     );
   }
 };
@@ -842,12 +895,12 @@ export const updatePassword = async (userId: string, newPass: string) => {
   try {
     await pool.query(
       `update capstone.auth set "password" = $1 where "authId" = $2`,
-      [newPass, userId]
+      [newPass, userId],
     );
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`
+      `May pagkakamali na hindi inaasahang nang yari habang pinapaltan ang iyong password`,
     );
   }
 };
@@ -863,7 +916,7 @@ export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang impoprmasyon ng mga agriculturist`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang impoprmasyon ng mga agriculturist`,
     );
   }
 };
@@ -874,19 +927,19 @@ export const getAllAgriId = async (): Promise<{ agriId: string }[]> => {
  * @returns farmername
  */
 export const getFarmerName = async (
-  farmerId: string
+  farmerId: string,
 ): Promise<getFarmerNameReturnType> => {
   try {
     return (
       await pool.query(
         `select "farmerFirstName", "farmerLastName" from capstone.farmer where "farmerId" = $1`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0];
   } catch (error) {
     console.log((error as Error).message);
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong pangalan`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong pangalan`,
     );
   }
 };
@@ -901,7 +954,7 @@ export const getAgriName = async (agriId: string): Promise<string> => {
     return (
       await pool.query(
         `select "name" from capstone.agriculturist where "agriId" = $1`,
-        [agriId]
+        [agriId],
       )
     ).rows[0].name;
   } catch (error) {
@@ -921,14 +974,14 @@ export const getFarmerEmail = async (farmerId: string): Promise<string> => {
     return (
       await pool.query(
         `select "username" from capstone.auth where "authId" = $1`,
-        [farmerId]
+        [farmerId],
       )
     ).rows[0].username;
   } catch (error) {
     console.log((error as Error).message);
 
     throw new Error(
-      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong username pangalan`
+      `May pagkakamali na hindi inaasahang nang yari habang kinukuha ang iyong username pangalan`,
     );
   }
 };
@@ -943,7 +996,7 @@ export const getAgriEmail = async (agriId: string): Promise<string> => {
     return (
       await pool.query(
         `select "email" from capstone.agriculturist where "agriId" = $1`,
-        [agriId]
+        [agriId],
       )
     ).rows[0].email;
   } catch (error) {
